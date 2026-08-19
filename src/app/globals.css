@@ -1,0 +1,314 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-brand-primary: #F5A524;
+  --color-brand-accent: #F5A524;
+  --color-brand-gold: #D49A3D;
+  --color-brand-terracotta: #C8521A;
+  --color-brand-deep: #B45309;
+  --color-brand-light: #F8F6F0;
+  --color-brand-cream: #F5F1E8;
+  --color-brand-muted: #64748B;
+
+  --color-bg-base: #090D0A;
+  --color-bg-surface: #0E1510;
+  --color-bg-card: #131B15;
+  --color-bg-dark: #090D0A;
+
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-serif), Georgia, 'Times New Roman', serif;
+}
+
+@layer utilities {
+  /* Haptic Double-Bezel Utilities */
+  .double-bezel-outer-dark {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  }
+
+  .double-bezel-inner-dark {
+    background-color: rgba(9, 13, 10, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  .double-bezel-outer-light {
+    background-color: rgba(9, 13, 10, 0.02);
+    border: 1px solid rgba(9, 13, 10, 0.06);
+    box-shadow: 0 20px 40px -15px rgba(9, 13, 10, 0.06);
+  }
+
+  .double-bezel-inner-light {
+    background-color: #ffffff;
+    border: 1px solid rgba(9, 13, 10, 0.05);
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.8), 0 4px 20px rgba(9, 13, 10, 0.03);
+  }
+
+  /* Luxury Glass Refraction */
+  .glass-card-dark {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+  }
+
+  .glass-card-light {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 246, 240, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(9, 13, 10, 0.06);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9), 0 20px 40px -15px rgba(9, 13, 10, 0.06);
+  }
+
+  .article-rich-content {
+    color: #1f2937;
+  }
+  .article-rich-content p {
+    margin-bottom: 1rem;
+    line-height: 1.85;
+    color: #1f2937;
+  }
+  .article-rich-content h2 {
+    margin-top: 2.25rem;
+    margin-bottom: 0.85rem;
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    line-height: 1.3;
+    color: #090d0a;
+    font-weight: 700;
+  }
+  .article-rich-content h3 {
+    margin-top: 1.6rem;
+    margin-bottom: 0.65rem;
+    font-family: var(--font-serif);
+    font-size: clamp(1.2rem, 1.05rem + 0.5vw, 1.5rem);
+    line-height: 1.35;
+    color: #090d0a;
+    font-weight: 700;
+  }
+  .article-rich-content strong,
+  .article-rich-content b {
+    color: #090d0a;
+    font-weight: 700;
+  }
+  .article-rich-content ul,
+  .article-rich-content ol {
+    margin: 1rem 0 1.25rem;
+    padding-left: 1.25rem;
+    color: #1f2937;
+  }
+  .article-rich-content ul {
+    list-style: disc;
+  }
+  .article-rich-content ol {
+    list-style: decimal;
+  }
+  .article-rich-content li {
+    margin: 0.45rem 0;
+    line-height: 1.75;
+  }
+  .article-rich-content a {
+    color: #8b1e1e;
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+  .article-rich-content a:hover {
+    color: #f5a524;
+    text-decoration: underline;
+  }
+  .article-rich-content blockquote {
+    margin: 1.25rem 0;
+    border-left: 4px solid #f5a524;
+    padding: 0.2rem 0 0.2rem 1rem;
+    color: #344054;
+    font-style: italic;
+  }
+  .article-rich-content .lexical-table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 1.25rem 0;
+    border: 1px solid #d0d5dd;
+    border-radius: 0.75rem;
+    background: #ffffff;
+  }
+  .article-rich-content table,
+  .article-rich-content .lexical-table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    color: #1f2937;
+  }
+  .article-rich-content th,
+  .article-rich-content td {
+    border: 1px solid #d0d5dd;
+    padding: 0.6rem 0.75rem;
+    vertical-align: top;
+    text-align: left;
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .article-rich-content th {
+    background: #f9fafb;
+    color: #090d0a;
+    font-weight: 700;
+  }
+
+  .prose-legal {
+    @apply text-[#090d0a]/80 text-sm sm:text-base;
+  }
+  .prose-legal p {
+    @apply mb-4 leading-relaxed;
+  }
+  .prose-legal h2 {
+    @apply mt-10 mb-4 font-serif font-bold text-2xl text-[#090d0a];
+  }
+  .prose-legal h3 {
+    @apply mt-8 mb-3 font-serif font-bold text-xl text-[#090d0a];
+  }
+  .prose-legal a {
+    @apply text-[#F5A524] no-underline transition-colors hover:underline;
+  }
+  .prose-legal ul {
+    @apply list-disc pl-6 mb-6 space-y-2 marker:text-[#F5A524];
+  }
+  .prose-legal ol {
+    @apply list-decimal pl-6 mb-6 space-y-2 marker:text-[#F5A524];
+  }
+  .prose-legal li {
+    @apply pl-1;
+  }
+  .prose-legal li > ul,
+  .prose-legal li > ol {
+    @apply mt-2 mb-0;
+  }
+}
+
+:root {
+  --background: var(--color-bg-base);
+  --foreground: var(--color-bg-dark);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--color-bg-dark);
+    --foreground: var(--color-bg-base);
+  }
+}
+
+body {
+  background-color: var(--color-bg-base);
+  background-image: radial-gradient(circle at 15% 50%, rgba(245, 165, 36, 0.03), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(52, 103, 57, 0.08), transparent 30%);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.015;
+}
+
+/* Framer Motion useScroll requires a positioned scroll root */
+html {
+  position: relative;
+  scroll-behavior: smooth;
+}
+
+/* Smooth Scrolling Custom Classes */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-scroll-container] {
+  will-change: transform;
+}
+
+/* Utilities for hiding scrollbars but allowing scroll */
+.scrollbar-hide::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Hero LCP text animation */
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+/* ── GPU-accelerated perpetual animations (replace JS-driven framer-motion loops) ── */
+
+/* Bank logo marquee */
+@keyframes marquee-x {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.animate-marquee-x {
+  animation: marquee-x 18s linear infinite;
+  will-change: transform;
+}
+
+/* WhatsApp floating button */
+@keyframes float-soft {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -3px, 0); }
+}
+.animate-float-soft {
+  animation: float-soft 2.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* 404 house-icon float */
+@keyframes float-icon {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -12px, 0); }
+}
+.animate-float-icon {
+  animation: float-icon 3s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Typewriter cursor blink */
+@keyframes cursor-pulse {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
+}
+.animate-cursor-pulse {
+  animation: cursor-pulse 0.8s ease-in-out infinite;
+}
+
+/* Honor reduced-motion across perpetual CSS animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-x,
+  .animate-float-soft,
+  .animate-float-icon,
+  .animate-cursor-pulse {
+    animation: none;
+  }
+}

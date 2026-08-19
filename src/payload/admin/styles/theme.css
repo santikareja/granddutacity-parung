@@ -1,0 +1,942 @@
+/* ==========================================================================
+   Grand Duta City - Payload Admin Theme
+   WordPress-like admin with softer cards, rounded controls, and light depth
+   ========================================================================== */
+
+/* ---------- Design Tokens ---------- */
+:root {
+  --gdc-white: #ffffff;
+  --gdc-bg: #f8fafc;
+  --gdc-bg-elevated: #eff3f8;
+  --gdc-surface: #ffffff;
+  --gdc-surface-muted: #f5f7fc;
+  --gdc-border: #d1dae6;
+  --gdc-border-strong: #bcc7d9;
+  --gdc-text: #0d1117;
+  --gdc-text-secondary: #24292f;
+  --gdc-text-muted: #57606a;
+  --gdc-muted-bg: #f6f8fb;
+  --gdc-accent: #0b1220;
+  --gdc-accent-hover: #1a2333;
+  --gdc-brand: #f5a524;
+  --gdc-brand-strong: #D88E0D;
+  --gdc-brand-light: #fdf0e1;
+  --gdc-sidebar-bg: linear-gradient(180deg, #1a2332 0%, #141829 100%);
+  --gdc-sidebar-text: #d0d7e0;
+  --gdc-sidebar-text-active: #ffffff;
+  --gdc-sidebar-text-hover: #e8ebf0;
+  --gdc-radius-xs: 4px;
+  --gdc-radius: 6px;
+  --gdc-radius-lg: 8px;
+  --gdc-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --gdc-shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08);
+  --gdc-shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- Body / Page Background ---------- */
+html[data-theme] body {
+  background: var(--gdc-bg) !important;
+  color: var(--gdc-text) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* ---------- Template Default Layout ---------- */
+html[data-theme] .template-default {
+  background:
+    radial-gradient(circle at top left, rgba(245, 165, 36, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(245, 247, 251, 0.94)) !important;
+}
+
+html[data-theme] .template-default__wrap {
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+html[data-theme] .template-default__wrap > * {
+  min-width: 0;
+}
+
+/* ---------- Sidebar Navigation ---------- */
+html[data-theme] .nav {
+  width: 260px !important;
+  padding: 16px 0 0 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  height: 100vh !important;
+  position: sticky !important;
+  top: 0 !important;
+}
+
+html[data-theme] .nav__wrap {
+  border: none !important;
+  border-radius: 0 !important;
+  background: var(--gdc-sidebar-bg) !important;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04), 18px 0 38px rgba(15, 23, 42, 0.14) !important;
+  backdrop-filter: blur(18px) !important;
+  color: var(--gdc-sidebar-text) !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+}
+
+html[data-theme] .nav__header {
+  padding: 18px 16px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme] .nav__controls {
+  padding: 12px 12px 16px !important;
+}
+
+html[data-theme] .nav__header-content,
+html[data-theme] .nav__controls,
+html[data-theme] .nav-group {
+  gap: 4px !important;
+}
+
+html[data-theme] .nav-group {
+  gap: 2px !important;
+}
+
+html[data-theme] .nav-group__label {
+  padding: 10px 14px 6px !important;
+  color: #8b95a6 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+}
+
+html[data-theme] .nav__link {
+  border: none !important;
+  border-radius: var(--gdc-radius) !important;
+  min-height: 42px !important;
+  padding: 8px 14px !important;
+  color: var(--gdc-sidebar-text) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+}
+
+html[data-theme] .nav__link:hover {
+  transform: none !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: var(--gdc-sidebar-text-hover) !important;
+}
+
+html[data-theme] .nav__link--active,
+html[data-theme] .nav__link[aria-current="page"] {
+  background: linear-gradient(135deg, rgba(245, 165, 36, 0.24), rgba(245, 165, 36, 0.14)) !important;
+  color: var(--gdc-sidebar-text-active) !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+html[data-theme] .nav__link--active .nav__link-indicator,
+html[data-theme] .nav__link[aria-current="page"] .nav__link-indicator {
+  background: var(--gdc-brand) !important;
+}
+
+/* Sidebar toggler */
+html[data-theme] .template-default__nav-toggler-wrapper {
+  top: 16px !important;
+  left: 16px !important;
+}
+
+html[data-theme] .template-default__nav-toggler,
+html[data-theme] .nav__mobile-close,
+html[data-theme] .settings-menu-button,
+html[data-theme] .drawer-close-button {
+  border: 1px solid var(--gdc-border) !important;
+  border-radius: var(--gdc-radius) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: var(--gdc-shadow-soft) !important;
+}
+
+/* ---------- App Header (top bar) ---------- */
+html[data-theme] .app-header {
+  margin: 12px 16px 0 !important;
+  padding: 14px 20px !important;
+  border: 1px solid var(--gdc-border) !important;
+  border-radius: var(--gdc-radius) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: var(--gdc-shadow-soft) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* ---------- Main Content Area ---------- */
+html[data-theme] .template-default__content {
+  background: var(--gdc-bg) !important;
+  min-height: 100vh !important;
+  padding-bottom: 28px !important;
+}
+
+html[data-theme] .dashboard,
+html[data-theme] .collection-list,
+html[data-theme] .collection-edit,
+html[data-theme] .global-edit,
+html[data-theme] .account,
+html[data-theme] .versions {
+  gap: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* Reset the catch-all child border/shadow from old theme */
+html[data-theme] .dashboard > *,
+html[data-theme] .collection-list > *,
+html[data-theme] .collection-edit > *,
+html[data-theme] .global-edit > *,
+html[data-theme] .account > *,
+html[data-theme] .versions > * {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Document / Collection Headers ---------- */
+html[data-theme] .doc-header,
+html[data-theme] .form-header,
+html[data-theme] .collection-list__header,
+html[data-theme] .list-controls {
+  border-bottom: 1px solid var(--gdc-border) !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+}
+
+html[data-theme] .doc-header,
+html[data-theme] .form-header {
+  border-radius: 0 !important;
+  padding: 16px 24px !important;
+  background: #ffffff !important;
+  border-bottom: 2px solid #e6ebf3 !important;
+}
+
+html[data-theme] .collection-list__header {
+  padding: 16px 24px !important;
+}
+
+html[data-theme] .doc-header__title h1,
+html[data-theme] .form-header h1,
+html[data-theme] .collection-list__header h1 {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+  color: #0d1117 !important;
+}
+
+/* ---------- Document Tabs ---------- */
+html[data-theme] .doc-tabs,
+html[data-theme] .render-fields,
+html[data-theme] .collection-edit__main,
+html[data-theme] .collection-edit__main-wrapper {
+  background: transparent !important;
+}
+
+html[data-theme] .collection-list__wrap,
+html[data-theme] .collection-edit__main-wrapper,
+html[data-theme] .global-edit__main-wrapper {
+  padding: 24px !important;
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+}
+
+/* ---------- Tables ---------- */
+html[data-theme] .render-fields > .row,
+html[data-theme] .card,
+html[data-theme] .table,
+html[data-theme] .collection-list__wrap,
+html[data-theme] .collection-list__list,
+html[data-theme] .collection-list__table {
+  border-radius: var(--gdc-radius-lg) !important;
+}
+
+html[data-theme] .table {
+  border: 1px solid var(--gdc-border) !important;
+  border-radius: var(--gdc-radius-lg) !important;
+  overflow: hidden !important;
+  background: var(--gdc-surface) !important;
+  box-shadow: var(--gdc-shadow-soft) !important;
+}
+
+html[data-theme] .table-wrap {
+  overflow: hidden !important;
+  border-radius: var(--gdc-radius-lg) !important;
+}
+
+html[data-theme] .table thead tr,
+html[data-theme] .table th {
+  background: #f5f7fc !important;
+  color: #2d3436 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  border-bottom: 2px solid #d1dae6 !important;
+}
+
+html[data-theme] .table tr {
+  border-bottom-color: #e6ebf3 !important;
+  transition: background-color 0.15s ease !important;
+}
+
+html[data-theme] .table td,
+html[data-theme] .table th {
+  padding: 14px 16px !important;
+}
+
+html[data-theme] .table td {
+  color: #2d3436 !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  vertical-align: middle !important;
+}
+
+html[data-theme] .table tbody tr {
+  background: #ffffff !important;
+}
+
+html[data-theme] .table tbody tr:hover {
+  background: #f8fafc !important;
+  box-shadow: inset 0 0 0 1px #e6ebf3 !important;
+}
+
+html[data-theme] .table tbody tr:nth-child(even) {
+  background: #f8fafc !important;
+}
+
+html[data-theme] .table a {
+  color: #0d1117 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+
+html[data-theme] .table a:hover {
+  color: #f5a524 !important;
+  text-decoration: underline !important;
+}
+
+/* ---------- List Controls / Filters ---------- */
+html[data-theme] .list-controls {
+  padding: 12px 24px !important;
+}
+
+html[data-theme] .list-controls__wrap,
+html[data-theme] .list-controls__wrap > *,
+html[data-theme] .collection-list__header .gutter {
+  gap: 12px !important;
+}
+
+html[data-theme] .collection-list__header + *,
+html[data-theme] .list-controls + * {
+  margin-top: 0 !important;
+}
+
+/* ---------- Form Fields ---------- */
+html[data-theme] .render-fields {
+  gap: 16px !important;
+}
+
+html[data-theme] .render-fields > .row {
+  padding: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Field card styling - only inside edit views, NOT auth pages */
+html[data-theme] .collection-edit .field-type,
+html[data-theme] .collection-edit .group-field,
+html[data-theme] .collection-edit .tabs-field,
+html[data-theme] .global-edit .field-type,
+html[data-theme] .global-edit .group-field,
+html[data-theme] .global-edit .tabs-field,
+html[data-theme] .account .field-type,
+html[data-theme] .account .group-field,
+html[data-theme] .account .tabs-field {
+  position: relative !important;
+  padding: 18px !important;
+  border: 1px solid #d1dae6 !important;
+  border-radius: var(--gdc-radius-lg) !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Remove the green gradient top bar from fields */
+html[data-theme] .field-type::before,
+html[data-theme] .group-field::before,
+html[data-theme] .tabs-field::before {
+  display: none !important;
+}
+
+html[data-theme] .field-type .field-label,
+html[data-theme] .group-field .field-label,
+html[data-theme] .tabs-field .field-label {
+  margin-bottom: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #0d1117 !important;
+  display: block !important;
+}
+
+html[data-theme] .field-type .field-description,
+html[data-theme] .group-field .field-description,
+html[data-theme] .tabs-field .field-description {
+  color: #57606a !important;
+  font-size: 13px !important;
+  margin-top: 4px !important;
+  line-height: 1.4 !important;
+}
+
+html[data-theme] .group-field > .group-field__wrap,
+html[data-theme] .tabs-field > .tabs-field__wrap {
+  margin-top: 8px !important;
+}
+
+/* ---------- Input Fields ---------- */
+html[data-theme] input,
+html[data-theme] textarea,
+html[data-theme] select,
+html[data-theme] .rs__control,
+html[data-theme] .text-input,
+html[data-theme] .textarea,
+html[data-theme] .field-type.text input,
+html[data-theme] .field-type.textarea textarea {
+  border-radius: var(--gdc-radius) !important;
+}
+
+html[data-theme] input,
+html[data-theme] textarea,
+html[data-theme] select,
+html[data-theme] .rs__control {
+  border-color: #d1dae6 !important;
+  background: #ffffff !important;
+  color: #0d1117 !important;
+  font-size: 14px !important;
+  min-height: 44px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  border-width: 1px !important;
+}
+
+html[data-theme] input::placeholder,
+html[data-theme] textarea::placeholder {
+  color: #848d98 !important;
+  opacity: 1 !important;
+}
+
+html[data-theme] textarea {
+  border-radius: var(--gdc-radius) !important;
+  min-height: 120px !important;
+}
+
+html[data-theme] input:focus,
+html[data-theme] textarea:focus,
+html[data-theme] select:focus,
+html[data-theme] .rs__control--is-focused {
+  border-color: #f5a524 !important;
+  box-shadow: 0 0 0 3px rgba(245, 165, 36, 0.15), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  outline: none !important;
+  background: #ffffff !important;
+}
+
+/* ---------- Tabs ---------- */
+html[data-theme] .tabs-field__tabs,
+html[data-theme] .doc-tabs__tabs {
+  gap: 4px !important;
+}
+
+html[data-theme] .tabs-field__tab-button,
+html[data-theme] .doc-tab,
+html[data-theme] .btn--style-tab {
+  border-radius: var(--gdc-radius) !important;
+  font-size: 14px !important;
+}
+
+html[data-theme] .tabs-field__tab-button[aria-selected="true"],
+html[data-theme] .doc-tab--active,
+html[data-theme] .btn--style-tab.active {
+  background: var(--gdc-brand-light) !important;
+  color: var(--gdc-brand-strong) !important;
+  font-weight: 600 !important;
+}
+
+/* ---------- Buttons ---------- */
+html[data-theme] .btn {
+  border-radius: var(--gdc-radius) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+  min-height: 44px !important;
+  padding-inline: 18px !important;
+  letter-spacing: 0.02em !important;
+}
+
+html[data-theme] .btn--style-primary {
+  background: linear-gradient(135deg, #0d1220, #1a2938) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(13, 18, 32, 0.2) !important;
+}
+
+html[data-theme] .btn--style-primary:hover {
+  background: linear-gradient(135deg, #1a2938, #2a3a4a) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(13, 18, 32, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+html[data-theme] .btn--style-primary:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 1px 4px rgba(13, 18, 32, 0.2) !important;
+}
+
+html[data-theme] .btn--style-secondary,
+html[data-theme] .btn--style-pill,
+html[data-theme] .btn--style-tab,
+html[data-theme] .btn--style-subtle {
+  border-color: #d1dae6 !important;
+  background: #ffffff !important;
+  color: #0d1117 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+html[data-theme] .btn--style-secondary:hover,
+html[data-theme] .btn--style-pill:hover,
+html[data-theme] .btn--style-subtle:hover {
+  background: #f5f7fc !important;
+  border-color: #bcc7d9 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ---------- Pills / Badges ---------- */
+html[data-theme] .pill,
+html[data-theme] .version-pill-label,
+html[data-theme] .pill-version-count {
+  border-radius: var(--gdc-radius) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+/* ---------- Rich Text Editor ---------- */
+html[data-theme] .render-fields .rich-text-lexical,
+html[data-theme] .render-fields .lexical-editor,
+html[data-theme] .render-fields .editor-shell {
+  border-radius: var(--gdc-radius) !important;
+}
+
+html[data-theme] .render-fields .rich-text-lexical [contenteditable="true"],
+html[data-theme] .render-fields .lexical-editor [contenteditable="true"],
+html[data-theme] .render-fields .editor-shell [contenteditable="true"],
+html[data-theme] .render-fields .lexical-editor,
+html[data-theme] .render-fields .editor-shell {
+  color: var(--gdc-text) !important;
+}
+
+html[data-theme] .render-fields .rich-text-lexical .toolbar,
+html[data-theme] .render-fields .lexical-editor .toolbar,
+html[data-theme] .render-fields .editor-shell .toolbar,
+html[data-theme] .render-fields .rich-text-lexical button,
+html[data-theme] .render-fields .lexical-editor button,
+html[data-theme] .render-fields .editor-shell button {
+  color: var(--gdc-text) !important;
+}
+
+/* Ensure typed content in lexical editor is always dark and readable */
+html[data-theme] .collection-edit .rich-text-lexical,
+html[data-theme] .collection-edit .lexical-editor,
+html[data-theme] .collection-edit .editor-shell,
+html[data-theme] .global-edit .rich-text-lexical,
+html[data-theme] .global-edit .lexical-editor,
+html[data-theme] .global-edit .editor-shell {
+  --theme-text: #000000 !important;
+  --theme-elevation-1000: #000000 !important;
+}
+
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"],
+html[data-theme] .collection-edit .lexical-editor [contenteditable="true"],
+html[data-theme] .collection-edit .editor-shell [contenteditable="true"],
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"],
+html[data-theme] .global-edit .lexical-editor [contenteditable="true"],
+html[data-theme] .global-edit .editor-shell [contenteditable="true"],
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] *,
+html[data-theme] .collection-edit .lexical-editor [contenteditable="true"] *,
+html[data-theme] .collection-edit .editor-shell [contenteditable="true"] *,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] *,
+html[data-theme] .global-edit .lexical-editor [contenteditable="true"] *,
+html[data-theme] .global-edit .editor-shell [contenteditable="true"] * {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  caret-color: #000000 !important;
+}
+
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] p,
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] span,
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] li,
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] a,
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] h1,
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] h2,
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] h3,
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] h4,
+html[data-theme] .collection-edit .rich-text-lexical [contenteditable="true"] blockquote,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] p,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] span,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] li,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] a,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] h1,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] h2,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] h3,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] h4,
+html[data-theme] .global-edit .rich-text-lexical [contenteditable="true"] blockquote {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+html[data-theme] .collection-edit .rich-text-lexical .editor-placeholder,
+html[data-theme] .collection-edit .lexical-editor .editor-placeholder,
+html[data-theme] .global-edit .rich-text-lexical .editor-placeholder,
+html[data-theme] .global-edit .lexical-editor .editor-placeholder {
+  color: #475467 !important;
+}
+
+/* ---------- Spacing Adjustments ---------- */
+html[data-theme] .collection-edit__main > *,
+html[data-theme] .global-edit__main > * {
+  margin-bottom: 16px !important;
+}
+
+html[data-theme] .render-fields .field-type + .field-type,
+html[data-theme] .render-fields .group-field + .group-field,
+html[data-theme] .render-fields .tabs-field + .tabs-field {
+  margin-top: 12px !important;
+}
+
+/* ---------- Cards ---------- */
+html[data-theme] .card {
+  border: 1px solid var(--gdc-border) !important;
+  border-radius: var(--gdc-radius-lg) !important;
+  background: var(--gdc-surface) !important;
+  box-shadow: var(--gdc-shadow-soft) !important;
+}
+
+/* ---------- Dashboard Home ---------- */
+html[data-theme] .gdc-admin-home {
+  display: grid;
+  gap: 24px;
+}
+
+html[data-theme] .gdc-admin-home__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 20px;
+}
+
+html[data-theme] .gdc-admin-home__panel {
+  border: 1px solid var(--gdc-border) !important;
+  border-radius: var(--gdc-radius) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.9)) !important;
+  box-shadow: var(--gdc-shadow-md) !important;
+  overflow: hidden;
+}
+
+html[data-theme] .gdc-admin-home__panel--dark {
+  background:
+    radial-gradient(circle at top left, rgba(245, 165, 36, 0.18), transparent 30%),
+    linear-gradient(160deg, #111827 0%, #0f172a 100%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+html[data-theme] .gdc-admin-home__hero-content,
+html[data-theme] .gdc-admin-home__aside {
+  padding: 28px;
+}
+
+html[data-theme] .gdc-admin-home__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 8px 12px;
+  border-radius: var(--gdc-radius);
+  background: var(--gdc-brand-light);
+  color: var(--gdc-brand-strong);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+html[data-theme] .gdc-admin-home__panel--dark .gdc-admin-home__eyebrow {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+html[data-theme] .gdc-admin-home__title {
+  margin: 0;
+  color: inherit;
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+html[data-theme] .gdc-admin-home__description {
+  margin: 14px 0 0;
+  max-width: 58ch;
+  color: var(--gdc-text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+html[data-theme] .gdc-admin-home__panel--dark .gdc-admin-home__description,
+html[data-theme] .gdc-admin-home__panel--dark .gdc-admin-home__meta-label,
+html[data-theme] .gdc-admin-home__panel--dark .gdc-admin-home__meta-value,
+html[data-theme] .gdc-admin-home__panel--dark .gdc-admin-home__list-link,
+html[data-theme] .gdc-admin-home__panel--dark .gdc-admin-home__list-title,
+html[data-theme] .gdc-admin-home__panel--dark .gdc-admin-home__list-meta {
+  color: rgba(248, 250, 252, 0.82) !important;
+}
+
+html[data-theme] .gdc-admin-home__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+html[data-theme] .gdc-admin-home__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+html[data-theme] .gdc-admin-home__stat {
+  padding: 18px 20px;
+  border: 1px solid var(--gdc-border);
+  border-radius: var(--gdc-radius);
+  background: var(--gdc-surface);
+  box-shadow: var(--gdc-shadow-soft);
+}
+
+html[data-theme] .gdc-admin-home__stat-label {
+  margin: 0;
+  color: var(--gdc-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+html[data-theme] .gdc-admin-home__stat-value {
+  margin: 10px 0 0;
+  color: var(--gdc-text);
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+html[data-theme] .gdc-admin-home__stat-copy {
+  margin: 10px 0 0;
+  color: var(--gdc-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html[data-theme] .gdc-admin-home__section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+html[data-theme] .gdc-admin-home__section-heading {
+  margin: 0 0 16px;
+  color: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+html[data-theme] .gdc-admin-home__meta {
+  display: grid;
+  gap: 14px;
+}
+
+html[data-theme] .gdc-admin-home__meta-item {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme] .gdc-admin-home__meta-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+html[data-theme] .gdc-admin-home__meta-label {
+  margin: 0;
+  color: var(--gdc-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+html[data-theme] .gdc-admin-home__meta-value {
+  margin: 0;
+  color: var(--gdc-text);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+html[data-theme] .gdc-admin-home__list {
+  display: grid;
+  gap: 12px;
+}
+
+html[data-theme] .gdc-admin-home__list-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--gdc-border);
+  border-radius: var(--gdc-radius);
+  background: var(--gdc-surface);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--gdc-shadow-soft);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+html[data-theme] .gdc-admin-home__panel--dark .gdc-admin-home__list-link {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+html[data-theme] .gdc-admin-home__list-link:hover {
+  transform: translateY(-1px);
+  border-color: var(--gdc-brand);
+  box-shadow: var(--gdc-shadow-md);
+}
+
+html[data-theme] .gdc-admin-home__list-title {
+  margin: 0;
+  color: var(--gdc-text);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+html[data-theme] .gdc-admin-home__list-meta {
+  margin: 6px 0 0;
+  color: var(--gdc-text-muted);
+  font-size: 13px;
+}
+
+html[data-theme] .gdc-admin-home__list-arrow {
+  flex-shrink: 0;
+  color: var(--gdc-brand-strong);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+html[data-theme] .gdc-admin-home__empty {
+  margin: 0;
+  color: var(--gdc-text-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ---------- Scrollbar ---------- */
+html[data-theme] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+html[data-theme] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-theme] ::-webkit-scrollbar-thumb {
+  background: var(--gdc-border-strong);
+  border-radius: 3px;
+}
+
+html[data-theme] ::-webkit-scrollbar-thumb:hover {
+  background: var(--gdc-text-muted);
+}
+
+/* ---------- Square Layout Override ---------- */
+html[data-theme] .collection-edit .field-type,
+html[data-theme] .collection-edit .group-field,
+html[data-theme] .collection-edit .tabs-field,
+html[data-theme] .global-edit .field-type,
+html[data-theme] .global-edit .group-field,
+html[data-theme] .global-edit .tabs-field,
+html[data-theme] .account .field-type,
+html[data-theme] .account .group-field,
+html[data-theme] .account .tabs-field,
+html[data-theme] .table,
+html[data-theme] .table-wrap,
+html[data-theme] .card,
+html[data-theme] .render-fields .rich-text-lexical,
+html[data-theme] .render-fields .lexical-editor,
+html[data-theme] .render-fields .editor-shell {
+  border-radius: 0 !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  html[data-theme] .template-default__wrap {
+    padding: 0 !important;
+  }
+
+  html[data-theme] .nav {
+    width: 240px !important;
+  }
+
+  html[data-theme] .nav__wrap {
+    border-radius: 0 !important;
+  }
+
+  html[data-theme] .gdc-admin-home__hero,
+  html[data-theme] .gdc-admin-home__section,
+  html[data-theme] .gdc-admin-home__stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  html[data-theme] .collection-list__wrap,
+  html[data-theme] .collection-edit__main-wrapper,
+  html[data-theme] .global-edit__main-wrapper {
+    padding: 16px !important;
+  }
+
+  html[data-theme] .field-type,
+  html[data-theme] .group-field,
+  html[data-theme] .tabs-field {
+    padding: 12px !important;
+  }
+
+  html[data-theme] .doc-header,
+  html[data-theme] .form-header,
+  html[data-theme] .collection-list__header {
+    padding: 12px 16px !important;
+  }
+
+  html[data-theme] .app-header {
+    padding: 10px 16px !important;
+    margin: 10px 12px 0 !important;
+  }
+
+  html[data-theme] .gdc-admin-home__hero-content,
+  html[data-theme] .gdc-admin-home__aside {
+    padding: 20px;
+  }
+
+  html[data-theme] .gdc-admin-home__title {
+    font-size: 26px;
+  }
+}

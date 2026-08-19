@@ -1,0 +1,309 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { ArrowUpRight, ShieldCheck, Sparkles, Building2 } from "lucide-react";
+import { Typewriter } from "@/components/ui/typewriter";
+
+/* ── Video sources per breakpoint ── */
+const VIDEO_SOURCES = {
+  mobile: {
+    webm: "https://res.cloudinary.com/dzhvfbuks/video/upload/f_webm,q_auto:good,w_480,fps_24,br_500k/v1775447530/GDC_Parung_Video_nsvvg6.webm",
+    mp4: "https://res.cloudinary.com/dzhvfbuks/video/upload/q_auto:good,w_480,fps_24,br_500k/v1775447530/GDC_Parung_Video_nsvvg6.mp4",
+    poster: "https://res.cloudinary.com/dzhvfbuks/video/upload/so_0,w_480,q_auto,f_auto/v1775447530/GDC_Parung_Video_nsvvg6.jpg",
+  },
+  desktop: {
+    webm: "https://res.cloudinary.com/dzhvfbuks/video/upload/f_webm,q_auto:best,w_1280,fps_24,br_2000k/v1775449335/Grand_Duta_City_Parung_South_of_Jakarta_lsds7k.webm",
+    mp4: "https://res.cloudinary.com/dzhvfbuks/video/upload/q_auto:best,w_1280,fps_24,br_2000k/v1775449335/Grand_Duta_City_Parung_South_of_Jakarta_lsds7k.mp4",
+    poster: "https://res.cloudinary.com/dzhvfbuks/video/upload/so_0,w_1280,q_auto,f_auto/v1775449335/Grand_Duta_City_Parung_South_of_Jakarta_lsds7k.jpg",
+  },
+} as const;
+
+export function Hero() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fadeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const fadeEl = fadeRef.current;
+    if (!video || !fadeEl) return;
+
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const sources = isMobile ? VIDEO_SOURCES.mobile : VIDEO_SOURCES.desktop;
+    let looping = false;
+
+    video.poster = sources.poster;
+    video.preload = "metadata";
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    video.innerHTML = "";
+
+    const webmSrc = document.createElement("source");
+    webmSrc.src = sources.webm;
+    webmSrc.type = "video/webm";
+    video.appendChild(webmSrc);
+
+    const mp4Src = document.createElement("source");
+    mp4Src.src = sources.mp4;
+    mp4Src.type = "video/mp4";
+    video.appendChild(mp4Src);
+
+    const onReady = () => {
+      requestAnimationFrame(() => {
+        video.play().catch(() => { });
+      });
+    };
+    const onLoadedData = () => {
+      if (video.readyState >= 3) onReady();
+    };
+    video.addEventListener("canplaythrough", onReady, { once: true });
+    video.addEventListener("loadeddata", onLoadedData, { once: true });
+
+    const restartVideo = () => {
+      if (looping) return;
+      looping = true;
+      fadeEl.style.opacity = "1";
+
+      setTimeout(() => {
+        video.currentTime = 0;
+        video.play().catch(() => { });
+
+        setTimeout(() => {
+          fadeEl.style.opacity = "0";
+          looping = false;
+        }, 80);
+      }, 150);
+    };
+
+    const onTimeUpdate = () => {
+      if (!video.duration || looping) return;
+      const remaining = video.duration - video.currentTime;
+
+      if (remaining < 0.3 && remaining > 0.1) {
+        fadeEl.style.opacity = "1";
+      }
+      if (remaining <= 0.1) {
+        restartVideo();
+      }
+    };
+
+    const onEnded = () => {
+      looping = false;
+      restartVideo();
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        video.pause();
+      } else {
+        video.play().catch(() => { });
+      }
+    };
+
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("ended", onEnded);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    video.load();
+
+    return () => {
+      video.removeEventListener("canplaythrough", onReady);
+      video.removeEventListener("loadeddata", onLoadedData);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("ended", onEnded);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative min-h-[100dvh] w-full overflow-hidden bg-[#090D0A] flex flex-col justify-center py-16 sm:py-24 md:py-0"
+    >
+      {/* Fast loop overlay */}
+      <div
+        ref={fadeRef}
+        aria-hidden
+        className="absolute inset-0 z-[3] bg-[#090D0A] pointer-events-none"
+        style={{ opacity: 0, transition: "opacity 150ms ease-in-out" }}
+      />
+
+      {/* Background video */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <video
+          ref={videoRef}
+          id="hero-video"
+          muted
+          playsInline
+          aria-hidden="true"
+          preload="metadata"
+          poster={VIDEO_SOURCES.mobile.poster}
+          className="absolute inset-0 w-full h-full object-cover object-center scale-[1.02]"
+        />
+      </div>
+
+      {/* Luxury Cinematic Scrim Overlays */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-[#090D0A]/80 via-[#090D0A]/35 to-[#090D0A]/85 pointer-events-none" />
+      <div
+        aria-hidden
+        className="absolute inset-0 z-[1] pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(9,13,10,0.6) 0%, rgba(9,13,10,0.3) 50%, transparent 80%)",
+        }}
+      />
+
+      {/* Left Sidebar Branding */}
+      <motion.div
+        initial={{ opacity: 0, x: -12 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute left-8 top-1/2 -translate-y-1/2 z-20 hidden xl:flex flex-col items-center gap-6"
+      >
+        <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
+        <span
+          className="text-[#F8F6F0]/40 text-[10px] tracking-[0.4em] uppercase font-sans font-medium"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+        >
+          VIP Inquiries
+        </span>
+        <a
+          href="https://wa.me/628131742034"
+          className="text-[#D49A3D] hover:text-[#F5A524] text-[11px] tracking-[0.18em] font-sans font-semibold transition-colors duration-300"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+        >
+          +62 813‑1742‑034
+        </a>
+        <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
+      </motion.div>
+
+      {/* Right Sidebar Branding */}
+      <motion.div
+        initial={{ opacity: 0, x: 12 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute right-8 top-1/2 -translate-y-1/2 z-20 hidden lg:flex flex-col items-center gap-6"
+      >
+        <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
+        <span
+          className="text-[#F8F6F0]/40 text-[10px] tracking-[0.4em] uppercase font-sans font-medium whitespace-nowrap"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+        >
+          Masterpiece by Duta Putra Land
+        </span>
+        <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
+      </motion.div>
+
+      {/* Center Hero Content */}
+      <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col justify-center items-center text-center px-4 sm:px-6 md:px-12 pt-12 sm:pt-16 md:pt-16 lg:pt-20">
+        <div className="flex flex-col items-center w-full">
+
+          {/* Feature Highlights Typewriter */}
+          <Typewriter
+            texts={[
+              "Kota Mandiri 200 Ha · Grand Duta City Parung",
+              "Perumahan Premium South of Jakarta",
+              "Smart Home System & Underfloor Cable",
+              "Cluster Private Pool & The Beach Lagoon",
+              "One Gate System & 24/7 Security Patrol",
+              "20 Menit ke CBD Jaksel via Tol Desari",
+              "Promo Spesial Tanpa DP & Bunga KPR Rendah",
+              "Kawasan Hijau Alami 80 Hektar",
+            ]}
+            delay={2800}
+            className="mb-2 text-[11px] sm:text-sm text-[#D49A3D] font-medium tracking-wide"
+          />
+
+        {/* Massive Display Headline */}
+         <div className="mb-4 sm:mb-6">
+           <h1
+             className="flex flex-col items-center gap-1 sm:gap-2 [text-shadow:0_4px_24px_rgba(0,0,0,0.8)]"
+             style={{ animation: "heroFadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both" }}
+           >
+             <span
+                className="font-serif font-bold text-[#F8F6F0] uppercase tracking-[-0.01em] sm:tracking-[0.02em] leading-[1.05]"
+               style={{ fontSize: "clamp(1.75rem, 5.5vw, 4.5rem)" }}
+             >
+                Grand Duta City Parung
+              </span>
+             <span
+               className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-[#F5A524] via-[#F8C165] to-[#D49A3D] tracking-[0.01em] leading-tight"
+               style={{ fontSize: "clamp(1.15rem, 3vw, 2.5rem)" }}
+             >
+                South of Jakarta
+              </span>
+            </h1>
+          </div>
+
+         {/* Supporting Copy */}
+         <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[#F8F6F0]/90 text-[13px] sm:text-base md:text-lg font-normal max-w-2xl mb-5 sm:mb-8 leading-[1.7] [text-shadow:0_1px_12px_rgba(0,0,0,0.8)] px-2"
+          >
+            Investasi &amp; hunian prestisius di Grand Duta City Parung — kota mandiri 200 Ha persembahan{" "}
+            <span className="text-[#F8F6F0] font-semibold">Duta Putra Land</span>. Cicilan mulai{" "}
+            <span className="text-[#F5A524] font-semibold">Rp 4 jutaan/bln</span>, Promo Tanpa DP, 20 menit ke CBD Jakarta Selatan.
+          </motion.p>
+
+          {/* Double-Bezel Button-in-Button CTA Cluster */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
+          >
+            {/* Primary Island Button-in-Button CTA */}
+            <a
+              href="https://wa.me/628131742034?text=Halo%2C%20saya%20mau%20ambil%20promo%20spesial%20di%20Grand%20Duta%20City%20Parung%20South%20of%20Jakarta.%20Mohon%20info%20selengkapnya."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2.5 pl-5 pr-1.5 py-2.5 sm:pl-6 sm:pr-2 sm:py-3.5 rounded-full bg-[#C8521A] hover:bg-[#DE5E1E] text-white text-[11px] sm:text-xs tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-bold shadow-[0_12px_36px_rgba(200,82,26,0.5)] hover:shadow-[0_16px_45px_rgba(200,82,26,0.65)] active:scale-[0.98] transition-all duration-300"
+            >
+              <span>Saya Mau Promo</span>
+              <span className="w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105 transition-all duration-300">
+                <ArrowUpRight className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
+              </span>
+            </a>
+
+            {/* Secondary Glassmorphic CTA */}
+            <a
+              href="#tipe-unit"
+              className="inline-flex w-full sm:w-auto items-center justify-center px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full border border-white/25 hover:border-[#F5A524] bg-white/5 hover:bg-white/10 backdrop-blur-xl text-[#F8F6F0] hover:text-[#F5A524] text-[11px] sm:text-xs tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-semibold active:scale-[0.98] transition-all duration-300"
+            >
+              Lihat Tipe Unit
+            </a>
+          </motion.div>
+
+          {/* Floating Trust Strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-6 sm:mt-10 inline-flex flex-wrap items-center justify-center gap-x-3.5 sm:gap-x-6 gap-y-1.5 py-1.5 px-4 sm:py-2 sm:px-5 rounded-full bg-[#090D0A]/60 backdrop-blur-md border border-white/10 text-[#F8F6F0]/80 text-[9px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-medium"
+          >
+            <div className="flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5 text-[#D49A3D]" />
+              <span>Developer 35+ Tahun</span>
+            </div>
+            <span className="w-1 h-1 rounded-full bg-white/30 hidden sm:inline-block" />
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#D49A3D]" />
+              <span>KPR 8 Bank Mitra</span>
+            </div>
+            <span className="w-1 h-1 rounded-full bg-white/30 hidden sm:inline-block" />
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#D49A3D]" />
+              <span>Bebas Banjir · One Gate System</span>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+    </section>
+  );
+}

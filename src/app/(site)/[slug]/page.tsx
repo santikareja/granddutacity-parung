@@ -204,6 +204,7 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
   const archiveMeta = articleArchiveEntries.find((entry) => entry.slug === article.slug);
   const archiveBySlug = new Map(articleArchiveEntries.map((entry) => [entry.slug, entry]));
   const authorName = archiveMeta ? getAuthorDefinition(archiveMeta.authorSlug)?.name || "Tim Editorial GDC" : "Tim Editorial GDC";
+  const authorHref = archiveMeta?.authorSlug ? `/author/${archiveMeta.authorSlug}` : null;
   const readingTime = archiveMeta?.readingTime || "5 menit baca";
   const cmsTagNames = (article.tags || [])
     .filter(isTagObject)
@@ -375,7 +376,14 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
               Dipublikasikan {formatDate(article.publishedAt || article.createdAt)}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.12em] text-[#F5F1E8]/72 md:mt-3 md:text-xs md:tracking-[0.14em]">
-              <span>Author: {authorName}</span>
+              <span>
+                Author:{" "}
+                {authorHref ? (
+                  <Link href={authorHref} className="text-[#F5F1E8] hover:text-[#F5A524] hover:underline transition-colors">{authorName}</Link>
+                ) : (
+                  authorName
+                )}
+              </span>
               <span>{readingTime}</span>
               {mobileTagNames.length > 0 ? <span>Tag: {mobileTagNames.join(", ")}</span> : null}
             </div>

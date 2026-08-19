@@ -96,6 +96,7 @@ export function Footer() {
               { label: "Lokasi & Akses Tol", href: "/lokasi-akses-grand-duta-city-parung" },
               { label: "Tentang Developer", href: "/about" },
               { label: "Blog Properti", href: "/artikel" },
+              { label: "Topik Artikel", href: "/category" },
               { label: "Hubungi Marketing", href: "/kontak" },
               { label: "Privacy Policy", href: "/privacy-policy" },
               { label: "Disclaimer Legal", href: "/disclaimer" },

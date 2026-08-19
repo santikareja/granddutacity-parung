@@ -3,6 +3,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   articleTagDefinitions,
+  getAuthorDefinition,
+  getAuthorPath,
   getCategoryPath,
   getTagPath,
   type ArticleArchiveEntry,
@@ -22,6 +24,8 @@ export function ArticleCard({
   className,
 }: ArticleCardProps) {
   const categoryHref = getCategoryPath(article.categorySlug);
+  const authorHref = getAuthorPath(article.authorSlug);
+  const authorName = getAuthorDefinition(article.authorSlug)?.name ?? "Tim Editorial GDC";
 
   return (
     <article
@@ -106,6 +110,16 @@ export function ArticleCard({
         <p className={cn("flex-1 text-[#0B120C]/68", compact ? "mt-3 text-[13px] leading-6 line-clamp-3" : "mt-4 text-sm leading-7 line-clamp-4")}>
           {article.excerpt}
         </p>
+
+        <div className={cn("mt-5 border-t border-[#0B120C]/8 pt-4 text-[#0B120C]/55", compact ? "text-[10px] tracking-[0.12em]" : "text-[11px] tracking-[0.14em]")}>
+          Ditulis oleh{" "}
+          <Link
+            href={authorHref}
+            className="font-semibold text-[#0B120C] transition-colors hover:text-[#A85D16]"
+          >
+            {authorName}
+          </Link>
+        </div>
       </div>
     </article>
   );

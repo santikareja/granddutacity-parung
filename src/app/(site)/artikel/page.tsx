@@ -357,8 +357,9 @@ export default async function ArtikelPage({
                 Artikel & Panduan Properti Grand Duta City Parung
               </h1>
               <p className="mt-6 max-w-3xl text-base leading-8 text-[#F5F1E8]/72 md:text-lg">
-                Temukan section editorial yang membantu Anda membaca Grand Duta
-                City dari tiga sudut yang berbeda: panduan pembelian, konteks
+                Temukan section editorial yang membantu Anda membaca{" "}
+                <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
+                dari tiga sudut yang berbeda: panduan pembelian, konteks
                 kawasan, dan update project terbaru.
               </p>
 

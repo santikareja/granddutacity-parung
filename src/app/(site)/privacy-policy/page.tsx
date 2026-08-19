@@ -244,7 +244,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="mt-16 flex justify-center border-t border-[#0b120c]/10 pt-10">
               <Link href="/" className="inline-flex items-center gap-3 rounded-full border border-[#0b120c]/20 px-8 py-3 text-xs font-bold uppercase tracking-[0.24em] text-[#0b120c] hover:border-[#F5A524] hover:text-[#F5A524] transition-colors">
-                <ArrowLeft className="h-4 w-4" /> Kembali ke Beranda
+                <ArrowLeft className="h-4 w-4" /> Kembali ke Grand Duta City Parung
               </Link>
             </div>
           </div>

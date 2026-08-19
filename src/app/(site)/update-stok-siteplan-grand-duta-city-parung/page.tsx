@@ -117,7 +117,9 @@ export default function UpdateStokSiteplanPage() {
             </h1>
 
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8">
-              Halaman ini menampilkan siteplan kawasan dan update stok unit Grand Duta City Parung untuk Cluster Ladera dan Cascada. Lihat posisi unit, status ketersediaan, dan hubungi marketing untuk konfirmasi unit terbaru.
+              Halaman ini menampilkan siteplan kawasan dan update stok unit{" "}
+              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
+              untuk Cluster Ladera dan Cascada. Lihat posisi unit, status ketersediaan, dan hubungi marketing untuk konfirmasi unit terbaru.
             </p>
 
             <div className="flex flex-col md:flex-row gap-4 justify-center w-full md:w-auto mb-12">

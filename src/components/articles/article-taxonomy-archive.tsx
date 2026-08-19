@@ -504,6 +504,11 @@ export function CategoryArchivePage({
               <p className="mt-6 max-w-3xl text-base leading-8 text-[#F5F1E8]/72 md:text-lg">
                 {category.intro}
               </p>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-[#F5F1E8]/60">
+                Semua artikel di topik ini membahas kawasan hunian{" "}
+                <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
+                South of Jakarta.
+              </p>
 
               <div className="mt-10 flex flex-wrap gap-3">
                 {relatedCategories.map((item) => (
@@ -811,7 +816,8 @@ export function TagArchivePage({
             <p className="mt-5 max-w-3xl text-sm leading-7 text-[#F5F1E8]/58">
               Halaman tag tetap bisa diakses dan diikuti crawler untuk membantu
               internal linking, tetapi tidak ditujukan untuk diindeks sebagai
-              landing page SEO.
+              landing page SEO. Kembali ke halaman utama{" "}
+              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-3">

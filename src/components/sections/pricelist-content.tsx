@@ -670,7 +670,9 @@ export default function PricelistPage() {
               <span className="italic font-normal text-[#F5A524]">| Harga Ladera & Cascada Terbaru.</span>
             </h1>
             <p className="text-[#F5F1E8]/80 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed">
-              Pricelist Grand Duta City Parung terbaru untuk Cluster Ladera dan Cascada, lengkap dengan kisaran harga, tipe unit, dan informasi awal simulasi KPR. Untuk konfirmasi harga dan unit tersedia, hubungi marketing.
+              Pricelist{" "}
+              <Link href="/" className="font-medium text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
+              terbaru untuk Cluster Ladera dan Cascada, lengkap dengan kisaran harga, tipe unit, dan informasi awal simulasi KPR. Untuk konfirmasi harga dan unit tersedia, hubungi marketing.
             </p>
             <div className="mt-8 text-[#F5F1E8]/50 font-sans text-xs flex justify-center items-center gap-2">
               <Clock className="w-4 h-4 text-[#F5A524]" /> Tanggal update: 9 Maret 2026

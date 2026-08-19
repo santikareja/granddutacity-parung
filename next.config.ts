@@ -83,6 +83,31 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/tag/investasi",
+        destination: "/category/panduan-properti",
+        permanent: true,
+      },
+      {
+        source: "/tag/brand",
+        destination: "/artikel",
+        permanent: true,
+      },
+      {
+        source: "/tag/desain",
+        destination: "/artikel",
+        permanent: true,
+      },
+      {
+        source: "/tag/perumahan",
+        destination: "/artikel",
+        permanent: true,
+      },
+      {
+        source: "/rumah-dengan-sistem-keamanan-tinggi",
+        destination: "/desain-rumah-dengan-efisiensi-energi-yang-tinggi",
+        permanent: true,
+      },
     ];
   },
 };

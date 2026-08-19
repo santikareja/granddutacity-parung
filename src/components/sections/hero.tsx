@@ -229,6 +229,7 @@ export function Hero() {
              >
                 Grand Duta City Parung
               </span>
+              {" "}
              <span
                className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-[#F5A524] via-[#F8C165] to-[#D49A3D] tracking-[0.01em] leading-tight"
                style={{ fontSize: "clamp(1.15rem, 3vw, 2.5rem)" }}

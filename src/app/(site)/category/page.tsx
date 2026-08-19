@@ -155,7 +155,8 @@ export default function CategoryHubPage() {
               Topik Artikel
             </h1>
             <p className="mt-6 max-w-3xl text-base leading-8 text-[#F5F1E8]/72 md:text-lg">
-              Pilih topik yang ingin Anda pelajari seputar properti dan Grand Duta City.
+              Pilih topik yang ingin Anda pelajari seputar properti dan{" "}
+              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>.
             </p>
           </div>
         </section>

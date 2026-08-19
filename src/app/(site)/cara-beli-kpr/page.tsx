@@ -236,7 +236,8 @@ export default function CaraBeliKPRPage() {
             </h1>
             
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8 max-w-3xl">
-              Halaman ini menjelaskan cara beli rumah di Grand Duta City Parung, mulai dari pemilihan unit, booking, pembayaran DP, proses pengajuan KPR, hingga tahapan akad.
+              Halaman ini menjelaskan cara beli rumah di{" "}
+              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>, mulai dari pemilihan unit, booking, pembayaran DP, proses pengajuan KPR, hingga tahapan akad.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">

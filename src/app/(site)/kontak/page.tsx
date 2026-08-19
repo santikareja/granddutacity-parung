@@ -152,7 +152,9 @@ export default function ContactPage() {
               <span className="text-[#F5A524] italic">Grand Duta City Parung</span>
             </h1>
             <p className="text-[#F5F1E8]/70 text-sm sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-              Hubungi tim marketing Grand Duta City Parung untuk informasi Cluster Ladera, Cluster Cascada, harga terbaru, siteplan, dan jadwal survey lokasi.
+              Hubungi tim marketing{" "}
+              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
+              untuk informasi Cluster Ladera, Cluster Cascada, harga terbaru, siteplan, dan jadwal survey lokasi.
             </p>
           </div>
         </section>

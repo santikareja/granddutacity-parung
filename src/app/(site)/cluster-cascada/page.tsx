@@ -215,7 +215,8 @@ export default function ClusterCascadaPage() {
               <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.38em] text-[#F5A524]">Ringkasan Cluster Cascada</p>
               <h2 className="font-serif text-4xl font-semibold text-[#0b120c] md:text-5xl">Cascada Grand Duta City</h2>
               <p className="mt-6 text-base leading-relaxed text-[#0b120c]/75">
-                Temukan harmoni kehidupan modern di Cluster Cascada Grand Duta City Parung. Didesain dengan gaya minimalis tropis yang elegan, klaster ini adalah jawaban bagi Anda yang mendambakan hunian prestisius dengan fasilitas super lengkap. Nikmati kenyamanan tinggal di kawasan mandiri seluas 200 hektare dengan akses tol terdekat di Selatan Jakarta.
+                Temukan harmoni kehidupan modern di Cluster Cascada{" "}
+                <Link href="/" className="font-medium text-[#A85D16] underline decoration-[#F5A524]/40 underline-offset-2 hover:text-[#F5A524]">Grand Duta City Parung</Link>. Didesain dengan gaya minimalis tropis yang elegan, klaster ini adalah jawaban bagi Anda yang mendambakan hunian prestisius dengan fasilitas super lengkap. Nikmati kenyamanan tinggal di kawasan mandiri seluas 200 hektare dengan akses tol terdekat di Selatan Jakarta.
               </p>
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 {[
@@ -476,7 +477,7 @@ export default function ClusterCascadaPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
-                  ["/", "Homepage"],
+                  ["/", "Grand Duta City Parung"],
                   ["/pricelist-grand-duta-city", "Cek harga Cluster Cascada"],
                   ["/update-stok-siteplan-grand-duta-city-parung#cluster-cascada", "Lihat stok Cluster Cascada"],
                   ["/lokasi-akses-grand-duta-city-parung", "Lihat detail lokasi Grand Duta City Parung"],

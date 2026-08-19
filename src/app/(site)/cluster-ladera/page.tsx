@@ -144,7 +144,9 @@ export default function ClusterLaderaPage() {
             </h1>
             <div className="w-16 h-1 bg-[#F5A524] mx-auto rounded-full mb-8" />
             <p className="text-[#F5F1E8]/90 text-lg md:text-xl font-sans max-w-3xl mx-auto leading-relaxed">
-              Menghadirkan hunian modern dengan desain fungsional, lingkungan nyaman, dan posisi strategis di dalam kawasan Grand Duta City South of Jakarta.
+              Menghadirkan hunian modern dengan desain fungsional, lingkungan nyaman, dan posisi strategis di dalam kawasan{" "}
+              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
+              South of Jakarta.
             </p>
           </div>
         </div>

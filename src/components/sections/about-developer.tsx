@@ -135,7 +135,7 @@ export function AboutDeveloper() {
                   <div className="inline-block p-5 border border-[#F5F1E8]/10 bg-[#F5F1E8]/[0.02] rounded-xl backdrop-blur-sm">
                     <p className="text-xs text-[#F5F1E8]/40 uppercase tracking-widest mb-2 font-sans">Projek Terbaru Kami:</p>
                     <Link href="/" className="inline-flex items-center text-[#F5A524] hover:text-[#F5F1E8] transition-colors duration-300 font-serif text-xl border-b border-[#F5A524]/30 hover:border-[#F5F1E8] pb-1 group">
-                      Grand Duta City South of Jakarta
+                      Grand Duta City Parung
                       <ArrowRight className="w-4 h-4 ml-2 opacity-50 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" />
                     </Link>
                   </div>

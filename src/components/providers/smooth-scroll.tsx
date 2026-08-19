@@ -38,7 +38,15 @@ export function SmoothScrollProvider({
 }) {
   const pathname = usePathname();
   const [inputMode, setInputMode] = useState<"desktop" | "touch" | "native">("native");
-  const [lenisKey, setLenisKey] = useState(0);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const applyReducedMotion = () => setPrefersReducedMotion(reducedMotionQuery.matches);
+    applyReducedMotion();
+    reducedMotionQuery.addEventListener("change", applyReducedMotion);
+    return () => reducedMotionQuery.removeEventListener("change", applyReducedMotion);
+  }, []);
 
   useEffect(() => {
     const desktopQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -71,9 +79,6 @@ export function SmoothScrollProvider({
   useEffect(() => {
     // Ensure no stale scroll-lock state persists across route transitions.
     document.body.style.overflow = "";
-
-    // Force Lenis remount per route to avoid stale internal state on back navigation.
-    setLenisKey((prev) => prev + 1);
   }, [pathname]);
 
   useEffect(() => {
@@ -81,9 +86,9 @@ export function SmoothScrollProvider({
       if (!event.persisted) return;
 
       document.body.style.overflow = "";
-      setLenisKey((prev) => prev + 1);
 
-      // Trigger a resize tick so layout/scroll measurements are recalculated.
+      // Trigger a resize tick so Lenis re-syncs to the browser-restored scroll position.
+      // (Lenis.resize() sets animatedScroll/targetScroll = actualScroll, reading native scrollY.)
       requestAnimationFrame(() => {
         window.dispatchEvent(new Event("resize"));
       });
@@ -94,6 +99,10 @@ export function SmoothScrollProvider({
       window.removeEventListener("pageshow", handlePageShow);
     };
   }, []);
+
+  if (prefersReducedMotion) {
+    return <>{children}</>;
+  }
 
   const lenisOptions =
     inputMode === "desktop"
@@ -107,7 +116,7 @@ export function SmoothScrollProvider({
   }
 
   return (
-    <ReactLenis key={`${pathname}-${inputMode}-${lenisKey}`} root options={lenisOptions}>
+    <ReactLenis key={inputMode} root options={lenisOptions}>
       {children}
     </ReactLenis>
   );

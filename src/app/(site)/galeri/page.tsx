@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Gallery } from "@/components/sections/gallery";
@@ -32,7 +33,8 @@ export default function GaleriPage() {
               Galeri Foto
             </h1>
             <p className="text-[#F5F1E8]/50 text-base md:text-lg font-light max-w-xl mx-auto leading-relaxed">
-              Jelajahi setiap sudut kawasan hunian prestisius kami, dari arsitektur modern hingga fasilitas eksklusif kelas dunia.
+              Jelajahi setiap sudut kawasan hunian prestisius{" "}
+              <Link href="/" className="text-brand-accent hover:underline">Grand Duta City Parung</Link>, dari arsitektur modern hingga fasilitas eksklusif kelas dunia.
             </p>
           </div>
         </section>

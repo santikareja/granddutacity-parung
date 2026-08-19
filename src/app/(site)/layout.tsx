@@ -40,10 +40,20 @@ export const metadata: Metadata = {
     ],
     shortcut: ["/favicon.ico"],
   },
- openGraph: {
+  openGraph: {
     siteName: "Grand Duta City Parung",
     locale: "id_ID",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+    "max-video-preview": -1,
   },
   verification: {
     google: "FivCctWsBAd8FOkGVRWg1A0ZGwkGk6q_7d_a471BiMY",
@@ -162,18 +172,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }}
         />
-        {/* Ahrefs Webmaster Tools verification — raw async tag agar hadir di SSR HTML (verifikasi Ahrefs) & non-blocking (CWV aman) */}
-        <script
-          src="https://analytics.ahrefs.com/analytics.js"
-          data-key="F+5eM2xzHqk0rnXRzS5taw"
-          async
-        />
         <SmoothScrollProvider>
           <div className="relative grow">{children}</div>
-          <PromoPopup />
-          <BackToTop />
-          <WhatsAppButton />
         </SmoothScrollProvider>
+        <PromoPopup />
+        <BackToTop />
+        <WhatsAppButton />
       </body>
       {gaId && gaId !== "G-XXXXXXXXXX" ? (
         <GoogleAnalytics gaId={gaId} />

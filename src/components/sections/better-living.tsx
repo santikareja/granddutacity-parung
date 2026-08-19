@@ -119,7 +119,7 @@ export function BetterLiving() {
                           fill
                           className="object-cover transition-transform duration-700 hover:scale-105"
                           sizes="(max-width: 768px) 100vw, 50vw"
-                          priority
+                          priority={index === 0}
                         />
                         <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 rounded-full bg-[#090D0A]/70 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs text-white font-sans font-medium border border-white/20 shadow-md">
                           {image.title}

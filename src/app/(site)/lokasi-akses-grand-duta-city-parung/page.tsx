@@ -260,7 +260,8 @@ export default function LokasiAksesPage() {
             </h1>
             
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8 max-w-3xl">
-              Grand Duta City Parung berada di kawasan Parung, Bogor, dengan akses yang menjangkau Bogor, Depok, dan Jakarta serta didukung fasilitas publik di sekitarnya.
+              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
+              berada di kawasan Parung, Bogor, dengan akses yang menjangkau Bogor, Depok, dan Jakarta serta didukung fasilitas publik di sekitarnya.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">

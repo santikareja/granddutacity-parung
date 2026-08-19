@@ -218,7 +218,8 @@ export default function AuthorSantikaRezaPage() {
                 </div>
 
                 <div className="mt-8 inline-flex rounded-full border border-[#F5A524]/25 bg-[#F5A524]/10 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#F5A524]">
-                  {articleCount} artikel terbit di Grand Duta City
+                  {articleCount} artikel terbit di{" "}
+                  <Link href="/" className="ml-1.5 underline decoration-[#F5A524]/40 underline-offset-2 hover:text-[#F5F1E8]">Grand Duta City Parung</Link>
                 </div>
               </div>
             </div>

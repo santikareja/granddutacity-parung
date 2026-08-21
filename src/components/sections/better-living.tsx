@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { clImg } from "@/lib/cloudinary";
 import { ArrowUpRight, Sparkles } from "lucide-react";
+import { Reveal } from "@/components/ui/reveal";
 import {
   Carousel,
   CarouselContent,
@@ -38,11 +37,8 @@ const sliderImages = [
 ];
 
 export function BetterLiving() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-10%" });
-
   return (
-    <section ref={ref} className="py-16 sm:py-24 md:py-36 bg-[#F8F6F0] text-[#090D0A] relative overflow-hidden border-t border-[#090D0A]/6">
+    <section className="py-16 sm:py-24 md:py-36 bg-[#F8F6F0] text-[#090D0A] relative overflow-hidden border-t border-[#090D0A]/6">
       
       {/* Texture Layer */}
       <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#090d0a_1px,transparent_1px)] [background-size:36px_36px] pointer-events-none" />
@@ -51,12 +47,7 @@ export function BetterLiving() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-14 lg:gap-16 items-center">
           
           {/* Left: Narrative Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-6 flex flex-col gap-3.5 sm:gap-6"
-          >
+          <Reveal className="lg:col-span-6 flex flex-col gap-3.5 sm:gap-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] w-max">
               <Sparkles className="w-3 h-3 text-[#D49A3D]" />
               <span>Future Proof Investment</span>
@@ -92,13 +83,12 @@ export function BetterLiving() {
                 Lihat Pricelist
               </Link>
             </div>
-          </motion.div>
+          </Reveal>
 
           {/* Right: Double-Bezel Interactive Slider */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          <Reveal
+            from="right"
+            delay={120}
             className="lg:col-span-6 w-full h-full relative"
           >
             <div className="rounded-[2rem] sm:rounded-[2.5rem] p-1.5 sm:p-2 bg-[#090D0A]/5 border border-[#090D0A]/10 shadow-[0_20px_50px_rgba(9,13,10,0.08)]">
@@ -119,9 +109,9 @@ export function BetterLiving() {
                           fill
                           className="object-cover transition-transform duration-700 hover:scale-105"
                           sizes="(max-width: 768px) 100vw, 50vw"
-                          priority={index === 0}
+                          loading="lazy"
                         />
-                        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 rounded-full bg-[#090D0A]/70 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs text-white font-sans font-medium border border-white/20 shadow-md">
+                        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 rounded-full bg-[#090D0A]/85 lg:bg-[#090D0A]/70 lg:backdrop-blur-md px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs text-white font-sans font-medium border border-white/20 shadow-md">
                           {image.title}
                         </div>
                       </div>
@@ -132,7 +122,7 @@ export function BetterLiving() {
                 <CarouselNext className="right-3 sm:right-4 bg-white/90 border border-black/10 text-[#090D0A] hover:bg-[#090D0A] hover:text-white h-9 w-9 sm:h-10 sm:w-10" />
               </Carousel>
             </div>
-          </motion.div>
+          </Reveal>
 
         </div>
       </div>

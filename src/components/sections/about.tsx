@@ -1,10 +1,43 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRef, useEffect } from "react";
 import { ArrowUpRight, Sparkles, Building2, Award } from "lucide-react";
+import { Reveal } from "@/components/ui/reveal";
+import { useViewportVideo } from "@/components/ui/use-viewport-video";
+
+const ABOUT_VIDEO_SRC =
+  "https://res.cloudinary.com/dxgoshyei/video/upload/v1780901920/Membeli_rumah_pertama_itu_bukan_keputusan_kecil.Ada_banyak_hal_yang_perlu_dipertimbangkan_supaya_tdxtox.mp4";
 
 export function About() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useViewportVideo(videoRef);
+
+  // Defer the ~7 MB video download until the section is within 200% of the
+  // viewport height. On Slow 4G this keeps the bandwidth free for above-the-fold
+  // assets (hero video, fonts, CSS) that directly affect FCP / LCP.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (!("IntersectionObserver" in window)) {
+      video.src = ABOUT_VIDEO_SRC;
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.src = ABOUT_VIDEO_SRC;
+          video.load();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200% 0px" },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section id="tentang-kami" className="py-16 sm:py-24 md:py-36 bg-[#F8F6F0] text-[#090D0A] relative overflow-hidden border-t border-[#090D0A]/6">
 
@@ -15,22 +48,19 @@ export function About() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-center">
 
           {/* Left Column: 9:16 Vertical Video Frame with Double-Bezel Architecture */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          <Reveal
+            from="left"
             className="lg:col-span-5 relative w-full max-w-[320px] sm:max-w-md lg:max-w-none mx-auto order-2 lg:order-1"
           >
             {/* Double-Bezel Enclosure */}
             <div className="rounded-[2rem] sm:rounded-[2.25rem] p-1.5 sm:p-2 bg-[#090D0A]/5 border border-[#090D0A]/10 shadow-[0_25px_60px_rgba(9,13,10,0.12)]">
               <div className="relative w-full rounded-[calc(2rem-0.375rem)] sm:rounded-[calc(2.25rem-0.5rem)] overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]" style={{ aspectRatio: "9/16" }}>
                 <video
-                  src="https://res.cloudinary.com/dxgoshyei/video/upload/v1780901920/Membeli_rumah_pertama_itu_bukan_keputusan_kecil.Ada_banyak_hal_yang_perlu_dipertimbangkan_supaya_tdxtox.mp4"
-                  autoPlay
+                  ref={videoRef}
                   loop
                   muted
                   playsInline
+                  preload="none"
                   aria-label="Video Profile Developer Duta Putra Land"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -39,12 +69,9 @@ export function About() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#090D0A]/70 via-transparent to-[#090D0A]/20 pointer-events-none" />
 
                 {/* Floating Metallic Developer Credential Badge */}
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
-                  className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6 bg-[#090D0A]/85 backdrop-blur-xl border border-white/15 p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.5)] z-20"
+                <Reveal
+                  delay={280}
+                  className="absolute bottom-3 left-3 right-3 sm:bottom-6 sm:left-6 sm:right-6 bg-[#090D0A]/85 lg:backdrop-blur-xl border border-white/15 p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.5)] z-20"
                 >
                   <div className="flex items-center gap-2.5 sm:gap-3">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-[#D49A3D]/20 border border-[#D49A3D]/30 flex items-center justify-center shrink-0 text-[#D49A3D]">
@@ -56,17 +83,15 @@ export function About() {
                       <p className="text-[#F8F6F0]/50 text-[9px] sm:text-[10px] tracking-wider uppercase font-sans mt-0.5">Established Since 1983 · 35+ Years</p>
                     </div>
                   </div>
-                </motion.div>
+                </Reveal>
               </div>
             </div>
-          </motion.div>
+          </Reveal>
 
           {/* Right Column: Editorial Storytelling */}
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          <Reveal
+            from="right"
+            delay={100}
             className="lg:col-span-7 flex flex-col justify-start space-y-5 sm:space-y-8 order-1 lg:order-2"
           >
             <div>
@@ -131,7 +156,7 @@ export function About() {
                 Tentang Developer
               </Link>
             </div>
-          </motion.div>
+          </Reveal>
 
         </div>
       </div>

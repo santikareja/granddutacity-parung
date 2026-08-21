@@ -1,11 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import { TreePine, Shield, Waves, Coffee, Wifi, Smile, MapPin, Sparkles, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
+import { Reveal } from "@/components/ui/reveal";
 
 function FacilityImage({ src, alt, title, className }: { src: string; alt: string; title: string; className?: string }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -41,7 +41,7 @@ function FacilityImage({ src, alt, title, className }: { src: string; alt: strin
             <span className="text-[#F8F6F0] text-[10px] sm:text-xs tracking-[0.12em] sm:tracking-[0.16em] uppercase font-sans font-bold leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
               {title}
             </span>
-            <span className="w-6 h-6 rounded-full bg-white/20 backdrop-blur-md hidden sm:flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1">
+            <span className="w-6 h-6 rounded-full bg-white/25 lg:bg-white/20 lg:backdrop-blur-md hidden sm:flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1">
               🔍
             </span>
           </div>
@@ -82,13 +82,7 @@ export function Fasilitas() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-start">
 
           {/* Left Column: Narrative Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-5 space-y-6 sm:space-y-8"
-          >
+          <Reveal from="left" className="lg:col-span-5 space-y-6 sm:space-y-8">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] mb-3 sm:mb-4 w-max">
                 <Sparkles className="w-3 h-3 text-[#D49A3D]" />
@@ -110,12 +104,10 @@ export function Fasilitas() {
             {/* Facility List Matrix */}
             <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-1 sm:pt-2">
               {facilities.map((fac, idx) => (
-                <motion.div
+                <Reveal
                   key={idx}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.05 * idx, duration: 0.4 }}
+                  from="left"
+                  delay={45 * idx}
                   className="group flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-white border border-[#090D0A]/5 hover:border-[#D49A3D]/40 transition-colors shadow-xs"
                 >
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#090D0A]/5 group-hover:bg-[#C8521A] text-[#B45309] group-hover:text-white flex items-center justify-center transition-colors duration-300 shrink-0">
@@ -124,7 +116,7 @@ export function Fasilitas() {
                   <span className="text-[#090D0A]/80 text-[11px] sm:text-sm font-medium group-hover:text-[#090D0A] transition-colors leading-snug">
                     {fac.title}
                   </span>
-                </motion.div>
+                </Reveal>
               ))}
             </div>
 
@@ -150,14 +142,12 @@ export function Fasilitas() {
                 Unduh E-Brosur
               </a>
             </div>
-          </motion.div>
+          </Reveal>
 
           {/* Right Column: Luxury Bento Collage with Double-Bezel Frames */}
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          <Reveal
+            from="right"
+            delay={120}
             className="lg:col-span-7 grid grid-cols-2 gap-2.5 sm:gap-4.5 h-auto sm:h-[540px] lg:h-[600px] w-full"
           >
             <div className="space-y-2.5 sm:space-y-4.5 mt-4 sm:mt-10">
@@ -189,7 +179,7 @@ export function Fasilitas() {
                 className="h-[125px] sm:h-[220px] lg:h-[250px]"
               />
             </div>
-          </motion.div>
+          </Reveal>
 
         </div>
       </div>

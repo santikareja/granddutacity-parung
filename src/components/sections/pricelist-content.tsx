@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BankSlider } from "@/components/ui/bank-slider";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Reveal } from "@/components/ui/reveal";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────
 interface PriceRow {
@@ -391,13 +392,7 @@ function KprSimulator({ activeTab }: { activeTab: ClusterKey }) {
   );
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="mt-20 mb-16"
-    >
+    <Reveal as="section" className="mt-20 mb-16">
       <div className="mb-10">
         <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-4">
           Simulasi KPR
@@ -615,7 +610,7 @@ function KprSimulator({ activeTab }: { activeTab: ClusterKey }) {
           </a>
         </div>
       </div>
-    </motion.section>
+    </Reveal>
   );
 }
 
@@ -705,13 +700,7 @@ export default function PricelistPage() {
         <div className="max-w-screen-xl mx-auto px-6 md:px-14 lg:px-20 py-20 relative z-10">
 
           {/* ── SECTION LABEL ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="mb-12"
-          >
+          <Reveal className="mb-12">
             <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-4">
               Daftar Harga Terbaru
             </p>
@@ -724,7 +713,7 @@ export default function PricelistPage() {
                 Semua harga sudah termasuk subsidi PPN, IMB, listrik 2.200 W, dan PDAM. Harga sewaktu-waktu dapat berubah.
               </p>
             </div>
-          </motion.div>
+          </Reveal>
 
           {/* ── TAB SWITCHER ── */}
           <div className="flex gap-3 mb-10 flex-wrap">
@@ -869,29 +858,19 @@ export default function PricelistPage() {
           <KprSimulator activeTab={activeTab} />
 
           {/* ── PAYMENT METHODS ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-            className="mt-20 mb-6"
-          >
+          <Reveal className="mt-20 mb-6">
             <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-4">
               Cara Pembayaran
             </p>
             <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#0b120c] mb-10">
               Ketentuan &amp; Cara Bayar
             </h2>
-          </motion.div>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             {PAYMENT_METHODS.map((m) => (
-              <motion.div
+              <Reveal
                 key={m.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
                 className="bg-[#F5F1E8] rounded-xl border border-[#0b120c]/10 p-8 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-5">
@@ -910,7 +889,7 @@ export default function PricelistPage() {
                     </li>
                   ))}
                 </ol>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
 
@@ -986,13 +965,7 @@ export default function PricelistPage() {
           </div>
 
           {/* ── CTA ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center py-6"
-          >
+          <Reveal className="text-center py-6">
             <p className="text-[#0b120c]/40 text-[9px] tracking-[0.4em] uppercase font-sans mb-6">
               Ada pertanyaan seputar harga?
             </p>
@@ -1005,7 +978,7 @@ export default function PricelistPage() {
               <Phone className="w-4 h-4" />
               Hubungi Marketing Kami
             </a>
-          </motion.div>
+          </Reveal>
 
           {/* ── INTERNAL LINKS ── */}
           <div className="mt-16 pt-10 border-t border-[#0b120c]/10 text-center">

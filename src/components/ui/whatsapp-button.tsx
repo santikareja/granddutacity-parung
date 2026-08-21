@@ -43,7 +43,7 @@ export function WhatsAppButton() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.95 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="w-[calc(100vw-36px)] sm:w-[330px] max-w-[350px] rounded-[2rem] p-1.5 bg-[#090D0A]/85 backdrop-blur-2xl border border-white/12 shadow-[0_25px_60px_rgba(0,0,0,0.6)]"
+            className="w-[calc(100vw-36px)] sm:w-[330px] max-w-[350px] rounded-[2rem] p-1.5 bg-[#0B120C] lg:bg-[#090D0A]/85 lg:backdrop-blur-2xl border border-white/12 shadow-[0_25px_60px_rgba(0,0,0,0.6)]"
           >
             <div className="rounded-[calc(2rem-0.375rem)] overflow-hidden bg-[#131B15] shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
               {/* Header */}

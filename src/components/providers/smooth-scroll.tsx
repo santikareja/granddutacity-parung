@@ -5,30 +5,24 @@ import type { LenisOptions } from "lenis";
 import { ReactLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
 
-const baseOptions: LenisOptions = {
+// Lenis is intentionally desktop-only.
+//
+// On touch devices the browser scrolls on the compositor thread with the OS
+// momentum curve, which is both cheaper and smoother than re-driving scroll
+// from a JS rAF loop. Lenis' `syncTouch` did exactly that: every frame of a
+// swipe had to wait on the main thread, so any React render, image decode, or
+// video frame turned into a dropped scroll frame (the stutter reported on
+// mobile). Native scrolling has no such coupling.
+const desktopOptions: LenisOptions = {
   smoothWheel: true,
   gestureOrientation: "vertical",
   overscroll: true,
   autoResize: true,
   anchors: true,
-};
-
-const desktopOptions: LenisOptions = {
-  ...baseOptions,
   lerp: 0.105,
   syncTouch: false,
   wheelMultiplier: 0.9,
   touchMultiplier: 1,
-};
-
-const touchOptions: LenisOptions = {
-  ...baseOptions,
-  lerp: 0.085,
-  syncTouch: true,
-  syncTouchLerp: 0.11,
-  touchInertiaExponent: 1.45,
-  touchMultiplier: 1.12,
-  wheelMultiplier: 0.95,
 };
 
 export function SmoothScrollProvider({
@@ -37,42 +31,26 @@ export function SmoothScrollProvider({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [inputMode, setInputMode] = useState<"desktop" | "touch" | "native">("native");
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [smoothWheelEnabled, setSmoothWheelEnabled] = useState(false);
 
   useEffect(() => {
-    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const applyReducedMotion = () => setPrefersReducedMotion(reducedMotionQuery.matches);
-    applyReducedMotion();
-    reducedMotionQuery.addEventListener("change", applyReducedMotion);
-    return () => reducedMotionQuery.removeEventListener("change", applyReducedMotion);
-  }, []);
-
-  useEffect(() => {
+    // A fine pointer with hover is the only input mode that benefits from
+    // wheel smoothing; everything else (touch, reduced motion) uses native
+    // scrolling.
     const desktopQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const touchQuery = window.matchMedia("(hover: none) and (pointer: coarse)");
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const update = () => {
-      if (desktopQuery.matches) {
-        setInputMode("desktop");
-        return;
-      }
-
-      if (touchQuery.matches) {
-        setInputMode("touch");
-        return;
-      }
-
-      setInputMode("native");
+      setSmoothWheelEnabled(desktopQuery.matches && !reducedMotionQuery.matches);
     };
 
     update();
     desktopQuery.addEventListener("change", update);
-    touchQuery.addEventListener("change", update);
+    reducedMotionQuery.addEventListener("change", update);
 
     return () => {
       desktopQuery.removeEventListener("change", update);
-      touchQuery.removeEventListener("change", update);
+      reducedMotionQuery.removeEventListener("change", update);
     };
   }, []);
 
@@ -82,6 +60,8 @@ export function SmoothScrollProvider({
   }, [pathname]);
 
   useEffect(() => {
+    if (!smoothWheelEnabled) return;
+
     const handlePageShow = (event: PageTransitionEvent) => {
       if (!event.persisted) return;
 
@@ -98,25 +78,14 @@ export function SmoothScrollProvider({
     return () => {
       window.removeEventListener("pageshow", handlePageShow);
     };
-  }, []);
+  }, [smoothWheelEnabled]);
 
-  if (prefersReducedMotion) {
-    return <>{children}</>;
-  }
-
-  const lenisOptions =
-    inputMode === "desktop"
-      ? desktopOptions
-      : inputMode === "touch"
-        ? touchOptions
-        : null;
-
-  if (!lenisOptions) {
+  if (!smoothWheelEnabled) {
     return <>{children}</>;
   }
 
   return (
-    <ReactLenis key={inputMode} root options={lenisOptions}>
+    <ReactLenis root options={desktopOptions}>
       {children}
     </ReactLenis>
   );

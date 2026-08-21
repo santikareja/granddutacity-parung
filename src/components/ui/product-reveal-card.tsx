@@ -159,7 +159,7 @@ export function ProductRevealCard({
         <div className="absolute top-3.5 left-3.5 right-3.5 sm:top-4 sm:left-4 sm:right-4 flex items-center justify-between z-20">
           <div className="flex flex-wrap gap-1.5 items-center">
             {cluster && (
-              <span className="px-2.5 sm:px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white text-[8px] sm:text-[9px] font-sans font-bold tracking-[0.14em] sm:tracking-[0.16em] uppercase">
+              <span className="px-2.5 sm:px-3 py-1 rounded-full bg-black/65 lg:bg-black/50 lg:backdrop-blur-md border border-white/15 text-white text-[8px] sm:text-[9px] font-sans font-bold tracking-[0.14em] sm:tracking-[0.16em] uppercase">
                 {cluster}
               </span>
             )}
@@ -179,10 +179,10 @@ export function ProductRevealCard({
             }}
             aria-label="Simpan Unit Favorit"
             className={cn(
-              "p-1.5 sm:p-2 rounded-full backdrop-blur-md border transition-all duration-300 cursor-pointer",
+              "p-1.5 sm:p-2 rounded-full lg:backdrop-blur-md border transition-all duration-300 cursor-pointer",
               isFavorite
                 ? "bg-[#C8521A] text-white border-[#C8521A]"
-                : "bg-black/30 text-white/80 border-white/20 hover:bg-black/50"
+                : "bg-black/45 lg:bg-black/30 text-white/80 border-white/20 hover:bg-black/50"
             )}
           >
             <Heart className={cn("w-3.5 h-3.5", isFavorite && "fill-current")} />
@@ -234,11 +234,15 @@ export function ProductRevealCard({
           </div>
         </div>
 
-        {/* Hover / Tap Reveal Overlay with Button-in-Button CTA */}
+        {/* Hover / Tap Reveal Overlay with Button-in-Button CTA.
+            The blur is desktop-only: this overlay is always mounted (just
+            translated out of frame), and a backdrop-filter keeps a live
+            composited layer per card even while hidden. At 95% opacity the blur
+            is barely visible anyway. */}
         <motion.div
           variants={overlayVariants}
           animate={isTouchDevice ? (isOverlayOpen ? "hover" : "rest") : undefined}
-          className="absolute inset-0 bg-[#090D0A]/95 backdrop-blur-2xl p-5 sm:p-7 flex flex-col justify-between z-30 text-left"
+          className="absolute inset-0 bg-[#090D0A]/95 lg:backdrop-blur-2xl p-5 sm:p-7 flex flex-col justify-between z-30 text-left"
         >
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">

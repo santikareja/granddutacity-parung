@@ -6,6 +6,7 @@ import { ClusterSpecs } from "@/components/sections/cluster-specs";
 import Link from "next/link";
 import Image from "next/image";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { AmbientVideo } from "@/components/ui/ambient-video";
 import { ArrowLeft, ArrowRight, ShieldCheck, TreePine, Bike, Footprints, Recycle, Home, MapPin, Maximize, BedDouble, Bath, CarFront } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -169,18 +170,12 @@ export default function ClusterLaderaPage() {
               </div>
               <div className="flex justify-center lg:justify-end">
                 <div className="relative aspect-[9/16] w-full max-w-sm rounded-2xl overflow-hidden border border-[#F5A524]/20 shadow-2xl">
-                  <video 
-                    className="w-full h-full object-cover"
-                    autoPlay 
-                    muted 
-                    loop 
-                    playsInline
-                    aria-label="Video presentasi Cluster Ladera"
-                    title="Video presentasi Cluster Ladera"
+                  <AmbientVideo
+                    src="https://res.cloudinary.com/dzhvfbuks/video/upload/v1775875427/Video_Cluster_Ladera_Grand_Duta_City_South_of_Jakarta_w9kaq3.mp4"
                     poster="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp"
-                  >
-                    <source src="https://res.cloudinary.com/dzhvfbuks/video/upload/v1775875427/Video_Cluster_Ladera_Grand_Duta_City_South_of_Jakarta_w9kaq3.mp4" type="video/mp4" />
-                  </video>
+                    ariaLabel="Video presentasi Cluster Ladera"
+                    title="Video presentasi Cluster Ladera"
+                  />
                 </div>
               </div>
             </div>

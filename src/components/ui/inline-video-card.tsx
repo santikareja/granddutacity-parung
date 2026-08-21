@@ -21,7 +21,10 @@ export function InlineVideoCard({
   videoClassName,
 }: InlineVideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  // Set once the user explicitly pauses, so scrolling back into view does not
+  // override that choice.
+  const pausedByUserRef = useRef(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -30,7 +33,17 @@ export function InlineVideoCard({
       return;
     }
 
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    let isVisible = false;
+
     const tryPlay = async () => {
+      if (!isVisible || document.hidden || pausedByUserRef.current) {
+        return;
+      }
+
       try {
         await video.play();
         setIsPlaying(true);
@@ -39,24 +52,53 @@ export function InlineVideoCard({
       }
     };
 
-    // Defer autoplay (and eager download) until the video is near the viewport.
-    if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              void tryPlay();
-              observer.disconnect();
-            }
-          }
-        },
-        { rootMargin: "200px" },
-      );
-      observer.observe(video);
-      return () => observer.disconnect();
+    const suspend = () => {
+      video.pause();
+      setIsPlaying(false);
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        suspend();
+        return;
+      }
+      void tryPlay();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    // Only decode while on screen: an offscreen video still forces a compositor
+    // frame per video frame, which competes with scrolling elsewhere on the page.
+    if (!("IntersectionObserver" in window)) {
+      isVisible = true;
+      void tryPlay();
+
+      return () => {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+      };
     }
 
-    void tryPlay();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          isVisible = entry.isIntersecting;
+
+          if (isVisible) {
+            void tryPlay();
+          } else {
+            suspend();
+          }
+        }
+      },
+      { rootMargin: "15% 0px" },
+    );
+
+    observer.observe(video);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   const togglePlayback = async () => {
@@ -67,6 +109,8 @@ export function InlineVideoCard({
     }
 
     if (video.paused) {
+      pausedByUserRef.current = false;
+
       try {
         await video.play();
         setIsPlaying(true);
@@ -76,6 +120,7 @@ export function InlineVideoCard({
       return;
     }
 
+    pausedByUserRef.current = true;
     video.pause();
     setIsPlaying(false);
   };
@@ -103,7 +148,6 @@ export function InlineVideoCard({
       <video
         ref={videoRef}
         className={cn("relative z-[1] h-auto w-full rounded-[24px] object-contain", videoClassName)}
-        autoPlay
         muted
         loop
         playsInline

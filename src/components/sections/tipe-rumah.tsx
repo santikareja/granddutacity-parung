@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Sparkles, ArrowUpRight } from "lucide-react";
 
 import { ProductRevealCard } from "@/components/ui/product-reveal-card";
 import { clImg } from "@/lib/cloudinary";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/ui/reveal";
 import {
   Carousel,
   CarouselApi,
@@ -132,13 +132,7 @@ export function TipeRumah() {
         
         {/* Section Header */}
         <div className="mb-8 sm:mb-14 flex flex-col md:flex-row md:items-end justify-between gap-6 px-4 sm:px-8 md:px-14 lg:px-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col gap-2.5 sm:gap-3"
-          >
+          <Reveal className="flex flex-col gap-2.5 sm:gap-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] w-max">
               <Sparkles className="w-3 h-3 text-[#D49A3D]" />
               <span>Modern Tropical Architecture</span>
@@ -155,7 +149,7 @@ export function TipeRumah() {
             <p className="max-w-lg text-[#090D0A]/70 text-xs sm:text-sm font-normal leading-[1.8] mt-2">
               Pilihan terbaik hunian di Parung, South of Jakarta dengan fasilitas kota mandiri 200 Ha dan akses strategis 20 menit ke CBD Jaksel.
             </p>
-          </motion.div>
+          </Reveal>
           
           {/* Navigation Controls */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 max-w-full">
@@ -253,13 +247,7 @@ export function TipeRumah() {
         </div>
 
         {/* Global Bottom CTA with Button-in-Button Architecture */}
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-16 sm:mt-20 md:mt-24 text-center px-4"
-        >
+        <Reveal className="mt-16 sm:mt-20 md:mt-24 text-center px-4">
           <div className="max-w-2xl mx-auto p-8 sm:p-10 rounded-[2.5rem] bg-white border border-[#090D0A]/8 shadow-[0_20px_50px_rgba(9,13,10,0.06)]">
             <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#B45309] mb-3 font-sans font-bold">
               Ketersediaan Unit &amp; Promo Terbatas Bulan Ini
@@ -282,7 +270,7 @@ export function TipeRumah() {
               </span>
             </a>
           </div>
-        </motion.div>
+        </Reveal>
 
       </div>
     </section>

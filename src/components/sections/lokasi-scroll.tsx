@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Navigation2, MapPin, ArrowUpRight, Clock, Car, Compass } from "lucide-react";
 import { createPortal } from "react-dom";
+import { Reveal } from "@/components/ui/reveal";
 
 const accessPoints = [
   { time: "5 Mnt", destination: "RS Dompet Dhuafa & SMA Dwiwarna", icon: Clock },
@@ -156,13 +157,7 @@ export function LokasiScroll() {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-8 md:px-14 relative z-10">
         
         {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-8 sm:mb-16"
-        >
+        <Reveal className="mb-8 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] mb-3 sm:mb-4 w-max">
             <Navigation2 className="w-3 h-3 text-[#D49A3D]" />
             <span>Konektivitas Tanpa Batas</span>
@@ -174,19 +169,13 @@ export function LokasiScroll() {
               Koridor Selatan Jakarta
             </span>
           </h2>
-        </motion.div>
+        </Reveal>
 
         {/* Asymmetric 2-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-14 items-start relative">
           
           {/* Column 1: Map Card with Double-Bezel Architecture */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-6 w-full lg:sticky lg:top-28"
-          >
+          <Reveal from="left" className="lg:col-span-6 w-full lg:sticky lg:top-28">
             <div className="rounded-[2rem] sm:rounded-[2.25rem] p-1.5 sm:p-2 bg-[#090D0A]/5 border border-[#090D0A]/10 shadow-[0_20px_45px_rgba(9,13,10,0.08)]">
               <button
                 type="button"
@@ -204,19 +193,17 @@ export function LokasiScroll() {
                 />
                 
                 {/* Floating Map Zoom Badge */}
-                <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 rounded-full bg-[#090D0A]/70 backdrop-blur-md px-3 sm:px-3.5 py-1 sm:py-1.5 text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.16em] text-white font-sans font-medium border border-white/20 shadow-md">
+                <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 rounded-full bg-[#090D0A]/85 lg:bg-[#090D0A]/70 lg:backdrop-blur-md px-3 sm:px-3.5 py-1 sm:py-1.5 text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.16em] text-white font-sans font-medium border border-white/20 shadow-md">
                   🔍 Klik Untuk Zoom
                 </div>
               </button>
             </div>
-          </motion.div>
+          </Reveal>
 
           {/* Column 2: Accessibility Travel-Time Hub */}
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          <Reveal
+            from="right"
+            delay={100}
             className="lg:col-span-6 flex flex-col justify-center space-y-6"
           >
             <div className="rounded-[2rem] sm:rounded-[2.25rem] p-5 sm:p-8 md:p-10 bg-white border border-[#090D0A]/8 shadow-[0_20px_50px_rgba(9,13,10,0.06)] relative overflow-hidden">
@@ -274,7 +261,7 @@ export function LokasiScroll() {
                 </Link>
               </div>
             </div>
-          </motion.div>
+          </Reveal>
 
         </div>
       </div>

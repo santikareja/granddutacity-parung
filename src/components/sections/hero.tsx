@@ -32,6 +32,9 @@ export function Hero() {
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     const sources = isMobile ? VIDEO_SOURCES.mobile : VIDEO_SOURCES.desktop;
     let looping = false;
+    // Suppresses playback while the hero is scrolled out of view so decoding
+    // never competes with scrolling further down the page.
+    let offscreen = false;
 
     video.poster = sources.poster;
     video.preload = "metadata";
@@ -52,10 +55,13 @@ export function Hero() {
     mp4Src.type = "video/mp4";
     video.appendChild(mp4Src);
 
+    const resumePlayback = () => {
+      if (offscreen || document.hidden) return;
+      video.play().catch(() => { });
+    };
+
     const onReady = () => {
-      requestAnimationFrame(() => {
-        video.play().catch(() => { });
-      });
+      requestAnimationFrame(resumePlayback);
     };
     const onLoadedData = () => {
       if (video.readyState >= 3) onReady();
@@ -70,7 +76,7 @@ export function Hero() {
 
       setTimeout(() => {
         video.currentTime = 0;
-        video.play().catch(() => { });
+        resumePlayback();
 
         setTimeout(() => {
           fadeEl.style.opacity = "0";
@@ -100,7 +106,7 @@ export function Hero() {
       if (document.hidden) {
         video.pause();
       } else {
-        video.play().catch(() => { });
+        resumePlayback();
       }
     };
 
@@ -108,9 +114,33 @@ export function Hero() {
     video.addEventListener("ended", onEnded);
     document.addEventListener("visibilitychange", onVisibilityChange);
 
+    // A decoding <video> forces a fresh compositor frame ~24x per second even
+    // when it is nowhere near the viewport, which starves the scroll. Pausing
+    // it once the hero leaves the screen frees that budget for the sections
+    // the user is actually looking at.
+    let observer: IntersectionObserver | undefined;
+    if ("IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            offscreen = !entry.isIntersecting;
+
+            if (offscreen) {
+              video.pause();
+            } else {
+              resumePlayback();
+            }
+          }
+        },
+        { rootMargin: "10% 0px" },
+      );
+      observer.observe(video);
+    }
+
     video.load();
 
     return () => {
+      observer?.disconnect();
       video.removeEventListener("canplaythrough", onReady);
       video.removeEventListener("loadeddata", onLoadedData);
       video.removeEventListener("timeupdate", onTimeUpdate);
@@ -239,24 +269,22 @@ export function Hero() {
             </h1>
           </div>
 
-         {/* Supporting Copy */}
-         <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+         {/* Supporting Copy — CSS animation instead of framer-motion to
+              eliminate LCP render delay (this <p> is the LCP element). */}
+         <p
             className="text-[#F8F6F0]/90 text-[13px] sm:text-base md:text-lg font-normal max-w-2xl mb-5 sm:mb-8 leading-[1.7] [text-shadow:0_1px_12px_rgba(0,0,0,0.8)] px-2"
+            style={{ animation: "heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both" }}
           >
             Investasi &amp; hunian prestisius di Grand Duta City Parung — kota mandiri 200 Ha persembahan{" "}
             <span className="text-[#F8F6F0] font-semibold">Duta Putra Land</span>. Cicilan mulai{" "}
             <span className="text-[#F5A524] font-semibold">Rp 4 jutaan/bln</span>, Promo Tanpa DP, 20 menit ke CBD Jakarta Selatan.
-          </motion.p>
+          </p>
 
-          {/* Double-Bezel Button-in-Button CTA Cluster */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          {/* Double-Bezel Button-in-Button CTA Cluster — CSS animation to
+               avoid blocking LCP with framer-motion hydration. */}
+          <div
             className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
+            style={{ animation: "heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both" }}
           >
             {/* Primary Island Button-in-Button CTA */}
             <a
@@ -274,18 +302,18 @@ export function Hero() {
             {/* Secondary Glassmorphic CTA */}
             <a
               href="#tipe-unit"
-              className="inline-flex w-full sm:w-auto items-center justify-center px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full border border-white/25 hover:border-[#F5A524] bg-white/5 hover:bg-white/10 backdrop-blur-xl text-[#F8F6F0] hover:text-[#F5A524] text-[11px] sm:text-xs tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-semibold active:scale-[0.98] transition-all duration-300"
+              className="inline-flex w-full sm:w-auto items-center justify-center px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full border border-white/25 hover:border-[#F5A524] bg-white/10 lg:bg-white/5 hover:bg-white/10 lg:backdrop-blur-xl text-[#F8F6F0] hover:text-[#F5A524] text-[11px] sm:text-xs tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-semibold active:scale-[0.98] transition-all duration-300"
             >
               Lihat Tipe Unit
             </a>
-          </motion.div>
+          </div>
 
           {/* Floating Trust Strip */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-6 sm:mt-10 inline-flex flex-wrap items-center justify-center gap-x-3.5 sm:gap-x-6 gap-y-1.5 py-1.5 px-4 sm:py-2 sm:px-5 rounded-full bg-[#090D0A]/60 backdrop-blur-md border border-white/10 text-[#F8F6F0]/80 text-[9px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-medium"
+            className="mt-6 sm:mt-10 inline-flex flex-wrap items-center justify-center gap-x-3.5 sm:gap-x-6 gap-y-1.5 py-1.5 px-4 sm:py-2 sm:px-5 rounded-full bg-[#090D0A]/75 lg:bg-[#090D0A]/60 lg:backdrop-blur-md border border-white/10 text-[#F8F6F0]/80 text-[9px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-medium"
           >
             <div className="flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5 text-[#D49A3D]" />

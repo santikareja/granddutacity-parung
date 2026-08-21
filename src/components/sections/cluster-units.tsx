@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ProductRevealCard } from "@/components/ui/product-reveal-card";
+import { Reveal } from "@/components/ui/reveal";
 import { propertyTypes } from "@/lib/data";
 
 interface PricingProps {
@@ -28,30 +28,18 @@ export function ClusterUnits({ clusterName, pricing, sectionId }: ClusterUnitsPr
       <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(#0b120c_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
 
       <div className="max-w-screen-xl mx-auto px-6 md:px-14 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
+        <Reveal className="text-center mb-16">
           <p className="text-[#F5A524] text-[10px] md:text-sm tracking-[0.4em] uppercase font-sans font-semibold mb-6">
             Pilihan Unit
           </p>
           <h2 className="font-serif text-3xl md:text-5xl font-semibold mb-6 text-[#0b120c]">
             Tipe Rumah {clusterName.replace("Cluster ", "")}
           </h2>
-        </motion.div>
+        </Reveal>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
           {units.map((unit, idx) => (
-            <motion.div
-              key={unit.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-            >
+            <Reveal key={unit.id} delay={90 * idx}>
               <ProductRevealCard
                 name={unit.name}
                 typeCategory={unit.typeCategory}
@@ -63,18 +51,12 @@ export function ClusterUnits({ clusterName, pricing, sectionId }: ClusterUnitsPr
                 specs={unit.specs}
                 onAdd={() => handleWhatsApp(unit.name)}
               />
-            </motion.div>
+            </Reveal>
           ))}
         </div>
 
         {pricing && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="border-t border-[#0b120c]/10 pt-16 max-w-4xl mx-auto text-center"
-          >
+          <Reveal className="border-t border-[#0b120c]/10 pt-16 max-w-4xl mx-auto text-center">
             <h3 className="font-serif text-2xl md:text-4xl text-[#0b120c] font-semibold mb-10">
               {pricing.title}
             </h3>
@@ -87,7 +69,7 @@ export function ClusterUnits({ clusterName, pricing, sectionId }: ClusterUnitsPr
                 </div>
               ))}
             </div>
-          </motion.div>
+          </Reveal>
         )}
       </div>
     </section>

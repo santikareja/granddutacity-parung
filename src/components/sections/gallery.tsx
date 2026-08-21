@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Maximize2, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/ui/reveal";
 
 const galleryImages = [
   {
@@ -263,12 +264,9 @@ export function Gallery() {
           {galleryImages.map((image, idx) => {
             const isAboveFold = idx < 6;
             return (
-            <motion.div
+            <Reveal
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: (idx % 4) * 0.08 }}
+              delay={(idx % 4) * 70}
               className={cn(
                 "group relative overflow-hidden rounded-2xl cursor-pointer bg-white/5 border border-white/8 shadow-md hover:shadow-xl transition-all duration-300",
                 image.span
@@ -294,7 +292,7 @@ export function Gallery() {
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
                 <Maximize2 className="w-5 h-5 text-[#F5F1E8]/70" />
               </div>
-            </motion.div>
+            </Reveal>
             );
           })}
 

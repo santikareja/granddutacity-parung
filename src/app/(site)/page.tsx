@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
@@ -16,11 +17,18 @@ const TipeRumah = dynamic(() => import("@/components/sections/tipe-rumah").then(
 const HighlightSlider = dynamic(() => import("@/components/sections/highlight-slider").then((mod) => ({ default: mod.HighlightSlider })));
 const FaqKpr = dynamic(() => import("@/components/sections/faq-kpr").then((mod) => ({ default: mod.FaqKpr })));
 
-const OG_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776807674/Tampak_Depan_Rumah_Grand_Duta_City_Parung_SOJ_ymztgv.webp";
-const OG_IMAGE_ALT = "Tampak Depan Rumah Mewah Minimalis di Grand Duta City Parung South of Jakarta";
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 
+// Social preview asset (1200x630) — dipakai eksklusif untuk OpenGraph & Twitter Card.
+const OG_IMAGE = "/og-grand-duta-city-parung.jpg";
+const OG_IMAGE_ALT = "Tampak Depan Rumah Mewah Minimalis di Grand Duta City Parung South of Jakarta";
+
+// Fallback asset (1200x1200) — dipakai untuk JSON-LD WebSite/WebPage yang mewajibkan URL absolut.
+const FALLBACK_IMAGE = `${SITE_URL}/perumahan-grand-duta-city-parung.jpg`;
+const FALLBACK_IMAGE_ALT = "Suasana kawasan perumahan modern Grand Duta City Parung Bogor South of Jakarta";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://granddutacitysouthofjakarta.com"),
   title: "Grand Duta City Parung | Promo Hunian South of Jakarta",
   description:
     "Grand Duta City Parung — hunian premium di South of Jakarta. Mulai Rp 700 jutaan, Promo Tanpa DP, KPR 8 bank, 20 menit ke CBD Jaksel via tol Desari.",
@@ -67,9 +75,11 @@ export const metadata: Metadata = {
     images: [
       {
         url: OG_IMAGE,
+        secureUrl: `${SITE_URL}${OG_IMAGE}`,
         width: 1200,
         height: 630,
-        alt: "Tampak Depan Rumah Mewah di Grand Duta City Parung South of Jakarta",
+        type: "image/jpeg",
+        alt: OG_IMAGE_ALT,
       },
     ],
   },
@@ -81,7 +91,9 @@ export const metadata: Metadata = {
     images: [
       {
         url: OG_IMAGE,
-        alt: "Hunian Modern di Grand Duta City Parung South of Jakarta",
+        width: 1200,
+        height: 630,
+        alt: OG_IMAGE_ALT,
       },
     ],
   },
@@ -106,6 +118,14 @@ const jsonLdWebSite = {
   url: SITE_URL,
   description:
     "Kawasan hunian Grand Duta City South of Jakarta di Parung, Bogor. Info Cluster Ladera & Cascada, harga, lokasi, siteplan, dan stok terbaru.",
+  inLanguage: "id",
+  image: {
+    "@type": "ImageObject",
+    url: FALLBACK_IMAGE,
+    width: 1200,
+    height: 1200,
+    caption: FALLBACK_IMAGE_ALT,
+  },
   potentialAction: {
     "@type": "SearchAction",
     target: {
@@ -379,8 +399,10 @@ const jsonLdPage = {
   },
   primaryImageOfPage: {
     "@type": "ImageObject",
-    url: OG_IMAGE,
-    description: OG_IMAGE_ALT,
+    url: FALLBACK_IMAGE,
+    width: 1200,
+    height: 1200,
+    description: FALLBACK_IMAGE_ALT,
   },
 };
 
@@ -475,6 +497,16 @@ export default function Home() {
       />
       <Header />
       <main className="relative w-full overflow-hidden">
+        {/* Featured Image (Hero Image) untuk optimasi SEO */}
+        <Image
+          src="/perumahan-grand-duta-city-parung.jpg"
+          alt="Suasana kawasan perumahan modern Grand Duta City Parung Bogor"
+          title="Kawasan Perumahan Grand Duta City Parung - Hunian Modern South of Jakarta"
+          width={1200}
+          height={630}
+          priority
+          className="sr-only"
+        />
         <Hero />
         <BankPartners />
         <VideoSection />

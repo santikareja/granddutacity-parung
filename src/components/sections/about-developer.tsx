@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Reveal } from "@/components/ui/reveal";
 
 const timeline = [
   {
@@ -105,12 +106,7 @@ export function AboutDeveloper() {
         {/* Overview Section */}
         <section className="mb-32 relative z-10 border-t border-[#F5A524]/20 pt-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div 
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
+            <Reveal from="left">
               <h2 className="font-serif text-3xl md:text-4xl font-semibold mb-6 flex items-center gap-4">
                 Overview
                 <div className="h-px bg-[#F5F1E8]/20 flex-1" />
@@ -141,13 +137,10 @@ export function AboutDeveloper() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </Reveal>
             
-            <motion.div 
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
+            <Reveal
+              from="right"
               className="w-full aspect-[4/5] md:aspect-square lg:aspect-[4/5] relative rounded-3xl overflow-hidden shadow-2xl border border-[#F5F1E8]/10"
             >
               <Image 
@@ -156,7 +149,7 @@ export function AboutDeveloper() {
                 fill
                 className="object-cover"
               />
-            </motion.div>
+            </Reveal>
           </div>
         </section>
 
@@ -191,12 +184,9 @@ export function AboutDeveloper() {
             <div className="absolute top-0 bottom-0 left-[-1px] w-[2px] bg-gradient-to-b from-[#F5A524] via-[#F5A524]/50 to-transparent" />
 
             {timeline.map((era, index) => (
-              <motion.div 
+              <Reveal
                 key={era.period}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.6, delay: 0.1 * index }}
+                delay={90 * index}
                 className="relative"
               >
                 {/* Dot */}
@@ -223,7 +213,7 @@ export function AboutDeveloper() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </section>

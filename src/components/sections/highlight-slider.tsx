@@ -3,10 +3,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Sparkles, ArrowUpRight } from "lucide-react";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
+import { Reveal } from "@/components/ui/reveal";
 import { clImg } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -108,12 +108,7 @@ export function HighlightSlider() {
         
         {/* Header Bar */}
         <div className="mb-8 sm:mb-14 flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          >
+          <Reveal from="left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] mb-2 sm:mb-3 w-max">
               <Sparkles className="w-3 h-3 text-[#D49A3D]" />
               <span>Lifestyle Highlights</span>
@@ -123,7 +118,7 @@ export function HighlightSlider() {
               Eksplorasi Suasana <br />
               <span className="italic font-normal text-[#B45309]">Kawasan Eksklusif</span>
             </h2>
-          </motion.div>
+          </Reveal>
           
           <div className="flex items-center gap-2.5 sm:gap-3">
             <button
@@ -158,7 +153,7 @@ export function HighlightSlider() {
                       src={slide.image}
                       alt={slide.title}
                       fill
-                      priority={index < 4}
+                      loading="lazy"
                       className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/slide:scale-108"
                       sizes="(max-width: 480px) 370px, (max-width: 768px) 50vw, 33vw"
                     />

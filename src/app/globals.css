@@ -209,15 +209,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 50;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-  opacity: 0.015;
+/* Film-grain overlay.
+   Skipped below 768px: a viewport-sized position:fixed paint layer is one of the
+   costliest things to keep in sync per scroll frame on mobile GPUs, and at
+   opacity 0.015 it is imperceptible on a phone screen. On desktop it is promoted
+   to its own compositor layer so scrolling never repaints it. */
+@media (min-width: 768px) {
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    opacity: 0.015;
+    transform: translateZ(0);
+  }
 }
 
 /* Framer Motion useScroll requires a positioned scroll root */
@@ -303,6 +311,63 @@ html.lenis body {
   animation: cursor-pulse 0.8s ease-in-out infinite;
 }
 
+/* ── Scroll reveal (see src/components/ui/reveal.tsx) ──
+   Compositor-only: animates opacity + transform, nothing that triggers layout.
+   The element is promoted while animating and released on completion, so a long
+   page never holds dozens of live layers at once. */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translate3d(0, 20px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes reveal-down {
+  from { opacity: 0; transform: translate3d(0, -20px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes reveal-left {
+  from { opacity: 0; transform: translate3d(-20px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes reveal-right {
+  from { opacity: 0; transform: translate3d(20px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+[data-reveal="hidden"] {
+  opacity: 0;
+}
+
+/* Safety net: without JS the IntersectionObserver never fires, so the reveal
+   state must not be what hides the content. Matches the specificity of the
+   [data-reveal="hidden"] rule above so it actually wins. */
+@media (scripting: none) {
+  [data-reveal="hidden"] {
+    opacity: 1;
+  }
+}
+
+[data-reveal="in"] {
+  animation-duration: 620ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+  will-change: opacity, transform;
+}
+
+[data-reveal="in"][data-reveal-from="up"]    { animation-name: reveal-up; }
+[data-reveal="in"][data-reveal-from="down"]  { animation-name: reveal-down; }
+[data-reveal="in"][data-reveal-from="left"]  { animation-name: reveal-left; }
+[data-reveal="in"][data-reveal-from="right"] { animation-name: reveal-right; }
+[data-reveal="in"][data-reveal-from="fade"]  { animation-name: reveal-fade; }
+
+/* Released after the animation so the layer is not retained for the page lifetime. */
+[data-reveal="done"] {
+  opacity: 1;
+  will-change: auto;
+}
+
 /* Honor reduced-motion across perpetual CSS animations */
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee-x,
@@ -310,5 +375,11 @@ html.lenis body {
   .animate-float-icon,
   .animate-cursor-pulse {
     animation: none;
+  }
+
+  [data-reveal] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

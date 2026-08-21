@@ -76,8 +76,12 @@ export function Header() {
 			<div
 				className={cn(
 					'mx-auto transition-all duration-500',
+					// Opaque below lg: this bar is position:fixed, so a backdrop-filter
+					// forces the blur to be recomputed against whatever scrolls beneath
+					// it on every frame — the single most expensive effect on the page
+					// during a mobile scroll.
 					scrolled
-						? 'max-w-6xl rounded-full border border-white/12 bg-[#090D0A]/90 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-4 sm:px-6 py-2'
+						? 'max-w-6xl rounded-full border border-white/12 bg-[#0B120C] lg:bg-[#090D0A]/90 lg:backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-4 sm:px-6 py-2'
 						: 'max-w-none w-full border-b border-white/8 bg-transparent px-6 sm:px-10 md:px-16 py-3.5'
 				)}
 			>
@@ -123,7 +127,7 @@ export function Header() {
 								{/* Desktop Submenu Dropdown (Double-Bezel) */}
 								{link.submenu && (
 									<div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 min-w-[280px] opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] z-50">
-										<div className="p-1.5 rounded-2xl bg-[#131B15]/95 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] ring-1 ring-black/40">
+										<div className="p-1.5 rounded-2xl bg-[#131B15]/95 lg:backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)] ring-1 ring-black/40">
 											<div className="flex flex-col gap-0.5">
 												{link.submenu.map((sub, j) => (
 													<Link
@@ -197,7 +201,7 @@ export function Header() {
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: -10 }}
 						transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-						className="fixed inset-x-4 top-20 bottom-6 z-50 flex flex-col overflow-hidden rounded-3xl bg-[#090D0A]/96 backdrop-blur-3xl border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] lg:hidden p-6"
+						className="fixed inset-x-4 top-20 bottom-6 z-50 flex flex-col overflow-hidden rounded-3xl bg-[#0B120C] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] lg:hidden p-6"
 					>
 						<div className="flex flex-col justify-between h-full overflow-y-auto pr-1">
 							<div className="flex flex-col gap-2 pt-2">

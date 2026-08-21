@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Building2, Navigation, Mountain, Droplet, Timer, ShieldCheck } from "lucide-react";
+import { Reveal } from "@/components/ui/reveal";
 
 const advantages = [
   {
@@ -55,13 +55,7 @@ export function Keunggulan() {
       <div className="max-w-screen-xl mx-auto px-8 md:px-14 relative z-10">
 
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-20"
-        >
+        <Reveal className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-20">
           <div>
             <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-5">
               Nilai Tambah
@@ -74,18 +68,15 @@ export function Keunggulan() {
           <p className="text-[#0b120c]/70 text-sm font-light leading-relaxed max-w-xs lg:max-w-sm mb-2">
             Investasi masa depan terbaik di kawasan selatan Jakarta, didukung spesifikasi dan infrastruktur kelas satu.
           </p>
-        </motion.div>
+        </Reveal>
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {advantages.map((item, index) => (
-            <motion.div
+            <Reveal
               key={index}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.6, delay: index * 0.08 }}
-              className="group bg-[#f7f5f0]/80 backdrop-blur-xl hover:bg-[#F5F1E8] border border-[#F5F1E8]/60 p-10 transition-all duration-500 relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)]"
+              delay={70 * index}
+              className="group bg-[#f7f5f0]/80 lg:backdrop-blur-xl hover:bg-[#F5F1E8] border border-[#F5F1E8]/60 p-10 transition-all duration-500 relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)]"
             >
               {/* Hover green gradient left border */}
               <div className="absolute left-0 top-0 w-1 h-0 bg-gradient-to-b from-[#F5A524] to-transparent group-hover:h-full transition-all duration-700" />
@@ -104,7 +95,7 @@ export function Keunggulan() {
               <p className="text-[#0b120c]/70 text-sm font-light leading-relaxed">
                 {item.desc}
               </p>
-            </motion.div>
+            </Reveal>
           ))}
         </div>
       </div>

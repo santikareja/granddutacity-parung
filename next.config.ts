@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     optimizePackageImports: [
       "lucide-react",
-      "framer-motion",
     ],
   },
   images: {

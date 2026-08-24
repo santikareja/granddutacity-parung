@@ -23,8 +23,9 @@ export function VideoSection() {
   // Gunakan youtube-nocookie.com untuk privacy-enhanced mode
   const embedUrl = `https://www.youtube-nocookie.com/embed/${VIDEO_ID}?rel=0&showinfo=0&modestbranding=1&autoplay=1`;
 
-  // YouTube thumbnail (maxresdefault untuk kualitas tertinggi)
-  const thumbnailUrl = `https://i.ytimg.com/vi/${VIDEO_ID}/maxresdefault.jpg`;
+  // YouTube thumbnail — hqdefault (480x360) sudah cukup untuk facade yang
+  // tampil ~366px; maxresdefault (1280x720) hanya memperbesar unduhan.
+  const thumbnailUrl = `https://i.ytimg.com/vi/${VIDEO_ID}/hqdefault.jpg`;
 
   return (
     <section 
@@ -104,8 +105,8 @@ export function VideoSection() {
                     <Image
                       src={thumbnailUrl}
                       alt={VIDEO_TITLE}
-                      width={1280}
-                      height={720}
+                      width={480}
+                      height={360}
                       sizes="(max-width: 960px) calc(100vw - 2rem), 896px"
                       loading="lazy"
                       decoding="async"

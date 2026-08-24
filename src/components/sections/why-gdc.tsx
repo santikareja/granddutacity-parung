@@ -15,12 +15,12 @@ import {
 } from "lucide-react";
 
 const imageList = [
-  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Harga_Promo_Grand_Duta_City_South_of_Jakarta_pbj2gv.webp", { w: 520, h: 650, q: "auto" }), alt: "Harga Promo Grand Duta City South of Jakarta Parung" },
-  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Kawasan_Grand_Duta_City_Parung_vusyk3.webp", { w: 520, h: 650, q: "auto" }), alt: "Kawasan Perumahan Grand Duta City Parung" },
-  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Lingkungan_Perumahan_Grand_Duta_City_South_of_Jakarta_uyfgbi.webp", { w: 520, h: 650, q: "auto" }), alt: "Lingkungan Perumahan Grand Duta City South of Jakarta" },
-  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Fasad_GDC_ptpex3.webp", { w: 520, h: 650, q: "auto" }), alt: "Fasad Rumah Grand Duta City Parung" },
-  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Lingkungan_GDC_Parung_aw7ljq.webp", { w: 520, h: 650, q: "auto" }), alt: "Lingkungan Asri GDC Parung" },
-  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/GDC_Parung_lbfaw3.webp", { w: 520, h: 650, q: "auto" }), alt: "Fasilitas Grand Duta City Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Harga_Promo_Grand_Duta_City_South_of_Jakarta_pbj2gv.webp", { w: 440, h: 550, q: 60 }), alt: "Harga Promo Grand Duta City South of Jakarta Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Kawasan_Grand_Duta_City_Parung_vusyk3.webp", { w: 440, h: 550, q: 60 }), alt: "Kawasan Perumahan Grand Duta City Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Lingkungan_Perumahan_Grand_Duta_City_South_of_Jakarta_uyfgbi.webp", { w: 440, h: 550, q: 60 }), alt: "Lingkungan Perumahan Grand Duta City South of Jakarta" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Fasad_GDC_ptpex3.webp", { w: 440, h: 550, q: 60 }), alt: "Fasad Rumah Grand Duta City Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Lingkungan_GDC_Parung_aw7ljq.webp", { w: 440, h: 550, q: 60 }), alt: "Lingkungan Asri GDC Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/GDC_Parung_lbfaw3.webp", { w: 440, h: 550, q: 60 }), alt: "Fasilitas Grand Duta City Parung" },
 ];
 
 function StackedImageSlider() {
@@ -75,10 +75,10 @@ function StackedImageSlider() {
                 src={img.url}
                 alt={img.alt}
                 fill
-                // Kartu benar-benar berukuran max 320px (mobile) / 420px (sm+)
-                // — JANGAN pakai lebar viewport: membuat varian yang diunduh
-                // jauh lebih besar dari tampilan dan menunda LCP mobile.
-                sizes="(max-width: 639px) 288px, 420px"
+                // Kartu ter-render ~274 CSS px (audit PSI). sizes dipangkas ke
+                // 240px agar next/image memilih varian device 480px (bukan 640px)
+                // — cukup untuk DPR ~1.75 tanpa oversize.
+                sizes="(max-width: 639px) 240px, 400px"
                 loading="lazy"
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
               />

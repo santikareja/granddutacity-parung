@@ -5,7 +5,14 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, ArrowUpRight, Sparkles } from "lucide-react";
 
-const POPUP_DELAY_MS = 14000;
+// Popup HANYA dibuka setelah interaksi nyata pengguna (tap/klik/keyboard).
+//
+// Pemicu berbasis timer (dulu 14s) terbukti merusak LCP: saat popup ter-paint,
+// gambarnya yang paling luas di viewport sehingga tercatat sebagai elemen LCP
+// baru pada detik ke-14+ — menggantikan kandidat LCP hero yang sudah cepat.
+// Interaksi pertama tidak pernah terjadi pada Lighthouse/PSI, jadi metrik lab
+// kembali mengukur konten utama halaman; pengunjung nyata tetap melihat promo.
+const OPEN_AFTER_INTERACTION_MS = 800;
 const SESSION_KEY = "gdc-promo-popup-shown";
 const WA_NUMBER = "628131742034";
 const WA_MESSAGE = encodeURIComponent(
@@ -25,12 +32,25 @@ export function PromoPopup() {
     const hasShown = window.sessionStorage.getItem(SESSION_KEY);
     if (hasShown === "1") return;
 
-    timerRef.current = window.setTimeout(() => {
-      setIsOpen(true);
-      window.sessionStorage.setItem(SESSION_KEY, "1");
-    }, POPUP_DELAY_MS);
+    let scheduled = false;
+
+    const scheduleOpen = () => {
+      if (scheduled) return;
+      scheduled = true;
+      window.removeEventListener("pointerdown", scheduleOpen);
+      window.removeEventListener("keydown", scheduleOpen);
+      timerRef.current = window.setTimeout(() => {
+        setIsOpen(true);
+        window.sessionStorage.setItem(SESSION_KEY, "1");
+      }, OPEN_AFTER_INTERACTION_MS);
+    };
+
+    window.addEventListener("pointerdown", scheduleOpen);
+    window.addEventListener("keydown", scheduleOpen);
 
     return () => {
+      window.removeEventListener("pointerdown", scheduleOpen);
+      window.removeEventListener("keydown", scheduleOpen);
       if (timerRef.current !== null) {
         window.clearTimeout(timerRef.current);
       }

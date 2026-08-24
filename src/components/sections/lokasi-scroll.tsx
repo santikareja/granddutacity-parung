@@ -3,7 +3,6 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, Navigation2, MapPin, ArrowUpRight, Clock, Car, Compass } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Reveal } from "@/components/ui/reveal";
@@ -17,14 +16,16 @@ const accessPoints = [
 ];
 
 export function LokasiScroll() {
-  const [mounted, setMounted] = React.useState(false);
+  // Portal butuh document — snapshot server false, klien true (tanpa setState-in-effect)
+  const mounted = React.useSyncExternalStore(
+    React.useCallback(() => () => {}, []),
+    () => true,
+    () => false
+  );
   const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
   const [zoomScale, setZoomScale] = React.useState(1);
   const [translate, setTranslate] = React.useState({ x: 0, y: 0 });
 
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
   const touchStateRef = React.useRef({
     isPinching: false,
     isPanning: false,
@@ -125,11 +126,17 @@ export function LokasiScroll() {
     }
   };
 
+  // Tutup lightbox + reset zoom dalam satu aksi (dipakai semua tombol tutup)
+  const closeLightbox = React.useCallback(() => {
+    setIsLightboxOpen(false);
+    resetZoom();
+  }, [resetZoom]);
+
   React.useEffect(() => {
     if (!isLightboxOpen) return;
 
     const onEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsLightboxOpen(false);
+      if (event.key === "Escape") closeLightbox();
     };
 
     const originalOverflow = document.body.style.overflow;
@@ -140,13 +147,7 @@ export function LokasiScroll() {
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", onEsc);
     };
-  }, [isLightboxOpen]);
-
-  React.useEffect(() => {
-    if (!isLightboxOpen) {
-      resetZoom();
-    }
-  }, [isLightboxOpen, resetZoom]);
+  }, [isLightboxOpen, closeLightbox]);
 
   return (
     <section id="lokasi" className="py-16 sm:py-24 md:py-36 bg-[#F8F6F0] text-[#090D0A] relative z-20 overflow-hidden border-t border-[#090D0A]/6">
@@ -268,32 +269,25 @@ export function LokasiScroll() {
 
       {/* Lightbox Modal via Portal */}
       {mounted && createPortal(
-        <AnimatePresence>
-          {isLightboxOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
+        isLightboxOpen ? (
+            <div
               className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md p-3 sm:p-6 md:p-8 flex flex-col items-center justify-center select-none"
-              onClick={() => setIsLightboxOpen(false)}
+              style={{ animation: "fadeIn 0.25s ease-out both" }}
+              onClick={closeLightbox}
               role="dialog"
               aria-modal="true"
               aria-label="Lightbox peta lokasi"
             >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 18 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: 18 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              <div
                 className="relative w-full max-w-5xl rounded-2xl sm:rounded-3xl overflow-hidden border border-white/20 bg-[#090D0A] shadow-[0_25px_70px_rgba(0,0,0,0.8)]"
+                style={{ animation: "waPanelIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both" }}
                 onClick={(event) => event.stopPropagation()}
               >
                 {/* Desktop Close Button (Top-Right) */}
                 <button
                   type="button"
                   aria-label="Tutup lightbox"
-                  onClick={() => setIsLightboxOpen(false)}
+                  onClick={closeLightbox}
                   className="hidden sm:inline-flex absolute top-4 right-4 z-20 h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white transition-colors hover:bg-black/80 cursor-pointer shadow-md"
                 >
                   <X className="h-5 w-5" />
@@ -306,15 +300,13 @@ export function LokasiScroll() {
                   onTouchEnd={handleTouchEnd}
                   onTouchCancel={handleTouchEnd}
                 >
-                  <motion.div
-                    className="absolute inset-0"
-                    animate={{
-                      scale: zoomScale,
-                      x: translate.x,
-                      y: translate.y,
+                  {/* Pan & zoom peta: transform CSS + transition (tanpa spring JS) */}
+                  <div
+                    className="absolute inset-0 transition-transform duration-300 ease-out"
+                    style={{
+                      transform: `translate(${translate.x}px, ${translate.y}px) scale(${zoomScale})`,
+                      transformOrigin: "center center",
                     }}
-                    transition={{ type: "spring", stiffness: 220, damping: 28, mass: 0.3 }}
-                    style={{ transformOrigin: "center center" }}
                   >
                     <Image
                       src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1776804065/map_lokasi_gdc_parung_bogor_anhrcm.webp"
@@ -324,15 +316,15 @@ export function LokasiScroll() {
                       className="object-contain"
                       priority
                     />
-                  </motion.div>
+                  </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Mobile Close Button (Bottom-Center below map) */}
               <div className="flex sm:hidden justify-center items-center mt-3 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setIsLightboxOpen(false)}
+                  onClick={closeLightbox}
                   aria-label="Tutup peta lokasi"
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 active:bg-white/30 border border-white/20 text-white text-xs font-sans font-medium backdrop-blur-md shadow-lg active:scale-95 transition-all cursor-pointer"
                 >
@@ -340,11 +332,10 @@ export function LokasiScroll() {
                   <span>Tutup Peta</span>
                 </button>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+            </div>
+          ) : null,
+          document.body
+        )}
     </section>
   );
 }

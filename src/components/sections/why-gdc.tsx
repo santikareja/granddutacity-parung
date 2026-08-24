@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 import React, { useState } from "react";
 import { clImg } from "@/lib/cloudinary";
@@ -53,20 +52,22 @@ function StackedImageSlider() {
         const isThird = position === 2;
         const isHidden = position > 2;
 
+        // Posisi kartu di-stack — CSS transition menggantikan spring framer-motion
+        const y = isFront ? 0 : isSecond ? -14 : isThird ? -26 : -38;
+        const x = isFront ? 0 : isSecond ? 14 : isThird ? -14 : 0;
+        const rotate = isFront ? 0 : isSecond ? 3 : isThird ? -2.5 : 0;
+        const scale = isFront ? 1 : isSecond ? 0.94 : isThird ? 0.88 : 0.82;
+
         return (
-          <motion.div
+          <div
             key={img.url}
-            initial={false}
-            animate={{
-              y: isFront ? 0 : isSecond ? -14 : isThird ? -26 : -38,
-              x: isFront ? 0 : isSecond ? 14 : isThird ? -14 : 0,
-              rotate: isFront ? 0 : isSecond ? 3 : isThird ? -2.5 : 0,
-              scale: isFront ? 1 : isSecond ? 0.94 : isThird ? 0.88 : 0.82,
+            style={{
+              transform: `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`,
               zIndex: imageList.length - position,
               opacity: isHidden ? 0 : 1,
+              transition: "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease",
+              transformOrigin: "bottom center",
             }}
-            transition={{ duration: 0.5, type: "spring", stiffness: 350, damping: 25 }}
-            style={{ transformOrigin: "bottom center" }}
             className="absolute top-8 left-4 right-4 bottom-2 rounded-[2rem] p-2 bg-[#090D0A]/5 border border-[#090D0A]/10 shadow-[0_20px_40px_rgba(9,13,10,0.14)]"
           >
             <div className="relative w-full h-full rounded-[calc(2rem-0.5rem)] overflow-hidden bg-black/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
@@ -85,7 +86,7 @@ function StackedImageSlider() {
                 {i + 1} / {imageList.length} · Tap Next
               </div>
             </div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

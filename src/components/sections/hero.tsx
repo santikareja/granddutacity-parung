@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { ArrowUpRight, ShieldCheck, Sparkles, Building2 } from "lucide-react";
 import { Typewriter } from "@/components/ui/typewriter";
@@ -203,6 +202,7 @@ export function Hero() {
         />
         {/* Static poster layer (kandidat LCP utama) — di atas video,
             memudar saat frame pertama siap. Lihat efek di atas. */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- poster sudah dioptimalkan Cloudinary (w_480,q_auto,f_auto) dan URL-nya sama dengan yang dipakai video; next/image justru menambah hop /_next/image */}
         <img
           ref={posterImgRef}
           aria-hidden="true"
@@ -226,11 +226,9 @@ export function Hero() {
       />
 
       {/* Left Sidebar Branding */}
-      <motion.div
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      <div
         className="absolute left-8 top-1/2 -translate-y-1/2 z-20 hidden xl:flex flex-col items-center gap-6"
+        style={{ animation: "fadeIn 0.7s ease-out 1.4s both" }}
       >
         <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
         <span
@@ -247,14 +245,12 @@ export function Hero() {
           +62 813‑1742‑034
         </a>
         <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
-      </motion.div>
+      </div>
 
       {/* Right Sidebar Branding */}
-      <motion.div
-        initial={{ opacity: 0, x: 12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      <div
         className="absolute right-8 top-1/2 -translate-y-1/2 z-20 hidden lg:flex flex-col items-center gap-6"
+        style={{ animation: "fadeIn 0.7s ease-out 1.4s both" }}
       >
         <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
         <span
@@ -264,7 +260,7 @@ export function Hero() {
           Masterpiece by Duta Putra Land
         </span>
         <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
-      </motion.div>
+      </div>
 
       {/* Center Hero Content */}
       <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col justify-center items-center text-center px-4 sm:px-6 md:px-12 pt-12 sm:pt-16 md:pt-16 lg:pt-20">
@@ -350,11 +346,9 @@ export function Hero() {
           </div>
 
           {/* Floating Trust Strip */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          <div
             className="mt-6 sm:mt-10 inline-flex flex-wrap items-center justify-center gap-x-3.5 sm:gap-x-6 gap-y-1.5 py-1.5 px-4 sm:py-2 sm:px-5 rounded-full bg-[#090D0A]/75 lg:bg-[#090D0A]/60 lg:backdrop-blur-md border border-white/10 text-[#F8F6F0]/80 text-[9px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-medium"
+            style={{ animation: "heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.6s both" }}
           >
             <div className="flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5 text-[#D49A3D]" />
@@ -370,7 +364,7 @@ export function Hero() {
               <ShieldCheck className="w-3.5 h-3.5 text-[#D49A3D]" />
               <span>Bebas Banjir · One Gate System</span>
             </div>
-          </motion.div>
+          </div>
 
         </div>
       </div>

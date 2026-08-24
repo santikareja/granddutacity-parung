@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
 import { Maximize2, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
@@ -228,12 +227,14 @@ const galleryImages = [
 ];
 
 export function Gallery() {
-  const [mounted, setMounted] = useState(false);
   const [selectedImage, setSelectedImage] = useState<typeof galleryImages[0] | null>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Portal butuh document — snapshot server false, klien true (tanpa setState-in-effect)
+  const mounted = React.useSyncExternalStore(
+    React.useCallback(() => () => {}, []),
+    () => true,
+    () => false
+  );
 
   // Lock body scroll and handle ESC key
   useEffect(() => {
@@ -300,30 +301,24 @@ export function Gallery() {
 
         {/* Lightbox Modal via Portal */}
         {mounted && createPortal(
-          <AnimatePresence>
-            {selectedImage && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+          selectedImage ? (
+              <div
                 className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/95 p-3 sm:p-6 md:p-10 select-none"
+                style={{ animation: "fadeIn 0.25s ease-out both" }}
                 onClick={() => setSelectedImage(null)}
               >
                 {/* Desktop Close Button */}
-                <motion.button
+                <button
                   className="hidden sm:flex absolute top-6 right-6 z-20 text-[#F5F1E8]/60 hover:text-[#F5F1E8] w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 items-center justify-center transition-colors cursor-pointer shadow-md"
                   onClick={() => setSelectedImage(null)}
                   aria-label="Tutup foto"
                 >
                   <X className="w-6 h-6" />
-                </motion.button>
+                </button>
 
-                <motion.div
-                  initial={{ scale: 0.92, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.92, opacity: 0 }}
-                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                <div
                   className="relative w-full max-w-5xl h-[70vh] sm:h-[80vh] flex flex-col justify-center"
+                  style={{ animation: "waPanelIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both" }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="relative w-full h-full overflow-hidden rounded-2xl bg-black/50 border border-white/10 shadow-2xl">
@@ -357,12 +352,11 @@ export function Gallery() {
                       <span>Tutup</span>
                     </button>
                   </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+                </div>
+              </div>
+            ) : null,
+            document.body
+          )}
       </div>
     </section>
   );

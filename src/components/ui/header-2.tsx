@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
@@ -27,8 +26,8 @@ export function Header() {
 			label: 'Cluster', 
 			href: '#',
 			submenu: [
-				{ label: 'Cluster Ladera', href: '/cluster-ladera', desc: 'American Classic Modern · Mulai 800 Jt' },
-				{ label: 'Cluster Cascada', href: '/cluster-cascada', desc: 'Modern Tropical Resort · Mulai 800 Jt' }
+				{ label: 'Cluster Ladera', href: '/cluster-ladera', desc: 'American Classic Modern Â· Mulai 800 Jt' },
+				{ label: 'Cluster Cascada', href: '/cluster-cascada', desc: 'Modern Tropical Resort Â· Mulai 800 Jt' }
 			]
 		},
 		{ 
@@ -78,7 +77,7 @@ export function Header() {
 					'mx-auto transition-all duration-500',
 					// Opaque below lg: this bar is position:fixed, so a backdrop-filter
 					// forces the blur to be recomputed against whatever scrolls beneath
-					// it on every frame — the single most expensive effect on the page
+					// it on every frame â€” the single most expensive effect on the page
 					// during a mobile scroll.
 					scrolled
 						? 'max-w-6xl rounded-full border border-white/12 bg-[#0B120C] lg:bg-[#090D0A]/90 lg:backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-4 sm:px-6 py-2'
@@ -194,76 +193,69 @@ export function Header() {
 			</div>
 
 			{/* Fullscreen Mobile Drawer with Staggered Mask Reveals */}
-			<AnimatePresence>
-				{open && (
-					<motion.div
-						initial={{ opacity: 0, y: -10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -10 }}
-						transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-						className="fixed inset-x-4 top-20 bottom-6 z-50 flex flex-col overflow-hidden rounded-3xl bg-[#0B120C] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] lg:hidden p-6"
-					>
-						<div className="flex flex-col justify-between h-full overflow-y-auto pr-1">
-							<div className="flex flex-col gap-2 pt-2">
-								{links.map((link, idx) => (
-									<motion.div
-										key={link.label}
-										initial={{ opacity: 0, y: 15 }}
-										animate={{ opacity: 1, y: 0 }}
-										transition={{ delay: 0.05 * idx, duration: 0.3 }}
-										className="flex flex-col border-b border-white/5 pb-2"
-									>
-										{link.submenu ? (
-											<>
-												<button
-													type="button"
-													onClick={() => setOpenSubmenu(openSubmenu === link.label ? null : link.label)}
-													className="flex items-center justify-between py-2 text-sm font-semibold tracking-[0.14em] uppercase text-[#F8F6F0]/90 hover:text-[#F5A524] transition-colors cursor-pointer"
-												>
-													<span>{link.label}</span>
-													<ChevronDown
-														className={cn(
-															"w-4 h-4 text-[#D49A3D] transition-transform duration-300",
-															openSubmenu === link.label && "rotate-180"
-														)}
-													/>
-												</button>
-												<AnimatePresence>
-													{openSubmenu === link.label && (
-														<motion.div
-															initial={{ height: 0, opacity: 0 }}
-															animate={{ height: "auto", opacity: 1 }}
-															exit={{ height: 0, opacity: 0 }}
-															transition={{ duration: 0.25 }}
-															className="overflow-hidden flex flex-col gap-1.5 pl-3 pt-1 pb-2"
-														>
-															{link.submenu.map((sub) => (
-																<Link
-																	key={sub.label}
-																	onClick={() => setOpen(false)}
-																	href={sub.href}
-																	className="py-1 text-xs text-[#F8F6F0]/70 hover:text-[#F5A524] transition-colors flex items-center justify-between"
-																>
-																	<span>{sub.label}</span>
-																	<ArrowUpRight className="w-3 h-3 text-[#D49A3D]" />
-																</Link>
-															))}
-														</motion.div>
-													)}
-												</AnimatePresence>
-											</>
-										) : (
-											<Link
-												onClick={() => setOpen(false)}
-												href={link.href!}
-												className="py-2 text-sm font-semibold tracking-[0.14em] uppercase text-[#F8F6F0]/90 hover:text-[#F5A524] transition-colors"
+			{open && (
+				<div
+					className="fixed inset-x-4 top-20 bottom-6 z-50 flex flex-col overflow-hidden rounded-3xl bg-[#0B120C] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] lg:hidden p-6"
+					style={{ animation: "waPanelIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both" }}
+				>
+					<div className="flex flex-col justify-between h-full overflow-y-auto pr-1">
+						<div className="flex flex-col gap-2 pt-2">
+							{links.map((link, idx) => (
+								<div
+									key={link.label}
+									className="flex flex-col border-b border-white/5 pb-2"
+									style={{ animation: `heroFadeUp 0.3s ease-out ${0.05 * idx}s both` }}
+								>
+									{link.submenu ? (
+										<>
+											<button
+												type="button"
+												onClick={() => setOpenSubmenu(openSubmenu === link.label ? null : link.label)}
+												className="flex items-center justify-between py-2 text-sm font-semibold tracking-[0.14em] uppercase text-[#F8F6F0]/90 hover:text-[#F5A524] transition-colors cursor-pointer"
 											>
-												{link.label}
-											</Link>
-										)}
-									</motion.div>
-								))}
-							</div>
+												<span>{link.label}</span>
+												<ChevronDown
+													className={cn(
+														"w-4 h-4 text-[#D49A3D] transition-transform duration-300",
+														openSubmenu === link.label && "rotate-180"
+													)}
+												/>
+											</button>
+											{/* Akordeon submenu CSS: grid-template-rows 0frâ†’1fr */}
+											<div
+												className="grid transition-[grid-template-rows,opacity] duration-300 overflow-hidden"
+												style={{
+													gridTemplateRows: openSubmenu === link.label ? "1fr" : "0fr",
+													opacity: openSubmenu === link.label ? 1 : 0,
+												}}
+											>
+												<div className="overflow-hidden flex flex-col gap-1.5 pl-3 pt-1 pb-2 min-h-0">
+													{link.submenu.map((sub) => (
+														<Link
+															key={sub.label}
+															onClick={() => setOpen(false)}
+															href={sub.href}
+															className="py-1 text-xs text-[#F8F6F0]/70 hover:text-[#F5A524] transition-colors flex items-center justify-between"
+														>
+															<span>{sub.label}</span>
+															<ArrowUpRight className="w-3 h-3 text-[#D49A3D]" />
+														</Link>
+													))}
+												</div>
+											</div>
+										</>
+									) : (
+										<Link
+											onClick={() => setOpen(false)}
+											href={link.href!}
+											className="py-2 text-sm font-semibold tracking-[0.14em] uppercase text-[#F8F6F0]/90 hover:text-[#F5A524] transition-colors"
+										>
+											{link.label}
+										</Link>
+									)}
+								</div>
+							))}
+						</div>
 
 							{/* Bottom Drawer CTA */}
 							<div className="pt-6 mt-auto">
@@ -281,9 +273,8 @@ export function Header() {
 								</p>
 							</div>
 						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+				</div>
+			)}
 		</header>
 	);
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -23,7 +22,7 @@ import { BankSlider } from "@/components/ui/bank-slider";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Reveal } from "@/components/ui/reveal";
 
-// ─── TYPES ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface PriceRow {
   kavling: string;
   type: string;
@@ -47,21 +46,21 @@ interface SimulationOption {
   row: PriceRow;
 }
 
-// ─── FORMATTERS ──────────────────────────────────────────────────────────
+// â”€â”€â”€ FORMATTERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const fmt = (n: number) =>
   "Rp " + n.toLocaleString("id-ID");
 
 const fmtPercent = (n: number) =>
   `${n.toLocaleString("id-ID", { maximumFractionDigits: 2 })}%`;
 
-// ─── LADERA DATA ──────────────────────────────────────────────────────────
+// â”€â”€â”€ LADERA DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const laderaT66: PriceRow[] = [
-  { kavling: "J.6/19–21, J.7/2–3,5–10,20–21, J.8/2–3", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1191210600, kpr: 1372093600, dp10: 137209360, bookingFee: 5000000, plafond: 1229884240 },
+  { kavling: "J.6/19â€“21, J.7/2â€“3,5â€“10,20â€“21, J.8/2â€“3", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1191210600, kpr: 1372093600, dp10: 137209360, bookingFee: 5000000, plafond: 1229884240 },
   { kavling: "J.7/1", type: "T-66 HK", lb: 66, lt: 99.75, tunaiKeras: 1392353100, kpr: 1607348000, dp10: 160734800, bookingFee: 5000000, plafond: 1441613200, isHook: true },
   { kavling: "J.7/22", type: "T-66 HK", lb: 66, lt: 98.48, tunaiKeras: 1385050600, kpr: 1598807100, dp10: 159880710, bookingFee: 5000000, plafond: 1433926390, isHook: true },
   { kavling: "J.8/1", type: "T-66 HK", lb: 66, lt: 124.14, tunaiKeras: 1532595600, kpr: 1771374300, dp10: 177137430, bookingFee: 5000000, plafond: 1589236870, isHook: true },
   { kavling: "J.8/10", type: "T-66 HK", lb: 66, lt: 107.79, tunaiKeras: 1465530600, kpr: 1692935700, dp10: 169293570, bookingFee: 5000000, plafond: 1518642130, isHook: true },
-  { kavling: "J.8/11,12,15–18", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1209210600, kpr: 1393146200, dp10: 139314620, bookingFee: 5000000, plafond: 1248831580 },
+  { kavling: "J.8/11,12,15â€“18", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1209210600, kpr: 1393146200, dp10: 139314620, bookingFee: 5000000, plafond: 1248831580 },
   { kavling: "J.8/19", type: "T-66 HK", lb: 66, lt: 104.85, tunaiKeras: 1447890600, kpr: 1672304100, dp10: 167230410, bookingFee: 5000000, plafond: 1500073690, isHook: true },
   { kavling: "J.10/6", type: "T-66", lb: 66, lt: 108, tunaiKeras: 1425210600, kpr: 1645777800, dp10: 164577780, bookingFee: 5000000, plafond: 1476200020 },
   { kavling: "J.13/1", type: "T-66 HK", lb: 66, lt: 114, tunaiKeras: 1462860600, kpr: 1689812900, dp10: 168981290, bookingFee: 5000000, plafond: 1515831610, isHook: true },
@@ -77,13 +76,13 @@ const laderaT47: PriceRow[] = [
   { kavling: "J.17/2,3,5,6", type: "T-47", lb: 47, lt: 72, tunaiKeras: 894013200, kpr: 1027777800, dp10: 102777780, bookingFee: 5000000, plafond: 920000020 },
   { kavling: "J.17/7", type: "T-47 HK", lb: 47, lt: 131.79, tunaiKeras: 1202690700, kpr: 1388804100, dp10: 138880410, bookingFee: 5000000, plafond: 1244923690, isHook: true },
   { kavling: "J.17/8, J.18/1", type: "T-47 HK", lb: 47, lt: 107.79, tunaiKeras: 1061743200, kpr: 1223953300, dp10: 122395330, bookingFee: 5000000, plafond: 1096557970, isHook: true },
-  { kavling: "J.17/9–12,15, J.18/2,3,5–7, J.19/15–21,25–31", type: "T-47", lb: 47, lt: 72, tunaiKeras: 876013200, kpr: 1006725200, dp10: 100672520, bookingFee: 5000000, plafond: 901052680 },
+  { kavling: "J.17/9â€“12,15, J.18/2,3,5â€“7, J.19/15â€“21,25â€“31", type: "T-47", lb: 47, lt: 72, tunaiKeras: 876013200, kpr: 1006725200, dp10: 100672520, bookingFee: 5000000, plafond: 901052680 },
   { kavling: "J.17/16", type: "T-47 HK", lb: 47, lt: 116.73, tunaiKeras: 1101973200, kpr: 1271005900, dp10: 127100590, bookingFee: 5000000, plafond: 1138905310, isHook: true },
   { kavling: "J.18/10", type: "T-47 HK", lb: 47, lt: 131.79, tunaiKeras: 1136795700, kpr: 1311734000, dp10: 131173400, bookingFee: 5000000, plafond: 1175560600, isHook: true },
   { kavling: "J.18/19", type: "T-47 HK", lb: 47, lt: 120.63, tunaiKeras: 1089365700, kpr: 1256260300, dp10: 125626030, bookingFee: 5000000, plafond: 1125634270, isHook: true },
   { kavling: "J.19/5,6,7,9", type: "T-47", lb: 47, lt: 72, tunaiKeras: 858013200, kpr: 985672600, dp10: 98567260, bookingFee: 5000000, plafond: 882105340 },
   { kavling: "J.19/22", type: "T-47 HK", lb: 47, lt: 120.11, tunaiKeras: 1117183200, kpr: 1288795400, dp10: 128879540, bookingFee: 5000000, plafond: 1154915860, isHook: true },
-  { kavling: "J.20/3,9,10,15,17,22–23,25–26,28–33,35–38", type: "T-47", lb: 47, lt: 72, tunaiKeras: 850813200, kpr: 977251500, dp10: 97725150, bookingFee: 5000000, plafond: 874526350 },
+  { kavling: "J.20/3,9,10,15,17,22â€“23,25â€“26,28â€“33,35â€“38", type: "T-47", lb: 47, lt: 72, tunaiKeras: 850813200, kpr: 977251500, dp10: 97725150, bookingFee: 5000000, plafond: 874526350 },
   { kavling: "J.20/20", type: "T-47 HK", lb: 47, lt: 129.13, tunaiKeras: 1112577700, kpr: 1283408800, dp10: 128340880, bookingFee: 5000000, plafond: 1150067920, isHook: true },
   { kavling: "J.20/21", type: "T-47 HK", lb: 47, lt: 117.76, tunaiKeras: 1065392200, kpr: 1228221100, dp10: 122822110, bookingFee: 5000000, plafond: 1100398990, isHook: true },
   { kavling: "J.20/40", type: "T-47 HK", lb: 47, lt: 107.79, tunaiKeras: 1024016700, kpr: 1179828700, dp10: 117982870, bookingFee: 5000000, plafond: 1056845830, isHook: true },
@@ -94,7 +93,7 @@ const laderaT47: PriceRow[] = [
   { kavling: "J.11/1", type: "T-47 HK", lb: 47, lt: 118.06, tunaiKeras: 1107958200, kpr: 1278005900, dp10: 127800590, bookingFee: 5000000, plafond: 1145205310, isHook: true },
 ];
 
-// ─── CASCADA DATA ──────────────────────────────────────────────────────────
+// â”€â”€â”€ CASCADA DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
   {
     group: "T-39",
@@ -108,7 +107,7 @@ const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
     group: "T-42",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp",
     rows: [
-      { kavling: "H.18/20,22,23,27, H.19/3,6,7,10–12,16,19,20", type: "T-42", lb: 42, lt: 60, tunaiKeras: 822668500, kpr: 942760300, dp10: 94276030, bookingFee: 5000000, plafond: 843484270 },
+      { kavling: "H.18/20,22,23,27, H.19/3,6,7,10â€“12,16,19,20", type: "T-42", lb: 42, lt: 60, tunaiKeras: 822668500, kpr: 942760300, dp10: 94276030, bookingFee: 5000000, plafond: 843484270 },
       { kavling: "H.18/16", type: "T-42 HK", lb: 42, lt: 117.6, tunaiKeras: 1103918500, kpr: 1271707700, dp10: 127170770, bookingFee: 5000000, plafond: 1139536930, isHook: true },
     ],
   },
@@ -138,7 +137,7 @@ const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
     group: "T-69",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Victoria_scolcc.webp",
     rows: [
-      { kavling: "H.14/9,11,12,17–20", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1183660600, kpr: 1363263200, dp10: 136326320, bookingFee: 5000000, plafond: 1221936880 },
+      { kavling: "H.14/9,11,12,17â€“20", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1183660600, kpr: 1363263200, dp10: 136326320, bookingFee: 5000000, plafond: 1221936880 },
       { kavling: "H.14/21,22", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1165160600, kpr: 1341625800, dp10: 134162580, bookingFee: 5000000, plafond: 1202463220 },
       { kavling: "H.14/28,31", type: "T-69", lb: 69, lt: 73, tunaiKeras: 1159660600, kpr: 1335193000, dp10: 133519300, bookingFee: 5000000, plafond: 1196673700 },
     ],
@@ -147,7 +146,7 @@ const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
     group: "T-88",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Alexandra_hhvq3f.webp",
     rows: [
-      { kavling: "H.1/12,15–20", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1636618500, kpr: 1893859700, dp10: 189385970, bookingFee: 5000000, plafond: 1699473730 },
+      { kavling: "H.1/12,15â€“20", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1636618500, kpr: 1893859700, dp10: 189385970, bookingFee: 5000000, plafond: 1699473730 },
       { kavling: "H.1/21,22,23", type: "T-88", lb: 88, lt: 106, tunaiKeras: 1643868500, kpr: 1902339200, dp10: 190233920, bookingFee: 5000000, plafond: 1707105280 },
       { kavling: "H.1/25,27,29,31", type: "T-88", lb: 88, lt: 107, tunaiKeras: 1651118500, kpr: 1910818800, dp10: 191081880, bookingFee: 5000000, plafond: 1714736920 },
       { kavling: "H.3/10", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1365768500, kpr: 1577076100, dp10: 157707610, bookingFee: 5000000, plafond: 1414368490 },
@@ -176,24 +175,24 @@ const SIMULATION_OPTIONS: SimulationOption[] = [
 
 const DEFAULT_SIMULATION_ID = SIMULATION_OPTIONS[0]?.id ?? "";
 
-// ─── STATIC CONTENT ────────────────────────────────────────────────────────
+// â”€â”€â”€ STATIC CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PAYMENT_METHODS = [
   {
     icon: <Banknote className="w-5 h-5" />,
     title: "A. Tunai Keras",
     steps: [
-      "Booking Fee Rp 5.000.000 — dibayar hari ke-1",
-      "Down Payment = 50% − Booking Fee — dibayar hari ke-15 setelah BF",
-      "Pelunasan 50% — dibayar hari ke-30 setelah BF",
+      "Booking Fee Rp 5.000.000 â€” dibayar hari ke-1",
+      "Down Payment = 50% âˆ’ Booking Fee â€” dibayar hari ke-15 setelah BF",
+      "Pelunasan 50% â€” dibayar hari ke-30 setelah BF",
     ],
   },
   {
     icon: <CreditCard className="w-5 h-5" />,
     title: "B. KPR Bank",
     steps: [
-      "Booking Fee Rp 5.000.000 — dibayar hari ke-1",
-      "Down Payment — dibayar hari ke-15 setelah BF",
-      "Akad Kredit (KPR) — dilakukan hari ke-30 setelah BF",
+      "Booking Fee Rp 5.000.000 â€” dibayar hari ke-1",
+      "Down Payment â€” dibayar hari ke-15 setelah BF",
+      "Akad Kredit (KPR) â€” dilakukan hari ke-30 setelah BF",
       "Unit hook: DP minimum 5%",
     ],
   },
@@ -248,7 +247,7 @@ function parseNumericInput(value: string, fallback: number) {
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
 }
 
-// ─── PRICE TABLE COMPONENT ─────────────────────────────────────────────────
+// â”€â”€â”€ PRICE TABLE COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PriceTable({ rows }: { rows: PriceRow[] }) {
   return (
     <div className="w-full overflow-x-auto rounded-xl border border-[#0b120c]/10 shadow-sm">
@@ -286,7 +285,7 @@ function PriceTable({ rows }: { rows: PriceRow[] }) {
                 </span>
               </td>
               <td className="px-4 py-3 text-center font-mono text-xs text-[#0b120c]/70 whitespace-nowrap">
-                {row.lb} / {row.lt} m²
+                {row.lb} / {row.lt} mÂ²
               </td>
               <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c] whitespace-nowrap">{fmt(row.tunaiKeras)}</td>
               <td className="px-4 py-3 text-right font-mono text-xs font-bold text-red-600 whitespace-nowrap">{fmt(row.kpr)}</td>
@@ -301,7 +300,7 @@ function PriceTable({ rows }: { rows: PriceRow[] }) {
   );
 }
 
-// ─── ACCORDIAN ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ ACCORDIAN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Accordion({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -313,19 +312,16 @@ function Accordion({ title, children, defaultOpen = false }: { title: string; ch
         <span className="font-serif text-lg md:text-xl font-semibold text-[#0b120c]">{title}</span>
         <ChevronDown className={cn("w-5 h-5 text-[#F5A524] shrink-0 transition-transform duration-300", open && "rotate-180")} />
       </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div className="px-6 pb-6 pt-2 bg-[#F5F1E8]">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Akordeon CSS: grid-template-rows 0frâ†’1fr tanpa JS */}
+      <div
+        className="grid transition-[grid-template-rows,opacity] duration-300 ease-in-out overflow-hidden"
+        style={{
+          gridTemplateRows: open ? "1fr" : "0fr",
+          opacity: open ? 1 : 0,
+        }}
+      >
+        <div className="px-6 pb-6 pt-2 bg-[#F5F1E8]">{children}</div>
+      </div>
     </div>
   );
 }
@@ -614,13 +610,13 @@ function KprSimulator({ activeTab }: { activeTab: ClusterKey }) {
   );
 }
 
-// ─── MAIN COMPONENT ────────────────────────────────────────────────────────
+// â”€â”€â”€ MAIN COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function PricelistPage() {
   const [activeTab, setActiveTab] = useState<ClusterKey>("ladera");
 
   return (
     <>
-      {/* ── HERO ── */}
+      {/* â”€â”€ HERO â”€â”€ */}
       <div className="relative w-full h-[70vh] min-h-[560px] overflow-hidden bg-[#0b120c] flex items-center justify-center">
         <Image
           src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp"
@@ -645,11 +641,9 @@ export default function PricelistPage() {
         </nav>
 
         <div className="relative z-10 text-center px-6 max-w-4xl pt-16 flex flex-col items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+          <div
             className="flex flex-col items-center"
+            style={{ animation: "heroFadeUp 0.8s ease-out both" }}
           >
             <div className="mb-6">
               <Breadcrumb items={[
@@ -657,9 +651,9 @@ export default function PricelistPage() {
               ]} />
             </div>
             <p className="text-[#F5A524] text-[10px] md:text-xs tracking-[0.5em] uppercase font-sans font-semibold mb-5 drop-shadow-md">
-              Grand Duta City Parung · South of Jakarta
+              Grand Duta City Parung Â· South of Jakarta
             </p>
-            {/* H1 — unique, no cannibalisation with homepage/cluster pages */}
+            {/* H1 â€” unique, no cannibalisation with homepage/cluster pages */}
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#F5F1E8] mb-5 drop-shadow-xl">
               Pricelist Grand Duta City SOJ Parung Bogor<br />
               <span className="italic font-normal text-[#F5A524]">| Harga Ladera & Cascada Terbaru.</span>
@@ -672,11 +666,11 @@ export default function PricelistPage() {
             <div className="mt-8 text-[#F5F1E8]/50 font-sans text-xs flex justify-center items-center gap-2">
               <Clock className="w-4 h-4 text-[#F5A524]" /> Tanggal update: 9 Maret 2026
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* ── INTRO STATS BAR ── */}
+      {/* â”€â”€ INTRO STATS BAR â”€â”€ */}
       <div className="bg-[#0b120c] border-t border-[#F5F1E8]/5">
         <div className="max-w-screen-xl mx-auto px-6 md:px-14 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-[#F5F1E8] text-center">
           {[
@@ -693,13 +687,13 @@ export default function PricelistPage() {
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* â”€â”€ MAIN CONTENT â”€â”€ */}
       <div className="bg-[#F5F1E8] relative">
         <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(#0b120c_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
 
         <div className="max-w-screen-xl mx-auto px-6 md:px-14 lg:px-20 py-20 relative z-10">
 
-          {/* ── SECTION LABEL ── */}
+          {/* â”€â”€ SECTION LABEL â”€â”€ */}
           <Reveal className="mb-12">
             <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-4">
               Daftar Harga Terbaru
@@ -715,7 +709,7 @@ export default function PricelistPage() {
             </div>
           </Reveal>
 
-          {/* ── TAB SWITCHER ── */}
+          {/* â”€â”€ TAB SWITCHER â”€â”€ */}
           <div className="flex gap-3 mb-10 flex-wrap">
             {(["ladera", "cascada"] as const).map((tab) => (
               <button
@@ -733,17 +727,13 @@ export default function PricelistPage() {
             ))}
           </div>
 
-          {/* ── LADERA ── */}
-          <AnimatePresence mode="wait">
-            {activeTab === "ladera" && (
-              <motion.div
-                key="ladera"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.4 }}
-                className="space-y-8"
-              >
+          {/* â”€â”€ LADERA â”€â”€ */}
+          {activeTab === "ladera" && (
+            <div
+              key="ladera"
+              className="space-y-8"
+              style={{ animation: "heroFadeUp 0.4s ease-out both" }}
+            >
                 {/* Hero image + intro */}
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-4">
                   <div className="lg:col-span-2 relative h-60 lg:h-auto rounded-xl overflow-hidden shadow-md">
@@ -777,39 +767,36 @@ export default function PricelistPage() {
                       </div>
                       <div className="flex items-center gap-2 text-xs font-sans">
                         <span className="w-3 h-3 rounded-sm bg-[#F5A524]/20 border border-[#F5A524]/40 inline-block" />
-                        <span className="text-[#0b120c]/60">Unit Hook (HK) — LT lebih luas</span>
+                        <span className="text-[#0b120c]/60">Unit Hook (HK) â€” LT lebih luas</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <Accordion title="Pricelist T-66 — Cluster Ladera" defaultOpen>
+                <Accordion title="Pricelist T-66 â€” Cluster Ladera" defaultOpen>
                   <div className="mb-3 flex items-center gap-2">
                     <Home className="w-4 h-4 text-[#F5A524]" />
-                    <span className="text-xs text-[#0b120c]/60 font-sans">LB 66 m², LT bervariasi (72–124 m²)</span>
+                    <span className="text-xs text-[#0b120c]/60 font-sans">LB 66 mÂ², LT bervariasi (72â€“124 mÂ²)</span>
                   </div>
                   <PriceTable rows={laderaT66} />
                 </Accordion>
 
-                <Accordion title="Pricelist T-47 — Cluster Ladera">
+                <Accordion title="Pricelist T-47 â€” Cluster Ladera">
                   <div className="mb-3 flex items-center gap-2">
                     <Home className="w-4 h-4 text-[#F5A524]" />
-                    <span className="text-xs text-[#0b120c]/60 font-sans">LB 47 m², LT bervariasi (72–142 m²)</span>
+                    <span className="text-xs text-[#0b120c]/60 font-sans">LB 47 mÂ², LT bervariasi (72â€“142 mÂ²)</span>
                   </div>
                   <PriceTable rows={laderaT47} />
                 </Accordion>
-              </motion.div>
-            )}
+            </div>
+          )}
 
-            {/* ── CASCADA ── */}
+            {/* â”€â”€ CASCADA â”€â”€ */}
             {activeTab === "cascada" && (
-              <motion.div
+              <div
                 key="cascada"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.4 }}
                 className="space-y-8"
+                style={{ animation: "heroFadeUp 0.4s ease-out both" }}
               >
                 {/* Hero image + intro */}
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-4">
@@ -840,7 +827,7 @@ export default function PricelistPage() {
                 </div>
 
                 {cascadaData.map((group) => (
-                  <Accordion key={group.group} title={`Pricelist ${group.group} — Cluster Cascada`} defaultOpen={group.group === "T-88"}>
+                  <Accordion key={group.group} title={`Pricelist ${group.group} â€” Cluster Cascada`} defaultOpen={group.group === "T-88"}>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
                       <div className="relative h-48 rounded-lg overflow-hidden shadow-sm md:col-span-1">
                         <Image src={group.image} alt={`Tipe ${group.group} Cluster Cascada Grand Duta City`} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover" />
@@ -851,13 +838,12 @@ export default function PricelistPage() {
                     </div>
                   </Accordion>
                 ))}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
 
           <KprSimulator activeTab={activeTab} />
 
-          {/* ── PAYMENT METHODS ── */}
+          {/* â”€â”€ PAYMENT METHODS â”€â”€ */}
           <Reveal className="mt-20 mb-6">
             <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-4">
               Cara Pembayaran
@@ -895,7 +881,7 @@ export default function PricelistPage() {
 
           <BankSlider className="mb-14" />
 
-          {/* ── INCLUDES / EXCLUDES ── */}
+          {/* â”€â”€ INCLUDES / EXCLUDES â”€â”€ */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <div className="bg-[#F5A524]/5 border border-[#F5A524]/20 rounded-xl p-7">
               <div className="flex items-center gap-2 mb-5">
@@ -905,7 +891,7 @@ export default function PricelistPage() {
               <ul className="space-y-3">
                 {INCLUSIONS.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-[#0b120c]/70 font-light">
-                    <span className="text-[#F5A524] mt-0.5 shrink-0">✓</span>
+                    <span className="text-[#F5A524] mt-0.5 shrink-0">âœ“</span>
                     {item}
                   </li>
                 ))}
@@ -919,7 +905,7 @@ export default function PricelistPage() {
               <ul className="space-y-3">
                 {EXCLUSIONS.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-[#0b120c]/70 font-light">
-                    <span className="text-red-400 mt-0.5 shrink-0">✕</span>
+                    <span className="text-red-400 mt-0.5 shrink-0">âœ•</span>
                     {item}
                   </li>
                 ))}
@@ -927,7 +913,7 @@ export default function PricelistPage() {
             </div>
           </div>
 
-          {/* ── NOTES ── */}
+          {/* â”€â”€ NOTES â”€â”€ */}
           <div className="bg-[#F5F1E8] border border-[#0b120c]/10 rounded-xl p-7 mb-14">
             <h3 className="font-serif text-lg font-semibold text-[#0b120c] mb-5 flex items-center gap-2">
               <Info className="w-4 h-4 text-[#F5A524]" /> Catatan Penting
@@ -942,7 +928,7 @@ export default function PricelistPage() {
             </ul>
           </div>
 
-          {/* ── REKENING ── */}
+          {/* â”€â”€ REKENING â”€â”€ */}
           <div className="bg-[#0b120c] rounded-xl p-8 mb-14 text-[#F5F1E8]">
             <div className="flex items-center gap-3 mb-6">
               <Building2 className="w-5 h-5 text-[#F5A524]" />
@@ -964,7 +950,7 @@ export default function PricelistPage() {
             </div>
           </div>
 
-          {/* ── CTA ── */}
+          {/* â”€â”€ CTA â”€â”€ */}
           <Reveal className="text-center py-6">
             <p className="text-[#0b120c]/40 text-[9px] tracking-[0.4em] uppercase font-sans mb-6">
               Ada pertanyaan seputar harga?
@@ -980,7 +966,7 @@ export default function PricelistPage() {
             </a>
           </Reveal>
 
-          {/* ── INTERNAL LINKS ── */}
+          {/* â”€â”€ INTERNAL LINKS â”€â”€ */}
           <div className="mt-16 pt-10 border-t border-[#0b120c]/10 text-center">
             <h3 className="font-serif text-2xl font-semibold text-[#0b120c] mb-6">Informasi Terkait</h3>
             <div className="flex flex-wrap justify-center gap-3">
@@ -991,7 +977,7 @@ export default function PricelistPage() {
             </div>
           </div>
 
-          {/* ── BACK LINK ── */}
+          {/* â”€â”€ BACK LINK â”€â”€ */}
           <div className="mt-10 flex justify-center border-t border-[#0b120c]/10 pt-10">
             <Link
               href="/"

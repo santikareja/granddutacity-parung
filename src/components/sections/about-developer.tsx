@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -72,11 +71,9 @@ export function AboutDeveloper() {
         <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(white_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
 
         {/* Intro Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+        <div
           className="flex flex-col items-center text-center max-w-4xl mx-auto mb-24 relative z-10"
+          style={{ animation: "heroFadeUp 0.8s ease-out both" }}
         >
           <div className="mb-6">
             <Breadcrumb items={[
@@ -99,9 +96,9 @@ export function AboutDeveloper() {
           </h1>
           <div className="w-px h-16 bg-gradient-to-b from-[#F5A524] to-transparent mb-8" />
           <p className="text-xl md:text-2xl font-light text-[#F5F1E8]/80 leading-relaxed font-serif max-w-3xl">
-            "Pengembangan properti bukan tentang kompetisi. Ini tentang menciptakan sinergi untuk membangun nilai terbaik bagi masyarakat kita."
+            &quot;Pengembangan properti bukan tentang kompetisi. Ini tentang menciptakan sinergi untuk membangun nilai terbaik bagi masyarakat kita.&quot;
           </p>
-        </motion.div>
+        </div>
 
         {/* Overview Section */}
         <section className="mb-32 relative z-10 border-t border-[#F5A524]/20 pt-20">

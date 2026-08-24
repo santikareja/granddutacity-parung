@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Calculator, Sparkles, ArrowUpRight, HelpCircle } from "lucide-react";
+import { ChevronDown, Calculator, ArrowUpRight, HelpCircle } from "lucide-react";
 import Image from "next/image";
 
 const faqs = [
@@ -16,7 +15,7 @@ const faqs = [
   },
   {
     q: "Di mana lokasi Grand Duta City Parung dan bagaimana akses tolnya?",
-    a: "Berlokasi di Jl. Raya Parung No.47, Jabon Mekar, Kec. Parung, Kabupaten Bogor — hanya 20 menit ke TB Simatupang & Antasari Jakarta Selatan, dan kurang dari 15 menit ke 4 exit tol utama: Pamulang, Krukut, Sawangan, dan Bojong Gede. Akses ke Tol Desari, Tol Andara, Tol Pamulang, dan Tol BORR membuat hunian ini sangat strategis untuk komuter Jakarta-Depok-Bogor-BSD."
+    a: "Berlokasi di Jl. Raya Parung No.47, Jabon Mekar, Kec. Parung, Kabupaten Bogor â€” hanya 20 menit ke TB Simatupang & Antasari Jakarta Selatan, dan kurang dari 15 menit ke 4 exit tol utama: Pamulang, Krukut, Sawangan, dan Bojong Gede. Akses ke Tol Desari, Tol Andara, Tol Pamulang, dan Tol BORR membuat hunian ini sangat strategis untuk komuter Jakarta-Depok-Bogor-BSD."
   },
   {
     q: "Fasilitas eksklusif apa saja di kawasan Grand Duta City SOJ?",
@@ -28,7 +27,7 @@ const faqs = [
   },
   {
     q: "Bagaimana prospek investasi properti di Grand Duta City Parung?",
-    a: "Sangat menjanjikan. Kawasan ini dilewati jalur rencana Tol JORR 3 yang akan mendongkrak capital gain signifikan, menjadikannya sunrise property terbaik di koridor selatan Jakarta. Kombinasi 200 Ha kota mandiri, infrastruktur lengkap, dan posisi strategis 20 menit dari CBD Jakarta Selatan menempatkan GDC SOJ sebagai pilihan investasi properti Bogor dengan potensi apresiasi tinggi 5–10 tahun ke depan."
+    a: "Sangat menjanjikan. Kawasan ini dilewati jalur rencana Tol JORR 3 yang akan mendongkrak capital gain signifikan, menjadikannya sunrise property terbaik di koridor selatan Jakarta. Kombinasi 200 Ha kota mandiri, infrastruktur lengkap, dan posisi strategis 20 menit dari CBD Jakarta Selatan menempatkan GDC SOJ sebagai pilihan investasi properti Bogor dengan potensi apresiasi tinggi 5â€“10 tahun ke depan."
   }
 ];
 
@@ -99,28 +98,28 @@ export function FaqKpr() {
                       <span className="font-sans font-semibold text-xs sm:text-base md:text-[17px] leading-snug text-[#090D0A] pr-3 sm:pr-4">
                         {faq.q}
                       </span>
-                      <motion.div
-                        animate={{ rotate: isOpen ? 180 : 0 }}
-                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#090D0A]/5 flex items-center justify-center shrink-0 text-[#B45309]"
+                      <div
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#090D0A]/5 flex items-center justify-center shrink-0 text-[#B45309] transition-transform duration-300"
+                        style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
                       >
                         <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </motion.div>
+                      </div>
                     </button>
-                    <AnimatePresence>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                          <div className="px-4 pb-4 sm:px-6 sm:pb-6 text-[#090D0A]/75 font-normal text-xs sm:text-sm md:text-base leading-[1.8] border-t border-[#090D0A]/5 pt-3.5 sm:pt-4">
-                            {faq.a}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {/* Akordeon CSS: grid-template-rows 0frâ†’1fr menganimasikan
+                        tinggi tanpa JS (menggantikan AnimatePresence height) */}
+                    <div
+                      className="grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                      style={{
+                        gridTemplateRows: isOpen ? "1fr" : "0fr",
+                        opacity: isOpen ? 1 : 0,
+                      }}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="px-4 pb-4 sm:px-6 sm:pb-6 text-[#090D0A]/75 font-normal text-xs sm:text-sm md:text-base leading-[1.8] border-t border-[#090D0A]/5 pt-3.5 sm:pt-4">
+                          {faq.a}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 );
               })}

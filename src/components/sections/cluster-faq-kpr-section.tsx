@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Calculator, ChevronDown } from "lucide-react";
 import Image from "next/image";
 
@@ -138,29 +137,28 @@ export function ClusterFaqKprSection({
                       <span className="pr-6 font-sans text-[15px] font-medium tracking-wide text-[#0b120c] md:text-[17px]">
                         {faq.question}
                       </span>
-                      <motion.div
-                        animate={{ rotate: isOpen ? 180 : 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#0b120c]/10"
+                      <div
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#0b120c]/10 transition-transform duration-300"
+                        style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
                       >
                         <ChevronDown className="h-4 w-4 text-[#F5A524]" />
-                      </motion.div>
+                      </div>
                     </button>
 
-                    <AnimatePresence initial={false}>
-                      {isOpen ? (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25, ease: "easeInOut" }}
-                        >
-                          <div className="px-6 pb-6 text-[14px] leading-[1.8] text-[#0b120c]/72 md:text-[15px]">
-                            {faq.answer}
-                          </div>
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
+                    {/* Akordeon CSS: grid-template-rows 0fr→1fr tanpa JS */}
+                    <div
+                      className="grid transition-[grid-template-rows,opacity] duration-300 ease-in-out"
+                      style={{
+                        gridTemplateRows: isOpen ? "1fr" : "0fr",
+                        opacity: isOpen ? 1 : 0,
+                      }}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="px-6 pb-6 text-[14px] leading-[1.8] text-[#0b120c]/72 md:text-[15px]">
+                          {faq.answer}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 );
               })}

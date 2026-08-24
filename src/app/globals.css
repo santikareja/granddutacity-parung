@@ -265,6 +265,17 @@ html.lenis body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Panel/dialog entrance — menggantikan framer-motion (AnimatePresence) */
+@keyframes waPanelIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 @keyframes pulseGlow {
   0%, 100% { opacity: 0.4; transform: scale(1); }
   50% { opacity: 0.8; transform: scale(1.08); }

@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
 import { BedDouble, Bath, Maximize, Heart, ArrowUpRight, CarFront } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
 
 interface ProductRevealCardProps {
@@ -27,6 +26,21 @@ interface ProductRevealCardProps {
   className?: string;
 }
 
+function subscribeMedia(query: string) {
+  return (callback: () => void) => {
+    const mq = window.matchMedia(query);
+    mq.addEventListener("change", callback);
+    return () => mq.removeEventListener("change", callback);
+  };
+}
+
+// Media query hooks tanpa setState-in-effect (aman hydration: snapshot
+// server selalu false, klien menyesuaikan setelah mount).
+const subscribeTouch = subscribeMedia("(hover: none), (pointer: coarse)");
+const getTouch = () => window.matchMedia("(hover: none), (pointer: coarse)").matches;
+const subscribeReduce = subscribeMedia("(prefers-reduced-motion: reduce)");
+const getReduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export function ProductRevealCard({
   name,
   price,
@@ -39,73 +53,19 @@ export function ProductRevealCard({
   specs,
   onAdd,
   onFavorite,
-  enableAnimations = true,
   className,
 }: ProductRevealCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const shouldReduceMotion = useReducedMotion();
-  const shouldAnimate = enableAnimations && !shouldReduceMotion;
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(hover: none), (pointer: coarse)");
-    const updateTouchMode = () => {
-      setIsTouchDevice(mediaQuery.matches);
-      if (!mediaQuery.matches) {
-        setIsOverlayOpen(false);
-      }
-    };
-
-    updateTouchMode();
-    mediaQuery.addEventListener("change", updateTouchMode);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updateTouchMode);
-    };
-  }, []);
+  // Hover/tap interaksi kartu dianimasikan murni dengan CSS (group-hover +
+  // transition) â€” menggantikan varian spring framer-motion yang membebani
+  // evaluasi JS di main thread.
+  const isTouchDevice = useSyncExternalStore(subscribeTouch, getTouch, () => false);
+  const reduceMotion = useSyncExternalStore(subscribeReduce, getReduce, () => false);
 
   const handleFavorite = () => {
     setIsFavorite(!isFavorite);
     onFavorite?.();
-  };
-
-  const containerVariants = {
-    rest: { 
-      scale: 1,
-      y: 0,
-    },
-    hover: shouldAnimate ? { 
-      y: -6,
-      transition: { 
-        type: "spring" as const, 
-        stiffness: 300, 
-        damping: 25,
-        mass: 0.8,
-      }
-    } : {},
-  };
-
-  const imageVariants = {
-    rest: { scale: 1 },
-    hover: { scale: 1.06 },
-  };
-
-  const overlayVariants = {
-    rest: { 
-      y: "100%", 
-      opacity: 0,
-    },
-    hover: { 
-      y: "0%", 
-      opacity: 1,
-      transition: {
-        type: "spring" as const,
-        stiffness: 350,
-        damping: 26,
-        mass: 0.6,
-      },
-    },
   };
 
   const clusterHref =
@@ -113,16 +73,14 @@ export function ProductRevealCard({
       ? "/cluster-ladera"
       : "/cluster-cascada";
 
+  const overlayOpen = isTouchDevice && isOverlayOpen;
+
   return (
-    <motion.div
+    <div
       data-slot="product-reveal-card"
-      initial="rest"
-      whileHover={isTouchDevice ? undefined : "hover"}
-      animate="rest"
-      variants={containerVariants}
       onClick={() => isTouchDevice && setIsOverlayOpen((prev) => !prev)}
       className={cn(
-        "group relative w-full h-[490px] sm:h-[560px] md:h-[590px] rounded-[2rem] sm:rounded-[2.25rem] p-1.5 sm:p-2 bg-[#090D0A]/5 border border-[#090D0A]/8 shadow-[0_15px_35px_rgba(9,13,10,0.06)] hover:shadow-[0_25px_50px_rgba(9,13,10,0.14)] transition-all duration-500 select-none",
+        "group relative w-full h-[490px] sm:h-[560px] md:h-[590px] rounded-[2rem] sm:rounded-[2.25rem] p-1.5 sm:p-2 bg-[#090D0A]/5 border border-[#090D0A]/8 shadow-[0_15px_35px_rgba(9,13,10,0.06)] hover:shadow-[0_25px_50px_rgba(9,13,10,0.14)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1.5 select-none motion-reduce:transition-none motion-reduce:hover:translate-y-0",
         className
       )}
     >
@@ -130,15 +88,15 @@ export function ProductRevealCard({
       <div className="relative w-full h-full rounded-[calc(2rem-0.375rem)] sm:rounded-[calc(2.25rem-0.5rem)] overflow-hidden bg-[#090D0A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
         
         {/* Background Image */}
-        <motion.img
+        {/* eslint-disable-next-line @next/next/no-img-element -- gambar sudah dioptimalkan Cloudinary per kartu */}
+        <img
           src={image}
           alt={`Fasad Rumah ${name} ${cluster || ''}`}
           className={cn(
-            "absolute inset-0 h-full w-full object-cover object-center",
-            soldOut && "grayscale-[50%] opacity-75"
+            "absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.06]",
+            soldOut && "grayscale-[50%] opacity-75",
+            reduceMotion && "!transform-none"
           )}
-          variants={imageVariants}
-          transition={{ type: "spring", stiffness: 250, damping: 25 }}
         />
 
         {/* Sold Out Overlay */}
@@ -194,7 +152,7 @@ export function ProductRevealCard({
           className={cn(
             "absolute inset-x-0 bottom-0 p-4 sm:p-6 text-white z-10 flex flex-col justify-end transition-opacity duration-300 pointer-events-none",
             !isTouchDevice && "group-hover:opacity-0",
-            isTouchDevice && isOverlayOpen && "opacity-0"
+            overlayOpen && "opacity-0"
           )}
         >
           <div className="mb-1.5 sm:mb-2">
@@ -235,14 +193,18 @@ export function ProductRevealCard({
         </div>
 
         {/* Hover / Tap Reveal Overlay with Button-in-Button CTA.
-            The blur is desktop-only: this overlay is always mounted (just
-            translated out of frame), and a backdrop-filter keeps a live
-            composited layer per card even while hidden. At 95% opacity the blur
-            is barely visible anyway. */}
-        <motion.div
-          variants={overlayVariants}
-          animate={isTouchDevice ? (isOverlayOpen ? "hover" : "rest") : undefined}
-          className="absolute inset-0 bg-[#090D0A]/95 lg:backdrop-blur-2xl p-5 sm:p-7 flex flex-col justify-between z-30 text-left"
+            Slide-up murni CSS: group-hover untuk desktop, state klik untuk
+            perangkat sentuh. The blur is desktop-only: this overlay is always
+            mounted (just translated out of frame), and a backdrop-filter keeps
+            a live composited layer per card even while hidden. At 95% opacity
+            the blur is barely visible anyway. */}
+        <div
+          className={cn(
+            "absolute inset-0 bg-[#090D0A]/95 lg:backdrop-blur-2xl p-5 sm:p-7 flex flex-col justify-between z-30 text-left",
+            "translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100",
+            "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            overlayOpen && "!translate-y-0 !opacity-100"
+          )}
         >
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
@@ -265,7 +227,7 @@ export function ProductRevealCard({
             <div className="p-3.5 rounded-xl bg-white/5 border border-white/8 space-y-2">
               <div className="flex justify-between text-xs text-[#F8F6F0]/90">
                 <span className="text-white/50">Luas Bangunan/Tanah:</span>
-                <span className="font-semibold">{specs.lb} m² / {specs.lt} m²</span>
+                <span className="font-semibold">{specs.lb} mÂ² / {specs.lt} mÂ²</span>
               </div>
               <div className="flex justify-between text-xs text-[#F8F6F0]/90">
                 <span className="text-white/50">Kamar Tidur:</span>
@@ -312,9 +274,9 @@ export function ProductRevealCard({
               Info {cluster}
             </a>
           </div>
-        </motion.div>
+        </div>
 
       </div>
-    </motion.div>
+    </div>
   );
 }

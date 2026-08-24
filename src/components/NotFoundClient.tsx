@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 const navLinks = [
   { href: "/", label: "Beranda", emoji: "🏠" },
@@ -81,22 +79,7 @@ const HouseIcon = () => (
   </svg>
 );
 
-const MotionLink = motion(Link);
-
 export default function NotFoundClient() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-      // Prevent hydration mismatch by returning a static version before hydration
-      return (
-          <main className="relative min-h-screen flex flex-col items-center justify-center px-6 md:px-8 bg-zinc-950 text-white" role="main"></main>
-      );
-  }
-
   return (
     <main
       className="relative min-h-screen flex flex-col items-center justify-center px-6 md:px-8 bg-black overflow-hidden pointer-events-auto selection:bg-amber-500/30 text-white"
@@ -119,40 +102,30 @@ export default function NotFoundClient() {
       {/* 404 Text */}
       <div className="flex z-10 space-x-3">
         {["4", "0", "4"].map((digit, index) => (
-          <motion.span
+          <span
             key={index}
-            initial={{ opacity: 0, y: -60, rotateX: 90 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{
-              duration: 0.6,
-              ease: "backOut",
-              delay: 0.1 + index * 0.15, // 0.1, 0.25, 0.4
-            }}
             className="font-bold text-[clamp(80px,18vw,160px)] leading-none text-transparent bg-clip-text bg-gradient-to-br from-[#D4A853] to-[#F0D080] drop-shadow-[0_0_15px_rgba(212,168,83,0.3)]"
+            style={{ animation: `heroFadeUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.1 + index * 0.15}s both` }}
           >
             {digit}
-          </motion.span>
+          </span>
         ))}
       </div>
 
       {/* Headings */}
       <div className="text-center mt-6 z-10">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
+        <h1
           className="text-2xl md:text-3xl font-semibold text-white mb-3"
+          style={{ animation: "heroFadeUp 0.8s ease-out 0.6s both" }}
         >
           Halaman Tidak Tersedia
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.75 }}
+        </h1>
+        <p
           className="text-sm md:text-base text-zinc-400 max-w-xs mx-auto"
+          style={{ animation: "heroFadeUp 0.8s ease-out 0.75s both" }}
         >
           Halaman yang Anda cari sepertinya sudah pindah atau tidak tersedia.
-        </motion.p>
+        </p>
       </div>
 
       {/* Navigation Grid */}
@@ -161,49 +134,33 @@ export default function NotFoundClient() {
         aria-label="Navigasi darurat"
       >
         {navLinks.map((link, index) => (
-          <motion.div
+          <div
             key={link.href}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              duration: 0.5,
-              ease: "easeOut",
-              delay: 0.8 + index * 0.1, // 0.8, 0.9, 1.0, 1.1
-            }}
+            style={{ animation: "waPanelIn 0.5s ease-out " + (0.8 + index * 0.1) + "s both" }}
           >
-            <MotionLink
+            <Link
               href={link.href}
-              className="flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-4 text-zinc-300 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 w-full h-full"
-              whileHover={{
-                scale: 1.04,
-                backgroundColor: "#D4A853",
-                color: "#000000",
-                borderColor: "#D4A853",
-              }}
+              className="flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-4 text-zinc-300 hover:text-black hover:bg-[#D4A853] hover:border-[#D4A853] hover:scale-[1.04] transition-all duration-200 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 w-full h-full"
             >
               <span aria-hidden="true">{link.emoji}</span>
               <span>{link.label}</span>
-            </MotionLink>
-          </motion.div>
+            </Link>
+          </div>
         ))}
       </nav>
 
       {/* CTA Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut", delay: 1.2 }}
+      <div
         className="z-10 w-full max-w-xs md:max-w-max"
+        style={{ animation: "heroFadeUp 0.8s ease-out 1.2s both" }}
       >
-        <MotionLink
+        <Link
           href="/"
-          className="flex items-center justify-center bg-[#D4A853] text-black font-bold px-8 py-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 w-full"
-          whileHover={{ scale: 1.05, backgroundColor: "#E8C270" }}
-          whileTap={{ scale: 0.97 }}
+          className="flex items-center justify-center bg-[#D4A853] hover:bg-[#E8C270] text-black font-bold px-8 py-3 rounded-full hover:scale-105 active:scale-[0.97] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 w-full"
         >
           &larr; Kembali ke Beranda
-        </MotionLink>
-      </motion.div>
+        </Link>
+      </div>
     </main>
   );
 }

@@ -1,9 +1,8 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { X } from "lucide-react";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 interface ImageLightboxProps {
@@ -15,11 +14,12 @@ interface ImageLightboxProps {
 }
 
 export function ImageLightbox({ isOpen, onClose, src, alt, title }: ImageLightboxProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Portal butuh document — snapshot server false, klien true (tanpa setState-in-effect)
+  const mounted = useSyncExternalStore(
+    useCallback(() => () => {}, []),
+    () => true,
+    () => false
+  );
 
   // Lock body scroll and handle ESC key
   useEffect(() => {
@@ -54,22 +54,15 @@ export function ImageLightbox({ isOpen, onClose, src, alt, title }: ImageLightbo
   if (!mounted) return null;
 
   return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+    isOpen ? (
+        <div
           className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-3 sm:p-6 select-none"
+          style={{ animation: "fadeIn 0.2s ease-out both" }}
           onClick={handleBackdropClick}
         >
-          <motion.div
-            initial={{ scale: 0.92, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.92, opacity: 0 }}
-            transition={{ duration: 0.3, type: "spring", stiffness: 400, damping: 30 }}
+          <div
             className="relative w-full max-w-5xl h-[70vh] sm:h-[80vh] flex flex-col justify-center"
+            style={{ animation: "waPanelIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Desktop Close Button (Top-Right) */}
@@ -96,14 +89,12 @@ export function ImageLightbox({ isOpen, onClose, src, alt, title }: ImageLightbo
 
             {/* Title (if provided) */}
             {title && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+              <div
                 className="mt-2.5 sm:mt-3 text-center px-4"
+                style={{ animation: "heroFadeUp 0.4s ease-out 0.1s both" }}
               >
                 <p className="text-white/90 text-xs sm:text-base font-medium drop-shadow-md">{title}</p>
-              </motion.div>
+              </div>
             )}
 
             {/* Mobile Close Button (Bottom-Center below image) */}
@@ -118,10 +109,9 @@ export function ImageLightbox({ isOpen, onClose, src, alt, title }: ImageLightbo
                 <span>Tutup</span>
               </button>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
+          </div>
+        </div>
+      ) : null,
     document.body
   );
 }

@@ -156,20 +156,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const title = article.seo?.metaTitle || `${article.title} | Grand Duta City`;
+  // absolute: mencegah template layout "%s | Grand Duta City Parung" menumpuk
+  // suffix kedua di belakang title yang sudah mengandung branding.
+  const title = article.seo?.metaTitle || `${article.title} | Grand Duta City Parung`;
   const description = article.seo?.metaDescription || article.excerpt || "Artikel Grand Duta City";
   const url = normalizeArticleUrl(article.slug);
   const featuredImage = isMedia(article.featuredImage) ? article.featuredImage : null;
   const ogImage = resolveMediaUrl(featuredImage) || undefined;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title,
+      title: { absolute: title },
       description,
       url,
       type: "article",

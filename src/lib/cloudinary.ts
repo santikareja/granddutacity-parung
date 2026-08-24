@@ -28,13 +28,16 @@ export function originalImage(publicId: string) {
 
 export function clImg(
   publicIdWithVersion: string,
-  opts: { w: number; h?: number; q?: number } = { w: 800 },
+  opts: { w: number; h?: number; q?: number | "auto" } = { w: 800 },
 ) {
   const { w, h, q = 75 } = opts;
+  // q_auto: Cloudinary memilih kualitas per-gambar secara adaptif (biasanya
+  // lebih kecil dari q tetap tanpa penurunan kualitas yang tampak).
+  const quality = `q_${q}`;
   const crop = h ? `w_${w},h_${h},c_fill,g_auto` : `w_${w}`;
 
   return publicIdWithVersion.replace(
     "/upload/",
-    `/upload/${crop},q_${q},f_auto/`,
+    `/upload/${crop},${quality},f_auto/`,
   );
 }

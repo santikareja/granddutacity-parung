@@ -104,11 +104,11 @@ export function BetterLiving() {
                     <CarouselItem key={index}>
                       <div className="relative aspect-[4/3] sm:aspect-square w-full overflow-hidden bg-[#090D0A]">
                         <Image
-                          src={clImg(image.url, { w: 1000, q: 80 })}
+                          src={clImg(image.url, { w: 1000, q: "auto" })}
                           alt={image.alt}
                           fill
                           className="object-cover transition-transform duration-700 hover:scale-105"
-                          sizes="(max-width: 768px) 100vw, 50vw"
+                          sizes="(max-width: 639px) calc(100vw - 2rem), (max-width: 1023px) calc(100vw - 4rem), 560px"
                           loading="lazy"
                         />
                         <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 rounded-full bg-[#090D0A]/85 lg:bg-[#090D0A]/70 lg:backdrop-blur-md px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs text-white font-sans font-medium border border-white/20 shadow-md">

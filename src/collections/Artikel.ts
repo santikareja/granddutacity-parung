@@ -62,7 +62,16 @@ export const Artikel: CollectionConfig = {
     defaultColumns: ["title", "kategori", "status", "publishedAt"],
   },
   access: {
-    read: () => true,
+    // Publik hanya boleh membaca artikel berstatus published. Tanpa constraint
+    // ini, `GET /api/artikel?draft=true` mengekspos draft & autosave ke siapa pun.
+    read: ({ req }) => {
+      if (req.user) return true;
+      return {
+        status: {
+          equals: "published",
+        },
+      };
+    },
     create: ({ req: { user } }) => !!user,
     update: ({ req: { user } }) => !!user,
     delete: ({ req: { user } }) => user?.role === "admin",

@@ -23,7 +23,7 @@ const propertyTypes = [
     cluster: "Cluster Ladera",
     tag: "Cluster Ladera",
     price: "1.1 Milyar-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Tuscan_drllpk.webp", { w: 600, h: 600, q: 75 }),
+    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Tuscan_drllpk.webp", { w: 600, h: 600, q: "auto" }),
     specs: { bed: 3, bath: 2, carport: 2, lb: 66, lt: 72 },
     desc: "Tipe hunian 2 lantai elegan di Cluster Ladera, tipe terfavorit dengan ruang keluarga luas bergaya Modern American Classic."
   },
@@ -34,7 +34,7 @@ const propertyTypes = [
     cluster: "Cluster Ladera",
     tag: "Cluster Ladera",
     price: "800 Juta-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Malta_tkq7di.webp", { w: 600, h: 600, q: 75 }),
+    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Malta_tkq7di.webp", { w: 600, h: 600, q: "auto" }),
     specs: { bed: "2+1", bath: 1, carport: 2, lb: 47, lt: 72 },
     desc: "Tipe praktis dengan ekstra ruang fleksibel di Cluster Ladera, sangat ideal untuk keluarga muda yang mengutamakan efisiensi."
   },
@@ -46,7 +46,7 @@ const propertyTypes = [
     cluster: "Cluster Cascada",
     tag: "Cluster Cascada",
     price: "1.4 Milyar-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Alexandra_hhvq3f.webp", { w: 600, h: 600, q: 75 }),
+    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Alexandra_hhvq3f.webp", { w: 600, h: 600, q: "auto" }),
     specs: { bed: 3, bath: 2, carport: 2, lb: 88, lt: 105 },
     desc: "Hunian termewah di Cluster Cascada dengan kavling tanah terluas (105 m²), menghadirkan kenyamanan penuh bagi keluarga mapan."
   },
@@ -57,7 +57,7 @@ const propertyTypes = [
     cluster: "Cluster Cascada",
     tag: "Cluster Cascada",
     price: "800 Juta-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp", { w: 600, h: 600, q: 75 }),
+    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp", { w: 600, h: 600, q: "auto" }),
     specs: { bed: 2, bath: 1, carport: 1, lb: 42, lt: 60 },
     desc: "Desain tropis minimalis di Cluster Cascada, memaksimalkan pencahayaan dan sirkulasi alami dalam hunian kompak bernilai tinggi."
   },
@@ -68,7 +68,7 @@ const propertyTypes = [
     cluster: "Cluster Cascada",
     tag: "Cluster Cascada",
     price: "800 Juta-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Manoa_j8uvcr.webp", { w: 600, h: 600, q: 75 }),
+    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Manoa_j8uvcr.webp", { w: 600, h: 600, q: "auto" }),
     specs: { bed: 1, bath: 2, carport: 1, lb: 58, lt: 60 },
     desc: "Konsep hunian resort modern di Cluster Cascada dengan fokus pada privasi, ruang terbuka menenangkan, dan high ceiling."
   },
@@ -79,7 +79,7 @@ const propertyTypes = [
     cluster: "Cluster Cascada",
     tag: "Cluster Cascada",
     price: "1.1 Milyar-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Victoria_scolcc.webp", { w: 600, h: 600, q: 75 }),
+    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Victoria_scolcc.webp", { w: 600, h: 600, q: "auto" }),
     specs: { bed: 3, bath: 2, carport: 2, lb: 69, lt: 72 },
     desc: "Perpaduan sempurna antara estetika dan fungsionalitas di Cluster Cascada, menyediakan ruang tumbuh terbaik untuk keluarga."
   },

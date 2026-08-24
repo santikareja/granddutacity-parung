@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { DeferredAnalytics } from "@/components/providers/deferred-analytics";
 import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll";
 import { BackToTop } from "@/components/ui/back-to-top";
@@ -180,7 +180,7 @@ export default function RootLayout({
         <WhatsAppButton />
       </body>
       {gaId && gaId !== "G-XXXXXXXXXX" ? (
-        <GoogleAnalytics gaId={gaId} />
+        <DeferredAnalytics gaId={gaId} />
       ) : null}
     </html>
   );

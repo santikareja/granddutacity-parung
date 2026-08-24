@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { Play, Clock, Users } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 
@@ -98,13 +99,14 @@ export function VideoSection() {
                     onClick={handlePlay}
                     className="absolute inset-0 w-full h-full cursor-pointer group/play bg-[#090D0A] rounded-[calc(1.5rem-0.375rem)] sm:rounded-[calc(2rem-0.5rem)] overflow-hidden border-0 p-0"
                   >
-                    {/* YouTube Thumbnail */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    {/* YouTube Thumbnail — via next/image: WebP responsif + cache panjang dari origin sendiri,
+                        bukan JPEG 1280x720 dari i.ytimg.com yang TTL-nya hanya 2 jam. */}
+                    <Image
                       src={thumbnailUrl}
                       alt={VIDEO_TITLE}
                       width={1280}
                       height={720}
+                      sizes="(max-width: 960px) 100vw, 896px"
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover opacity-85 group-hover/play:opacity-100 transition-opacity duration-300"

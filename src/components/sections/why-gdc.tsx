@@ -77,7 +77,7 @@ function StackedImageSlider() {
                 // Kartu benar-benar berukuran max 320px (mobile) / 420px (sm+)
                 // — JANGAN pakai lebar viewport: membuat varian yang diunduh
                 // jauh lebih besar dari tampilan dan menunda LCP mobile.
-                sizes="(max-width: 639px) 320px, 420px"
+                sizes="(max-width: 639px) 288px, 420px"
                 loading="lazy"
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
               />

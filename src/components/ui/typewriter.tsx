@@ -10,7 +10,12 @@ interface TypewriterProps {
 
 export function Typewriter({ texts, delay = 1500, className = "" }: TypewriterProps) {
   const [index, setIndex] = useState(0);
-  const [displayText, setDisplayText] = useState("");
+  // Mulai dari frasa pertama yang SUDAH LENGKAP (SSR-friendly). Jika diawali
+  // string kosong, blok teks tumbuh via JS-timer dan baru selesai ter-paint
+  // beberapa detik setelah muat — menjadi elemen LCP terlambat yang merusak
+  // skor (terbukti menaikkan LCP simulasi ke ~4.5s). Efek ketik tetap jalan:
+  // frasa pertama tampil utama dulu, lalu siklus hapus-ketik berlanjut.
+  const [displayText, setDisplayText] = useState(texts[0] ?? "");
   const [isDeleting, setIsDeleting] = useState(false);
   const [speed, setSpeed] = useState(100);
 

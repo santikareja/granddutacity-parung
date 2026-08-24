@@ -23,11 +23,13 @@ export function Hero() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fadeRef = useRef<HTMLDivElement>(null);
+  const posterImgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     const video = videoRef.current;
     const fadeEl = fadeRef.current;
-    if (!video || !fadeEl) return;
+    const posterImg = posterImgRef.current;
+    if (!video || !fadeEl || !posterImg) return;
 
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     const sources = isMobile ? VIDEO_SOURCES.mobile : VIDEO_SOURCES.desktop;
@@ -36,7 +38,11 @@ export function Hero() {
     // never competes with scrolling further down the page.
     let offscreen = false;
 
-    video.poster = sources.poster;
+    // Poster statis kini berupa <img> terpisah (bukan atribut poster video):
+    // layer inilah kandidat LCP utama — ter-paint dari HTML SSR dengan
+    // fetchpriority tinggi, jauh sebelum JS/video siap. Video transparan
+    // di belakangnya; begitu frame pertama siap, poster memudar.
+    posterImg.src = sources.poster;
     video.preload = "metadata";
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -61,7 +67,24 @@ export function Hero() {
     };
 
     const onReady = () => {
+      // Mulai pemutaran segera (frame tampil di belakang poster yang masih
+      // opaque), TAPI jangan redupkan poster sebelum poster benar-benar
+      // ter-decode dan ter-paint: jika difade saat byte-nya belum datang,
+      // ia tak pernah menjadi kandidat LCP dan elemen LCP jatuh ke gambar
+      // jauh di bawah fold yang baru ter-paint saat halaman digulir.
       requestAnimationFrame(resumePlayback);
+      const fadeWhenPainted = () => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            posterImg.style.opacity = "0";
+          });
+        });
+      };
+      if (typeof posterImg.decode === "function") {
+        posterImg.decode().then(fadeWhenPainted).catch(fadeWhenPainted);
+      } else {
+        fadeWhenPainted();
+      }
     };
     const onLoadedData = () => {
       if (video.readyState >= 3) onReady();
@@ -162,6 +185,11 @@ export function Hero() {
         style={{ opacity: 0, transition: "opacity 150ms ease-in-out" }}
       />
 
+      {/* Poster preload — media-scoped agar tiap perangkat hanya mengunduh
+          satu varian, dan masuk critical path dengan prioritas tinggi */}
+      <link rel="preload" as="image" href={VIDEO_SOURCES.mobile.poster} media="(max-width: 767px)" fetchPriority="high" />
+      <link rel="preload" as="image" href={VIDEO_SOURCES.desktop.poster} media="(min-width: 768px)" fetchPriority="high" />
+
       {/* Background video */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <video
@@ -171,8 +199,19 @@ export function Hero() {
           playsInline
           aria-hidden="true"
           preload="metadata"
-          poster={VIDEO_SOURCES.mobile.poster}
           className="absolute inset-0 w-full h-full object-cover object-center scale-[1.02]"
+        />
+        {/* Static poster layer (kandidat LCP utama) — di atas video,
+            memudar saat frame pertama siap. Lihat efek di atas. */}
+        <img
+          ref={posterImgRef}
+          aria-hidden="true"
+          alt=""
+          src={VIDEO_SOURCES.mobile.poster}
+          fetchPriority="high"
+          decoding="async"
+          className="pointer-events-none absolute inset-0 h-full w-full scale-[1.02] object-cover object-center"
+          style={{ opacity: 1, transition: "opacity 500ms ease-in-out" }}
         />
       </div>
 

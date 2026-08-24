@@ -106,7 +106,7 @@ export function VideoSection() {
                       alt={VIDEO_TITLE}
                       width={1280}
                       height={720}
-                      sizes="(max-width: 960px) 100vw, 896px"
+                      sizes="(max-width: 960px) calc(100vw - 2rem), 896px"
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover opacity-85 group-hover/play:opacity-100 transition-opacity duration-300"

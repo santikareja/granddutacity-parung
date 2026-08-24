@@ -1,9 +1,0 @@
-# .browserslistrc — selaras dengan default Next.js 16
-# (lihat node_modules/next/dist/docs/03-architecture/supported-browsers.md).
-# Floor ini sudah mendukung semua fitur yang dipakai app, sehingga SWC tidak
-# lagi mem-bundle polyfill legacy (Array.at, Object.hasOwn, dst) — hemat ~14 KiB
-# dan mengurangi biaya parse/eval JS di mobile.
-chrome >= 111
-edge >= 111
-firefox >= 111
-safari >= 16.4

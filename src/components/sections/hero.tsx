@@ -249,10 +249,10 @@ export function Hero() {
 
         {/* Massive Display Headline */}
          <div className="mb-4 sm:mb-6">
-           <h1
-             className="flex flex-col items-center gap-1 sm:gap-2 [text-shadow:0_4px_24px_rgba(0,0,0,0.8)]"
-             style={{ animation: "heroFadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both" }}
-           >
+             <h1
+               className="flex flex-col items-center gap-1 sm:gap-2 [text-shadow:0_4px_24px_rgba(0,0,0,0.8)]"
+               style={{ animation: "heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both" }}
+             >
              <span
                 className="font-serif font-bold text-[#F8F6F0] uppercase tracking-[-0.01em] sm:tracking-[0.02em] leading-[1.05]"
                style={{ fontSize: "clamp(1.75rem, 5.5vw, 4.5rem)" }}
@@ -269,11 +269,13 @@ export function Hero() {
             </h1>
           </div>
 
-         {/* Supporting Copy — CSS animation instead of framer-motion to
-              eliminate LCP render delay (this <p> is the LCP element). */}
-         <p
+          {/* Supporting Copy — CSS animation instead of framer-motion to
+               eliminate LCP render delay (this <p> is the LCP element).
+               Delay pendek: fill-mode "both" membuat teks tak terlihat selama
+               delay berlangsung, dan LCP baru tercatat saat teks ter-paint. */}
+          <p
             className="text-[#F8F6F0]/90 text-[13px] sm:text-base md:text-lg font-normal max-w-2xl mb-5 sm:mb-8 leading-[1.7] [text-shadow:0_1px_12px_rgba(0,0,0,0.8)] px-2"
-            style={{ animation: "heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both" }}
+            style={{ animation: "heroFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both" }}
           >
             Investasi &amp; hunian prestisius di Grand Duta City Parung — kota mandiri 200 Ha persembahan{" "}
             <span className="text-[#F8F6F0] font-semibold">Duta Putra Land</span>. Cicilan mulai{" "}
@@ -284,7 +286,7 @@ export function Hero() {
                avoid blocking LCP with framer-motion hydration. */}
           <div
             className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
-            style={{ animation: "heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1.1s both" }}
+            style={{ animation: "heroFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both" }}
           >
             {/* Primary Island Button-in-Button CTA */}
             <a

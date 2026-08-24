@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
@@ -497,16 +496,10 @@ export default function Home() {
       />
       <Header />
       <main className="relative w-full overflow-hidden">
-        {/* Featured Image (Hero Image) untuk optimasi SEO */}
-        <Image
-          src="/perumahan-grand-duta-city-parung.jpg"
-          alt="Suasana kawasan perumahan modern Grand Duta City Parung Bogor"
-          title="Kawasan Perumahan Grand Duta City Parung - Hunian Modern South of Jakarta"
-          width={1200}
-          height={630}
-          priority
-          className="sr-only"
-        />
+        {/* SEO gambar ditangani metadata + JSON-LD saja — dilarang menyisipkan
+            <Image> tersembunyi (sr-only/priority) di sini: preload-nya berebut
+            bandwidth dengan poster video hero dan menunda LCP mobile secara
+            signifikan (lihat catatan konvensi proyek). */}
         <Hero />
         <BankPartners />
         <VideoSection />

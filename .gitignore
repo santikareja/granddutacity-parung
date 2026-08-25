@@ -116,3 +116,7 @@ ehthumbs.db
 .tmp/
 *.bak
 *.orig
+
+.vercel
+.env*
+.kilo/

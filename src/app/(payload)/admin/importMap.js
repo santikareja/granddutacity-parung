@@ -25,6 +25,9 @@ import { default as default_fa673cc5d702d295cd7aaa0359d263c4 } from '@/payload/a
 import { default as default_8f3fa6423b31a5fc8adcba2a5ea9a728 } from '@/payload/admin/views/CreateFirstUserView'
 import { default as default_d01a06dadac0f17fcee7a785dbb34210 } from '@/payload/admin/views/DashboardView'
 import { default as default_3741607bcc14021ef035603e11dc5fb5 } from '@/payload/admin/views/LoginView'
+import { default as default_aistudio_view_gdc } from '@/payload/admin/views/AiStudioView'
+import { default as default_generate_seo_gdc } from '@/payload/admin/components/GenerateSeoButton'
+import { default as default_ai_model_picker_gdc } from '@/payload/admin/components/AiModelPicker'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -55,5 +58,8 @@ export const importMap = {
   "@/payload/admin/views/CreateFirstUserView#default": default_8f3fa6423b31a5fc8adcba2a5ea9a728,
   "@/payload/admin/views/DashboardView#default": default_d01a06dadac0f17fcee7a785dbb34210,
   "@/payload/admin/views/LoginView#default": default_3741607bcc14021ef035603e11dc5fb5,
+  "@/payload/admin/views/AiStudioView#default": default_aistudio_view_gdc,
+  "@/payload/admin/components/GenerateSeoButton#default": default_generate_seo_gdc,
+  "@/payload/admin/components/AiModelPicker#default": default_ai_model_picker_gdc,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

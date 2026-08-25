@@ -51,6 +51,152 @@ const extractFeaturedImageFromContent = (content: unknown): number | null => {
   return findFirstUploadMediaId(root);
 };
 
+// CTA wajib di akhir setiap artikel: hyperlink ke homepage dengan anchor persis
+// "Grand Duta City Parung". Di-enforce server-side agar berlaku baik untuk
+// artikel manual maupun hasil AI, dan tidak bergantung pada kepatuhan AI.
+const CTA_URL = "https://granddutacitysouthofjakarta.com";
+const CTA_ANCHOR = "Grand Duta City Parung";
+const CTA_LEAD = "Tertarik memiliki hunian di ";
+
+type LexicalTextNode = {
+  type: "text";
+  detail: number;
+  format: number;
+  mode: "normal";
+  style: string;
+  text: string;
+  version: number;
+};
+
+type LexicalLinkNode = {
+  type: "link";
+  fields: { linkType: "custom"; newTab: boolean; url: string };
+  children: LexicalTextNode[];
+  direction: "ltr" | "rtl" | null;
+  format: "";
+  indent: number;
+  version: number;
+};
+
+type LexicalParagraphNode = {
+  type: "paragraph";
+  children: (LexicalTextNode | LexicalLinkNode)[];
+  direction: "ltr" | "rtl" | null;
+  format: "";
+  indent: number;
+  version: number;
+  textFormat?: number;
+};
+
+const makeTextNode = (text: string): LexicalTextNode => ({
+  type: "text",
+  detail: 0,
+  format: 0,
+  mode: "normal",
+  style: "",
+  text,
+  version: 1,
+});
+
+const buildCtaParagraph = (): LexicalParagraphNode => ({
+  type: "paragraph",
+  direction: "ltr",
+  format: "",
+  indent: 0,
+  version: 1,
+  children: [
+    makeTextNode(CTA_LEAD),
+    {
+      type: "link",
+      fields: { linkType: "custom", newTab: false, url: CTA_URL },
+      direction: "ltr",
+      format: "",
+      indent: 0,
+      version: 3,
+      children: [makeTextNode(CTA_ANCHOR)],
+    },
+    makeTextNode(
+      "? Jelajahi pilihan cluster, harga terbaru, dan fasilitasnya sekarang.",
+    ),
+  ],
+});
+
+// Gabungkan semua teks di dalam subtree sebuah node (dipakai untuk mencocokkan
+// anchor CTA lintas beberapa text node).
+const collectNodeText = (node: RichNode | null | undefined): string => {
+  if (!node) return "";
+  const own = typeof (node as { text?: unknown }).text === "string"
+    ? ((node as { text: string }).text)
+    : "";
+  const childText = Array.isArray(node.children)
+    ? node.children.map(collectNodeText).join("")
+    : "";
+  return own + childText;
+};
+
+// Cari link node menuju homepage dengan anchor persis "Grand Duta City Parung"
+// di dalam subtree. Dipakai untuk deteksi idempoten sebelum menambah CTA.
+const containsCtaLink = (node: RichNode | null | undefined): boolean => {
+  if (!node) return false;
+
+  if (node.type === "link") {
+    const url = (node as { fields?: { url?: unknown } }).fields?.url;
+    if (typeof url === "string") {
+      const normalizedUrl = url.replace(/\/+$/, "");
+      const anchorText = collectNodeText(node).trim();
+      if (normalizedUrl === CTA_URL && anchorText.includes(CTA_ANCHOR)) {
+        return true;
+      }
+    }
+  }
+
+  if (!Array.isArray(node.children)) return false;
+  return node.children.some(containsCtaLink);
+};
+
+const isEmptyBlock = (node: RichNode | null | undefined): boolean => {
+  if (!node) return true;
+  return collectNodeText(node).trim().length === 0;
+};
+
+// Idempotensi kritikal: autosave (interval 3s) memicu beforeChange berulang.
+// Kita hanya menambah CTA jika blok non-kosong terakhir belum berupa CTA. Setelah
+// sekali ditambah, blok terakhir menjadi CTA sehingga re-save menjadi no-op.
+const enforceCtaAtEnd = (content: unknown): unknown => {
+  if (!content || typeof content !== "object" || !("root" in content)) {
+    return content;
+  }
+
+  const root = (content as { root?: { children?: RichNode[] } }).root;
+  if (!root || !Array.isArray(root.children)) {
+    return content;
+  }
+
+  const children = root.children;
+
+  let lastMeaningfulIndex = -1;
+  for (let i = children.length - 1; i >= 0; i -= 1) {
+    if (!isEmptyBlock(children[i])) {
+      lastMeaningfulIndex = i;
+      break;
+    }
+  }
+
+  if (lastMeaningfulIndex >= 0 && containsCtaLink(children[lastMeaningfulIndex])) {
+    return content;
+  }
+
+  const nextChildren = [...children, buildCtaParagraph() as unknown as RichNode];
+
+  return {
+    ...(content as Record<string, unknown>),
+    root: {
+      ...root,
+      children: nextChildren,
+    },
+  };
+};
+
 export const Artikel: CollectionConfig = {
   slug: "artikel",
   labels: {
@@ -60,6 +206,7 @@ export const Artikel: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "kategori", "status", "publishedAt"],
+    group: "Konten",
   },
   access: {
     // Publik hanya boleh membaca artikel berstatus published. Tanpa constraint
@@ -81,7 +228,7 @@ export const Artikel: CollectionConfig = {
   },
   hooks: {
     beforeChange: [
-      ({ data }) => {
+      ({ data, operation }) => {
         if (data?.title && !data.slug) {
           data.slug = data.title
             .toLowerCase()
@@ -95,6 +242,33 @@ export const Artikel: CollectionConfig = {
           const mediaIdFromBody = extractFeaturedImageFromContent(data.content);
           if (mediaIdFromBody) {
             data.featuredImage = mediaIdFromBody;
+          }
+        }
+
+        // Enforce CTA di akhir artikel (idempoten) — berlaku untuk artikel manual
+        // maupun hasil AI. Aman dijalankan berulang saat autosave.
+        if (data?.content) {
+          data.content = enforceCtaAtEnd(data.content) as typeof data.content;
+        }
+
+        // Sinkronkan `status` (field kustom yang dibaca frontend, sitemap, access
+        // control, dashboard) dengan `_status` bawaan Payload (drafts/versions),
+        // agar keduanya tidak pernah berlawanan.
+        //
+        // Sumber kebenaran berbeda per operasi:
+        // - CREATE (mis. AI Studio / migrasi seed) mengirim `status` langsung tanpa
+        //   `_status`, jadi `status` yang memimpin.
+        // - UPDATE (tombol Publish/Save Draft) menggerakkan `_status`; form admin
+        //   ikut mengirim nilai lama `status` dari sidebar yang bisa basi, jadi
+        //   `_status` yang memimpin agar aksi Publish tidak dianulir nilai basi.
+        {
+          const resolved =
+            operation === "create"
+              ? (data?.status ?? data?._status)
+              : (data?._status ?? data?.status);
+          if (resolved === "published" || resolved === "draft") {
+            data.status = resolved;
+            data._status = resolved;
           }
         }
 
@@ -200,6 +374,15 @@ export const Artikel: CollectionConfig = {
       label: "Pengaturan SEO",
       fields: [
         {
+          name: "generateSeoUi",
+          type: "ui",
+          admin: {
+            components: {
+              Field: "@/payload/admin/components/GenerateSeoButton",
+            },
+          },
+        },
+        {
           name: "metaTitle",
           type: "text",
           admin: { description: "Rekomendasi sekitar 60 karakter. Kosong = judul + | Grand Duta City" },
@@ -251,6 +434,24 @@ export const Artikel: CollectionConfig = {
       defaultValue: false,
       label: "Dibuat oleh AI",
       admin: { position: "sidebar" },
+    },
+    {
+      name: "aiTopic",
+      type: "text",
+      label: "Topik AI",
+      admin: {
+        position: "sidebar",
+        description: "Jejak audit: ide topik yang dipakai AI Studio (opsional).",
+      },
+    },
+    {
+      name: "aiOutline",
+      type: "json",
+      label: "Outline AI",
+      admin: {
+        position: "sidebar",
+        description: "Jejak audit: outline hasil AI Studio (opsional).",
+      },
     },
   ],
 };

@@ -3,7 +3,6 @@ import type { AdminViewServerProps } from "payload";
 import { getSafeRedirect } from "payload/shared";
 
 import AdminAuthShell from "../components/AdminAuthShell";
-import AdminAuthLogo from "../components/AdminAuthLogo";
 import AdminLoginForm from "../components/AdminLoginForm";
 
 export default function LoginView({
@@ -32,9 +31,6 @@ export default function LoginView({
 
   return (
     <AdminAuthShell mode="login">
-      <div className="gdc-auth-panel__brand">
-        <AdminAuthLogo compact />
-      </div>
       <AdminLoginForm redirectTo={redirectTo} />
     </AdminAuthShell>
   );

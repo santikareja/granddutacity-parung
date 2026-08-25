@@ -1,26 +1,58 @@
 type AdminAuthLogoProps = {
   compact?: boolean;
+  variant?: "brand-bubble" | "console-header" | "badge-only";
 };
 
-export default function AdminAuthLogo({ compact = false }: AdminAuthLogoProps) {
-  const markSize = compact ? 32 : 40;
-  const eyebrowStyle = {
-    color: "#667085",
-    fontSize: compact ? 10 : 11,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase" as const,
-    fontWeight: 700,
-    lineHeight: 1.2,
-  };
+export default function AdminAuthLogo({
+  compact = false,
+  variant = "console-header",
+}: AdminAuthLogoProps) {
+  if (variant === "brand-bubble") {
+    return (
+      <div
+        className="mum-auth-bubble-logo"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 6,
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--font-outfit, 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif)",
+            fontSize: 30,
+            fontWeight: 900,
+            letterSpacing: "-0.02em",
+            color: "#E28743",
+            textShadow: "0 2px 14px rgba(226, 135, 67, 0.45), 0 0 2px #733413",
+            lineHeight: 1.15,
+            userSelect: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 2,
+            textAlign: "center",
+          }}
+        >
+          <span>Grand Duta City Parung</span>
+        </div>
+        <p
+          style={{
+            margin: 0,
+            color: "#A69B8D",
+            fontSize: 14,
+            fontWeight: 500,
+            letterSpacing: "0.02em",
+          }}
+        >
+          Admin Dashboard
+        </p>
+      </div>
+    );
+  }
 
-  const titleStyle = {
-    color: "#101828",
-    fontSize: compact ? 15 : 16,
-    fontWeight: 700,
-    letterSpacing: "-0.02em",
-    lineHeight: 1.2,
-  };
-
+  // Console header variant (for Sidebar / Nav / Default Logo)
   return (
     <div
       className={`gdc-auth-logo${compact ? " gdc-auth-logo--compact" : ""}`}
@@ -34,13 +66,12 @@ export default function AdminAuthLogo({ compact = false }: AdminAuthLogoProps) {
         className="gdc-auth-logo__mark"
         aria-hidden="true"
         style={{
-          width: markSize,
-          height: markSize,
-          borderRadius: compact ? 12 : 14,
-          background:
-            "linear-gradient(135deg, rgba(245, 165, 36, 0.16), rgba(17, 24, 39, 0.96))",
-          border: "1px solid rgba(229, 234, 242, 0.95)",
-          boxShadow: "0 10px 24px rgba(15, 23, 42, 0.12)",
+          width: compact ? 36 : 40,
+          height: compact ? 36 : 40,
+          borderRadius: 9999,
+          background: "#2D433C",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          boxShadow: "0 4px 12px rgba(45, 67, 60, 0.25)",
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
@@ -48,44 +79,48 @@ export default function AdminAuthLogo({ compact = false }: AdminAuthLogoProps) {
         }}
       >
         <span
-          className="gdc-auth-logo__diamond"
           style={{
             color: "#ffffff",
-            fontSize: compact ? 14 : 16,
+            fontSize: compact ? 15 : 17,
             fontWeight: 800,
             lineHeight: 1,
+            fontFamily: "system-ui, -apple-system, sans-serif",
           }}
         >
-          G
+          M
         </span>
-        <span className="gdc-auth-logo__core" />
       </div>
       <div
         className="gdc-auth-logo__copy"
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 2,
+          gap: 1,
         }}
       >
-        <span className="gdc-auth-logo__eyebrow" style={eyebrowStyle}>
-          Grand Duta City
-        </span>
-        <strong className="gdc-auth-logo__title" style={titleStyle}>
-          Grand Duta CMS
+        <strong
+          className="gdc-auth-logo__title"
+          style={{
+            color: "#181D20",
+            fontSize: compact ? 14 : 15,
+            fontWeight: 700,
+            letterSpacing: "-0.01em",
+            lineHeight: 1.2,
+          }}
+        >
+          Admin Console
         </strong>
-        {!compact ? (
-          <span
-            className="gdc-auth-logo__meta"
-            style={{
-              color: "#667085",
-              fontSize: 13,
-              lineHeight: 1.45,
-            }}
-          >
-            Kelola artikel, media, dan konten website dalam satu dashboard.
-          </span>
-        ) : null}
+        <span
+          className="gdc-auth-logo__eyebrow"
+          style={{
+            color: "#7E858E",
+            fontSize: compact ? 11 : 12,
+            fontWeight: 500,
+            lineHeight: 1.2,
+          }}
+        >
+          Grand Duta City Parung
+        </span>
       </div>
     </div>
   );

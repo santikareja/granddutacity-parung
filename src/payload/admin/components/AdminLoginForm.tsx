@@ -28,8 +28,9 @@ function LoginField({ type }: { type: "email" | "emailOrUsername" | "username" }
         field={{
           admin: {
             autoComplete: "email",
+            placeholder: "santikaraza@gmail.com",
           },
-          label: t("general:email"),
+          label: "Email",
           name: "email",
           required: true,
         }}
@@ -56,7 +57,7 @@ function LoginField({ type }: { type: "email" | "emailOrUsername" | "username" }
   return (
     <TextField
       field={{
-        label: t("authentication:emailOrUsername"),
+        label: "Email atau Username",
         name: "username",
         required: true,
       }}
@@ -110,7 +111,7 @@ export default function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
         apiRoute,
         path: `/${userSlug}/login`,
       })}
-      className="gdc-auth-form"
+      className="mum-auth-form"
       disableSuccessStatus
       initialState={{
         password: {
@@ -141,19 +142,11 @@ export default function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
       redirect={safeRedirect}
       waitForAutocomplete
     >
-      <div className="gdc-auth-form__intro">
-        <h2>Masuk ke dashboard admin</h2>
-        <p>
-          Gunakan akun admin Anda untuk mengelola artikel, media, dan struktur konten
-          Grand Duta City.
-        </p>
-      </div>
-
-      <div className="gdc-auth-form__fields">
+      <div className="mum-auth-form__fields">
         <LoginField type={loginType} />
         <CustomPasswordField
           field={{
-            label: t("general:password"),
+            label: "Password",
             name: "password",
             required: true,
           }}
@@ -161,19 +154,28 @@ export default function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
         />
       </div>
 
-      <div className="gdc-auth-form__footer">
+      <div
+        className="mum-auth-form__footer"
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 16,
+          marginTop: -6,
+        }}
+      >
         <Link
           href={formatAdminURL({
             adminRoute,
             path: forgotRoute,
           })}
           prefetch={false}
+          style={{ fontSize: 13 }}
         >
           {t("authentication:forgotPasswordQuestion")}
         </Link>
       </div>
 
-      <FormSubmit size="large">Masuk ke dashboard</FormSubmit>
+      <FormSubmit size="large">Masuk</FormSubmit>
     </Form>
   );
 }

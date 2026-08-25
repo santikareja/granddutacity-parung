@@ -72,6 +72,7 @@ export interface Config {
     media: Media;
     tags: Tag;
     users: User;
+    'ai-providers': AiProvider;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +85,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'ai-providers': AiProvidersSelect<false> | AiProvidersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -177,6 +179,22 @@ export interface Artikel {
   status?: ('draft' | 'published') | null;
   publishedAt?: string | null;
   aiGenerated?: boolean | null;
+  /**
+   * Jejak audit: ide topik yang dipakai AI Studio (opsional).
+   */
+  aiTopic?: string | null;
+  /**
+   * Jejak audit: outline hasil AI Studio (opsional).
+   */
+  aiOutline?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -196,6 +214,9 @@ export interface Media {
    * Opsional. Gunakan untuk keterangan singkat gambar.
    */
   caption?: string | null;
+  source?: ('upload' | 'unsplash' | 'pexels') | null;
+  sourceId?: string | null;
+  attributionUrl?: string | null;
   cloudinaryPublicId?: string | null;
   cloudinaryUrl?: string | null;
   cloudinaryResourceType?: string | null;
@@ -285,6 +306,38 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-providers".
+ */
+export interface AiProvider {
+  id: number;
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  availableModels?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  models?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  defaultModel?: string | null;
+  isDefault?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -326,6 +379,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'ai-providers';
+        value: number | AiProvider;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -392,6 +449,8 @@ export interface ArtikelSelect<T extends boolean = true> {
   status?: T;
   publishedAt?: T;
   aiGenerated?: T;
+  aiTopic?: T;
+  aiOutline?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -415,6 +474,9 @@ export interface MediaSelect<T extends boolean = true> {
   name?: T;
   alt?: T;
   caption?: T;
+  source?: T;
+  sourceId?: T;
+  attributionUrl?: T;
   cloudinaryPublicId?: T;
   cloudinaryUrl?: T;
   cloudinaryResourceType?: T;
@@ -467,6 +529,21 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-providers_select".
+ */
+export interface AiProvidersSelect<T extends boolean = true> {
+  name?: T;
+  baseUrl?: T;
+  apiKey?: T;
+  availableModels?: T;
+  models?: T;
+  defaultModel?: T;
+  isDefault?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

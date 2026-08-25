@@ -1,338 +1,220 @@
-﻿import Image from "next/image";
 import type { ReactNode } from "react";
-
-const AUTH_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775630457/Main_Gate_sdap2y.webp";
+import AdminAuthLogo from "./AdminAuthLogo";
 
 const AUTH_STYLES = `
   :root {
-    --gdc-auth-bg: #0b120c;
-    --gdc-auth-surface: #111a12;
-    --gdc-auth-border: rgba(245, 241, 232, 0.08);
-    --gdc-auth-text: #F5F1E8;
-    --gdc-auth-text-muted: rgba(245, 241, 232, 0.6);
-    --gdc-auth-brand: #F5A524;
-    --gdc-auth-panel-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    --mum-auth-bg: #1B1411;
+    --mum-auth-card: #271F1B;
+    --mum-auth-border: rgba(255, 255, 255, 0.08);
+    --mum-auth-text: #FFFFFF;
+    --mum-auth-muted: #A89F93;
+    --mum-input-bg: #E8EEF8;
+    --mum-input-text: #1E293B;
+    --mum-btn-primary: #38554D;
+    --mum-btn-primary-hover: #45685E;
   }
 
   html,
   html[data-theme],
   html[data-theme] body {
-    background-color: var(--gdc-auth-bg) !important;
+    background-color: var(--mum-auth-bg) !important;
+    color: var(--mum-auth-text) !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh !important;
   }
 
   .template-minimal {
-    background-color: var(--gdc-auth-bg) !important;
+    background-color: var(--mum-auth-bg) !important;
     display: flex !important;
-    align-items: stretch !important;
-    justify-content: stretch !important;
-    padding: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px 16px !important;
     margin: 0 !important;
-    min-height: 100dvh !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    min-height: 100vh !important;
   }
 
   .template-minimal > * {
     width: 100% !important;
     max-width: none !important;
-    min-height: 100dvh !important;
     margin: 0 !important;
   }
 
-  .gdc-auth-panel {
-    --theme-elevation-150: var(--gdc-auth-border);
-    --theme-elevation-500: var(--gdc-auth-text-muted);
-    --theme-elevation-800: var(--gdc-auth-text);
-    --theme-bg: transparent;
-    --theme-input-bg: rgba(255, 255, 255, 0.03);
-    --theme-text: var(--gdc-auth-text);
-  }
-
-  .gdc-auth-panel .field-type,
-  .gdc-auth-panel [class*="field-type"],
-  .gdc-auth-panel [class*="text_"],
-  .gdc-auth-panel [class*="email_"],
-  .gdc-auth-panel [class*="password_"],
-  .gdc-auth-panel [class*="fieldType"] {
-    box-shadow: none !important;
-    margin: 0 0 8px !important;
-  }
-
-  .gdc-auth-shell {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(440px, 520px);
-    width: 100%;
-    min-height: 100dvh;
-    background: var(--gdc-auth-surface);
-    border: none;
-    border-radius: 0;
-    overflow: clip;
-    box-shadow: none;
-  }
-
-  @media (max-width: 1200px) {
-    .gdc-auth-shell {
-      grid-template-columns: minmax(0, 1fr) minmax(380px, 460px);
-    }
-  }
-
-  .gdc-auth-hero {
-    position: relative;
+  .mum-auth-container {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: clamp(28px, 4vw, 48px);
-  }
-
-  @media (max-width: 900px) {
-    .gdc-auth-hero {
-      display: none;
-    }
-  }
-
-  .gdc-auth-hero__media {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
-
-  .gdc-auth-hero__media img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-  }
-
-  .gdc-auth-hero__veil {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(11,18,12,0.95) 0%, rgba(11,18,12,0.4) 50%, rgba(11,18,12,0.1) 100%);
-  }
-
-  .gdc-auth-hero__content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 480px;
-  }
-
-  .gdc-auth-hero__eyebrow {
-    width: fit-content;
-    margin: 0;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: rgba(245, 165, 36, 0.15);
-    border: 1px solid rgba(245, 165, 36, 0.3);
-    color: #fff;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    font-size: 11px;
-    font-weight: 700;
-  }
-
-  .gdc-auth-hero__title {
-    margin: 0;
-    font-size: 40px;
-    line-height: 1.05;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-  }
-
-  .gdc-auth-hero__description {
-    margin: 0;
-    color: rgba(255,255,255,0.84);
-    font-size: 16px;
-    line-height: 1.7;
-    max-width: 38rem;
-  }
-
-  .gdc-auth-hero__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .gdc-auth-hero__chip {
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.85);
-    font-size: 12px;
-  }
-
-  .gdc-auth-hero__features {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .gdc-auth-hero__feature {
-    display: flex;
     align-items: center;
-    gap: 10px;
-    color: rgba(255,255,255,0.86);
-    font-size: 14px;
-    line-height: 1.6;
-  }
-
-  .gdc-auth-hero__feature::before {
-    content: "";
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--gdc-auth-brand);
-    box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.18);
-    flex-shrink: 0;
-  }
-
-  .gdc-auth-panel {
-    display: flex;
-    flex-direction: column;
     justify-content: center;
-    padding: clamp(20px, 3.5vw, 44px);
-    background: transparent;
-    min-height: 100dvh;
-    max-height: none;
-    overflow-y: auto;
-    border-left: 1px solid var(--gdc-auth-border);
-  }
-
-  .gdc-auth-form,
-  .gdc-auth-panel .create-first-user {
-    width: 100%;
-    max-width: 460px;
-    margin-inline: auto;
-  }
-
-  @media (max-width: 900px) {
-    .gdc-auth-shell {
-      grid-template-columns: 1fr;
-      min-height: 100dvh;
-    }
-
-    .gdc-auth-panel {
-      border-left: none;
-      min-height: 100dvh;
-      padding: 24px 18px;
-    }
-
-    .gdc-auth-form,
-    .gdc-auth-panel .create-first-user {
-      max-width: 520px;
-    }
-  }
-
-  .gdc-auth-panel > * {
+    padding: 40px 16px;
+    background: radial-gradient(circle at 50% 30%, #291E19 0%, #17110E 100%);
+    box-sizing: border-box;
     width: 100%;
   }
 
-  .gdc-auth-panel__brand {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 40px;
+  .mum-auth-header {
+    margin-bottom: 28px;
+    text-align: center;
   }
 
-  .gdc-auth-form__intro {
-    margin-bottom: 32px;
+  .mum-auth-card {
+    width: 100%;
+    max-width: 470px;
+    background: var(--mum-auth-card);
+    border: 1px solid var(--mum-auth-border);
+    border-radius: 24px;
+    padding: 38px 40px 32px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+    box-sizing: border-box;
   }
-  .gdc-auth-form__intro h2 {
-    margin: 0 0 8px;
+
+  .mum-auth-card__title {
+    color: #FFFFFF;
     font-size: 24px;
     font-weight: 700;
+    text-align: center;
+    margin: 0 0 26px 0;
     letter-spacing: -0.02em;
-    color: var(--gdc-auth-text);
-  }
-  .gdc-auth-form__intro p {
-    margin: 0;
-    font-size: 15px;
-    color: var(--gdc-auth-text-muted);
   }
 
-  .gdc-auth-form__footer {
-    margin-top: 16px;
-    margin-bottom: 24px;
-  }
-  .gdc-auth-form__footer a {
-    color: var(--gdc-auth-brand);
-    font-size: 14px;
-    text-decoration: none;
+  .mum-auth-footer {
+    margin-top: 36px;
+    text-align: center;
+    color: #7B7266;
+    font-size: 13px;
     font-weight: 500;
   }
-  .gdc-auth-form__footer a:hover {
-    text-decoration: underline;
+
+  /* Override Payload CMS Form & Inputs inside Auth Card */
+  .mum-auth-card .field-type,
+  .mum-auth-card [class*="field-type"],
+  .mum-auth-card [class*="fieldType"] {
+    margin-bottom: 18px !important;
   }
 
-  .gdc-auth-panel .create-first-user h1 {
-    margin: 0 0 8px;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--gdc-auth-text);
-  }
-  .gdc-auth-panel .create-first-user > p {
-    margin: 0 0 24px;
-    color: var(--gdc-auth-text-muted);
-    font-size: 14px;
+  .mum-auth-card label,
+  .mum-auth-card .field-label {
+    color: #C8BFB2 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
   }
 
-  .gdc-auth-form button[type="submit"],
-  .gdc-auth-panel .create-first-user button[type="submit"] {
-    width: 100%;
-    padding: 12px;
-    background: var(--gdc-auth-brand) !important;
-    color: #0b120c !important;
+  .mum-auth-card input[type="text"],
+  .mum-auth-card input[type="email"],
+  .mum-auth-card input[type="password"] {
+    background-color: var(--mum-input-bg) !important;
+    color: var(--mum-input-text) !important;
     border: none !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    cursor: pointer;
-    transition: background 0.2s ease !important;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    border-radius: 14px !important;
+    height: 48px !important;
+    padding: 0 16px !important;
+    font-size: 15px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease !important;
   }
-  .gdc-auth-form button[type="submit"]:hover,
-  .gdc-auth-panel .create-first-user button[type="submit"]:hover {
-    background: #fff !important;
+
+  .mum-auth-card input[type="text"]:focus,
+  .mum-auth-card input[type="email"]:focus,
+  .mum-auth-card input[type="password"]:focus {
+    box-shadow: 0 0 0 2px #E28743 !important;
+    background-color: #FFFFFF !important;
+  }
+
+  .mum-auth-card button[type="submit"],
+  .mum-auth-card .btn--size-large {
+    width: 100% !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    background: var(--mum-btn-primary) !important;
+    color: #FFFFFF !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background-color 0.2s ease, transform 0.1s ease !important;
+    margin-top: 10px !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+  }
+
+  .mum-auth-card button[type="submit"]:hover,
+  .mum-auth-card .btn--size-large:hover {
+    background: var(--mum-btn-primary-hover) !important;
+    transform: translateY(-1px);
+  }
+
+  .mum-auth-card button[type="submit"]:active,
+  .mum-auth-card .btn--size-large:active {
+    transform: translateY(0);
+  }
+
+  .mum-auth-card a {
+    color: #A89F93 !important;
+    text-decoration: none !important;
+    font-size: 13px !important;
+  }
+
+  .mum-auth-card a:hover {
+    color: #E28743 !important;
+    text-decoration: underline !important;
+  }
+
+  /* Layout form auth (dipakai AdminLoginForm & AdminCreateFirstUserForm) */
+  .mum-auth-form,
+  .gdc-auth-form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mum-auth-form__fields,
+  .gdc-auth-form__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Variabel warna untuk komponen field auth (mis. toggle password) */
+  .mum-auth-card {
+    --gdc-auth-text: #FFFFFF;
+    --gdc-auth-text-muted: #A89F93;
   }
 `;
 
-export default function AdminAuthShell({ children, mode = "login" }: { children: ReactNode; mode?: "login" | "first-user" }) {
+type AdminAuthShellProps = {
+  children: ReactNode;
+  mode?: "login" | "first-user";
+};
+
+export default function AdminAuthShell({ children, mode = "login" }: AdminAuthShellProps) {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: AUTH_STYLES }} />
-      <div className="gdc-auth-shell">
-        {/* Left Hero */}
-        <div className="gdc-auth-hero">
-          <div className="gdc-auth-hero__media">
-            <Image src={AUTH_IMAGE} alt="Grand Duta City" fill priority />
-            <div className="gdc-auth-hero__veil" />
-          </div>
-          <div className="gdc-auth-hero__content">
-            <p className="gdc-auth-hero__eyebrow">Sistem Manajemen Konten</p>
-            <h1 className="gdc-auth-hero__title">Membangun Kota<br/>Masa Depan</h1>
-            <p className="gdc-auth-hero__description">
-              Pusat kendali konten Grand Duta City. Akses ini dikhususkan bagi
-              administrator dan tim pemasaran.
-            </p>
-            <div className="gdc-auth-hero__chips">
-              <span className="gdc-auth-hero__chip">Cluster Ladera</span>
-              <span className="gdc-auth-hero__chip">Cluster Cascada</span>
-              <span className="gdc-auth-hero__chip">200 Hektar</span>
-            </div>
-            <ul className="gdc-auth-hero__features">
-              <li className="gdc-auth-hero__feature">Kelola artikel dan kampanye pemasaran</li>
-              <li className="gdc-auth-hero__feature">Pembaruan siteplan dan daftar stok real-time</li>
-              <li className="gdc-auth-hero__feature">Akses aman dengan enkripsi terkini</li>
-            </ul>
-          </div>
+      <div className="mum-auth-container">
+        {/* Top Logo */}
+        <div className="mum-auth-header">
+          <AdminAuthLogo variant="brand-bubble" />
         </div>
 
-        {/* Right Panel */}
-        <div className="gdc-auth-panel">
+        {/* Login / Auth Card */}
+        <div className="mum-auth-card">
+          <h1 className="mum-auth-card__title">
+            {mode === "first-user" ? "Buat Akun Admin Pertama" : "Masuk ke Dashboard"}
+          </h1>
           {children}
+        </div>
+
+        {/* Footer */}
+        <div className="mum-auth-footer">
+          &copy; 2026 Grand Duta City Parung. Admin Area.
         </div>
       </div>
     </>

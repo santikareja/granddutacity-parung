@@ -9,6 +9,7 @@ export const Categories: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "slug", "updatedAt"],
+    group: "Konten",
   },
   access: {
     read: () => true,

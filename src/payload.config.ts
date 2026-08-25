@@ -6,10 +6,13 @@ import { buildConfig } from "payload";
 import { cloudinaryStorage } from "payload-storage-cloudinary";
 
 import { Artikel } from "./collections/Artikel";
+import { AiProviders } from "./collections/AiProviders";
 import { Categories } from "./collections/Categories";
 import { Media } from "./collections/Media";
 import { Tags } from "./collections/Tags";
 import { Users } from "./collections/Users";
+import { aiEndpoints } from "./lib/ai/endpoints";
+import { stockEndpoints } from "./lib/ai/stock-endpoints";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -46,7 +49,7 @@ export default buildConfig({
         shortcut: "/logo.svg",
         apple: "/logo.svg",
       },
-      titleSuffix: " - Grand Duta CMS",
+      titleSuffix: " - Grand Duta City Parung",
     },
     ...(payloadAdminEmail && payloadAdminPassword
       ? {
@@ -73,10 +76,15 @@ export default buildConfig({
         login: {
           Component: "@/payload/admin/views/LoginView",
         },
+        aiStudio: {
+          Component: "@/payload/admin/views/AiStudioView",
+          path: "/ai-studio",
+        },
       },
     },
   },
-  collections: [Artikel, Categories, Media, Tags, Users],
+  collections: [Artikel, Categories, Media, Tags, Users, AiProviders],
+  endpoints: [...aiEndpoints, ...stockEndpoints],
   db: postgresAdapter({
     pool: {
       connectionString: databaseUrl,

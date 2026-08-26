@@ -28,6 +28,14 @@ export function PromoPopup() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // Popup dimatikan total di tampilan mobile (<768px, breakpoint md proyek).
+    // Alasan: di mobile ia menutupi hampir seluruh layar, mengunduh satu gambar
+    // promo besar (1080x1350), dan menambah kerja hydration — semuanya menekan
+    // pengalaman serta skor mobile tanpa manfaat sepadan. Desktop tidak berubah.
+    // matchMedia dipakai (bukan lebar sekali baca) agar perputaran orientasi
+    // tablet tetap tepat.
+    if (window.matchMedia("(max-width: 767px)").matches) return;
+
     const hasShown = window.sessionStorage.getItem(SESSION_KEY);
     if (hasShown === "1") return;
 

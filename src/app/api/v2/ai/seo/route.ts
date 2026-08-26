@@ -5,6 +5,7 @@ import { chatCompletion, parseJsonFromAi } from "@/lib/ai/client";
 import { resolveAiConfig } from "@/lib/v2-admin/ai-runtime";
 import { buildSeoPrompt } from "@/lib/ai/prompts";
 import { lexicalToPlaintext, slugify } from "@/lib/v2-admin/lexical";
+import { logAiTask } from "@/lib/v2-admin/ai-tasks";
 
 export const runtime = "nodejs";
 // Panggilan model bisa lama; beri ruang agar tidak terputus di tengah.
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
       focusKeyword?: unknown;
     }>(raw);
 
-    return NextResponse.json({
+    const result = {
       metaTitle:
         typeof parsed.metaTitle === "string" ? parsed.metaTitle.trim() : "",
       metaDescription:
@@ -67,9 +68,28 @@ export async function POST(request: Request) {
         typeof parsed.slug === "string" && parsed.slug.trim()
           ? slugify(parsed.slug)
           : slugify(title),
+    };
+
+    void logAiTask({
+      type: "seo",
+      status: "completed",
+      input: { title },
+      output: { slug: result.slug, focusKeyword: result.focusKeyword },
+      userId: guard.user.id,
     });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("[api/v2/ai/seo] gagal:", error);
+
+    void logAiTask({
+      type: "seo",
+      status: "failed",
+      input: { title },
+      error: error instanceof Error ? error.message : "Gagal.",
+      userId: guard.user.id,
+    });
+
     return apiError(
       error instanceof Error ? error.message : "Gagal menghasilkan SEO.",
       502,

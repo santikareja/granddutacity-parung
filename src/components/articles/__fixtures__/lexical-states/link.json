@@ -1,0 +1,138 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Tertarik memiliki hunian di ", "version": 1 },
+          {
+            "type": "link",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": { "linkType": "custom", "newTab": false, "url": "https://granddutacitysouthofjakarta.com" },
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Grand Duta City Parung", "version": 1 }
+            ]
+          },
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "? Jelajahi pilihan cluster.", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          {
+            "type": "link",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": { "linkType": "custom", "newTab": true, "url": "https://example.com/eksternal?a=1&b=2" },
+            "children": [
+              { "type": "text", "detail": 0, "format": 1, "mode": "normal", "style": "", "text": "link eksternal newTab", "version": 1 }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          {
+            "type": "link",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": { "linkType": "custom", "newTab": false, "url": "/artikel/contoh-slug-internal" },
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "link internal relatif", "version": 1 }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          {
+            "type": "autolink",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": { "linkType": "custom", "newTab": false, "url": "https://granddutacitysouthofjakarta.com/kontak" },
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "https://granddutacitysouthofjakarta.com/kontak", "version": 1 }
+            ]
+          },
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": " dan ", "version": 1 },
+          {
+            "type": "autolink",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": { "linkType": "custom", "newTab": true, "url": "https://wa.me/6281234567890" },
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "wa.me/6281234567890", "version": 1 }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          {
+            "type": "link",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": { "linkType": "custom", "newTab": true, "url": "https://example.com/multi" },
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "anchor ", "version": 1 },
+              { "type": "text", "detail": 0, "format": 3, "mode": "normal", "style": "", "text": "bold italic", "version": 1 },
+              { "type": "linebreak", "version": 1 },
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "setelah br", "version": 1 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

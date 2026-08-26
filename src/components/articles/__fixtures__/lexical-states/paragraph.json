@@ -1,0 +1,61 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          {
+            "type": "text",
+            "detail": 0,
+            "format": 0,
+            "mode": "normal",
+            "style": "",
+            "text": "Paragraf pertama dengan teks biasa.",
+            "version": 1
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": null,
+        "textFormat": 0,
+        "textStyle": "",
+        "children": []
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          {
+            "type": "text",
+            "detail": 0,
+            "format": 0,
+            "mode": "normal",
+            "style": "",
+            "text": "Karakter khusus wajib ter-escape: <script>alert(\"x\")</script> & 'kutip' \u00e9 \u2014 selesai.",
+            "version": 1
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -4,6 +4,7 @@ import { requireApiUser, apiError } from "@/lib/v2-auth/api-guard";
 import { chatCompletion, parseJsonFromAi } from "@/lib/ai/client";
 import { resolveAiConfigWithModel } from "@/lib/v2-admin/ai-runtime";
 import { buildOutlinePrompt, type OutlineSection } from "@/lib/ai/prompts";
+import { logAiTask } from "@/lib/v2-admin/ai-tasks";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -71,9 +72,26 @@ export async function POST(request: Request) {
       return apiError("AI tidak menghasilkan outline yang valid.", 502);
     }
 
+    void logAiTask({
+      type: "outline",
+      status: "completed",
+      input: { title },
+      output: { sections: sections.length },
+      userId: guard.user.id,
+    });
+
     return NextResponse.json({ sections });
   } catch (error) {
     console.error("[api/v2/ai/outline] gagal:", error);
+
+    void logAiTask({
+      type: "outline",
+      status: "failed",
+      input: { title },
+      error: error instanceof Error ? error.message : "Gagal.",
+      userId: guard.user.id,
+    });
+
     return apiError(
       error instanceof Error ? error.message : "Gagal menghasilkan outline.",
       502,

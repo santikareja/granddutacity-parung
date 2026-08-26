@@ -7,6 +7,7 @@ import {
   setArticleStatus,
   updateArticle,
 } from "@/lib/v2-admin/article-write";
+import { recordAudit } from "@/lib/v2-admin/audit";
 
 export const runtime = "nodejs";
 
@@ -70,6 +71,17 @@ export async function PATCH(
     if (body.statusOnly === true) {
       const ok = await setArticleStatus(id, status);
       if (!ok) return apiError("Artikel tidak ditemukan.", 404);
+
+      // Audit best-effort (fire-and-forget): tidak menyentuh response.
+      void recordAudit({
+        action: "article:status",
+        entity: "artikel",
+        entityId: id,
+        userId: guard.user.id,
+        userEmail: guard.user.email,
+        summary: { status },
+      });
+
       return NextResponse.json({ ok: true, status });
     }
 
@@ -101,13 +113,25 @@ export async function PATCH(
     });
 
     if (!updated) return apiError("Artikel tidak ditemukan.", 404);
+
+    // Audit best-effort (fire-and-forget): tidak menyentuh response.
+    void recordAudit({
+      action: "article:update",
+      entity: "artikel",
+      entityId: id,
+      userId: guard.user.id,
+      userEmail: guard.user.email,
+      summary: { title, status },
+    });
+
     return NextResponse.json({ article: updated });
   } catch (error) {
     console.error("[api/v2/articles/:id] PATCH gagal:", error);
-    return apiError(
-      error instanceof Error ? error.message : "Gagal memperbarui artikel.",
-      500,
-    );
+    const message =
+      error instanceof Error ? error.message : "Gagal memperbarui artikel.";
+    // Gagal validasi kesiapan publish adalah kesalahan input → 400.
+    const status = message.startsWith("Belum siap dipublish") ? 400 : 500;
+    return apiError(message, status);
   }
 }
 
@@ -126,6 +150,16 @@ export async function DELETE(
   try {
     const removed = await deleteArticle(id);
     if (!removed) return apiError("Artikel tidak ditemukan.", 404);
+
+    // Audit best-effort (fire-and-forget): tidak menyentuh response.
+    void recordAudit({
+      action: "article:delete",
+      entity: "artikel",
+      entityId: id,
+      userId: guard.user.id,
+      userEmail: guard.user.email,
+    });
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[api/v2/articles/:id] DELETE gagal:", error);

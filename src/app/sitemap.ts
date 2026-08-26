@@ -1,49 +1,25 @@
 import type { MetadataRoute } from "next";
-import { getPayload } from "payload";
-import configPromise from "@payload-config";
 import { getCategorySitemapEntries } from "@/lib/articles";
+import { getArticleSitemapEntries } from "@/lib/public/queries";
 
 const BASE_URL = "https://granddutacitysouthofjakarta.com";
 
 // Daftar artikel published dari CMS ikut masuk sitemap agar Google menemukan
 // URL /{slug} tanpa bergantung pada internal link saja.
 //
-// Query dibungkus try/catch: saat build di environment tanpa kredensial DB
-// (mis. laptop baru), sitemap tetap ter-generate dengan halaman statis dan
-// tidak menggagalkan build. Di Vercel (env lengkap), artikel ikut terindeks.
+// Query dibungkus try/catch di lapisan lib (getArticleSitemapEntries): saat
+// build di environment tanpa kredensial DB (mis. laptop baru), sitemap tetap
+// ter-generate dengan halaman statis dan tidak menggagalkan build. Di Vercel
+// (env lengkap), artikel ikut terindeks.
 async function getArtikelSitemapEntries(): Promise<MetadataRoute.Sitemap> {
-  try {
-    const payload = await getPayload({ config: configPromise });
+  const entries = await getArticleSitemapEntries();
 
-    const result = await payload.find({
-      collection: "artikel",
-      depth: 0,
-      draft: false,
-      limit: 500,
-      pagination: false,
-      sort: "-publishedAt",
-      where: {
-        status: {
-          equals: "published",
-        },
-      },
-    });
-
-    return result.docs
-      .filter((doc) => Boolean(doc.slug))
-      .map((doc) => ({
-        url: `${BASE_URL}/${doc.slug}`,
-        lastModified: doc.publishedAt ? new Date(doc.publishedAt) : new Date(),
-        changeFrequency: "monthly" as const,
-        priority: 0.7,
-      }));
-  } catch (error) {
-    console.warn(
-      "[sitemap] Artikel CMS dilewati (database tidak tersedia saat build):",
-      error instanceof Error ? error.message : error,
-    );
-    return [];
-  }
+  return entries.map((entry) => ({
+    url: `${BASE_URL}/${entry.slug}`,
+    lastModified: entry.publishedAt ? new Date(entry.publishedAt) : new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

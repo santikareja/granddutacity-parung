@@ -1,0 +1,112 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "paragraph",
+        "format": "left",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "align left", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "center",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "align center", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "right",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "align right", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "justify",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "align justify", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "start",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "align start", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "end",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "align end", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 1,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "indent 1", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "center",
+        "indent": 3,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "indent 3 + center", "version": 1 }
+        ]
+      },
+      {
+        "type": "heading",
+        "tag": "h3",
+        "format": "center",
+        "indent": 2,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Heading center + indent", "version": 1 }
+        ]
+      },
+      {
+        "type": "quote",
+        "format": "right",
+        "indent": 1,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Quote right + indent", "version": 1 }
+        ]
+      }
+    ]
+  }
+}

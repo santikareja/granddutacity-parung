@@ -131,9 +131,21 @@ export const uploadMedia = async (
       source: input.source ?? "upload",
       sourceId: input.sourceId ?? null,
       attributionUrl: input.attributionUrl ?? null,
+      // Simpan public_id agar aset bisa dihapus dari Cloudinary saat baris
+      // media dihapus (lihat deleteMedia di media.ts).
+      cloudinaryPublicId: result.public_id,
       updatedAt: new Date(),
     })
     .returning({ id: media.id });
 
   return { id: rows[0].id, url };
+};
+
+// Hapus aset dari Cloudinary. Dipakai deleteMedia (media.ts) — dikumpulkan di
+// sini agar kredensial Cloudinary hanya dikonfigurasi di satu tempat.
+export const destroyCloudinaryAsset = async (
+  publicId: string,
+): Promise<void> => {
+  ensureConfigured();
+  await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
 };

@@ -1,13 +1,14 @@
-import { RichText, type JSXConverter } from "@payloadcms/richtext-lexical/react";
 import Link from "next/link";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
-import type { Media } from "@/payload-types";
+import type { PublicMedia } from "@/types/content";
 import { SmartImage } from "@/components/ui/smart-image";
+
+import { LexicalRenderer, type JSXConverter } from "./lexical-renderer";
 
 type UploadNode = {
   type: "upload";
-  value?: Media | number | null;
+  value?: PublicMedia | number | null;
   fields?: {
     alignment?: "left" | "center" | "right";
     captionOverride?: string;
@@ -15,7 +16,7 @@ type UploadNode = {
   };
 };
 
-const resolveMediaUrl = (media: Media) => {
+const resolveMediaUrl = (media: PublicMedia) => {
   return media.transformedUrl || media.cloudinaryUrl || media.url || media.thumbnailURL || media.originalUrl || null;
 };
 
@@ -164,7 +165,7 @@ export function ArticleRichContent({ data, readAlsoItems = [] }: ArticleRichCont
 
   return (
     <div className="article-rich-content max-w-none">
-      <RichText
+      <LexicalRenderer
         converters={({ defaultConverters }) => ({
           ...defaultConverters,
           upload: UploadNodeConverter,

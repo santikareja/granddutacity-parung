@@ -4,6 +4,7 @@ import { requireApiUser, apiError } from "@/lib/v2-auth/api-guard";
 import { chatCompletion, parseJsonFromAi } from "@/lib/ai/client";
 import { resolveAiConfigWithModel } from "@/lib/v2-admin/ai-runtime";
 import { buildTitlesPrompt } from "@/lib/ai/prompts";
+import { logAiTask } from "@/lib/v2-admin/ai-tasks";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -55,9 +56,26 @@ export async function POST(request: Request) {
       return apiError("AI tidak menghasilkan judul yang valid.", 502);
     }
 
+    void logAiTask({
+      type: "titles",
+      status: "completed",
+      input: { topicLength: topic.length },
+      output: { count: titles.length },
+      userId: guard.user.id,
+    });
+
     return NextResponse.json({ titles });
   } catch (error) {
     console.error("[api/v2/ai/titles] gagal:", error);
+
+    void logAiTask({
+      type: "titles",
+      status: "failed",
+      input: { topicLength: topic.length },
+      error: error instanceof Error ? error.message : "Gagal.",
+      userId: guard.user.id,
+    });
+
     return apiError(
       error instanceof Error ? error.message : "Gagal menghasilkan judul.",
       502,

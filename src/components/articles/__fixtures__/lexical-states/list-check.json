@@ -1,0 +1,82 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "list",
+        "listType": "check",
+        "tag": "ul",
+        "start": 1,
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          {
+            "type": "listitem",
+            "value": 1,
+            "checked": true,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Sudah selesai", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 2,
+            "checked": false,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Belum selesai", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 3,
+            "checked": false,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              {
+                "type": "list",
+                "listType": "check",
+                "tag": "ul",
+                "start": 1,
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "direction": "ltr",
+                "children": [
+                  {
+                    "type": "listitem",
+                    "value": 1,
+                    "checked": true,
+                    "format": "",
+                    "indent": 1,
+                    "version": 1,
+                    "direction": "ltr",
+                    "children": [
+                      { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Sub-checklist", "version": 1 }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

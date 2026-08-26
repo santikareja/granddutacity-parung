@@ -1,9 +1,9 @@
 // Repository provider AI untuk CMS kustom. Server-side only.
 //
-// Menggantikan collection Payload `ai-providers` dengan query Drizzle langsung,
-// tetapi memakai TABEL YANG SAMA (`ai_providers`) dan format ciphertext yang sama
-// (AES-256-GCM di src/lib/ai/crypto.ts), sehingga provider yang sudah tersimpan
-// tetap terbaca dan Payload/v2-admin bisa hidup berdampingan selama transisi.
+// Menggantikan collection Payload `ai-providers` (sudah dicabut) dengan query
+// Drizzle langsung, tetapi memakai TABEL YANG SAMA (`ai_providers`) dan format
+// ciphertext yang sama (AES-256-GCM di src/lib/ai/crypto.ts), sehingga provider
+// yang sudah tersimpan sejak era Payload tetap terbaca tanpa re-entry API key.
 //
 // ATURAN KEAMANAN: fungsi yang namanya berakhiran `ForClient` sudah memask
 // api_key. JANGAN pernah mengirim hasil `getProviderWithSecret` ke client.
@@ -87,7 +87,7 @@ export const getProviderWithSecret = async (
 };
 
 // Dekripsi api_key sebuah provider. Mengembalikan string kosong bila gagal
-// (mis. PAYLOAD_SECRET berubah) agar pemanggil bisa menampilkan pesan jelas.
+// (mis. APP_SECRET berubah) agar pemanggil bisa menampilkan pesan jelas.
 export const decryptProviderKey = (cipher: string): string => {
   try {
     const plain = decryptSecret(cipher);

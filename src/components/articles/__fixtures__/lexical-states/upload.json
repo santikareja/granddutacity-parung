@@ -1,0 +1,165 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "",
+        "version": 3,
+        "fields": { "alignment": "center" },
+        "value": {
+          "id": 101,
+          "url": "https://res.cloudinary.com/demo/image/upload/v1/artikel/cluster-cascada.jpg",
+          "thumbnailURL": "https://res.cloudinary.com/demo/image/upload/c_thumb,w_300/v1/artikel/cluster-cascada.jpg",
+          "alt": "Tampak depan Cluster Cascada",
+          "caption": "Caption asli dari media library",
+          "width": 1600,
+          "height": 900,
+          "name": "cluster-cascada.jpg",
+          "mimeType": "image/jpeg",
+          "filename": "cluster-cascada.jpg"
+        }
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "",
+        "version": 3,
+        "fields": { "alignment": "left", "captionOverride": "Caption override di artikel" },
+        "value": {
+          "id": 102,
+          "url": "https://res.cloudinary.com/demo/image/upload/v1/artikel/siteplan.png",
+          "alt": "Siteplan Grand Duta City",
+          "caption": null,
+          "width": 1200,
+          "height": 800,
+          "name": "siteplan.png",
+          "mimeType": "image/png",
+          "filename": "siteplan.png"
+        }
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "",
+        "version": 3,
+        "fields": { "alignment": "right" },
+        "value": {
+          "id": 103,
+          "transformedUrl": "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/v1/artikel/fasilitas.jpg",
+          "cloudinaryUrl": "https://res.cloudinary.com/demo/image/upload/v1/artikel/fasilitas.jpg",
+          "url": "/media/fasilitas.jpg",
+          "alt": null,
+          "caption": null,
+          "width": null,
+          "height": null,
+          "name": "fasilitas.jpg",
+          "mimeType": "image/jpeg",
+          "filename": "fasilitas.jpg"
+        }
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "",
+        "version": 3,
+        "fields": null,
+        "value": {
+          "id": 104,
+          "url": "/media/tanpa-fields.jpg",
+          "alt": "",
+          "caption": "",
+          "width": 800,
+          "height": 600,
+          "name": "",
+          "mimeType": "image/jpeg",
+          "filename": "tanpa-fields.jpg"
+        }
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "center",
+        "version": 3,
+        "fields": { "alignment": "center", "alt": "Alt eksplisit dari fields", "captionOverride": "Caption & <b>escape</b> test" },
+        "value": {
+          "id": 105,
+          "cloudinaryUrl": "https://res.cloudinary.com/demo/image/upload/v1/artikel/format-center.jpg",
+          "alt": "alt media",
+          "caption": "caption media",
+          "width": 1024,
+          "height": 768,
+          "name": "format-center.jpg",
+          "mimeType": "image/jpeg",
+          "filename": "format-center.jpg"
+        }
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "right",
+        "version": 3,
+        "fields": { "alignment": "left" },
+        "value": {
+          "id": 106,
+          "url": "/media/format-right.jpg",
+          "alt": "alt untuk format right",
+          "width": 640,
+          "height": 480,
+          "mimeType": "image/jpeg",
+          "filename": "format-right.jpg"
+        }
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "",
+        "version": 3,
+        "fields": { "alignment": "center" },
+        "value": 107
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "",
+        "version": 3,
+        "fields": { "alignment": "center" },
+        "value": null
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "",
+        "version": 3,
+        "fields": { "alignment": "center" },
+        "value": {
+          "id": 108,
+          "url": null,
+          "thumbnailURL": null,
+          "alt": "tanpa url apa pun",
+          "width": 100,
+          "height": 100,
+          "mimeType": "image/jpeg",
+          "filename": "tanpa-url.jpg"
+        }
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Paragraf penutup setelah rangkaian upload.", "version": 1 }
+        ]
+      }
+    ]
+  }
+}

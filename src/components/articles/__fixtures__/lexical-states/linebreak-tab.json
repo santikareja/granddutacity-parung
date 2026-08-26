@@ -1,0 +1,53 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "baris satu", "version": 1 },
+          { "type": "linebreak", "version": 1 },
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "baris dua", "version": 1 },
+          { "type": "linebreak", "version": 1 },
+          { "type": "linebreak", "version": 1 },
+          { "type": "text", "detail": 0, "format": 1, "mode": "normal", "style": "", "text": "baris tiga tebal", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "tab", "detail": 2, "format": 0, "mode": "normal", "style": "", "text": "\t", "version": 1 },
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "setelah tab", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": null,
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "linebreak", "version": 1 }
+        ]
+      }
+    ]
+  }
+}

@@ -15,6 +15,7 @@ import {
   lexicalToPlaintext,
   slugify,
 } from "./lexical";
+import { computeReadingTime, validatePublishReadiness } from "./post-publishing";
 import type { ArticleStatus } from "./articles";
 
 export type ArticleWriteInput = {
@@ -99,6 +100,7 @@ type PreparedFields = {
   featuredImageId: number | null;
   status: ArticleStatus;
   publishedAt: Date | null;
+  readingTime: number;
   seoMetaTitle: string | null;
   seoMetaDescription: string | null;
   seoFocusKeyword: string | null;
@@ -133,16 +135,36 @@ const prepare = (
     publishedAt = new Date();
   }
 
+  const excerpt = buildExcerpt(input.excerpt, content);
+  const resolvedFeaturedImageId = featuredImageId ?? null;
+  const seoMetaDescription = input.seoMetaDescription?.trim() || null;
+
+  // Publish manual harus lolos syarat kesiapan. Draft tidak divalidasi di sini.
+  if (status === "published") {
+    const issues = validatePublishReadiness({
+      title,
+      content,
+      excerpt,
+      seoMetaDescription,
+      categoryIds: input.categoryIds ?? [],
+      featuredImageId: resolvedFeaturedImageId,
+    });
+    if (issues.length > 0) {
+      throw new Error(`Belum siap dipublish: ${issues.join(" ")}`);
+    }
+  }
+
   return {
     title,
     slug: input.slug?.trim() ? slugify(input.slug) : slugify(title),
-    excerpt: buildExcerpt(input.excerpt, content),
+    excerpt,
     content,
-    featuredImageId: featuredImageId ?? null,
+    featuredImageId: resolvedFeaturedImageId,
     status,
     publishedAt,
+    readingTime: computeReadingTime(content),
     seoMetaTitle: input.seoMetaTitle?.trim() || null,
-    seoMetaDescription: input.seoMetaDescription?.trim() || null,
+    seoMetaDescription,
     seoFocusKeyword: input.seoFocusKeyword?.trim() || null,
     aiGenerated: input.aiGenerated ?? false,
     aiTopic: input.aiTopic?.trim() || null,
@@ -168,6 +190,7 @@ export const createArticle = async (
         // Wajib sinkron dengan `status` agar draft/publish Payload konsisten.
         underscoreStatus: fields.status,
         publishedAt: fields.publishedAt,
+        readingTime: fields.readingTime,
         seoMetaTitle: fields.seoMetaTitle,
         seoMetaDescription: fields.seoMetaDescription,
         seoFocusKeyword: fields.seoFocusKeyword,
@@ -214,6 +237,7 @@ export const updateArticle = async (
         status: fields.status,
         underscoreStatus: fields.status,
         publishedAt: fields.publishedAt,
+        readingTime: fields.readingTime,
         seoMetaTitle: fields.seoMetaTitle,
         seoMetaDescription: fields.seoMetaDescription,
         seoFocusKeyword: fields.seoFocusKeyword,

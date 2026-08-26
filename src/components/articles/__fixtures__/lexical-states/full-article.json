@@ -1,0 +1,324 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Grand Duta City Parung menghadirkan hunian ", "version": 1 },
+          { "type": "text", "detail": 0, "format": 1, "mode": "normal", "style": "", "text": "siap huni", "version": 1 },
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": " di koridor selatan Jakarta.", "version": 1 }
+        ]
+      },
+      {
+        "type": "heading",
+        "tag": "h2",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Pilihan Cluster", "version": 1 }
+        ]
+      },
+      {
+        "type": "list",
+        "listType": "bullet",
+        "tag": "ul",
+        "start": 1,
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          {
+            "type": "listitem",
+            "value": 1,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Cluster Cascada", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 2,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Cluster Ladera", "version": 1 }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "upload",
+        "relationTo": "media",
+        "format": "",
+        "version": 3,
+        "fields": { "alignment": "center", "captionOverride": "Siteplan terbaru Grand Duta City Parung" },
+        "value": {
+          "id": 201,
+          "url": "https://res.cloudinary.com/demo/image/upload/v1/artikel/siteplan-2026.jpg",
+          "alt": "Siteplan 2026",
+          "caption": "caption media (harus tertimpa override)",
+          "width": 1920,
+          "height": 1080,
+          "name": "siteplan-2026.jpg",
+          "mimeType": "image/jpeg",
+          "filename": "siteplan-2026.jpg"
+        }
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Lokasi strategis, akses tol dekat, dan fasilitas lengkap.", "version": 1 }
+        ]
+      },
+      {
+        "type": "heading",
+        "tag": "h3",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Perbandingan Harga", "version": 1 }
+        ]
+      },
+      {
+        "type": "table",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "colWidths": [200, 200],
+        "rowStriping": false,
+        "frozenColumnCount": 0,
+        "frozenRowCount": 0,
+        "children": [
+          {
+            "type": "tablerow",
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "height": 33,
+            "children": [
+              {
+                "type": "tablecell",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "direction": "ltr",
+                "headerState": 1,
+                "colSpan": 1,
+                "rowSpan": 1,
+                "backgroundColor": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "format": "",
+                    "indent": 0,
+                    "version": 1,
+                    "direction": "ltr",
+                    "textFormat": 0,
+                    "textStyle": "",
+                    "children": [
+                      { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Cluster", "version": 1 }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "tablecell",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "direction": "ltr",
+                "headerState": 1,
+                "colSpan": 1,
+                "rowSpan": 1,
+                "backgroundColor": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "format": "",
+                    "indent": 0,
+                    "version": 1,
+                    "direction": "ltr",
+                    "textFormat": 0,
+                    "textStyle": "",
+                    "children": [
+                      { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Mulai", "version": 1 }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "tablerow",
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "height": 33,
+            "children": [
+              {
+                "type": "tablecell",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "direction": "ltr",
+                "headerState": 0,
+                "colSpan": 1,
+                "rowSpan": 1,
+                "backgroundColor": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "format": "",
+                    "indent": 0,
+                    "version": 1,
+                    "direction": "ltr",
+                    "textFormat": 0,
+                    "textStyle": "",
+                    "children": [
+                      { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Cascada", "version": 1 }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "tablecell",
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "direction": "ltr",
+                "headerState": 0,
+                "colSpan": 1,
+                "rowSpan": 1,
+                "backgroundColor": null,
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "format": "",
+                    "indent": 0,
+                    "version": 1,
+                    "direction": "ltr",
+                    "textFormat": 0,
+                    "textStyle": "",
+                    "children": [
+                      { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Rp 1,2 M", "version": 1 }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "quote",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          { "type": "text", "detail": 0, "format": 2, "mode": "normal", "style": "", "text": "Investasi properti terbaik adalah yang dekat akses.", "version": 1 }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Simak juga langkah pembelian berikut:", "version": 1 }
+        ]
+      },
+      {
+        "type": "list",
+        "listType": "number",
+        "tag": "ol",
+        "start": 1,
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          {
+            "type": "listitem",
+            "value": 1,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Survei lokasi", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 2,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Booking unit", "version": 1 }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Tertarik memiliki hunian di ", "version": 1 },
+          {
+            "type": "link",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": { "linkType": "custom", "newTab": false, "url": "https://granddutacitysouthofjakarta.com" },
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Grand Duta City Parung", "version": 1 }
+            ]
+          },
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "? Jelajahi pilihan cluster, harga terbaru, dan fasilitasnya sekarang.", "version": 1 }
+        ]
+      }
+    ]
+  }
+}

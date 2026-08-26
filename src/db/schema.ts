@@ -9,13 +9,13 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
-  index,
   integer,
   jsonb,
   numeric,
   pgEnum,
   pgTable,
   serial,
+  text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -29,20 +29,14 @@ export const artikelStatusEnum = pgEnum("enum_artikel_status", [
   "published",
 ]);
 
-export const artikelKategoriEnum = pgEnum("enum_artikel_kategori", [
-  "panduan-properti",
-  "kawasan",
-  "seputar-gdc",
-]);
+// CATATAN: `enum_artikel_kategori` dan `enum__artikel_v_version_kategori` SUDAH
+// di-DROP oleh migrasi 20260417_133623 (kategori dipindah ke tabel artikel_rels).
+// Enum tersebut sengaja tidak dideklarasikan di sini agar Drizzle tidak
+// mereferensikan objek Postgres yang tidak ada.
 
 export const artikelVersionStatusEnum = pgEnum(
   "enum__artikel_v_version_status",
   ["draft", "published"],
-);
-
-export const artikelVersionKategoriEnum = pgEnum(
-  "enum__artikel_v_version_kategori",
-  ["panduan-properti", "kawasan", "seputar-gdc"],
 );
 
 export const usersRoleEnum = pgEnum("enum_users_role", ["admin", "ai-agent"]);
@@ -66,6 +60,9 @@ export const media = pgTable("media", {
   source: mediaSourceEnum("source").default("upload"),
   sourceId: varchar("source_id"),
   attributionUrl: varchar("attribution_url"),
+  // public_id Cloudinary (migrasi 20260826_090000) — dipakai untuk menghapus
+  // aset saat baris media dihapus. Nullable: baris lama diisi via derivasi URL.
+  cloudinaryPublicId: varchar("cloudinary_public_id"),
   // Kolom upload bawaan Payload.
   url: varchar("url"),
   // Perhatikan penamaan aneh dari Payload: thumbnailURL -> thumbnail_u_r_l.
@@ -134,13 +131,15 @@ export const artikel = pgTable(
     featuredImageId: integer("featured_image_id").references(() => media.id, {
       onDelete: "set null",
     }),
-    kategori: artikelKategoriEnum("kategori"),
+    // Kolom `kategori` sudah di-DROP (migrasi 20260417). Kategori kini via artikel_rels.
     seoMetaTitle: varchar("seo_meta_title"),
     seoMetaDescription: varchar("seo_meta_description"),
     seoFocusKeyword: varchar("seo_focus_keyword"),
     // `status` = field kustom yang dibaca frontend/sitemap.
     status: artikelStatusEnum("status").default("draft"),
     publishedAt: timestamp("published_at", { precision: 3, withTimezone: true }),
+    // Estimasi waktu baca (menit), dihitung otomatis dari konten saat menyimpan.
+    readingTime: integer("reading_time"),
     aiGenerated: boolean("ai_generated").default(false),
     // Jejak audit AI Studio (migrasi 20260825_040000).
     aiTopic: varchar("ai_topic"),
@@ -155,10 +154,9 @@ export const artikel = pgTable(
     // `status` oleh hook Artikel; CMS kustom WAJIB menulis keduanya agar konsisten.
     underscoreStatus: artikelStatusEnum("_status").default("draft"),
   },
-  (table) => [
-    index("artikel_slug_idx_drizzle").on(table.slug),
-    index("artikel_status_idx_drizzle").on(table.status),
-  ],
+  // Index nyata (artikel_slug_idx unik, artikel__status_idx) sudah dibuat oleh
+  // migrasi Payload. Tidak dideklarasikan ulang di sini agar tidak memunculkan
+  // index bayangan yang tak pernah ada di DB.
 );
 
 // ---------------------------------------------------------------------------
@@ -232,6 +230,126 @@ export const aiProviders = pgTable("ai_providers", {
 });
 
 // ---------------------------------------------------------------------------
+// site_settings (Task 7: settings DB-driven key/value + metadata)
+// ---------------------------------------------------------------------------
+//
+// `key` unik (site_settings_key_idx). `type`: text|json|url|image|html.
+// `group`: general|seo|social|contact. Kolom `group` adalah kata reserved di
+// SQL, tetapi aman sebagai nama kolom Postgres karena selalu di-quote oleh
+// Drizzle: varchar("group").
+
+export const siteSettings = pgTable("site_settings", {
+  id: serial("id").primaryKey(),
+  key: varchar("key").notNull(),
+  value: text("value"),
+  type: varchar("type").default("text").notNull(),
+  group: varchar("group").default("general").notNull(),
+  label: varchar("label"),
+  description: varchar("description"),
+  updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  createdAt: timestamp("created_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// ---------------------------------------------------------------------------
+// ai_role_models (Task 9A: model AI per tugas; api_key terenkripsi AES-256-GCM)
+// ---------------------------------------------------------------------------
+//
+// `role` unik (ai_role_models_role_idx): 'text' | 'image' | 'scanning'.
+// `api_key` ciphertext "enc::v1::..." — JANGAN pernah kirim ke client.
+
+export const aiRoleModels = pgTable("ai_role_models", {
+  id: serial("id").primaryKey(),
+  role: varchar("role").notNull(),
+  provider: varchar("provider").default("openai_compatible").notNull(),
+  // Ciphertext AES-256-GCM — JANGAN pernah kirim ke client.
+  apiKey: varchar("api_key").notNull(),
+  baseUrl: varchar("base_url"),
+  model: varchar("model"),
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  createdAt: timestamp("created_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// ---------------------------------------------------------------------------
+// agent_api_tokens (Task 9B: token untuk agent eksternal; hanya hash SHA-256)
+// ---------------------------------------------------------------------------
+//
+// `token_hash` unik (agent_api_tokens_token_hash_idx). Plaintext token TIDAK
+// disimpan — hanya ditampilkan sekali saat pembuatan. `token_prefix` (12 char)
+// bukan rahasia, hanya untuk identifikasi di UI. `scopes` jsonb array string.
+
+export const agentApiTokens = pgTable("agent_api_tokens", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  // SHA-256 hex dari token mentah — JANGAN pernah kirim ke client.
+  tokenHash: varchar("token_hash").notNull(),
+  tokenPrefix: varchar("token_prefix").notNull(),
+  scopes: jsonb("scopes"),
+  isActive: boolean("is_active").default(true),
+  lastUsedAt: timestamp("last_used_at", { precision: 3, withTimezone: true }),
+  expiresAt: timestamp("expires_at", { precision: 3, withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { precision: 3, withTimezone: true }),
+  createdById: integer("created_by_id"),
+  createdAt: timestamp("created_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// ---------------------------------------------------------------------------
+// ai_tasks (Task 10: log tugas AI untuk riwayat/audit)
+// ---------------------------------------------------------------------------
+//
+// `type`: titles|outline|article|seo|text-tool|image-meta.
+// `status`: pending|processing|completed|failed.
+// `input`/`output` jsonb ringkas — JANGAN pernah menyimpan API key di sini.
+// Index `ai_tasks_created_at_idx` untuk urutan riwayat terbaru.
+
+export const aiTasks = pgTable("ai_tasks", {
+  id: serial("id").primaryKey(),
+  type: varchar("type").notNull(),
+  status: varchar("status").default("completed").notNull(),
+  input: jsonb("input"),
+  output: jsonb("output"),
+  error: varchar("error"),
+  userId: integer("user_id"),
+  createdAt: timestamp("created_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// ---------------------------------------------------------------------------
+// admin_audit_log — Task 11: audit trail durable perubahan konten admin.
+//
+// `action`: 'article:create'|'article:update'|'article:delete'|'article:status'.
+// `entity`: 'artikel' (dapat diperluas). `summary` jsonb ringkas — JANGAN simpan
+// kredensial. Index (entity, entity_id) & created_at ada di migrasi.
+// ---------------------------------------------------------------------------
+
+export const adminAuditLog = pgTable("admin_audit_log", {
+  id: serial("id").primaryKey(),
+  action: varchar("action").notNull(),
+  entity: varchar("entity").notNull(),
+  entityId: integer("entity_id"),
+  userId: integer("user_id"),
+  userEmail: varchar("user_email"),
+  summary: jsonb("summary"),
+  createdAt: timestamp("created_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// ---------------------------------------------------------------------------
 // Relations (untuk query relational Drizzle)
 // ---------------------------------------------------------------------------
 
@@ -269,3 +387,13 @@ export type Category = typeof categories.$inferSelect;
 export type Tag = typeof tags.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type AiProvider = typeof aiProviders.$inferSelect;
+export type SiteSetting = typeof siteSettings.$inferSelect;
+export type NewSiteSetting = typeof siteSettings.$inferInsert;
+export type AiRoleModel = typeof aiRoleModels.$inferSelect;
+export type NewAiRoleModel = typeof aiRoleModels.$inferInsert;
+export type AgentApiToken = typeof agentApiTokens.$inferSelect;
+export type NewAgentApiToken = typeof agentApiTokens.$inferInsert;
+export type AiTask = typeof aiTasks.$inferSelect;
+export type NewAiTask = typeof aiTasks.$inferInsert;
+export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
+export type NewAdminAuditLog = typeof adminAuditLog.$inferInsert;

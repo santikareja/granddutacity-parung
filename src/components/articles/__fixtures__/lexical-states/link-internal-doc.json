@@ -1,0 +1,63 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          {
+            "type": "link",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": {
+              "linkType": "internal",
+              "newTab": false,
+              "doc": { "relationTo": "artikel", "value": 12 }
+            },
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "relasi doc internal (tanpa internalDocToHref)", "version": 1 }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          {
+            "type": "link",
+            "format": "",
+            "indent": 0,
+            "version": 3,
+            "direction": "ltr",
+            "fields": {
+              "linkType": "internal",
+              "newTab": true,
+              "doc": { "relationTo": "artikel", "value": 34 }
+            },
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "relasi doc internal newTab", "version": 1 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

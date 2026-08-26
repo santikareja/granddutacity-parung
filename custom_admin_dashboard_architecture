@@ -1,0 +1,1741 @@
+# Arsitektur Lengkap Admin Dashboard — Mum 'N Hun CMS
+
+> **Tujuan dokumen ini**: Menjadi satu-satunya referensi yang dibutuhkan AI agent untuk
+> mereplikasi seluruh sistem admin dashboard ke project baru, menggantikan Payload CMS,
+> **tanpa kehilangan 1 data pun**.
+
+---
+
+## DAFTAR ISI
+
+1. [Ringkasan Sistem](#1-ringkasan-sistem)
+2. [Tech Stack & Dependencies](#2-tech-stack--dependencies)
+3. [Environment Variables](#3-environment-variables)
+4. [Database Schema (Prisma + PostgreSQL)](#4-database-schema-prisma--postgresql)
+5. [Autentikasi & Session (NextAuth v5)](#5-autentikasi--session-nextauth-v5)
+6. [Sistem Keamanan](#6-sistem-keamanan)
+7. [Arsitektur File & Routing](#7-arsitektur-file--routing)
+8. [Admin Layout & Sidebar](#8-admin-layout--sidebar)
+9. [Halaman Admin — Detail per Modul](#9-halaman-admin--detail-per-modul)
+10. [API Routes — Detail per Endpoint](#10-api-routes--detail-per-endpoint)
+11. [Admin API Client (Frontend)](#11-admin-api-client-frontend)
+12. [Komponen Admin Besar](#12-komponen-admin-besar)
+13. [Settings System (SiteSetting)](#13-settings-system-sitesetting)
+14. [Scheduled Publishing (Cron)](#14-scheduled-publishing-cron)
+15. [AI Integration](#15-ai-integration)
+16. [Media / Cloudinary](#16-media--cloudinary)
+17. [Observability & Monitoring](#17-observability--monitoring)
+18. [Data Migration Guide (Payload CMS → Sistem Ini)](#18-data-migration-guide-payload-cms--sistem-ini)
+19. [Workflow Lengkap — End to End](#19-workflow-lengkap--end-to-end)
+
+---
+
+## 1. Ringkasan Sistem
+
+Mum 'N Hun Admin Dashboard adalah **custom CMS full-stack** yang dibangun di atas Next.js App Router. Sistem ini menggantikan WordPress sebagai CMS dan menyediakan:
+
+- **Blog CMS**: CRUD artikel/post dengan rich text editor (TipTap), kategori, tag, SEO metadata
+- **Page CMS**: CRUD halaman statis (Petunjuk Pemakaian, Syarat & Ketentuan, Kontak, dll)
+- **Media Library**: Manajemen gambar via Cloudinary CDN
+- **Hero Section Manager**: Kelola slide banner homepage
+- **SEO Dashboard**: Schema/JSON-LD manager, audit SEO, internal link suggestions
+- **AI Tools**: Generate artikel, rewrite, content audit, AI chat, scanner
+- **Settings Dashboard**: Pengaturan umum, navigasi, media sosial, AI keys
+- **Agent API Tokens**: Token untuk external AI agents (OpenClaw, Hermes, dll)
+- **Monitoring**: Dashboard metrik operasional 24 jam
+
+### Pola Arsitektur Utama
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                     BROWSER (Client)                         │
+│  ┌──────────┐  ┌──────────────┐  ┌────────────────────────┐ │
+│  │  Login    │  │  Admin Pages │  │  Admin Components      │ │
+│  │  Page     │  │  (SSR + CSR) │  │  (PostEditor, Sidebar) │ │
+│  └────┬─────┘  └──────┬───────┘  └───────────┬────────────┘ │
+│       │               │                      │               │
+│       │     ┌─────────▼──────────────────────▼────┐          │
+│       │     │  Admin API Client (lib/api/admin-client.ts)    │
+│       │     │  - CSRF token auto-attach                      │
+│       │     │  - Timeout, retry, error handling               │
+│       │     └─────────────────┬───────────────────┘          │
+└───────┼───────────────────────┼──────────────────────────────┘
+        │                       │
+┌───────▼───────────────────────▼──────────────────────────────┐
+│                      SERVER (Next.js)                         │
+│  ┌────────────┐  ┌─────────────────────────────────────────┐ │
+│  │  proxy.ts   │  │  API Routes (/api/admin/*)              │ │
+│  │  (edge      │  │  - requireAdminApi() / requireAdminMuta│ │
+│  │  middleware) │  │  - Zod validation                       │ │
+│  └─────────────┘  │  - Prisma queries                       │ │
+│                    │  - Admin logging                        │ │
+│                    └─────────────┬───────────────────────────┘ │
+│                                  │                             │
+│  ┌───────────────────────────────▼─────────────────────────┐  │
+│  │               Prisma ORM + PostgreSQL (Supabase)         │  │
+│  │  Users, Posts, Categories, Tags, Pages, Media,           │  │
+│  │  HeroSection, SiteSetting, AiApiKey, AiRoleModel,        │  │
+│  │  AgentApiToken, AiChatMessage, AiTask, SeoSchema,        │  │
+│  │  ContentAudit, ContentIdea, InternalLinkSuggestion        │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Tech Stack & Dependencies
+
+### Core Framework
+
+| Teknologi | Versi | Fungsi |
+| --- | --- | --- |
+| Next.js | ^16.3.1 | App Router, SSR, API Routes |
+| React | 19.2.3 | UI library |
+| TypeScript | ^5 | Type safety |
+| Tailwind CSS | ^4 | Styling |
+
+### Database & ORM
+
+| Teknologi | Versi | Fungsi |
+| --- | --- | --- |
+| Prisma | ^7.3.0 | ORM |
+| @prisma/adapter-pg | ^7.3.0 | PostgreSQL adapter via pg pool |
+| pg | ^8.18.0 | PostgreSQL connection pool |
+| PostgreSQL | (Supabase) | Database backend |
+
+### Authentication & Security
+
+| Teknologi | Versi | Fungsi |
+| --- | --- | --- |
+| next-auth | ^5.0.0-beta.32 | Auth (NextAuth v5) |
+| bcryptjs | ^3.0.3 | Password hashing |
+| zod | ^4.3.6 | Schema validation |
+| sanitize-html | ^2.17.0 | HTML sanitization |
+
+### Rich Text Editor
+
+| Teknologi | Versi | Fungsi |
+| --- | --- | --- |
+| @tiptap/react | ^3.19.0 | WYSIWYG editor |
+| @tiptap/starter-kit | ^3.19.0 | Default extensions |
+| @tiptap/extension-image | ^3.19.0 | Image support |
+| @tiptap/extension-link | ^3.19.0 | Link support |
+| @tiptap/extension-table | 3.19.0 | Table support |
+| @tiptap/extension-text-align | ^3.19.0 | Alignment |
+
+### Media & CDN
+
+| Teknologi | Versi | Fungsi |
+| --- | --- | --- |
+| cloudinary | ^2.9.0 | Image CDN & upload |
+| next-cloudinary | ^6.17.5 | Next.js integration |
+
+### AI
+
+| Teknologi | Versi | Fungsi |
+| --- | --- | --- |
+| @google/genai | ^2.18.0 | AI generation (Gemini) |
+
+### UI Libraries
+
+| Teknologi | Versi | Fungsi |
+| --- | --- | --- |
+| lucide-react | ^0.563.0 | Icons |
+| framer-motion | ^12.34.2 | Animations |
+| radix-ui | ^1.4.3 | Primitives |
+| swiper | ^12.1.0 | Slider/carousel |
+| date-fns | ^4.1.0 | Date formatting |
+
+---
+
+## 3. Environment Variables
+
+```env
+# Database
+DATABASE_URL="postgresql://user:password@host:5432/dbname"
+
+# NextAuth
+AUTH_SECRET="random-secret-for-jwt-signing"
+AUTH_URL="https://your-domain.com"
+
+# Admin Access
+ADMIN_EMAILS="admin@example.com,editor@example.com"
+
+# CSRF Protection
+CSRF_SECRET="random-csrf-secret-min-32-chars"
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+
+# Site
+NEXT_PUBLIC_SITE_URL="https://your-domain.com"
+
+# AI (Gemini)
+GEMINI_API_KEY="your-gemini-key"
+```
+
+---
+
+## 4. Database Schema (Prisma + PostgreSQL)
+
+### 4.1 Connection Setup
+
+```typescript
+// lib/db/prisma.ts
+// Menggunakan pg Pool + PrismaPg adapter
+// - Singleton pattern via globalThis (dev: reuse, prod: new instance)
+// - Fail-fast jika DATABASE_URL tidak di-set
+// - Log level: development = ['error', 'warn'], production = ['error']
+```
+
+**Logic flow**:
+
+1. Baca `DATABASE_URL` dari env
+2. Jika kosong → throw Error langsung (bukan tunggu query gagal)
+3. Buat `pg.Pool` → reuse di development via `globalThis`
+4. Buat `PrismaPg` adapter dari pool
+5. Buat `PrismaClient` dengan adapter → reuse di development
+
+### 4.2 Model-Model Database
+
+#### User (Admin CMS)
+
+```prisma
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  role         Role     @default(AUTHOR)  // ADMIN | AUTHOR
+  avatarUrl    String?
+  passwordHash String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  posts        Post[]
+  @@map("users")
+}
+```
+
+**Logic**:
+
+- `role` menentukan akses dashboard (ADMIN = full access, AUTHOR = limited)
+- `passwordHash` di-hash dengan bcryptjs (cost 12)
+- Admin bisa dibuat via script `scripts/create-admin.ts`
+
+#### Post (Blog Articles)
+
+```prisma
+model Post {
+  id              String      @id @default(cuid())
+  title           String
+  slug            String      @unique
+  content         String      // HTML dari TipTap editor
+  excerpt         String?
+  featuredImage   String?     // Cloudinary URL
+  status          PostStatus  @default(DRAFT)  // DRAFT|PUBLISHED|SCHEDULED|ARCHIVED
+  publishedAt     DateTime?
+  scheduledAt     DateTime?   // untuk auto-publish via cron
+  readingTime     Int?        // auto-calculated dari word count
+  
+  // WordPress migration fields
+  wpId            Int?        @unique
+  wpGuid          String?
+  
+  // SEO fields
+  metaTitle       String?
+  metaDescription String?
+  focusKeyword    String?
+  focusKeywords   String?     // multiple keywords
+  canonicalUrl    String?
+  ogImage         String?
+  ogTitle         String?
+  ogDescription   String?
+  schemaType      String?
+  schemaData      String?     // JSON-LD
+  internalLinks   String?     // JSON array
+  
+  // Provenance
+  source          String      @default("manual")  // manual|ai|agent
+  createdVia      String?     // dashboard, api, agent-name
+  
+  // Relations
+  authorId        String?
+  author          User?       @relation(...)
+  categories      CategoriesOnPosts[]
+  tags            TagsOnPosts[]
+  
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([scheduledAt])
+  @@map("posts")
+}
+```
+
+**Logic kritis**:
+
+- `content` di-sanitize sebelum disimpan (lihat §6.4)
+- `readingTime` dihitung otomatis: `Math.max(1, Math.ceil(wordCount / 200))`
+- `slug` harus unique — ada collision resolver yang append `-2`, `-3`, dst
+- Status flow: `DRAFT → PUBLISHED`, `DRAFT → SCHEDULED → PUBLISHED` (via cron)
+- Publish validation: judul min 10 karakter, konten min 120 kata, excerpt/metaDescription wajib
+
+#### Category
+
+```prisma
+model Category {
+  id          String @id @default(cuid())
+  name        String
+  slug        String @unique  // auto-generated dari name
+  description String?
+  wpId        Int?   @unique  // untuk migrasi
+  posts       CategoriesOnPosts[]
+  @@map("categories")
+}
+```
+
+#### Tag
+
+```prisma
+model Tag {
+  id     String @id @default(cuid())
+  name   String
+  slug   String @unique
+  wpId   Int?   @unique
+  posts  TagsOnPosts[]
+  @@map("tags")
+}
+```
+
+#### Many-to-Many Relations
+
+```prisma
+model CategoriesOnPosts {
+  post       Post     @relation(...)
+  postId     String
+  category   Category @relation(...)
+  categoryId String
+  assignedAt DateTime @default(now())
+  @@id([postId, categoryId])
+  @@map("categories_on_posts")
+}
+
+model TagsOnPosts {
+  post   Post @relation(...)
+  postId String
+  tag    Tag  @relation(...)
+  tagId  String
+  assignedAt DateTime @default(now())
+  @@id([postId, tagId])
+  @@map("tags_on_posts")
+}
+```
+
+**Logic**: Explicit join table (bukan implicit `@relation`) supaya bisa track `assignedAt` dan onDelete cascade.
+
+#### Page (Static Pages)
+
+```prisma
+model Page {
+  id              String     @id @default(cuid())
+  title           String
+  slug            String     @unique
+  content         String     // HTML
+  status          PostStatus @default(DRAFT)
+  publishedAt     DateTime?
+  // SEO fields sama seperti Post
+  metaTitle, metaDescription, canonicalUrl, ogImage, ogTitle, ogDescription
+  schemaType, schemaData
+  wpId            Int?       @unique
+  @@map("pages")
+}
+```
+
+#### Media
+
+```prisma
+model Media {
+  id         String @id @default(cuid())
+  filename   String
+  mimeType   String
+  size       Int
+  width      Int?
+  height     Int?
+  alt        String?
+  caption    String?
+  url        String          // Cloudinary URL
+  wpUrl      String?         // legacy WordPress URL
+  wpPath     String?
+  source     String @default("upload")  // upload|free_stock|ai_generated
+  sourceRef  String?         // stock photo ID
+  attribution String?        // photographer credit
+  aiPrompt   String?         // prompt jika AI generated
+  publicId   String?         // Cloudinary public_id
+  wpId       Int?   @unique
+  @@map("media")
+}
+```
+
+#### HeroSection
+
+```prisma
+model HeroSection {
+  id               String  @id @default(cuid())
+  title            String
+  subtitle         String?
+  imageUrl         String?
+  imagePublicId    String?
+  ctaPrimaryText   String  @default("Cek Harga Sewa")
+  ctaPrimaryLink   String  @default("/#pricing")
+  ctaSecondaryText String?
+  ctaSecondaryLink String?
+  isActive         Boolean @default(true)
+  order            Int     @default(0)
+  @@map("hero_sections")
+}
+```
+
+#### SiteSetting
+
+```prisma
+model SiteSetting {
+  id          String @id @default(cuid())
+  key         String @unique     // e.g. "site_name", "contact_email"
+  value       String             // stored as string, parsed per type
+  type        String @default("text")     // text|json|image|url|html
+  group       String @default("general")  // general|seo|social|footer|navigation|homepage
+  label       String?
+  description String?
+  @@index([group])
+  @@map("site_settings")
+}
+```
+
+**Logic**: Key-value store dengan grouping. Cached via `unstable_cache` (60s TTL + revalidateTag on mutation).
+
+#### AiApiKey (Rotary Pool)
+
+```prisma
+model AiApiKey {
+  id         String  @id @default(cuid())
+  provider   String  @default("gemini")
+  apiKey     String                        // encrypted at rest
+  label      String?
+  baseUrl    String?                       // untuk OpenAI-compatible providers
+  model      String?
+  capability String  @default("text")      // text|image
+  authStyle  String?                       // bearer|api-key|custom
+  isActive   Boolean @default(true)
+  usageCount Int     @default(0)
+  lastUsedAt DateTime?
+  lastError  String?
+  order      Int     @default(0)
+  @@map("ai_api_keys")
+}
+```
+
+**Logic**: Rotary pool — multiple API keys, round-robin usage, auto-skip yang error.
+
+#### AiRoleModel (Per-Task Dedicated)
+
+```prisma
+model AiRoleModel {
+  id       String  @id @default(cuid())
+  role     String  @unique    // "scanning"|"text"|"image"
+  provider String  @default("openai_compatible")
+  apiKey   String             // encrypted
+  baseUrl  String?
+  model    String?
+  // ... same pattern as AiApiKey
+  @@map("ai_role_models")
+}
+```
+
+**Logic**: Satu credential per tugas AI:
+
+- `scanning` → audit content, internal link suggestions
+- `text` → generate/rewrite artikel, SEO metadata
+- `image` → generate featured image, alt text
+
+#### AgentApiToken
+
+```prisma
+model AgentApiToken {
+  id          String    @id @default(cuid())
+  name        String
+  tokenHash   String    @unique  // SHA-256 hash
+  tokenPrefix String             // first 8 chars for display
+  scopes      String             // JSON array: ["posts:read","posts:write",...]
+  isActive    Boolean   @default(true)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdById String?
+  @@map("agent_api_tokens")
+}
+```
+
+**Logic**: Hash-only storage. Plaintext shown ONCE at creation. Used by external AI agents.
+
+#### AiChatMessage, AiTask, SeoSchema, ContentAudit, ContentIdea, InternalLinkSuggestion
+
+(Lihat schema.prisma untuk detail lengkap — model-model ini support AI chat history, batch task queue, JSON-LD schemas, content audit pipeline, dan internal linking suggestions.)
+
+---
+
+## 5. Autentikasi & Session (NextAuth v5)
+
+### 5.1 Arsitektur Auth
+
+Sistem auth dibagi menjadi 2 file untuk optimasi:
+
+#### `auth.config.ts` (Edge-Safe)
+
+```typescript
+// TIDAK import Prisma atau bcrypt — bisa di-import di edge/proxy
+export const authConfig = {
+  pages: { signIn: "/login" },
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60 * 8,  // 8 jam
+  },
+  providers: [],  // Ditambahkan di auth.ts
+  callbacks: {
+    jwt({ token, user }) {
+      // Persist id + role ke JWT token saat sign-in
+      if (user) {
+        token.id = user.id
+        token.role = user.role ?? "AUTHOR"
+      }
+      return token
+    },
+    session({ session, token }) {
+      // Expose id + role di session object
+      session.user.id = token.id
+      session.user.role = token.role ?? "AUTHOR"
+      return session
+    },
+  },
+}
+```
+
+#### `auth.ts` (Server-Side Only)
+
+```typescript
+// Import Prisma + bcrypt (berat, hanya untuk auth handler)
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  providers: [
+    Credentials({
+      credentials: { email: {...}, password: {...} },
+      async authorize(rawCredentials, request) {
+        // 1. Validate input via Zod (email: lowercase, trimmed)
+        // 2. Rate limit check: 5 attempts / 15 minutes per IP+email
+        // 3. Query user by email
+        // 4. TIMING-SAFE compare: selalu bcrypt.compare, bahkan jika user tidak ada
+        //    (gunakan DUMMY_PASSWORD_HASH untuk prevent enumeration)
+        // 5. Jika match → return { id, email, name, role }
+        // 6. Jika gagal → consumeLoginAttempt() + return null
+        // 7. NEVER return passwordHash ke session layer
+      },
+    }),
+  ],
+})
+```
+
+**Anti-patterns yang dihindari**:
+
+- Timing side channel → dummy hash comparison
+- User enumeration → generic error message
+- Brute force → rate limit per IP+email (5/15min)
+- Password in session → explicit field exclusion
+
+### 5.2 Proxy / Middleware (`proxy.ts`)
+
+```typescript
+// Edge middleware — runs on EVERY matched request
+export const proxy = auth((req) => {
+  // Logic:
+  // 1. /admin/* atau /api/admin/* + NOT logged in → redirect ke /login?redirect=path
+  // 2. /login + logged in → redirect ke /admin
+  // 3. Otherwise → NextResponse.next()
+})
+
+export const config = {
+  matcher: ["/admin/:path*", "/api/admin/:path*", "/login"],
+}
+```
+
+**PENTING**: Proxy hanya cek "apakah ada session?" — BUKAN cek role. Role authorization di-enforce di `requireAdminPage()` dan `requireAdminApi()` (defense in depth).
+
+### 5.3 Login Page Flow
+
+```text
+User buka /admin
+  → proxy.ts: belum login → redirect /login?redirect=/admin
+  → Login page renders (client component)
+  → User submit email + password
+  → signIn("credentials", { email, password, redirect: false })
+  → auth.ts authorize() runs:
+      → Zod validate
+      → Rate limit check
+      → DB lookup + bcrypt compare
+      → Return user atau null
+  → Jika sukses → router.push(redirect) + router.refresh()
+  → Jika gagal → tampilkan "Email atau password salah"
+```
+
+### 5.4 Type Declarations
+
+```typescript
+// types/next-auth.d.ts
+declare module "next-auth" {
+  interface Session {
+    user: { id: string; role: "ADMIN" | "AUTHOR" } & DefaultSession["user"]
+  }
+  interface User {
+    role?: "ADMIN" | "AUTHOR"
+  }
+}
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string
+    role: "ADMIN" | "AUTHOR"
+  }
+}
+```
+
+---
+
+## 6. Sistem Keamanan
+
+### 6.1 Admin Authorization (`lib/security/admin.ts`)
+
+Tiga fungsi utama:
+
+#### `requireAdminPage()` — untuk Server Components
+
+```typescript
+// Flow:
+// 1. auth() → get session
+// 2. Jika no session → redirect("/login")
+// 3. Query DB user by email → check role === "ADMIN"
+// 4. Fallback: check ADMIN_EMAILS env variable
+// 5. Jika bukan admin → redirect("/") (bukan /login, untuk hindari loop)
+// 6. Return AdminIdentity { id, email, role: "ADMIN", source: "database"|"env" }
+```
+
+#### `requireAdminApi()` — untuk API GET routes
+
+```typescript
+// Flow sama, tapi return NextResponse.json 401/403 bukan redirect
+```
+
+#### `requireAdminMutationApi()` — untuk API POST/PUT/DELETE routes
+
+```typescript
+// Flow:
+// 1. requireAdminApi() → auth check
+// 2. verifyAdminCsrf() → CSRF token check
+// 3. checkRateLimit() → 60 mutations/minute per user per action
+// 4. Return AdminCheckResult
+```
+
+### 6.2 CSRF Protection
+
+#### Server-side (`lib/security/csrf.ts`)
+
+```text
+CSRF Token = HMAC-SHA256(CSRF_SECRET, userId)
+```
+
+**Verification flow**:
+
+1. Check `CSRF_SECRET` exists
+2. Check `Origin` header exists
+3. Normalize & validate origin against allowed origins
+4. Check `x-csrf-token` header exists
+5. Generate expected HMAC → timing-safe compare
+6. If any step fails → 403 Forbidden
+
+**Allowed origins**: runtime origin + x-forwarded-host + NEXT_PUBLIC_SITE_URL
+
+#### Client-side (`lib/security/csrf-client.ts`)
+
+```typescript
+// Lazy-fetch & cache CSRF token
+// GET /api/admin/csrf → { success: true, data: { csrfToken: "..." } }
+// Token cached in memory (singleton per tab lifecycle)
+```
+
+### 6.3 Rate Limiting (`lib/security/rate-limit.ts`)
+
+In-memory rate limiter (Map-based, process-level):
+
+```typescript
+type Config = { limit: number, windowMs: number }
+
+// Two functions:
+// peekRateLimit(key, config) — read-only check (no consume)
+// checkRateLimit(key, config) — consume attempt + check
+
+// Cleanup: when store > 5000 entries, purge expired
+// Response: 429 with Retry-After header
+```
+
+**Rate limits yang diterapkan**:
+
+| Context | Key Pattern | Limit |
+| --- | --- | --- |
+| Login | `login:{ip}:{email}` | 5 / 15 min |
+| Admin mutation | `admin-mutation:{userId}:{action}` | 60 / 1 min |
+
+### 6.4 HTML Sanitization (`lib/security/sanitize-html.ts`)
+
+Semua content dari TipTap editor di-sanitize sebelum disimpan ke database. Menggunakan library `sanitize-html` dengan whitelist tag dan atribut yang strict.
+
+### 6.5 Input Validation (Zod)
+
+SETIAP API route memvalidasi input dengan Zod schema:
+
+- Query parameters di-parse via `z.coerce` untuk type coercion
+- Body di-parse sebelum business logic
+- Semua error di-log + return structured error response
+
+---
+
+## 7. Arsitektur File & Routing
+
+```text
+app/
+├── login/
+│   ├── layout.tsx          # Metadata: noindex, nofollow
+│   └── page.tsx            # Client component: login form
+│
+├── admin/
+│   ├── layout.tsx          # Server component: requireAdminPage() + sidebar + top bar
+│   ├── page.tsx            # Server component: dashboard overview
+│   │
+│   ├── posts/
+│   │   ├── page.tsx        # Client: post list + search + filter + pagination
+│   │   ├── new/page.tsx    # Wrapper → <PostEditor />
+│   │   └── [id]/edit/page.tsx  # Wrapper → <PostEditor postId={id} />
+│   │
+│   ├── categories/
+│   │   └── page.tsx        # Client: CRUD inline (add + edit + delete)
+│   │
+│   ├── tags/
+│   │   └── page.tsx        # Client: CRUD inline
+│   │
+│   ├── pages/
+│   │   ├── page.tsx        # Client: page list
+│   │   ├── new/page.tsx    # Page editor
+│   │   └── [id]/edit/page.tsx
+│   │
+│   ├── media/
+│   │   └── page.tsx        # Client: grid gallery + upload + search + preview modal
+│   │
+│   ├── hero/
+│   │   └── page.tsx        # Client: hero slide manager (add/edit/toggle/delete/reorder)
+│   │
+│   ├── seo/
+│   │   ├── page.tsx        # SEO dashboard overview
+│   │   ├── schemas/        # Schema/JSON-LD manager
+│   │   └── settings/       # SEO settings
+│   │
+│   ├── ai/
+│   │   ├── page.tsx        # AI dashboard
+│   │   ├── content-audit/  # Content audit + calendar
+│   │   ├── generate/       # AI article generator
+│   │   ├── rewrite/        # AI rewriter
+│   │   ├── internal-links/ # Internal link suggestions
+│   │   └── scanner/        # Content scanner
+│   │
+│   ├── chat/
+│   │   └── page.tsx        # AI chat interface
+│   │
+│   ├── monitoring/
+│   │   └── page.tsx        # Server component: operational metrics
+│   │
+│   └── settings/
+│       ├── page.tsx        # General settings
+│       ├── navigation/     # Navigation settings
+│       ├── social/         # Social media links
+│       ├── ai/             # AI key pool manager
+│       │   └── models/     # AI role model per tugas
+│       └── agent-tokens/   # Agent API token manager
+│
+├── api/
+│   ├── auth/[...nextauth]  # NextAuth handler
+│   ├── admin/
+│   │   ├── posts/
+│   │   │   ├── route.ts           # GET (list) + POST (create)
+│   │   │   ├── [id]/route.ts      # GET (single) + PUT (update) + DELETE
+│   │   │   └── publish-scheduled/ # POST (cron trigger)
+│   │   ├── categories/
+│   │   │   ├── route.ts           # GET + POST
+│   │   │   └── [id]/route.ts      # PUT + DELETE
+│   │   ├── tags/
+│   │   │   ├── route.ts           # GET + POST
+│   │   │   └── [id]/route.ts      # PUT + DELETE
+│   │   ├── pages/
+│   │   │   ├── route.ts           # GET + POST
+│   │   │   └── [id]/route.ts      # PUT + DELETE
+│   │   ├── media/route.ts         # GET + POST + DELETE
+│   │   ├── hero/route.ts          # GET + POST + PUT + DELETE
+│   │   ├── settings/route.ts      # GET + PUT
+│   │   ├── seo/                   # SEO related endpoints
+│   │   ├── csrf/route.ts          # GET → return CSRF token
+│   │   ├── upload/route.ts        # POST → Cloudinary upload
+│   │   ├── chat/route.ts          # POST → AI chat
+│   │   ├── ai/                    # AI endpoints
+│   │   │   ├── image/route.ts     # POST → AI image generation
+│   │   │   └── role-models/route.ts # CRUD AI role models
+│   │   ├── agent-tokens/          # Agent token management
+│   │   ├── content-calendar/      # Content calendar
+│   │   └── internal-link-suggestions/
+│   │
+│   ├── agent/             # External agent API (token-auth)
+│   ├── cron/              # Cron endpoints
+│   └── hero/              # Public hero data
+│
+├── [slug]/                # Dynamic post/page rendering
+├── blog/                  # Blog listing
+├── category/              # Category pages
+└── tag/                   # Tag pages
+
+components/
+├── admin/
+│   ├── sidebar.tsx              # Collapsible sidebar with grouped navigation
+│   ├── post-editor.tsx          # Full post editor (TipTap + SEO + metadata)
+│   ├── rich-text-editor.tsx     # TipTap wrapper component
+│   ├── ai-assistant-panel.tsx   # AI writing assistant panel
+│   ├── image-source-picker.tsx  # Multi-source image picker
+│   ├── cloudinary-uploader.tsx  # Cloudinary upload widget
+│   ├── seo-scanner.tsx          # SEO audit component
+│   └── wysiwyg-content.css      # Editor content styles
+├── blog/                  # Public blog components
+├── home/                  # Homepage components
+├── layout/                # Shared layout components
+├── shared/                # Shared components
+└── ui/                    # Radix-based UI primitives
+
+lib/
+├── db/
+│   ├── prisma.ts          # Prisma client singleton
+│   └── queries.ts         # Public-facing queries (getPosts, getPostBySlug, etc.)
+├── api/
+│   └── admin-client.ts    # Client-side admin API wrapper
+├── security/
+│   ├── admin.ts           # Admin auth guards
+│   ├── admin-helpers.ts   # Helper utilities
+│   ├── csrf.ts            # Server CSRF
+│   ├── csrf-client.ts     # Client CSRF
+│   ├── rate-limit.ts      # Rate limiter
+│   ├── sanitize-html.ts   # HTML sanitizer
+│   ├── agent-token.ts     # Agent token verification
+│   ├── api-key-crypto.ts  # API key encryption
+│   └── url-guard.ts       # URL validation/sanitization
+├── content/
+│   ├── post-publishing.ts      # Slug generation, reading time, publish validation
+│   └── scheduled-publisher.ts  # Cron: auto-publish scheduled posts
+├── ai/
+│   └── provider.ts        # AI provider abstraction
+├── settings.ts            # SiteSetting cache layer
+├── cloudinary.ts          # Cloudinary upload helpers
+├── constants.ts           # App constants
+├── utils.ts               # General utilities (cn, etc.)
+├── observability/         # Admin logging & alerts
+├── seo/                   # SEO utilities
+└── supabase/              # Supabase client (if needed)
+```
+
+---
+
+## 8. Admin Layout & Sidebar
+
+### 8.1 Admin Layout (`app/admin/layout.tsx`)
+
+```typescript
+// Server component — runs requireAdminPage() on EVERY admin page load
+export default async function AdminLayout({ children }) {
+  await requireAdminPage()  // Will redirect if not admin
+  
+  return (
+    <div className="min-h-screen bg-[#F9F6F0] flex text-[#0F0A09]">
+      <AdminSidebar />
+      <div className="flex-1 flex flex-col min-h-screen overflow-x-clip">
+        <header className="sticky top-0 z-30 ...">
+          {/* Top bar with "Lihat Website →" link */}
+        </header>
+        <main className="flex-1 p-6 lg:p-8">
+          {children}
+        </main>
+      </div>
+    </div>
+  )
+}
+```
+
+**Design tokens**:
+
+- Background: `#F9F6F0` (warm off-white)
+- Text primary: `#0F0A09`
+- Text muted: `#8C7A6B`
+- Accent/brand: `#466A68` (teal-green)
+- Border: `#D4BCAA/20`
+- Card: white with `border-[#D4BCAA]/20 rounded-2xl shadow-sm`
+
+### 8.2 Sidebar (`components/admin/sidebar.tsx`)
+
+Client component dengan fitur:
+
+- **Collapsible**: desktop collapse ke 80px, expand ke 256px
+- **Mobile responsive**: slide-out dengan overlay
+- **Grouped navigation** dengan accordion collapse
+- **Active state detection**: exact match untuk `/admin`, prefix match untuk sub-routes
+- **Auto-expand**: group yang mengandung active item auto-open
+- **Search**: placeholder input (bisa diextend)
+- **Logout**: signOut() dengan redirect ke /login
+
+**Navigation Groups**:
+
+```typescript
+const navGroups = [
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    items: [
+      { href: "/admin", label: "Overview" },
+      { href: "/admin/monitoring", label: "Monitoring" },
+    ],
+  },
+  {
+    id: "content",
+    title: "Konten",
+    items: [
+      { href: "/admin/posts", label: "Artikel" },
+      { href: "/admin/categories", label: "Kategori" },
+      { href: "/admin/tags", label: "Tag" },
+      { href: "/admin/pages", label: "Halaman" },
+      { href: "/admin/media", label: "Media" },
+      { href: "/admin/hero", label: "Hero Section" },
+    ],
+  },
+  {
+    id: "seo",
+    title: "SEO",
+    items: [
+      { href: "/admin/seo", label: "SEO Dashboard" },
+      { href: "/admin/seo/schemas", label: "Schema / JSON-LD" },
+      { href: "/admin/seo/settings", label: "SEO Settings" },
+    ],
+  },
+  {
+    id: "ai",
+    title: "AI Tools",
+    items: [
+      { href: "/admin/ai", label: "AI Dashboard" },
+      { href: "/admin/ai/content-audit", label: "Audit & Kalender" },
+      { href: "/admin/ai/generate", label: "Generate" },
+      { href: "/admin/ai/rewrite", label: "Rewrite" },
+      { href: "/admin/ai/internal-links", label: "Internal Links" },
+      { href: "/admin/ai/scanner", label: "Scanner" },
+      { href: "/admin/chat", label: "AI Chat" },
+    ],
+  },
+  {
+    id: "settings",
+    title: "Pengaturan",
+    items: [
+      { href: "/admin/settings", label: "Umum" },
+      { href: "/admin/settings/navigation", label: "Navigasi" },
+      { href: "/admin/settings/social", label: "Media Sosial" },
+      { href: "/admin/settings/ai/models", label: "AI Models per Tugas" },
+      { href: "/admin/settings/ai", label: "AI Key Pool" },
+      { href: "/admin/settings/agent-tokens", label: "Agent Tokens" },
+    ],
+  },
+]
+```
+
+---
+
+## 9. Halaman Admin — Detail per Modul
+
+### 9.1 Dashboard Overview (`/admin`)
+
+**Type**: Server Component (data fetched at request time)
+
+**Data yang ditampilkan**:
+
+- Welcome banner dengan greeting berdasarkan jam + site name
+- Stat cards: Published, Draft, Scheduled, Kategori, Tag
+- Recent posts (6 terbaru) dengan status badge
+- Quick actions: Tulis Artikel, SEO Dashboard, AI Tools, AI Chat, Pengaturan
+
+**Query logic**:
+
+```typescript
+const stats = await Promise.all([
+  prisma.post.count({ where: { status: "PUBLISHED" } }),
+  prisma.post.count({ where: { status: "DRAFT" } }),
+  prisma.category.count(),
+  prisma.tag.count(),
+  prisma.post.count({ where: { status: "SCHEDULED" } }),
+  prisma.page.count(),
+  prisma.media.count(),
+])
+const recentPosts = await prisma.post.findMany({
+  orderBy: { updatedAt: "desc" }, take: 6,
+  select: { id, title, slug, status, publishedAt, updatedAt }
+})
+```
+
+### 9.2 Posts Management (`/admin/posts`)
+
+**Type**: Client Component
+
+**Features**:
+
+- Paginated list (20 per page)
+- Search with 300ms debounce
+- Status filter dropdown (All, Published, Draft, Scheduled, Archived)
+- Table: Judul (link to edit), Kategori badges, Status badge, Diperbarui, Aksi
+- Actions: View (published only), Delete (with confirm)
+- AbortController: cancel in-flight requests on new search
+
+**API calls**:
+
+```http
+GET /api/admin/posts?page=1&limit=20&status=PUBLISHED&search=keyword
+DELETE /api/admin/posts/{id}
+```
+
+### 9.3 Post Editor (`/admin/posts/new` & `/admin/posts/[id]/edit`)
+
+**Type**: Client Component — `<PostEditor />` (47KB component)
+
+**Features**:
+
+- TipTap WYSIWYG editor dengan toolbar
+- Title input → auto-generate slug
+- Category multi-select (checkboxes)
+- Tag multi-select
+- Featured image picker (Cloudinary/AI/Stock)
+- Status selector (Draft, Published, Scheduled)
+- Schedule date/time picker
+- Excerpt editor
+- SEO panel: meta title, meta description, focus keyword, OG fields
+- AI Assistant panel: generate title ideas, outline, full article
+- Auto-save indicator
+- Publish validation (inline errors)
+
+**API calls**:
+
+```http
+POST /api/admin/posts        (create new)
+PUT  /api/admin/posts/{id}   (update existing)
+GET  /api/admin/posts/{id}   (load for editing)
+GET  /api/admin/categories   (load category options)
+GET  /api/admin/tags         (load tag options)
+```
+
+### 9.4 Categories (`/admin/categories`)
+
+**Type**: Client Component
+
+**Features**:
+
+- Add form: name + description → auto-slug
+- Inline edit: click pencil → input fields → confirm/cancel
+- Delete with confirm
+- Shows: name, description, slug, post count
+
+**Pattern**: Identical CRUD pattern untuk Categories dan Tags
+
+### 9.5 Tags (`/admin/tags`)
+
+Same pattern as Categories, tanpa description field.
+
+### 9.6 Pages (`/admin/pages`)
+
+**Type**: Client Component
+
+**Features**:
+
+- Page list with status badges
+- Create/edit via page editor (similar to post editor but simpler)
+- SEO metadata fields
+
+### 9.7 Media Library (`/admin/media`)
+
+**Type**: Client Component
+
+**Features**:
+
+- Grid gallery (6-column responsive)
+- Add media: URL input + alt text + preview
+- Search with 300ms debounce
+- Pagination (30 per page)
+- Hover overlay: Copy URL, Delete
+- Click: Preview modal with full-size image + copy URL
+- AbortController for list requests
+
+### 9.8 Hero Section (`/admin/hero`)
+
+**Type**: Client Component
+
+**Features**:
+
+- Slide list with thumbnail, title, subtitle, CTA preview
+- Add slide form: title, subtitle, image URL, CTA primary/secondary
+- Inline edit
+- Toggle active/inactive (eye icon)
+- Delete with confirm
+- Grip handle for future drag reorder
+- Busy flag: prevent concurrent toggle/delete
+
+### 9.9 Settings (`/admin/settings`)
+
+**Type**: Client Component
+
+**Settings fields**:
+
+- site_name, site_description, site_url
+- site_logo, site_icon (Cloudinary URLs)
+- contact_email, contact_phone, contact_whatsapp
+- contact_address, contact_work_hours
+
+**Save flow**: PUT /api/admin/settings with batch update → revalidateTag("site-settings")
+
+### 9.10 Monitoring (`/admin/monitoring`)
+
+**Type**: Server Component
+
+**Shows**: 24-hour metrics snapshot
+
+- 401/403 count (unauthorized)
+- 500+ count (server errors)
+- AI Task Failed count
+- Total events
+- Top endpoints by request count
+
+---
+
+## 10. API Routes — Detail per Endpoint
+
+### 10.1 Posts API
+
+#### `GET /api/admin/posts`
+
+- Auth: `requireAdminApi()`
+- Query: `{ page, limit, status?, search?, category? }`
+- Validation: Zod schema
+- Response: `{ success, data: Post[], pagination: { page, limit, total, totalPages } }`
+
+#### `POST /api/admin/posts`
+
+- Auth: `requireAdminMutationApi()` (includes CSRF + rate limit)
+- Body: `{ title, slug, content?, excerpt?, featuredImage?, status?, publishedAt?, scheduledAt?, categoryIds?, tagIds?, metaTitle?, metaDescription?, ... }`
+- Logic:
+  1. Zod validate body
+  2. Parse dates (publishedAt, scheduledAt)
+  3. Check slug uniqueness
+  4. Sanitize HTML content
+  5. If PUBLISHED: validate readiness (title ≥10 chars, content ≥120 words, excerpt required)
+  6. If SCHEDULED: require scheduledAt
+  7. Calculate reading time
+  8. Create post with categories + tags relations
+  9. If published: revalidatePath
+  10. Log admin action
+- Response: `{ success, data: Post }`
+
+#### `GET /api/admin/posts/[id]`
+
+- Returns single post with all fields + categories + tags
+
+#### `PUT /api/admin/posts/[id]`
+
+- Same validation as POST but for update
+- Handles category/tag reassignment (delete old → create new)
+
+#### `DELETE /api/admin/posts/[id]`
+
+- Cascade deletes: CategoriesOnPosts, TagsOnPosts
+- revalidatePath
+
+### 10.2 Categories API
+
+#### `GET /api/admin/categories`
+
+```json
+{ "success": true, "data": [{ "id": "1", "name": "Category", "slug": "cat", "description": null, "_count": { "posts": 5 } }] }
+```
+
+#### `POST /api/admin/categories`
+
+- Body: `{ name, description? }`
+- Auto-generate slug from name
+
+#### `PUT /api/admin/categories/[id]`
+
+- Body: `{ name, description? }`
+- Re-generate slug from name
+
+#### `DELETE /api/admin/categories/[id]`
+
+- Cascade: removes CategoriesOnPosts (posts themselves preserved)
+
+### 10.3 Tags API — Same pattern as Categories
+
+### 10.4 Pages API — Same CRUD pattern as Posts (simpler, no categories/tags)
+
+### 10.5 Media API
+
+#### `GET /api/admin/media`
+
+- Query: `{ page, limit, search? }`
+- Search: by alt text or filename
+
+#### `POST /api/admin/media`
+
+- Body: `{ url, alt? }`
+
+#### `DELETE /api/admin/media`
+
+- Body: `{ id }`
+
+### 10.6 Hero API
+
+#### `GET /api/admin/hero`
+
+- Returns all slides ordered by `order`
+
+#### `POST /api/admin/hero` — Create slide
+
+#### `PUT /api/admin/hero` — Update slide (including toggle isActive)
+
+#### `DELETE /api/admin/hero` — Delete slide
+
+### 10.7 Settings API
+
+#### `GET /api/admin/settings?group=general`
+
+#### `PUT /api/admin/settings` — Body: `{ settings: Record<string, string> }`
+
+### 10.8 CSRF API
+
+#### `GET /api/admin/csrf`
+
+- Auth: `requireAdminApi()`
+- Response: `{ success: true, data: { csrfToken: "hmac-base64url" } }`
+
+---
+
+## 11. Admin API Client (Frontend)
+
+File: `lib/api/admin-client.ts`
+
+### Core Pattern
+
+```typescript
+// Setiap client-side admin page menggunakan helper ini:
+import { adminGet, adminPost, adminPut, adminDelete } from "@/lib/api/admin-client"
+
+// GET: auto-retry (1x) on timeout/network error/5xx
+const data = await adminGet<ListPostsResponse>("/api/admin/posts?page=1")
+
+// POST/PUT/DELETE: auto-attach CSRF token
+const result = await adminPost<CreateResponse>("/api/admin/posts", {
+  body: { title: "...", content: "..." }
+})
+```
+
+### Features
+
+1. **Auto CSRF**: Non-GET requests automatically fetch + attach CSRF token
+2. **Timeout**: Default 10s, configurable
+3. **Retry**: GET requests retry 1x with exponential backoff (200ms * 2^attempt)
+4. **Error handling**: Structured `AdminClientError` with code (HTTP_ERROR, TIMEOUT, ABORTED, NETWORK_ERROR)
+5. **Response parsing**: Safe JSON parse with fallback
+6. **AbortController support**: External signal forwarding for request cancellation
+
+### Error Message Extraction
+
+```typescript
+// Extracts human-readable error from API response:
+// 1. payload.message
+// 2. payload.error
+// 3. payload.issues[0].message (Zod errors)
+// 4. Fallback: "Request gagal (status statusText)"
+```
+
+---
+
+## 12. Komponen Admin Besar
+
+### 12.1 PostEditor (`components/admin/post-editor.tsx`)
+
+47KB component — heart of the CMS. Features:
+
+- **Mode**: New (no postId) vs Edit (postId prop)
+- **Auto-slug**: dari title, dengan collision detection
+- **TipTap integration**: via RichTextEditor component
+- **AI Assistant**: sidebar panel untuk AI-assisted writing
+- **Image picker**: multi-source (upload, Cloudinary, AI, stock photos)
+- **SEO panel**: collapsible panel untuk SEO metadata
+- **Category/tag management**: fetch from API, multi-select
+- **Status management**: DRAFT → PUBLISHED / SCHEDULED logic
+- **Publish validation**: client-side pre-check before API call
+
+### 12.2 RichTextEditor (`components/admin/rich-text-editor.tsx`)
+
+TipTap editor wrapper dengan:
+
+- Heading levels (H2-H4)
+- Bold, Italic, Underline
+- Ordered/Unordered lists
+- Links
+- Images (inline)
+- Tables
+- Text alignment
+- Code blocks
+- Blockquote
+- Custom toolbar with icons
+
+### 12.3 AdminSidebar — Described in §8.2
+
+### 12.4 AI Assistant Panel (`components/admin/ai-assistant-panel.tsx`)
+
+28KB component for AI-assisted content creation:
+
+- Title idea generation
+- Content outline generation
+- Full article generation from outline
+- SEO metadata suggestions
+- Integration with AiRoleModel system
+
+### 12.5 ImageSourcePicker (`components/admin/image-source-picker.tsx`)
+
+28KB component for multi-source image selection:
+
+- Upload to Cloudinary
+- Browse Cloudinary library
+- AI image generation (via Gemini)
+- Free stock photo search
+- URL input
+
+---
+
+## 13. Settings System (SiteSetting)
+
+### Cache Layer (`lib/settings.ts`)
+
+```typescript
+// Cached with unstable_cache (60s TTL, "site-settings" tag)
+export const getSetting = unstable_cache(
+  async (key) => prisma.siteSetting.findUnique({ where: { key } })?.value ?? null,
+  ["site-setting"],
+  { tags: ["site-settings"], revalidate: 60 }
+)
+
+export const getSettingsByGroup = unstable_cache(...)
+export const getAllSettings = unstable_cache(...)
+export async function getJsonSetting<T>(key: string): Promise<T | null>
+
+// Mutations: upsert + revalidateTag("site-settings")
+export async function updateSetting(key, value, options?)
+export async function updateSettings(settings: Record<string, string>, options?)
+```
+
+**Setting groups**:
+
+- `general`: site_name, site_description, site_url, site_logo, contact_*
+- `seo`: meta defaults, schema defaults
+- `social`: social media URLs
+- `navigation`: menu items (JSON)
+- `homepage`: homepage config
+
+---
+
+## 14. Scheduled Publishing (Cron)
+
+### Publisher Logic (`lib/content/scheduled-publisher.ts`)
+
+```typescript
+// Called by cron endpoint: POST /api/admin/posts/publish-scheduled
+// or GET /api/cron/publish-scheduled (with cron secret)
+
+export async function publishDueScheduledPosts(now: Date) {
+  // 1. Query: status=SCHEDULED, scheduledAt <= now, LIMIT 50, ORDER BY scheduledAt ASC
+  // 2. For each post:
+  //    a. validatePublishReadiness() — same rules as manual publish
+  //    b. If fails: push scheduledAt 1 hour ahead (backoff), add to skipped
+  //    c. If passes: CAS update (WHERE id AND status=SCHEDULED) → PUBLISHED
+  //    d. Update linked ContentIdea status to "published"
+  //    e. Add to published list
+  // 3. Return { checked, published, skipped }
+}
+```
+
+**CAS (Compare-And-Swap)**: `updateMany({ where: { id, status: "SCHEDULED" } })` ensures two concurrent cron runs can't both publish the same post.
+
+### Publish Validation Rules
+
+```typescript
+// lib/content/post-publishing.ts
+function validatePublishReadiness(input) {
+  const issues = []
+  if (title.length < 10) issues.push("Judul minimal 10 karakter")
+  if (wordCount < 120) issues.push("Konten minimal 120 kata")
+  if (!excerpt && !metaDescription) issues.push("Excerpt/metaDescription wajib")
+  return issues
+}
+```
+
+---
+
+## 15. AI Integration
+
+### 15.1 AI Architecture
+
+Two credential systems:
+
+1. **AiApiKey (Rotary Pool)**: Multiple keys, round-robin, for general AI tasks
+2. **AiRoleModel (Per-Task)**: One dedicated key per role (text, image, scanning)
+
+### 15.2 AI Features
+
+| Feature | Route | Model Role |
+| --- | --- | --- |
+| Generate Article | `/admin/ai/generate` | text |
+| Rewrite Article | `/admin/ai/rewrite` | text |
+| Content Audit | `/admin/ai/content-audit` | scanning |
+| Internal Links | `/admin/ai/internal-links` | scanning |
+| SEO Scanner | `/admin/ai/scanner` | scanning |
+| AI Chat | `/admin/chat` | text |
+| Image Generation | `/api/admin/ai/image` | image |
+
+### 15.3 AI Provider (`lib/ai/provider.ts`)
+
+Abstraction layer supporting:
+
+- Native Gemini (@google/genai)
+- OpenAI-compatible APIs (custom baseUrl + model)
+
+### 15.4 AI Task Queue (AiTask model)
+
+```text
+Status flow: pending → processing → completed|failed
+Fields: type, input (JSON), output (JSON), progress (0-100), error
+```
+
+### 15.5 Content Audit Pipeline
+
+```text
+1. Trigger audit scan
+2. Scan all published posts using "scanning" role model
+3. Generate ContentIdea records (title, angle, keywords, scheduled date)
+4. Generate InternalLinkSuggestion records (source post → target post)
+5. Results viewable in content calendar
+6. Ideas can be converted to real posts
+7. Link suggestions can be applied or dismissed
+```
+
+---
+
+## 16. Media / Cloudinary
+
+### Upload Flow
+
+```text
+1. User selects file in ImageSourcePicker or CloudinaryUploader
+2. POST /api/admin/upload → server-side Cloudinary SDK upload
+3. Returns { url, public_id, width, height, format }
+4. URL stored in Post.featuredImage or Media.url
+```
+
+### Configuration
+
+```typescript
+// lib/cloudinary.ts
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+})
+```
+
+### Image Domains (next.config.ts)
+
+```typescript
+images: {
+  remotePatterns: [
+    { hostname: 'mumnhun.id', pathname: '/wp-content/**' },    // Legacy WP
+    { hostname: 'res.cloudinary.com', pathname: '/**' },         // Cloudinary
+    { hostname: 'images.unsplash.com', pathname: '/**' },        // Stock photos
+  ],
+}
+```
+
+---
+
+## 17. Observability & Monitoring
+
+### Admin Logging (`lib/observability/admin-log.ts`)
+
+Setiap API request di-log dengan:
+
+```typescript
+{
+  requestId: crypto.randomUUID(),
+  action: "posts:create",
+  userId: adminCheck.identity.id,
+  role: adminCheck.identity.role,
+  roleSource: adminCheck.identity.source,
+  status: 200,
+  payloadSummary: { id: post.id, status: post.status },
+  validation: { ok: true },
+  prismaCode?: "P2025",  // if Prisma error
+  error?: "...",          // if error
+}
+```
+
+Three log levels: `logAdminInfo`, `logAdminWarn`, `logAdminError`
+
+### Admin Alerts (`lib/observability/admin-alerts.ts`)
+
+In-memory event ring buffer:
+
+```typescript
+observeAdminOperationalEvent({ status, action })
+getAdminMonitoringSnapshot({ windowMs, topEndpointsLimit })
+  // Returns: { fromIso, toIso, totalEvents, unauthorizedCount, serverErrorCount, aiTaskFailureCount, topEndpoints }
+```
+
+---
+
+## 18. Data Migration Guide (Payload CMS → Sistem Ini)
+
+### 18.1 Data Mapping
+
+| Payload CMS Collection | Target Model | Migration Notes |
+| --- | --- | --- |
+| Users | User | Map roles, hash passwords |
+| Posts | Post | Map content, SEO fields, categories, tags |
+| Categories | Category | Preserve slugs |
+| Tags | Tag | Preserve slugs |
+| Pages | Page | Map content + SEO |
+| Media | Media | Transfer URLs, preserve alt text |
+| Settings (global) | SiteSetting | Map to key-value pairs |
+
+### 18.2 Migration Script Strategy
+
+```typescript
+// scripts/migrate-from-payload.ts
+
+async function migrateFromPayload() {
+  // 1. Connect to Payload CMS database (source)
+  // 2. Connect to target PostgreSQL (Prisma)
+  
+  // 3. Migrate Users
+  // - Map Payload user fields → User model
+  // - Hash passwords if needed
+  // - Set role: ADMIN for admin users
+  
+  // 4. Migrate Categories
+  // - Preserve name, slug
+  // - Generate cuid() IDs
+  // - Track old_id → new_id mapping
+  
+  // 5. Migrate Tags
+  // - Same pattern as categories
+  
+  // 6. Migrate Media
+  // - Transfer Cloudinary URLs or re-upload
+  // - Preserve alt, width, height
+  
+  // 7. Migrate Posts
+  // - Map content (HTML), title, slug
+  // - Map SEO fields
+  // - Link categories via CategoriesOnPosts (use ID mapping)
+  // - Link tags via TagsOnPosts
+  // - Preserve publishedAt dates
+  // - Set source: "migrated"
+  
+  // 8. Migrate Pages
+  // - Same as posts but simpler
+  
+  // 9. Migrate Settings
+  // - Map Payload globals → SiteSetting records
+  
+  // 10. Verify counts match
+  // 11. Verify slug uniqueness
+  // 12. Verify relation integrity
+}
+```
+
+### 18.3 Critical Migration Rules
+
+1. **NEVER lose data**: Every field must have a target
+2. **Preserve URLs**: All slugs must match exactly (for SEO)
+3. **Preserve dates**: publishedAt, createdAt must be exact
+4. **Preserve relations**: Post ↔ Category/Tag mappings
+5. **Preserve media URLs**: If using same Cloudinary, URLs stay the same
+6. **Redirect legacy routes**: next.config.ts handles /blog/:slug → /:slug
+7. **Preserve SEO**: meta titles, descriptions, canonical URLs
+
+---
+
+## 19. Workflow Lengkap — End to End
+
+### 19.1 User Login Flow
+
+```text
+1. User navigates to /admin
+2. proxy.ts checks: no session → redirect /login?redirect=/admin
+3. Login page renders (client component)
+4. User enters email + password
+5. signIn("credentials", { email, password, redirect: false })
+6. Server: Zod validate → rate limit check → DB lookup → bcrypt compare
+7. Success: JWT token created with { id, role }
+8. Client: router.push("/admin") + router.refresh()
+9. Admin layout: requireAdminPage() verifies role
+10. Dashboard renders with stats
+```
+
+### 19.2 Create Post Flow
+
+```text
+1. User clicks "Tulis Artikel" → /admin/posts/new
+2. PostEditor component renders (empty state)
+3. User types title → auto-generate slug
+4. User writes content in TipTap editor
+5. User selects categories, tags
+6. User uploads/selects featured image
+7. User fills SEO metadata (or uses AI suggestions)
+8. User clicks "Publish" or "Save Draft"
+9. Client:
+   a. Validate required fields client-side
+   b. Get CSRF token (if not cached)
+   c. POST /api/admin/posts with all data
+10. Server:
+   a. requireAdminMutationApi() → auth + CSRF + rate limit
+   b. Zod validate body
+   c. Check slug uniqueness
+   d. Sanitize HTML content
+   e. If PUBLISHED: validatePublishReadiness()
+   f. Calculate reading time
+   g. Prisma create with nested category/tag relations
+   h. If published: revalidatePath
+   i. Log admin action
+11. Client: redirect to post list or show success
+```
+
+### 19.3 Scheduled Publish Flow
+
+```text
+1. User sets status = SCHEDULED, picks future date
+2. Post saved with status=SCHEDULED, scheduledAt=<future>
+3. Cron job runs periodically (e.g. every 5 minutes)
+4. Calls publishDueScheduledPosts()
+5. Finds posts where scheduledAt <= now
+6. For each: validatePublishReadiness()
+7. If passes: CAS update SCHEDULED → PUBLISHED
+8. If fails: push scheduledAt 1 hour ahead
+9. Linked ContentIdea updated to "published"
+```
+
+### 19.4 AI Content Generation Flow
+
+```text
+1. User goes to /admin/ai/generate
+2. Enters topic, keywords, target length
+3. Client: POST /api/admin/ai/generate
+4. Server:
+   a. Fetch AiRoleModel where role="text"
+   b. Build prompt with topic + keywords + site context
+   c. Call AI provider (Gemini or OpenAI-compatible)
+   d. Parse generated content
+   e. Create AiTask record for tracking
+5. Return generated content to editor
+6. User reviews, edits, then saves as post
+```
+
+### 19.5 Content Audit Flow
+
+```text
+1. Admin triggers content audit
+2. Server fetches all published posts
+3. AI "scanning" model analyzes:
+   - Content coverage gaps
+   - Missing internal links
+   - SEO improvement opportunities
+4. Creates ContentIdea records (30-day calendar)
+5. Creates InternalLinkSuggestion records
+6. Results displayed in /admin/ai/content-audit
+7. Admin can:
+   - Schedule ideas to calendar
+   - Convert ideas to draft posts
+   - Apply internal link suggestions (auto-edit HTML)
+   - Dismiss suggestions
+```
+
+---
+
+## LAMPIRAN: Security Headers (next.config.ts)
+
+```typescript
+headers: [
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+  { key: 'X-XSS-Protection', value: '1; mode=block' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+]
+```
+
+## LAMPIRAN: Admin User Creation
+
+```bash
+npm run admin:create
+# Runs: npx tsx scripts/create-admin.ts
+# Prompts for email + password → bcrypt hash → insert User with role=ADMIN
+```
+
+## LAMPIRAN: Design System Summary
+
+| Token | Value | Usage |
+| --- | --- | --- |
+| bg-page | `#F9F6F0` | Admin page background |
+| bg-card | `white` | Card/panel background |
+| bg-dark | `#1a1412` → `#2a2018` | Login page gradient |
+| text-primary | `#0F0A09` | Headings, body text |
+| text-muted | `#8C7A6B` | Secondary text |
+| text-light | `#F4EEE7` | Text on dark bg (login) |
+| accent | `#466A68` | Brand teal-green |
+| accent-dark | `#3a5856` | Hover/gradient pair |
+| border | `#D4BCAA/20` | Card borders |
+| border-warm | `#D4BCAA` | Warm stone border |
+| radius-card | `rounded-2xl` | Cards, panels |
+| radius-input | `rounded-xl` | Inputs, buttons |
+| radius-badge | `rounded-md` / `rounded-full` | Status badges |
+| shadow-card | `shadow-sm` | Card elevation |
+| font-stack | System default (no custom import) | Body text |
+
+---
+
+> **Dokumen ini ditulis agar AI agent bisa memahami:**
+>
+> 1. Setiap model database dan relasinya
+> 2. Setiap alur autentikasi dan keamanan
+> 3. Setiap halaman admin dan fungsinya
+> 4. Setiap API endpoint dan validation rules
+> 5. Setiap komponen besar dan behaviour-nya
+> 6. Design tokens untuk konsistensi visual
+> 7. Migration strategy agar tidak ada data yang hilang
+>
+> **Copy-paste dokumen ini ke project baru, sesuaikan brand/nama, dan instruksikan AI agent untuk mengimplementasikan setiap bagian sesuai spesifikasi di atas.**

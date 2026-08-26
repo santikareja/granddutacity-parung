@@ -1,0 +1,66 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "list",
+        "listType": "bullet",
+        "tag": "ul",
+        "start": 1,
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          {
+            "type": "listitem",
+            "value": 1,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Item satu", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 2,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 1, "mode": "normal", "style": "", "text": "Item dua tebal", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 3,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              {
+                "type": "link",
+                "format": "",
+                "indent": 0,
+                "version": 3,
+                "direction": "ltr",
+                "fields": { "linkType": "custom", "newTab": false, "url": "/kontak" },
+                "children": [
+                  { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Item tiga dengan tautan", "version": 1 }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

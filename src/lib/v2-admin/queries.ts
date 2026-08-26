@@ -1,6 +1,6 @@
 // Query statistik & daftar untuk dashboard CMS kustom. Server-side only.
 
-import { and, count, desc, eq, gt, isNotNull, lte } from "drizzle-orm";
+import { and, count, desc, eq, lte } from "drizzle-orm";
 
 import { db } from "@/db";
 import { artikel, categories, media, tags } from "@/db/schema";
@@ -8,7 +8,6 @@ import { artikel, categories, media, tags } from "@/db/schema";
 export type DashboardStats = {
   published: number;
   draft: number;
-  scheduled: number;
   media: number;
   categories: number;
   tags: number;
@@ -27,7 +26,6 @@ export type RecentArticle = {
 const zeroStats: DashboardStats = {
   published: 0,
   draft: 0,
-  scheduled: 0,
   media: 0,
   categories: 0,
   tags: 0,
@@ -42,43 +40,28 @@ export const getDashboardStats = async (): Promise<{
   const now = new Date();
 
   try {
-    const [
-      publishedRows,
-      draftRows,
-      scheduledRows,
-      mediaRows,
-      categoryRows,
-      tagRows,
-    ] = await Promise.all([
-      // published = sudah tayang (publishedAt <= sekarang, atau belum diisi).
-      db
-        .select({ value: count() })
-        .from(artikel)
-        .where(
-          and(eq(artikel.status, "published"), lte(artikel.publishedAt, now)),
-        ),
-      db.select({ value: count() }).from(artikel).where(eq(artikel.status, "draft")),
-      // scheduled = published tapi tanggal tayang masih di masa depan.
-      db
-        .select({ value: count() })
-        .from(artikel)
-        .where(
-          and(
-            eq(artikel.status, "published"),
-            isNotNull(artikel.publishedAt),
-            gt(artikel.publishedAt, now),
+    const [publishedRows, draftRows, mediaRows, categoryRows, tagRows] =
+      await Promise.all([
+        // published = sudah tayang (publishedAt <= sekarang, atau belum diisi).
+        db
+          .select({ value: count() })
+          .from(artikel)
+          .where(
+            and(eq(artikel.status, "published"), lte(artikel.publishedAt, now)),
           ),
-        ),
-      db.select({ value: count() }).from(media),
-      db.select({ value: count() }).from(categories),
-      db.select({ value: count() }).from(tags),
-    ]);
+        db
+          .select({ value: count() })
+          .from(artikel)
+          .where(eq(artikel.status, "draft")),
+        db.select({ value: count() }).from(media),
+        db.select({ value: count() }).from(categories),
+        db.select({ value: count() }).from(tags),
+      ]);
 
     return {
       stats: {
         published: publishedRows[0]?.value ?? 0,
         draft: draftRows[0]?.value ?? 0,
-        scheduled: scheduledRows[0]?.value ?? 0,
         media: mediaRows[0]?.value ?? 0,
         categories: categoryRows[0]?.value ?? 0,
         tags: tagRows[0]?.value ?? 0,

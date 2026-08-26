@@ -140,7 +140,7 @@ describe("Integration — alur generate → pratinjau AI Studio (Task 5)", () =>
   it("I-C: komentar ai-studio-client.tsx menyatakan sanitasi di server (bukan klaim htmlToLexicalState)", () => {
     const clientPath = resolve(
       process.cwd(),
-      "src/app/v2-admin/ai-studio/ai-studio-client.tsx",
+      "src/app/admin/(protected)/ai-studio/ai-studio-client.tsx",
     );
     const source = readFileSync(clientPath, "utf8");
 

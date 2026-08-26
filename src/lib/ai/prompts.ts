@@ -106,6 +106,42 @@ Keluarkan HANYA JSON valid:
   },
 ];
 
+export type TextToolMode = "rewrite" | "expand" | "shorten" | "proofread";
+
+// Instruksi spesifik per mode untuk alat AI di editor (teks terseleksi).
+const TEXT_TOOL_INSTRUCTIONS: Record<TextToolMode, string> = {
+  rewrite:
+    "Parafrasekan teks agar lebih baik, jernih, dan enak dibaca tanpa mengubah makna inti. Perbaiki alur kalimat dan pilihan kata.",
+  expand:
+    "Kembangkan teks menjadi lebih detail dan kaya informasi yang relevan, tetap padu dengan konteks. Jangan menambah klaim yang tidak berdasar.",
+  shorten:
+    "Ringkas teks menjadi lebih padat dan langsung ke inti, pertahankan poin penting dan makna aslinya.",
+  proofread:
+    "Perbaiki ejaan, tata bahasa, dan tanda baca. JANGAN mengubah makna, gaya, atau isi kalimat—hanya koreksi kesalahan.",
+};
+
+// Builder prompt alat teks editor: rewrite/expand/shorten/proofread atas teks
+// terseleksi. Output HARUS berupa teks hasil murni (plain), tanpa markup, tanpa
+// penjelasan, agar aman disisipkan kembali ke editor sebagai teks.
+export const buildTextToolPrompt = (
+  mode: TextToolMode,
+  text: string,
+): ChatMessage[] => [
+  {
+    role: "system",
+    content: `${QUALITY_GUARDRAILS}
+Tugas: ${TEXT_TOOL_INSTRUCTIONS[mode]}
+Aturan keluaran:
+- Keluarkan HANYA teks hasil akhir, tanpa markup/HTML/markdown, tanpa tanda kutip pembungkus.
+- Tanpa penjelasan, tanpa komentar, tanpa label seperti "Hasil:".
+- Bahasa Indonesia baku yang enak dibaca; pertahankan bahasa asli bila teks bukan Indonesia.`,
+  },
+  {
+    role: "user",
+    content: text,
+  },
+];
+
 export const buildImageMetaPrompt = (
   context: string,
   photoDescription: string,

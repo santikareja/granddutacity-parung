@@ -6,9 +6,9 @@
 //   - hash = pbkdf2(password, salt, 25000, 512, 'sha256') dalam hex
 // Verifikasi memakai perbandingan waktu-konstan untuk mencegah timing attack.
 //
-// Sesi TIDAK memakai tabel users_sessions milik Payload: kita pakai cookie
-// bertanda tangan (HMAC-SHA256 dengan PAYLOAD_SECRET) yang stateless, sehingga
-// tidak mengganggu sesi Payload dan tidak butuh tabel baru.
+// Sesi TIDAK memakai tabel users_sessions warisan Payload: kita pakai cookie
+// bertanda tangan (HMAC-SHA256 dengan APP_SECRET) yang stateless, sehingga
+// tidak butuh tabel baru.
 
 import { createHmac, pbkdf2, randomBytes, timingSafeEqual } from "crypto";
 import { eq } from "drizzle-orm";
@@ -30,11 +30,22 @@ export type SessionUser = {
   role: "admin" | "ai-agent";
 };
 
+// Pembacaan ganda APP_SECRET -> PAYLOAD_SECRET (fallback warisan).
+//
+// PENTING: nilai secret ini TIDAK BOLEH DIROTASI. Selain menandatangani cookie
+// sesi admin (rotasi = semua sesi aktif langsung invalid), nilai yang sama juga
+// dipakai sebagai kunci dekripsi API key provider AI (src/lib/ai/crypto.ts) dan
+// penandatangan token CSRF (src/lib/v2-admin/csrf.ts). Mengganti nilainya membuat
+// API key AI yang sudah tersimpan tidak bisa didekripsi lagi.
+//
+// Fallback ke PAYLOAD_SECRET dipertahankan agar deployment yang belum menambah
+// APP_SECRET tetap jalan setelah Payload dicabut.
 const getSecret = (): string => {
-  const secret = process.env.PAYLOAD_SECRET;
+  const secret = process.env.APP_SECRET ?? process.env.PAYLOAD_SECRET;
   if (!secret || secret.length < 8) {
     throw new Error(
-      "PAYLOAD_SECRET wajib diset dan cukup panjang untuk menandatangani sesi v2-admin.",
+      "APP_SECRET wajib diset dan cukup panjang untuk menandatangani sesi admin " +
+        "(fallback PAYLOAD_SECRET juga tidak tersedia).",
     );
   }
   return secret;

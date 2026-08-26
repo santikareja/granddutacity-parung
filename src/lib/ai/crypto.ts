@@ -1,8 +1,8 @@
 // Enkripsi API key provider AI sebelum disimpan ke DB. AES-256-GCM dengan kunci
-// diturunkan dari PAYLOAD_SECRET (scrypt). Server-side only — jangan impor dari client.
+// diturunkan dari APP_SECRET (scrypt). Server-side only — jangan impor dari client.
 //
 // Format ciphertext: "enc::v1::<saltB64>::<ivB64>::<tagB64>::<dataB64>"
-// Salt per-record membuat kunci turunan unik walau PAYLOAD_SECRET sama.
+// Salt per-record membuat kunci turunan unik walau APP_SECRET sama.
 
 import {
   createCipheriv,
@@ -14,14 +14,21 @@ import {
 const PREFIX = "enc::v1";
 const ALGO = "aes-256-gcm";
 
+// Pembacaan ganda APP_SECRET -> PAYLOAD_SECRET (fallback warisan).
+//
+// PENTING: nilai secret ini TIDAK BOLEH DIROTASI. Ia adalah kunci dekripsi API
+// key provider AI yang SUDAH tersimpan di tabel `ai_providers`, dan sekaligus
+// penandatangan cookie sesi (src/lib/v2-auth/auth.ts) + token CSRF
+// (src/lib/v2-admin/csrf.ts). Mengganti nilainya membuat ciphertext lama tidak
+// bisa dibuka lagi (API key harus dimasukkan ulang) dan meng-invalidasi sesi.
 const getMasterSecret = (): string => {
-  const secret = process.env.PAYLOAD_SECRET;
+  const secret = process.env.APP_SECRET ?? process.env.PAYLOAD_SECRET;
   if (!secret || secret.length < 8) {
-    // Selaras dengan guard di payload.config.ts: tanpa secret kuat, enkripsi
-    // tidak aman. Lempar agar pemanggil bisa menampilkan error, bukan menyimpan
-    // key dalam bentuk lemah.
+    // Tanpa secret kuat, enkripsi tidak aman. Lempar agar pemanggil bisa
+    // menampilkan error, bukan menyimpan key dalam bentuk lemah.
     throw new Error(
-      "PAYLOAD_SECRET tidak tersedia/terlalu pendek untuk mengenkripsi API key.",
+      "APP_SECRET tidak tersedia/terlalu pendek untuk mengenkripsi API key " +
+        "(fallback PAYLOAD_SECRET juga tidak tersedia).",
     );
   }
   return secret;

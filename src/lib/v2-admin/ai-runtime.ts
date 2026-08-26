@@ -13,6 +13,11 @@ import { aiProviders } from "@/db/schema";
 import type { AiConfig } from "@/lib/ai/env";
 import { getAiConfig } from "@/lib/ai/env";
 import { decryptProviderKey, normalizeModelIds } from "./ai-providers";
+import {
+  decryptRoleModelKey,
+  getRoleModel,
+  type AiRole,
+} from "./ai-role-models";
 
 export type ResolvedAiConfig = AiConfig & {
   source: "db" | "env";
@@ -67,6 +72,42 @@ export const resolveAiConfig = async (
   if (envConfig) return { ...envConfig, source: "env" };
 
   return null;
+};
+
+// Resolusi konfigurasi AI untuk sebuah PERAN tugas (Task 9A). Bila ada role
+// model aktif dengan base_url + api_key + model yang lengkap untuk peran itu,
+// gunakan; jika tidak, fallback ke resolveAiConfig() umum.
+//
+// Integrasi ringan: fungsi baru ini TIDAK mengubah pemanggil existing yang
+// sudah memakai resolveAiConfig/resolveAiConfigWithModel.
+export const resolveAiConfigForRole = async (
+  role: AiRole,
+): Promise<ResolvedAiConfig | null> => {
+  try {
+    const row = await getRoleModel(role);
+
+    if (row?.isActive && row.baseUrl && row.apiKey && row.model) {
+      const apiKey = decryptRoleModelKey(row.apiKey);
+      const model = row.model.trim();
+
+      if (apiKey && model) {
+        return {
+          baseUrl: row.baseUrl.replace(/\/+$/, ""),
+          apiKey,
+          model,
+          source: "db",
+        };
+      }
+    }
+  } catch (error) {
+    // Tabel belum ada / DB bermasalah: jangan crash, fallback ke config umum.
+    console.error(
+      `[v2-admin] gagal resolve role model AI untuk "${role}":`,
+      error,
+    );
+  }
+
+  return resolveAiConfig();
 };
 
 // Resolusi dengan override model tertentu (model harus milik provider terkait).

@@ -1,4 +1,3 @@
-import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -56,6 +55,19 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Panel admin lama /v2-admin -> /admin (Task 12B-2). Ditaruh PALING ATAS
+      // agar menang atas aturan trailing-slash di bawahnya. Tanpa ini, bookmark
+      // dan tab yang masih terbuka di /v2-admin/* akan 404 (R2: nol URL mati).
+      {
+        source: "/v2-admin",
+        destination: "/admin",
+        permanent: true,
+      },
+      {
+        source: "/v2-admin/:path*",
+        destination: "/admin/:path*",
+        permanent: true,
+      },
       {
         source: "/:path+/",
         destination: "/:path+",
@@ -115,4 +127,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPayload(nextConfig);
+export default nextConfig;

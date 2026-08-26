@@ -1,0 +1,52 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Sebelum garis horizontal warisan.", "version": 1 }
+        ]
+      },
+      {
+        "type": "horizontalrule",
+        "version": 1
+      },
+      {
+        "type": "relationship",
+        "format": "",
+        "version": 2,
+        "relationTo": "artikel",
+        "value": 7
+      },
+      {
+        "type": "block",
+        "format": "",
+        "version": 2,
+        "fields": { "blockType": "unregisteredBlock", "judul": "apa pun" }
+      },
+      {
+        "type": "paragraph",
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "textFormat": 0,
+        "textStyle": "",
+        "children": [
+          { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Sesudah garis horizontal warisan.", "version": 1 }
+        ]
+      }
+    ]
+  }
+}

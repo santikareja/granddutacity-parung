@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { requireApiUser, apiError } from "@/lib/v2-auth/api-guard";
 import { listArticles } from "@/lib/v2-admin/articles";
 import { createArticle } from "@/lib/v2-admin/article-write";
+import { recordAudit } from "@/lib/v2-admin/audit";
 
 export const runtime = "nodejs";
 
@@ -74,12 +75,26 @@ export async function POST(request: Request) {
       aiOutline: body.aiOutline ?? null,
     });
 
+    // Audit best-effort (fire-and-forget): tidak menyentuh response.
+    void recordAudit({
+      action: "article:create",
+      entity: "artikel",
+      entityId: created.id,
+      userId: guard.user.id,
+      userEmail: guard.user.email,
+      summary: {
+        title,
+        status: body.status === "published" ? "published" : "draft",
+      },
+    });
+
     return NextResponse.json({ article: created }, { status: 201 });
   } catch (error) {
     console.error("[api/v2/articles] POST gagal:", error);
-    return apiError(
-      error instanceof Error ? error.message : "Gagal membuat artikel.",
-      500,
-    );
+    const message =
+      error instanceof Error ? error.message : "Gagal membuat artikel.";
+    // Gagal validasi kesiapan publish adalah kesalahan input → 400.
+    const status = message.startsWith("Belum siap dipublish") ? 400 : 500;
+    return apiError(message, status);
   }
 }

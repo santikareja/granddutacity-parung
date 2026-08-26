@@ -6,36 +6,27 @@ import {
   authenticateUser,
   createSessionToken,
 } from "@/lib/v2-auth/auth";
+import { checkRateLimit } from "@/lib/v2-admin/rate-limit";
 
 // Node runtime wajib: pbkdf2 & pool pg tidak tersedia di Edge.
 export const runtime = "nodejs";
 
-// Rate limit sederhana per-IP untuk menahan brute force. In-memory per instance;
-// cukup sebagai pertahanan lapis pertama, bukan pengganti WAF.
+// Rate limit sederhana per-IP untuk menahan brute force. Memakai rate limiter
+// bersama (in-memory per instance) — cukup sebagai pertahanan lapis pertama,
+// bukan pengganti WAF.
 const ATTEMPT_LIMIT = 8;
 const ATTEMPT_WINDOW_MS = 5 * 60_000;
-const attempts = new Map<string, { count: number; resetAt: number }>();
-
-const isRateLimited = (ip: string): boolean => {
-  const now = Date.now();
-  const bucket = attempts.get(ip);
-
-  if (!bucket || now > bucket.resetAt) {
-    attempts.set(ip, { count: 1, resetAt: now + ATTEMPT_WINDOW_MS });
-    return false;
-  }
-
-  if (bucket.count >= ATTEMPT_LIMIT) return true;
-
-  bucket.count += 1;
-  return false;
-};
 
 export async function POST(request: Request) {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
-  if (isRateLimited(ip)) {
+  const rate = checkRateLimit(`login:${ip}`, {
+    limit: ATTEMPT_LIMIT,
+    windowMs: ATTEMPT_WINDOW_MS,
+  });
+
+  if (!rate.ok) {
     return NextResponse.json(
       { error: "Terlalu banyak percobaan login. Coba lagi beberapa menit." },
       { status: 429 },

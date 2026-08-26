@@ -6,7 +6,8 @@ import { resolveAiConfigWithModel } from "@/lib/v2-admin/ai-runtime";
 import { buildArticlePrompt, type OutlineSection } from "@/lib/ai/prompts";
 import { htmlToLexicalState } from "@/lib/v2-admin/html-to-lexical";
 import { ensureCta } from "@/lib/v2-admin/lexical";
-import { sanitizeAiHtml } from "@/lib/ai/html-to-lexical";
+import { sanitizeAiHtml } from "@/lib/ai/sanitize-html";
+import { logAiTask } from "@/lib/v2-admin/ai-tasks";
 
 export const runtime = "nodejs";
 // Generasi artikel 900-1200 kata bisa memakan waktu lama.
@@ -91,9 +92,26 @@ export async function POST(request: Request) {
     // Sanitasi hanya field `html` yang dikembalikan ke klien untuk pratinjau.
     const html = sanitizeAiHtml(rawHtml);
 
+    void logAiTask({
+      type: "article",
+      status: "completed",
+      input: { title, sections: outline.length },
+      output: { htmlLength: html.length },
+      userId: guard.user.id,
+    });
+
     return NextResponse.json({ html, content });
   } catch (error) {
     console.error("[api/v2/ai/article] gagal:", error);
+
+    void logAiTask({
+      type: "article",
+      status: "failed",
+      input: { title, sections: outline.length },
+      error: error instanceof Error ? error.message : "Gagal.",
+      userId: guard.user.id,
+    });
+
     return apiError(
       error instanceof Error ? error.message : "Gagal menghasilkan artikel.",
       502,

@@ -5,6 +5,8 @@
 
 import { NextResponse } from "next/server";
 
+import { verifyCsrf } from "@/lib/v2-admin/csrf";
+import { observeOperationalEvent } from "@/lib/v2-admin/observability";
 import type { SessionUser } from "./auth";
 import { getSessionUser } from "./session";
 
@@ -16,6 +18,8 @@ export const requireApiUser = async (): Promise<ApiGuardResult> => {
   const user = await getSessionUser();
 
   if (!user) {
+    // Observabilitas best-effort (indikasi ringan, per-instance).
+    observeOperationalEvent({ status: 401, action: "auth" });
     return {
       ok: false,
       response: NextResponse.json(
@@ -34,10 +38,55 @@ export const requireApiAdmin = async (): Promise<ApiGuardResult> => {
   if (!result.ok) return result;
 
   if (result.user.role !== "admin") {
+    observeOperationalEvent({ status: 403, action: "auth" });
     return {
       ok: false,
       response: NextResponse.json(
         { error: "Butuh hak akses admin." },
+        { status: 403 },
+      ),
+    };
+  }
+
+  return result;
+};
+
+// Guard untuk endpoint MUTASI (POST/PATCH/PUT/DELETE): requireApiUser + CSRF.
+// Butuh `request` untuk membaca header x-csrf-token dan Origin. requireApiUser
+// yang lama sengaja tidak diubah karena dipakai oleh handler GET.
+export const requireApiMutation = async (
+  request: Request,
+): Promise<ApiGuardResult> => {
+  const result = await requireApiUser();
+  if (!result.ok) return result;
+
+  if (!verifyCsrf(request, result.user.id)) {
+    observeOperationalEvent({ status: 403, action: "auth" });
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "CSRF tidak valid." },
+        { status: 403 },
+      ),
+    };
+  }
+
+  return result;
+};
+
+// Varian mutasi yang juga mensyaratkan role admin.
+export const requireApiAdminMutation = async (
+  request: Request,
+): Promise<ApiGuardResult> => {
+  const result = await requireApiAdmin();
+  if (!result.ok) return result;
+
+  if (!verifyCsrf(request, result.user.id)) {
+    observeOperationalEvent({ status: 403, action: "auth" });
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "CSRF tidak valid." },
         { status: 403 },
       ),
     };

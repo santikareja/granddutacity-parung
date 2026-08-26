@@ -1,0 +1,67 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "list",
+        "listType": "number",
+        "tag": "ol",
+        "start": 1,
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          {
+            "type": "listitem",
+            "value": 1,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Langkah pertama", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 2,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Langkah kedua", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 3,
+            "format": "center",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Langkah ketiga (format center)", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 4,
+            "format": "",
+            "indent": 2,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Langkah keempat (indent 2, TIDAK memicu paddingInlineStart)", "version": 1 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

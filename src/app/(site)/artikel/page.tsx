@@ -4,9 +4,8 @@ import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ArticleArchiveClient } from "@/components/articles/article-archive-client";
-import { getPayload } from "payload";
-import configPromise from "@payload-config";
-import type { Artikel, Media, Tag } from "@/payload-types";
+import { getPublishedArticles } from "@/lib/public/queries";
+import type { PublicArticle, PublicMedia, PublicTag } from "@/types/content";
 import {
   articleArchiveEntries,
   type ArticleArchiveEntry,
@@ -176,7 +175,7 @@ const getCollectionPageSchema = (
   },
 });
 
-const resolveMediaUrl = (media?: Media | number | null) => {
+const resolveMediaUrl = (media?: PublicMedia | number | null) => {
   if (!media || typeof media === "number") return null;
   return media.transformedUrl || media.cloudinaryUrl || media.url || media.thumbnailURL || media.originalUrl || null;
 };
@@ -191,7 +190,7 @@ const isCategorySlug = (value: string): value is ArticleCategorySlug =>
   articleCategorySlugs.includes(value as ArticleCategorySlug);
 
 const resolveArticleCategory = (
-  entry: Artikel,
+  entry: PublicArticle,
   fallbackArchive?: (typeof articleArchiveEntries)[number],
 ) => {
   const fallbackCategory = fallbackArchive
@@ -259,20 +258,7 @@ export default async function ArtikelPage({
   const pageNumber = typeof pageParam === "string" ? parseInt(pageParam, 10) : 1;
   const canonicalUrl = pageNumber > 1 ? `${PAGE_URL}?page=${pageNumber}` : PAGE_URL;
 
-  const payload = await getPayload({ config: configPromise });
-
-  const result = await payload.find({
-    collection: "artikel",
-    depth: 2,
-    draft: false,
-    limit: 100,
-    sort: "-publishedAt",
-    where: {
-      status: {
-        equals: "published",
-      },
-    },
-  });
+  const dbArticlesRaw = await getPublishedArticles(100);
 
   const formatDate = (value?: string | null) => {
     if (!value) return "-";
@@ -283,7 +269,7 @@ export default async function ArtikelPage({
     });
   };
 
-  const dbArticles = result.docs.map((entry) => {
+  const dbArticles = dbArticlesRaw.map((entry) => {
     const fallbackArchive = articleArchiveEntries.find(a => a.slug === entry.slug);
     const thumb = resolveMediaUrl(entry.featuredImage) || fallbackArchive?.coverImage || "";
     const isMediaObj = typeof entry.featuredImage === "object" && entry.featuredImage !== null;
@@ -294,7 +280,7 @@ export default async function ArtikelPage({
     );
 
     const tagList = Array.isArray(entry.tags) 
-      ? entry.tags.map(t => typeof t === 'object' && t !== null && 'name' in t ? (t as Tag).slug || (t as Tag).name : '').filter(Boolean)
+      ? entry.tags.map(t => typeof t === 'object' && t !== null && 'name' in t ? (t as PublicTag).slug || (t as PublicTag).name : '').filter(Boolean)
       : fallbackArchive?.tags || [];
 
     return {
@@ -309,7 +295,7 @@ export default async function ArtikelPage({
       authorSlug: fallbackArchive?.authorSlug || "santika-reza",
       tags: tagList as ArticleTagSlug[],
       coverImage: thumb,
-      coverAlt: isMediaObj ? ((entry.featuredImage as Media).alt || entry.title) : (fallbackArchive?.coverAlt || entry.title),
+      coverAlt: isMediaObj ? ((entry.featuredImage as PublicMedia).alt || entry.title) : (fallbackArchive?.coverAlt || entry.title),
       updatedAt: entry.updatedAt || entry.createdAt,
       updatedLabel: fallbackArchive?.updatedLabel || formatDate(entry.publishedAt || entry.createdAt),
       readingTime: fallbackArchive?.readingTime || "5 menit baca",

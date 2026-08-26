@@ -396,8 +396,8 @@ html.lenis body {
 }
 
 /* ==========================================================================
-   Editor Lexical CMS kustom (/v2-admin). Kelas dipakai editorTheme di
-   src/app/v2-admin/articles/editor/theme.ts. Dijaga mirip tampilan artikel
+   Editor Lexical CMS kustom (/admin). Kelas dipakai editorTheme di
+   src/app/admin/(protected)/articles/editor/theme.ts. Dijaga mirip tampilan artikel
    publik agar penulis melihat hasil yang mendekati versi tayang.
    ========================================================================== */
 .gdc-editor__p { margin: 0 0 0.85rem; line-height: 1.7; }

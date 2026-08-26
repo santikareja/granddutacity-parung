@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPayload } from "payload";
 
 import { ArticleRichContent } from "@/components/articles/article-rich-content";
 import { ArticleTableOfContents } from "@/components/articles/article-toc";
@@ -15,8 +14,11 @@ import {
   getTagDefinition,
   sortArticles,
 } from "@/lib/articles";
-import type { Artikel, Media, Tag } from "@/payload-types";
-import configPromise from "@payload-config";
+import {
+  getPublishedArticleBySlug,
+  getPublishedArticles,
+} from "@/lib/public/queries";
+import type { PublicArticle, PublicMedia, PublicTag } from "@/types/content";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const SIDEBAR_PROMO_BANNER =
@@ -45,10 +47,10 @@ const formatDate = (value?: string | null) => {
   });
 };
 
-const isMedia = (value: Artikel["featuredImage"]): value is Media =>
+const isMedia = (value: PublicArticle["featuredImage"]): value is PublicMedia =>
   typeof value === "object" && value !== null;
 
-const resolveMediaUrl = (media?: Media | null) => {
+const resolveMediaUrl = (media?: PublicMedia | null) => {
   if (!media) return null;
   return media.transformedUrl || media.cloudinaryUrl || media.url || media.thumbnailURL || media.originalUrl || null;
 };
@@ -58,10 +60,10 @@ const normalizeArticleUrl = (slug: string) => {
   return normalizedSlug ? `${SITE_URL}/${normalizedSlug}` : SITE_URL;
 };
 
-const isTagObject = (value: NonNullable<Artikel["tags"]>[number]): value is Tag =>
+const isTagObject = (value: NonNullable<PublicArticle["tags"]>[number]): value is PublicTag =>
   typeof value === "object" && value !== null;
 
-const isArtikelObject = (value: number | Artikel): value is Artikel =>
+const isArtikelObject = (value: number | PublicArticle): value is PublicArticle =>
   typeof value === "object" && value !== null;
 
 const toMiniFromArchive = (entry: (typeof articleArchiveEntries)[number]): MiniArticleItem => ({
@@ -98,57 +100,9 @@ function SidebarArticleList({ title, items }: { title: string; items: MiniArticl
   );
 }
 
-const getArticleBySlug = async (slug: string) => {
-  const payload = await getPayload({ config: configPromise });
-
-  const result = await payload.find({
-    collection: "artikel",
-    depth: 2,
-    draft: false,
-    limit: 1,
-    pagination: false,
-    where: {
-      and: [
-        {
-          slug: {
-            equals: slug,
-          },
-        },
-        {
-          status: {
-            equals: "published",
-          },
-        },
-      ],
-    },
-  });
-
-  return result.docs[0] ?? null;
-};
-
-const getPublishedArticles = async () => {
-  const payload = await getPayload({ config: configPromise });
-
-  const result = await payload.find({
-    collection: "artikel",
-    depth: 2,
-    draft: false,
-    limit: 50,
-    pagination: false,
-    sort: "-publishedAt",
-    where: {
-      status: {
-        equals: "published",
-      },
-    },
-  });
-
-  return result.docs;
-};
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = await getArticleBySlug(slug);
+  const article = await getPublishedArticleBySlug(slug);
 
   if (!article) {
     return {
@@ -192,8 +146,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
   const { slug } = await params;
   const [article, publishedArticles] = await Promise.all([
-    getArticleBySlug(slug),
-    getPublishedArticles(),
+    getPublishedArticleBySlug(slug),
+    getPublishedArticles(50),
   ]);
 
   if (!article) {
@@ -228,7 +182,7 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
   const previousFromCms = cmsIndex >= 0 ? publishedArticles[cmsIndex + 1] : undefined;
   const nextFromCms = cmsIndex > 0 ? publishedArticles[cmsIndex - 1] : undefined;
 
-  const toMiniFromCms = (entry: Artikel): MiniArticleItem | null => {
+  const toMiniFromCms = (entry: PublicArticle): MiniArticleItem | null => {
     const fallbackArchive = archiveBySlug.get(entry.slug);
     const thumb = isMedia(entry.featuredImage) ? resolveMediaUrl(entry.featuredImage) : fallbackArchive?.coverImage;
     if (!thumb) return null;

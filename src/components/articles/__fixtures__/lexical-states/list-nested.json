@@ -1,0 +1,134 @@
+{
+  "root": {
+    "type": "root",
+    "format": "",
+    "indent": 0,
+    "version": 1,
+    "direction": "ltr",
+    "children": [
+      {
+        "type": "list",
+        "listType": "bullet",
+        "tag": "ul",
+        "start": 1,
+        "format": "",
+        "indent": 0,
+        "version": 1,
+        "direction": "ltr",
+        "children": [
+          {
+            "type": "listitem",
+            "value": 1,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Induk satu", "version": 1 }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 2,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              {
+                "type": "list",
+                "listType": "number",
+                "tag": "ol",
+                "start": 1,
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "direction": "ltr",
+                "children": [
+                  {
+                    "type": "listitem",
+                    "value": 1,
+                    "format": "",
+                    "indent": 1,
+                    "version": 1,
+                    "direction": "ltr",
+                    "children": [
+                      { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Anak A", "version": 1 }
+                    ]
+                  },
+                  {
+                    "type": "listitem",
+                    "value": 2,
+                    "format": "",
+                    "indent": 1,
+                    "version": 1,
+                    "direction": "ltr",
+                    "children": [
+                      {
+                        "type": "list",
+                        "listType": "bullet",
+                        "tag": "ul",
+                        "start": 1,
+                        "format": "",
+                        "indent": 0,
+                        "version": 1,
+                        "direction": "ltr",
+                        "children": [
+                          {
+                            "type": "listitem",
+                            "value": 1,
+                            "format": "",
+                            "indent": 2,
+                            "version": 1,
+                            "direction": "ltr",
+                            "children": [
+                              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Cucu A1", "version": 1 }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listitem",
+            "value": 3,
+            "format": "",
+            "indent": 0,
+            "version": 1,
+            "direction": "ltr",
+            "children": [
+              { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Induk tiga", "version": 1 },
+              {
+                "type": "list",
+                "listType": "bullet",
+                "tag": "ul",
+                "start": 1,
+                "format": "",
+                "indent": 0,
+                "version": 1,
+                "direction": "ltr",
+                "children": [
+                  {
+                    "type": "listitem",
+                    "value": 1,
+                    "format": "",
+                    "indent": 1,
+                    "version": 1,
+                    "direction": "ltr",
+                    "children": [
+                      { "type": "text", "detail": 0, "format": 0, "mode": "normal", "style": "", "text": "Anak campuran (teks + sublist)", "version": 1 }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

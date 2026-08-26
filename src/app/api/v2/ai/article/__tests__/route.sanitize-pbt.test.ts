@@ -27,7 +27,7 @@ import {
 // Fungsi asli untuk membangun `content` jalur asli & untuk uji idempotensi.
 import { htmlToLexicalState } from "@/lib/v2-admin/html-to-lexical";
 import { ensureCta } from "@/lib/v2-admin/lexical";
-import { sanitizeAiHtml } from "@/lib/ai/html-to-lexical";
+import { sanitizeAiHtml } from "@/lib/ai/sanitize-html";
 
 vi.mock("@/lib/ai/client", () => ({
   chatCompletion: chatCompletionMock,

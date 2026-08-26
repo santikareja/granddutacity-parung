@@ -13,7 +13,6 @@ type Props = {
 
 const PAGE_URL = "https://granddutacitysouthofjakarta.com/cara-beli-kpr";
 const OG_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775877869/cara-beli-kpr-grand-duta-city-parung_cf7tep.webp";
-const LAST_UPDATED_ISO = new Date().toISOString();
 const AUTHOR_ID = "https://granddutacitysouthofjakarta.com/author/santika-reza#person";
 const AUTHOR_URL = "https://granddutacitysouthofjakarta.com/author/santika-reza";
 

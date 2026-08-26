@@ -79,7 +79,7 @@ export default function PrivacyPolicyPage() {
           <div className="mx-auto max-w-screen-md px-6 md:px-14">
             <article className="prose-legal">
               <p>
-                Kebijakan Privasi ini menjelaskan bagaimana situs ini ("granddutacitysouthofjakarta.com") mengumpulkan, menggunakan, menyimpan, melindungi, dan membagikan data pribadi pengguna situs granddutacitysouthofjakarta.com yang memuat informasi mengenai Grand Duta City Parung / Grand Duta City South of Jakarta.
+                Kebijakan Privasi ini menjelaskan bagaimana situs ini (&ldquo;granddutacitysouthofjakarta.com&rdquo;) mengumpulkan, menggunakan, menyimpan, melindungi, dan membagikan data pribadi pengguna situs granddutacitysouthofjakarta.com yang memuat informasi mengenai Grand Duta City Parung / Grand Duta City South of Jakarta.
               </p>
 
               <p>

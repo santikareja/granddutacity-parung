@@ -95,6 +95,7 @@ export function ArticleArchiveClient({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const rawPage = Number.parseInt(params.get("page") ?? "1", 10);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sinkronisasi state awal dengan window.location.search (URL, API browser, tidak tersedia saat render pertama)
     setCurrentPage(Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage);
 
     const onPopState = () => {

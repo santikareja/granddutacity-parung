@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { AmbientVideo } from "@/components/ui/ambient-video";
-import { ArrowLeft, ArrowRight, ShieldCheck, TreePine, Bike, Footprints, Recycle, Home, MapPin, Maximize, BedDouble, Bath, CarFront } from "lucide-react";
+import { ArrowRight, ShieldCheck, TreePine, Bike, Footprints, Recycle, MapPin, Maximize, BedDouble, Bath, CarFront } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Cluster Ladera Grand Duta City Parung | Ladera South of Jakarta",

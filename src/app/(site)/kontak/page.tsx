@@ -12,7 +12,6 @@ import {
   Globe,
   Play,
   ArrowRight, 
-  MessageSquare,
   Map as MapIcon,
   CalendarDays
 } from "lucide-react";
@@ -235,10 +234,10 @@ export default function ContactPage() {
                   <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 mb-2" />
                   <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider sm:tracking-widest leading-tight">Petunjuk <br />Arah Lokasi</span>
                 </a>
-                <a href="/cara-beli-kpr" className="bg-brand-light/5 hover:bg-brand-light/10 border border-[#F5F1E8]/10 text-[#F5F1E8] p-4 sm:p-6 rounded-2xl sm:rounded-3xl transition-all group flex flex-col justify-between min-h-[110px] sm:h-32">
+                <Link href="/cara-beli-kpr" className="bg-brand-light/5 hover:bg-brand-light/10 border border-[#F5F1E8]/10 text-[#F5F1E8] p-4 sm:p-6 rounded-2xl sm:rounded-3xl transition-all group flex flex-col justify-between min-h-[110px] sm:h-32">
                    <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6 text-[#F5A524] mb-2" />
                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider sm:tracking-widest leading-tight">Pelajari <br />Proses KPR</span>
-                </a>
+                </Link>
               </div>
             </div>
 

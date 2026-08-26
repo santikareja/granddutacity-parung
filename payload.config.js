@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- loader CommonJS untuk Payload CLI; wajib pakai require() karena bergantung pada __dirname dan module.exports gaya CJS (bukan ESM) */
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 

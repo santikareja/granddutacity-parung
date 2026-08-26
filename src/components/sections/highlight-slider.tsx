@@ -89,6 +89,7 @@ export function HighlightSlider() {
 
   useEffect(() => {
     if (!emblaApi) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sinkronisasi state awal dengan Embla API (sistem eksternal), bukan derivable saat render
     onSelect();
     emblaApi.on("select", onSelect);
     emblaApi.on("reInit", onSelect);
@@ -142,7 +143,7 @@ export function HighlightSlider() {
         <div className="relative group">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-3.5 sm:gap-5 md:gap-6">
-              {slides.map((slide, index) => (
+              {slides.map((slide) => (
                 <div
                   key={slide.id}
                   className="relative flex-[0_0_82%] sm:flex-[0_0_calc(50%-12px)] lg:flex-[0_0_calc(33.333%-16px)] min-w-0 aspect-[4/3] group/slide rounded-[1.75rem] sm:rounded-[2rem] p-1.5 bg-[#090D0A]/5 border border-[#090D0A]/8 shadow-[0_12px_30px_rgba(9,13,10,0.06)] hover:shadow-[0_20px_45px_rgba(9,13,10,0.12)] transition-all duration-500 cursor-pointer overflow-hidden select-none"

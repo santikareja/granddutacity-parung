@@ -24,6 +24,7 @@ export function ArticleTableOfContents({ targetId = "article-content" }: { targe
   useEffect(() => {
     const container = document.getElementById(targetId);
     if (!container) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sinkronisasi dengan DOM container yang di-query di luar React (bukan derivable saat render)
       setItems([]);
       return;
     }

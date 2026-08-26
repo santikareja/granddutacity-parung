@@ -26,6 +26,15 @@ const sslConfig = isLocal
     ? { ca: process.env.DATABASE_SSL_CA, rejectUnauthorized: true }
     : { rejectUnauthorized: false };
 
+// Peringatan sekali di startup: TLS tanpa validasi sertifikat aktif.
+if (!isLocal && !process.env.DATABASE_SSL_CA) {
+  console.warn(
+    "[db/security] Validasi sertifikat TLS Postgres DIMATIKAN (rejectUnauthorized: false). " +
+      "Koneksi rentan terhadap serangan Man-in-the-Middle (MITM). " +
+      "Rekomendasikan set DATABASE_SSL_CA dengan CA certificate dari provider DB (Supabase/Neon/RDS).",
+  );
+}
+
 type GlobalWithPool = typeof globalThis & {
   __gdcPgPool?: Pool;
 };

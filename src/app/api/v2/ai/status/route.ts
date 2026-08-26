@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { requireApiUser, apiError } from "@/lib/v2-auth/api-guard";
+import { requireApiUser } from "@/lib/v2-auth/api-guard";
 import { resolveAiConfig } from "@/lib/v2-admin/ai-runtime";
 
 export const runtime = "nodejs";

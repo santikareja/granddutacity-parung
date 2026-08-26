@@ -1,0 +1,166 @@
+{
+  "pbtResults": {
+    "2. Tulis test eksplorasi bug condition (SEBELUM fix)": {
+      "status": "passed",
+      "failingExample": "Pada kode BELUM diperbaiki, field `html` respons = stripCodeFence(raw) tanpa sanitasi. Counterexample konkret yang teramati:\n1) Tag berbahaya: html = \"<h2>Judul</h2><script>fetch('/steal?c='+document.cookie)</script><iframe src=\\\"https://evil.example/x\\\"></iframe><p>Isi artikel.</p>\" — masih memuat <script> dan <iframe>.\n2) Event handler inline: html = \"<p>Sebelum</p><img src=x onerror=alert(document.cookie)><p>Sesudah</p>\" — masih memuat onerror=alert(document.cookie).\n3) Skema URL aktif: html = \"<p>Tautan: <a href=\\\"javascript:alert(1)\\\">klik</a></p>\" — masih memuat href=\\\"javascript:...\\\".\n4) Kombinasi: containsDangerousTag/containsInlineEventHandler/containsActiveUrlScheme semuanya true (markup aktif tidak dibuang).\nKeempat test GAGAL sebagaimana diharapkan, mengonfirmasi bug (handler tidak memanggil sanitizeAiHtml pada field `html`).",
+      "lastRunTimestamp": 1787745918824
+    }
+  },
+  "executionHistory": {
+    "1. Siapkan infrastruktur pengujian": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745343911
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745354665
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745701369
+      }
+    ],
+    "2. Tulis test eksplorasi bug condition (SEBELUM fix)": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745344001
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745708030
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745946590
+      }
+    ],
+    "3. Tulis test preservation (SEBELUM fix)": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745344063
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745952752
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746218204
+      }
+    ],
+    "4.1 Sanitasi field `html` di server pada handler artikel": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745344114
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746224820
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746685856
+      }
+    ],
+    "4.2 Perbaiki komentar menyesatkan di klien AI Studio": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745344189
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746690990
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746743641
+      }
+    ],
+    "4.3 Verifikasi test eksplorasi bug condition kini LOLOS": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745344256
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746749567
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746800335
+      }
+    ],
+    "4.4 Verifikasi test preservation tetap LOLOS": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745344299
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746805744
+      }
+    ],
+    "5. Tambahkan test unit, PBT, dan integrasi tambahan sesuai Testing Strategy": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745344342
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746812201
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787747061364
+      }
+    ],
+    "6. Checkpoint - Pastikan semua test lolos": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787745344408
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787747066657
+      },
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787747320513
+      }
+    ],
+    "4. Fix untuk XSS pada field `html` pratinjau AI Studio": [
+      {
+        "executionId": "6264eb96-075a-487a-b39e-67b6f8f88999",
+        "chatSessionId": "sess_b52aaaa4-78b3-4b2d-88d3-97e0e88a7e36",
+        "timestamp": 1787746805813
+      }
+    ]
+  }
+}

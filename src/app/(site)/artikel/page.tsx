@@ -9,7 +9,9 @@ import configPromise from "@payload-config";
 import type { Artikel, Media, Tag } from "@/payload-types";
 import {
   articleArchiveEntries,
+  type ArticleArchiveEntry,
   type ArticleCategorySlug,
+  type ArticleTagSlug,
   articleCategories,
   articleCategoryDefinitions,
   articleCategorySlugs,
@@ -116,7 +118,7 @@ const breadcrumbSchema = {
   ],
 };
 
-const getItemListSchema = (articles: any[]) => ({
+const getItemListSchema = (articles: ArticleArchiveEntry[]) => ({
   "@context": "https://schema.org",
   "@type": "ItemList",
   "@id": `${PAGE_URL}#itemlist`,
@@ -131,7 +133,10 @@ const getItemListSchema = (articles: any[]) => ({
   })),
 });
 
-const getCollectionPageSchema = (articles: any[], canonicalUrl: string) => ({
+const getCollectionPageSchema = (
+  articles: ArticleArchiveEntry[],
+  canonicalUrl: string,
+) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   "@id": `${canonicalUrl}#webpage`,
@@ -302,7 +307,7 @@ export default async function ArtikelPage({
       category: categoryName,
       categorySlug,
       authorSlug: fallbackArchive?.authorSlug || "santika-reza",
-      tags: tagList as any[],
+      tags: tagList as ArticleTagSlug[],
       coverImage: thumb,
       coverAlt: isMediaObj ? ((entry.featuredImage as Media).alt || entry.title) : (fallbackArchive?.coverAlt || entry.title),
       updatedAt: entry.updatedAt || entry.createdAt,

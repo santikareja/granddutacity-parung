@@ -39,6 +39,7 @@ export function useScroll(threshold: number) {
 	React.useEffect(() => {
 		const nextValue = window.scrollY > threshold;
 		lastValueRef.current = nextValue;
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- sinkronisasi dengan window.scrollY (API browser, tidak tersedia saat render server/pertama)
 		setScrolled(nextValue);
 	}, [threshold]);
 

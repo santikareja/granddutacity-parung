@@ -1,8 +1,9 @@
 import type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/db-postgres'
 import { sql } from '@payloadcms/db-postgres'
+import type { Artikel } from '@/payload-types'
 
 const ARTICLE_SLUG = '10-ciri-agen-properti-terbaik'
-const ARTICLE_CONTENT = {
+const ARTICLE_CONTENT: Artikel['content'] = {
   root: {
     type: 'root',
     children: [
@@ -336,7 +337,7 @@ export async function up(args: MigrateUpArgs): Promise<void> {
     title: '10 Ciri Agen Properti Terbaik: Panduan Lengkap Memilih Mitra Jual Beli Rumah Anda',
     slug: ARTICLE_SLUG,
     excerpt: 'Temukan rahasia memilih agen properti terbaik untuk transaksi jual beli rumah Anda. Pelajari 10 ciri utama yang harus dimiliki agen profesional.',
-    content: ARTICLE_CONTENT as any,
+    content: ARTICLE_CONTENT,
     featuredImage: mediaId as number,
     kategori: [categoryId],
     tags: tagIds,

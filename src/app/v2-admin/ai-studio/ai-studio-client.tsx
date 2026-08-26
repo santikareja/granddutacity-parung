@@ -386,8 +386,8 @@ export default function AiStudioClient({
 
           <div
             className="gdc-editor max-h-[420px] overflow-y-auto rounded-lg border border-[#e2e8f0] bg-[#fdfdfd] p-4 text-sm"
-            // Konten dari AI sudah disanitasi di server (htmlToLexicalState
-            // membuang tag/atribut aktif) sebelum dikirim balik ke sini.
+            // Field `html` sudah disanitasi di server dengan sanitizeAiHtml()
+            // (membuang tag/atribut aktif dan skema URL berbahaya) sebelum dirender di sini.
             dangerouslySetInnerHTML={{ __html: articleHtml }}
           />
 

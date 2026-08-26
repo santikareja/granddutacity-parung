@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useEffect } from "react";
-import { ArrowUpRight, Sparkles, Building2, Award } from "lucide-react";
+import { ArrowUpRight, Building2, Award } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { useViewportVideo } from "@/components/ui/use-viewport-video";
 

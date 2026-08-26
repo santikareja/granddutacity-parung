@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Phone, Download, Clock, Info } from "lucide-react";
 import { BankSlider } from "@/components/ui/bank-slider";

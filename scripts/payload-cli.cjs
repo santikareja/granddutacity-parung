@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- script CLI CommonJS (.cjs); wajib pakai require() karena bergantung pada __dirname gaya CJS */
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 

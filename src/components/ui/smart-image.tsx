@@ -25,6 +25,7 @@ export function SmartImage({
   const [currentSrc, setCurrentSrc] = useState(normalizedSrc);
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element -- butuh fallback onError ke placeholder lokal saat src CMS gagal load; next/image tidak menyediakan pola ini dengan sederhana
     <img
       alt={alt}
       className={className}

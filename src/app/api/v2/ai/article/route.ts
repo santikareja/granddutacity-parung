@@ -6,6 +6,7 @@ import { resolveAiConfigWithModel } from "@/lib/v2-admin/ai-runtime";
 import { buildArticlePrompt, type OutlineSection } from "@/lib/ai/prompts";
 import { htmlToLexicalState } from "@/lib/v2-admin/html-to-lexical";
 import { ensureCta } from "@/lib/v2-admin/lexical";
+import { sanitizeAiHtml } from "@/lib/ai/html-to-lexical";
 
 export const runtime = "nodejs";
 // Generasi artikel 900-1200 kata bisa memakan waktu lama.
@@ -80,11 +81,15 @@ export async function POST(request: Request) {
       maxTokens: 4000,
     });
 
-    const html = stripCodeFence(raw);
-    if (!html) return apiError("AI menghasilkan artikel kosong.", 502);
+    const rawHtml = stripCodeFence(raw);
+    if (!rawHtml) return apiError("AI menghasilkan artikel kosong.", 502);
 
     // Konversi ke Lexical (sekaligus sanitasi) lalu enforce CTA wajib.
-    const content = ensureCta(htmlToLexicalState(html));
+    // Di-feed dari HTML mentah agar `content` tetap identik.
+    const content = ensureCta(htmlToLexicalState(rawHtml));
+
+    // Sanitasi hanya field `html` yang dikembalikan ke klien untuk pratinjau.
+    const html = sanitizeAiHtml(rawHtml);
 
     return NextResponse.json({ html, content });
   } catch (error) {

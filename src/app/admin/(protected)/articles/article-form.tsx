@@ -7,12 +7,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { ArrowLeft, ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
 import ArticleEditor from "./editor/article-editor";
 import MediaPickerDialog, {
   type PickedMedia,
 } from "./editor/media-picker-dialog";
 import { createEmptyState, slugify } from "@/lib/v2-admin/lexical";
+import {
+  AdminAlert,
+  AdminBadge,
+  AdminButton,
+  AdminCard,
+  AdminCardBody,
+  AdminCardTitle,
+  AdminCheckbox,
+  AdminInput,
+  AdminLabel,
+  AdminTextarea,
+} from "@/components/admin/ui";
 
 export type ArticleFormData = {
   id: number | null;
@@ -43,10 +57,6 @@ type Props = {
 };
 
 const AUTOSAVE_DELAY_MS = 4000;
-
-const inputClass =
-  "w-full rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20";
-const labelClass = "block text-sm font-medium text-[#334155]";
 
 export default function ArticleForm({ initial, categories, tags }: Props) {
   const router = useRouter();
@@ -246,19 +256,18 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl space-y-4">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-admin-border bg-admin-surface px-4 py-3 shadow-admin-xs">
         <div className="flex items-center gap-3">
-          <Link
-            href="/admin/articles"
-            className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 text-sm transition hover:bg-[#f1f5f9]"
-          >
-            &larr; Daftar
-          </Link>
+          <AdminButton variant="ghost" size="icon" asChild>
+            <Link href="/admin/articles" aria-label="Kembali ke daftar artikel">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </AdminButton>
           <div>
-            <h1 className="text-lg font-semibold">
+            <h1 className="text-base font-semibold text-admin-fg">
               {articleId ? "Edit Artikel" : "Artikel Baru"}
             </h1>
-            <p className="text-xs text-[#64748b]">
+            <p className="text-xs text-admin-fg-muted">
               {autosaving
                 ? "Menyimpan otomatis…"
                 : savedAt
@@ -271,46 +280,35 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
+          <AdminButton
+            variant="secondary"
             onClick={() => void persist("draft", "manual")}
             disabled={saving}
-            className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-sm transition hover:bg-[#f1f5f9] disabled:opacity-50"
           >
             {saving ? "Menyimpan…" : "Simpan Draft"}
-          </button>
-          <button
-            type="button"
+          </AdminButton>
+          <AdminButton
+            variant="primary"
             onClick={async () => {
               const ok = await persist("published", "manual");
               if (ok) router.refresh();
             }}
             disabled={saving}
-            className="rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
           >
             {form.status === "published" ? "Perbarui" : "Publish"}
-          </button>
+          </AdminButton>
         </div>
       </header>
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert>{error}</AdminAlert> : null}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className={labelClass} htmlFor="art-title">
-              Judul
-            </label>
-            <input
+            <AdminLabel htmlFor="art-title">Judul</AdminLabel>
+            <AdminInput
               id="art-title"
-              className={`${inputClass} text-base font-medium`}
+              className="text-base font-medium"
               value={form.title}
               onChange={(event) => update("title", event.target.value)}
               placeholder="Judul artikel…"
@@ -324,197 +322,185 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
         </div>
 
         <aside className="space-y-4">
-          <section className="space-y-3 rounded-xl border border-[#e2e8f0] bg-white p-4">
-            <h2 className="text-sm font-semibold">Publikasi</h2>
-            <p className="text-xs text-[#64748b]">
-              Status saat ini:{" "}
-              <span
-                className={
-                  form.status === "published"
-                    ? "font-semibold text-emerald-700"
-                    : "font-semibold text-amber-700"
-                }
-              >
-                {form.status === "published" ? "Live" : "Draft"}
-              </span>
-            </p>
-            {form.status === "published" ? (
-              <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                Artikel ini sudah tayang. Autosave dimatikan; tekan
-                &ldquo;Perbarui&rdquo; untuk menerapkan perubahan ke situs.
+          <AdminCard>
+            <AdminCardBody>
+              <AdminCardTitle>Publikasi</AdminCardTitle>
+              <p className="text-xs text-admin-fg-muted">
+                Status saat ini:{" "}
+                <AdminBadge tone={form.status === "published" ? "success" : "warning"}>
+                  {form.status === "published" ? "Live" : "Draft"}
+                </AdminBadge>
               </p>
-            ) : null}
-          </section>
+              {form.status === "published" ? (
+                <AdminAlert variant="warning">
+                  Artikel ini sudah tayang. Autosave dimatikan; tekan
+                  &ldquo;Perbarui&rdquo; untuk menerapkan perubahan ke situs.
+                </AdminAlert>
+              ) : null}
+            </AdminCardBody>
+          </AdminCard>
 
-          <section className="space-y-3 rounded-xl border border-[#e2e8f0] bg-white p-4">
-            <h2 className="text-sm font-semibold">Slug &amp; Ringkasan</h2>
-            <div className="space-y-1.5">
-              <label className={labelClass} htmlFor="art-slug">
-                Slug URL
-              </label>
-              <input
-                id="art-slug"
-                className={`${inputClass} font-mono text-xs`}
-                value={form.slug}
-                onChange={(event) => update("slug", event.target.value)}
-                placeholder="otomatis dari judul"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className={labelClass} htmlFor="art-excerpt">
-                Excerpt
-              </label>
-              <textarea
-                id="art-excerpt"
-                className={`${inputClass} min-h-20 resize-y`}
-                maxLength={160}
-                value={form.excerpt}
-                onChange={(event) => update("excerpt", event.target.value)}
-                placeholder="Otomatis dari paragraf pertama bila kosong"
-              />
-              <p className="text-xs text-[#94a3b8]">
-                {form.excerpt.length}/160 karakter
-              </p>
-            </div>
-          </section>
-
-          <section className="space-y-3 rounded-xl border border-[#e2e8f0] bg-white p-4">
-            <h2 className="text-sm font-semibold">Gambar Utama</h2>
-            {form.featuredImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- pratinjau Cloudinary di panel admin
-              <img
-                src={form.featuredImageUrl}
-                alt="Pratinjau gambar utama"
-                className="h-40 w-full rounded-lg border border-[#e2e8f0] object-cover"
-              />
-            ) : (
-              <div className="flex h-40 w-full items-center justify-center rounded-lg border border-dashed border-[#e2e8f0] bg-[#f8fafc] text-xs text-[#94a3b8]">
-                {form.featuredImageId
-                  ? "Gambar terpilih (pratinjau tidak tersedia)"
-                  : "Belum ada gambar utama"}
+          <AdminCard>
+            <AdminCardBody>
+              <AdminCardTitle>Slug &amp; Ringkasan</AdminCardTitle>
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="art-slug">Slug URL</AdminLabel>
+                <AdminInput
+                  id="art-slug"
+                  className="font-mono text-xs"
+                  value={form.slug}
+                  onChange={(event) => update("slug", event.target.value)}
+                  placeholder="otomatis dari judul"
+                />
               </div>
-            )}
-            <p className="text-xs text-[#94a3b8]">
-              Bila kosong, gambar pertama di konten dipakai otomatis saat
-              disimpan.
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setShowImagePicker(true)}
-                className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-1.5 text-sm transition hover:bg-[#f1f5f9]"
-              >
-                {form.featuredImageId ? "Ganti Gambar" : "Pilih Gambar"}
-              </button>
-              {form.featuredImageId ? (
-                <button
-                  type="button"
-                  onClick={clearFeaturedImage}
-                  className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50"
-                >
-                  Hapus
-                </button>
-              ) : null}
-            </div>
-          </section>
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="art-excerpt">Excerpt</AdminLabel>
+                <AdminTextarea
+                  id="art-excerpt"
+                  className="min-h-20"
+                  maxLength={160}
+                  value={form.excerpt}
+                  onChange={(event) => update("excerpt", event.target.value)}
+                  placeholder="Otomatis dari paragraf pertama bila kosong"
+                />
+                <p className="text-xs text-admin-fg-dim">
+                  {form.excerpt.length}/160 karakter
+                </p>
+              </div>
+            </AdminCardBody>
+          </AdminCard>
 
-          <section className="space-y-3 rounded-xl border border-[#e2e8f0] bg-white p-4">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold">SEO</h2>
-              <button
-                type="button"
-                onClick={() => void generateSeo()}
-                className="rounded-md bg-[#0f172a] px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-[#1e293b]"
-              >
-                Isi dengan AI
-              </button>
-            </div>
-            <div className="space-y-1.5">
-              <label className={labelClass} htmlFor="art-meta-title">
-                Meta title
-              </label>
-              <input
-                id="art-meta-title"
-                className={inputClass}
-                value={form.seoMetaTitle}
-                onChange={(event) => update("seoMetaTitle", event.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className={labelClass} htmlFor="art-meta-desc">
-                Meta description
-              </label>
-              <textarea
-                id="art-meta-desc"
-                className={`${inputClass} min-h-20 resize-y`}
-                value={form.seoMetaDescription}
-                onChange={(event) =>
-                  update("seoMetaDescription", event.target.value)
-                }
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className={labelClass} htmlFor="art-keyword">
-                Focus keyword
-              </label>
-              <input
-                id="art-keyword"
-                className={inputClass}
-                value={form.seoFocusKeyword}
-                onChange={(event) =>
-                  update("seoFocusKeyword", event.target.value)
-                }
-              />
-            </div>
-          </section>
-
-          <section className="space-y-3 rounded-xl border border-[#e2e8f0] bg-white p-4">
-            <h2 className="text-sm font-semibold">Kategori</h2>
-            <div className="space-y-1.5">
-              {categories.map((category) => (
-                <label
-                  key={category.id}
-                  className="flex cursor-pointer items-center gap-2.5 text-sm"
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.categoryIds.includes(category.id)}
-                    onChange={() =>
-                      update("categoryIds", toggleId(form.categoryIds, category.id))
-                    }
-                    className="h-4 w-4 accent-[#F5A524]"
+          <AdminCard>
+            <AdminCardBody>
+              <AdminCardTitle>Gambar Utama</AdminCardTitle>
+              {form.featuredImageUrl ? (
+                <div className="relative h-40 w-full overflow-hidden rounded-lg border border-admin-border">
+                  <Image
+                    src={form.featuredImageUrl}
+                    alt="Pratinjau gambar utama"
+                    fill
+                    sizes="320px"
+                    className="object-cover"
                   />
-                  <span>{category.name}</span>
-                </label>
-              ))}
-              {categories.length === 0 ? (
-                <p className="text-xs text-[#94a3b8]">Belum ada kategori.</p>
-              ) : null}
-            </div>
-          </section>
-
-          <section className="space-y-3 rounded-xl border border-[#e2e8f0] bg-white p-4">
-            <h2 className="text-sm font-semibold">Tag</h2>
-            <div className="max-h-48 space-y-1.5 overflow-y-auto">
-              {tags.map((tag) => (
-                <label
-                  key={tag.id}
-                  className="flex cursor-pointer items-center gap-2.5 text-sm"
+                </div>
+              ) : (
+                <div className="flex h-40 w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-admin-border bg-admin-surface-muted text-xs text-admin-fg-dim">
+                  <ImageIcon className="h-5 w-5" strokeWidth={1.5} />
+                  {form.featuredImageId
+                    ? "Gambar terpilih (pratinjau tidak tersedia)"
+                    : "Belum ada gambar utama"}
+                </div>
+              )}
+              <p className="text-xs text-admin-fg-dim">
+                Bila kosong, gambar pertama di konten dipakai otomatis saat
+                disimpan.
+              </p>
+              <div className="flex gap-2">
+                <AdminButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowImagePicker(true)}
                 >
-                  <input
-                    type="checkbox"
-                    checked={form.tagIds.includes(tag.id)}
-                    onChange={() => update("tagIds", toggleId(form.tagIds, tag.id))}
-                    className="h-4 w-4 accent-[#F5A524]"
-                  />
-                  <span>{tag.name}</span>
-                </label>
-              ))}
-              {tags.length === 0 ? (
-                <p className="text-xs text-[#94a3b8]">Belum ada tag.</p>
-              ) : null}
-            </div>
-          </section>
+                  {form.featuredImageId ? "Ganti Gambar" : "Pilih Gambar"}
+                </AdminButton>
+                {form.featuredImageId ? (
+                  <AdminButton variant="danger" size="sm" onClick={clearFeaturedImage}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Hapus
+                  </AdminButton>
+                ) : null}
+              </div>
+            </AdminCardBody>
+          </AdminCard>
+
+          <AdminCard>
+            <AdminCardBody>
+              <div className="flex items-center justify-between gap-2">
+                <AdminCardTitle>SEO</AdminCardTitle>
+                <AdminButton variant="dark" size="sm" onClick={() => void generateSeo()}>
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Isi dengan AI
+                </AdminButton>
+              </div>
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="art-meta-title">Meta title</AdminLabel>
+                <AdminInput
+                  id="art-meta-title"
+                  value={form.seoMetaTitle}
+                  onChange={(event) => update("seoMetaTitle", event.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="art-meta-desc">Meta description</AdminLabel>
+                <AdminTextarea
+                  id="art-meta-desc"
+                  className="min-h-20"
+                  value={form.seoMetaDescription}
+                  onChange={(event) =>
+                    update("seoMetaDescription", event.target.value)
+                  }
+                />
+              </div>
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="art-keyword">Focus keyword</AdminLabel>
+                <AdminInput
+                  id="art-keyword"
+                  value={form.seoFocusKeyword}
+                  onChange={(event) =>
+                    update("seoFocusKeyword", event.target.value)
+                  }
+                />
+              </div>
+            </AdminCardBody>
+          </AdminCard>
+
+          <AdminCard>
+            <AdminCardBody>
+              <AdminCardTitle>Kategori</AdminCardTitle>
+              <div className="space-y-1.5">
+                {categories.map((category) => (
+                  <label
+                    key={category.id}
+                    className="flex cursor-pointer items-center gap-2.5 text-sm text-admin-fg"
+                  >
+                    <AdminCheckbox
+                      checked={form.categoryIds.includes(category.id)}
+                      onChange={() =>
+                        update("categoryIds", toggleId(form.categoryIds, category.id))
+                      }
+                    />
+                    <span>{category.name}</span>
+                  </label>
+                ))}
+                {categories.length === 0 ? (
+                  <p className="text-xs text-admin-fg-dim">Belum ada kategori.</p>
+                ) : null}
+              </div>
+            </AdminCardBody>
+          </AdminCard>
+
+          <AdminCard>
+            <AdminCardBody>
+              <AdminCardTitle>Tag</AdminCardTitle>
+              <div className="admin-scrollbar max-h-48 space-y-1.5 overflow-y-auto">
+                {tags.map((tag) => (
+                  <label
+                    key={tag.id}
+                    className="flex cursor-pointer items-center gap-2.5 text-sm text-admin-fg"
+                  >
+                    <AdminCheckbox
+                      checked={form.tagIds.includes(tag.id)}
+                      onChange={() => update("tagIds", toggleId(form.tagIds, tag.id))}
+                    />
+                    <span>{tag.name}</span>
+                  </label>
+                ))}
+                {tags.length === 0 ? (
+                  <p className="text-xs text-admin-fg-dim">Belum ada tag.</p>
+                ) : null}
+              </div>
+            </AdminCardBody>
+          </AdminCard>
         </aside>
       </div>
 

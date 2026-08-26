@@ -1,6 +1,20 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { CheckCircle2, Pencil, Plus, ScanSearch, Trash2 } from "lucide-react";
+
+import {
+  AdminAlert,
+  AdminBadge,
+  AdminButton,
+  AdminCard,
+  AdminCardBody,
+  AdminCheckbox,
+  AdminInput,
+  AdminLabel,
+  AdminPageHeader,
+  AdminSelect,
+} from "@/components/admin/ui";
 
 export type ProviderForClient = {
   id: number;
@@ -42,11 +56,6 @@ const PRESETS = [
   { label: "OpenRouter", url: "https://openrouter.ai/api/v1" },
   { label: "DeepSeek", url: "https://api.deepseek.com/v1" },
 ];
-
-const inputClass =
-  "w-full rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20";
-
-const labelClass = "block text-sm font-medium text-[#334155]";
 
 export default function AiSettingsClient({
   initialProviders,
@@ -209,50 +218,33 @@ export default function AiSettingsClient({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Konfigurasi AI</h1>
-          <p className="mt-1 text-sm text-[#475467]">
-            Provider OpenAI-compatible. API key dienkripsi (AES-256-GCM) sebelum
-            disimpan dan tidak pernah dikirim balik ke browser.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={startCreate}
-          className="rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f]"
-        >
-          + Provider Baru
-        </button>
-      </header>
+      <AdminPageHeader
+        title="Konfigurasi AI"
+        description="Provider OpenAI-compatible. API key dienkripsi (AES-256-GCM) sebelum disimpan dan tidak pernah dikirim balik ke browser."
+        actions={
+          <AdminButton type="button" variant="primary" onClick={startCreate}>
+            <Plus className="h-4 w-4" />
+            Provider Baru
+          </AdminButton>
+        }
+      />
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
 
-      {notice ? (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {notice}
-        </p>
-      ) : null}
+      {notice ? <AdminAlert variant="success">{notice}</AdminAlert> : null}
 
       {providers.length === 0 && aiEnvFallbackActive ? (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <AdminAlert variant="warning">
           Belum ada provider di database, tetapi AI tetap aktif memakai variabel
           environment <code className="font-mono">AI_BASE_URL</code>/
           <code className="font-mono">AI_MODEL</code>. Tambahkan provider di sini
           agar bisa mengganti model tanpa redeploy.
-        </p>
+        </AdminAlert>
       ) : null}
 
       {providers.length > 0 ? (
-        <section className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
-          <ul className="divide-y divide-[#eef2f7]">
+        <AdminCard className="overflow-hidden">
+          <ul className="divide-y divide-admin-border">
             {providers.map((provider) => (
               <li
                 key={provider.id}
@@ -260,17 +252,20 @@ export default function AiSettingsClient({
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold">{provider.name}</p>
+                    <p className="truncate text-sm font-semibold text-admin-fg">
+                      {provider.name}
+                    </p>
                     {provider.isDefault ? (
-                      <span className="rounded-full bg-[#fff5ea] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#A85D16]">
+                      <AdminBadge tone="accent">
+                        <CheckCircle2 className="h-3 w-3" />
                         Default
-                      </span>
+                      </AdminBadge>
                     ) : null}
                   </div>
-                  <p className="mt-0.5 truncate font-mono text-xs text-[#64748b]">
+                  <p className="mt-0.5 truncate font-mono text-xs text-admin-fg-muted">
                     {provider.baseUrl}
                   </p>
-                  <p className="mt-0.5 text-xs text-[#64748b]">
+                  <p className="mt-0.5 text-xs text-admin-fg-muted">
                     Key {provider.apiKeyMasked} &middot; {provider.models.length} model
                     aktif
                     {provider.defaultModel ? ` · default: ${provider.defaultModel}` : ""}
@@ -278,203 +273,193 @@ export default function AiSettingsClient({
                 </div>
 
                 <div className="flex shrink-0 gap-2">
-                  <button
+                  <AdminButton
                     type="button"
+                    size="sm"
+                    variant="secondary"
                     onClick={() => startEdit(provider)}
-                    className="rounded-lg border border-[#e2e8f0] px-3 py-1.5 text-sm transition hover:bg-[#f1f5f9]"
                   >
+                    <Pencil className="h-3.5 w-3.5" />
                     Edit
-                  </button>
-                  <button
+                  </AdminButton>
+                  <AdminButton
                     type="button"
+                    size="sm"
+                    variant="danger"
                     onClick={() => void remove(provider)}
-                    className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50"
                   >
+                    <Trash2 className="h-3.5 w-3.5" />
                     Hapus
-                  </button>
+                  </AdminButton>
                 </div>
               </li>
             ))}
           </ul>
-        </section>
+        </AdminCard>
       ) : null}
 
       {showForm ? (
-        <form
-          onSubmit={save}
-          className="space-y-5 rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm"
-        >
-          <h2 className="text-base font-semibold">
-            {form.id ? `Edit: ${form.name}` : "Tambah Provider"}
-          </h2>
+        <AdminCard>
+          <form onSubmit={save}>
+            <AdminCardBody>
+              <h2 className="text-base font-semibold text-admin-fg">
+                {form.id ? `Edit: ${form.name}` : "Tambah Provider"}
+              </h2>
 
-          <div className="space-y-1.5">
-            <label className={labelClass} htmlFor="prov-name">
-              Nama
-            </label>
-            <input
-              id="prov-name"
-              className={inputClass}
-              required
-              value={form.name}
-              onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-              placeholder="OpenAI"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className={labelClass} htmlFor="prov-url">
-              Base URL
-            </label>
-            <input
-              id="prov-url"
-              className={inputClass}
-              required
-              value={form.baseUrl}
-              onChange={(e) => setForm((p) => ({ ...p, baseUrl: e.target.value }))}
-              placeholder="https://api.openai.com/v1"
-            />
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {PRESETS.map((preset) => (
-                <button
-                  key={preset.url}
-                  type="button"
-                  onClick={() =>
-                    setForm((p) => ({
-                      ...p,
-                      baseUrl: preset.url,
-                      name: p.name || preset.label,
-                    }))
-                  }
-                  className="rounded-md border border-[#e2e8f0] px-2 py-1 text-xs text-[#475467] transition hover:border-[#F5A524] hover:bg-[#fff5ea]"
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className={labelClass} htmlFor="prov-key">
-              API Key
-            </label>
-            <input
-              id="prov-key"
-              className={`${inputClass} font-mono`}
-              type="text"
-              autoComplete="off"
-              value={form.apiKey}
-              onChange={(e) => setForm((p) => ({ ...p, apiKey: e.target.value }))}
-              placeholder="sk-..."
-              required={form.id === null}
-            />
-            {form.id !== null ? (
-              <p className="text-xs text-[#64748b]">
-                Menampilkan mask. Biarkan seperti ini untuk mempertahankan key
-                lama, atau hapus lalu ketik key baru untuk menggantinya.
-              </p>
-            ) : null}
-          </div>
-
-          <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm font-medium">Model</p>
-              <button
-                type="button"
-                onClick={() => void detectModels()}
-                disabled={detecting || !form.baseUrl}
-                className="rounded-lg bg-[#0f172a] px-3.5 py-2 text-sm font-medium text-white transition hover:bg-[#1e293b] disabled:opacity-50"
-              >
-                {detecting ? "Mendeteksi…" : "Deteksi Model"}
-              </button>
-            </div>
-
-            {form.availableModels.length > 0 ? (
-              <div className="mt-3 max-h-64 space-y-1 overflow-y-auto rounded-lg border border-[#e2e8f0] bg-white p-3">
-                {form.availableModels.map((modelId) => (
-                  <label
-                    key={modelId}
-                    className="flex cursor-pointer items-center gap-2.5 rounded px-1.5 py-1 text-sm hover:bg-[#f8fafc]"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form.models.includes(modelId)}
-                      onChange={() => toggleModel(modelId)}
-                      className="h-4 w-4 accent-[#F5A524]"
-                    />
-                    <span className="font-mono text-xs">{modelId}</span>
-                  </label>
-                ))}
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="prov-name">Nama</AdminLabel>
+                <AdminInput
+                  id="prov-name"
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="OpenAI"
+                />
               </div>
-            ) : (
-              <p className="mt-2 text-xs text-[#64748b]">
-                {form.models.length > 0
-                  ? `Model aktif: ${form.models.join(", ")}. Klik "Deteksi Model" untuk memuat daftar lengkap.`
-                  : "Klik \"Deteksi Model\" setelah Base URL dan API Key terisi."}
-              </p>
-            )}
 
-            {form.models.length > 0 ? (
-              <div className="mt-3 space-y-1.5">
-                <label className={labelClass} htmlFor="prov-default-model">
-                  Model default
-                </label>
-                <select
-                  id="prov-default-model"
-                  className={inputClass}
-                  value={form.defaultModel}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, defaultModel: e.target.value }))
-                  }
-                >
-                  {form.models.map((modelId) => (
-                    <option key={modelId} value={modelId}>
-                      {modelId}
-                    </option>
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="prov-url">Base URL</AdminLabel>
+                <AdminInput
+                  id="prov-url"
+                  required
+                  value={form.baseUrl}
+                  onChange={(e) => setForm((p) => ({ ...p, baseUrl: e.target.value }))}
+                  placeholder="https://api.openai.com/v1"
+                />
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {PRESETS.map((preset) => (
+                    <AdminButton
+                      key={preset.url}
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={() =>
+                        setForm((p) => ({
+                          ...p,
+                          baseUrl: preset.url,
+                          name: p.name || preset.label,
+                        }))
+                      }
+                    >
+                      {preset.label}
+                    </AdminButton>
                   ))}
-                </select>
+                </div>
               </div>
-            ) : null}
-          </div>
 
-          <label className="flex cursor-pointer items-center gap-2.5 text-sm">
-            <input
-              type="checkbox"
-              checked={form.isDefault}
-              onChange={(e) =>
-                setForm((p) => ({ ...p, isDefault: e.target.checked }))
-              }
-              className="h-4 w-4 accent-[#F5A524]"
-            />
-            <span>
-              Jadikan provider default
-              <span className="ml-1 text-xs text-[#64748b]">
-                (dipakai AI Studio &amp; tombol AI)
-              </span>
-            </span>
-          </label>
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="prov-key">API Key</AdminLabel>
+                <AdminInput
+                  id="prov-key"
+                  className="font-mono"
+                  type="text"
+                  autoComplete="off"
+                  value={form.apiKey}
+                  onChange={(e) => setForm((p) => ({ ...p, apiKey: e.target.value }))}
+                  placeholder="sk-..."
+                  required={form.id === null}
+                />
+                {form.id !== null ? (
+                  <p className="text-xs text-admin-fg-muted">
+                    Menampilkan mask. Biarkan seperti ini untuk mempertahankan key
+                    lama, atau hapus lalu ketik key baru untuk menggantinya.
+                  </p>
+                ) : null}
+              </div>
 
-          <div className="flex flex-wrap gap-3 border-t border-[#eef2f7] pt-4">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-lg bg-[#F5A524] px-4 py-2.5 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
-            >
-              {saving ? "Menyimpan…" : form.id ? "Simpan Perubahan" : "Simpan Provider"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowForm(false);
-                setForm(emptyForm);
-                setError(null);
-              }}
-              className="rounded-lg border border-[#e2e8f0] px-4 py-2.5 text-sm transition hover:bg-[#f1f5f9]"
-            >
-              Batal
-            </button>
-          </div>
-        </form>
+              <div className="rounded-xl border border-admin-border bg-admin-surface-muted p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-admin-fg">Model</p>
+                  <AdminButton
+                    type="button"
+                    variant="dark"
+                    onClick={() => void detectModels()}
+                    disabled={detecting || !form.baseUrl}
+                  >
+                    <ScanSearch className="h-4 w-4" />
+                    {detecting ? "Mendeteksi…" : "Deteksi Model"}
+                  </AdminButton>
+                </div>
+
+                {form.availableModels.length > 0 ? (
+                  <div className="admin-scrollbar mt-3 max-h-64 space-y-1 overflow-y-auto rounded-lg border border-admin-border bg-admin-surface p-3">
+                    {form.availableModels.map((modelId) => (
+                      <label
+                        key={modelId}
+                        className="flex cursor-pointer items-center gap-2.5 rounded px-1.5 py-1 text-sm hover:bg-admin-surface-hover"
+                      >
+                        <AdminCheckbox
+                          checked={form.models.includes(modelId)}
+                          onChange={() => toggleModel(modelId)}
+                        />
+                        <span className="font-mono text-xs">{modelId}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-2 text-xs text-admin-fg-muted">
+                    {form.models.length > 0
+                      ? `Model aktif: ${form.models.join(", ")}. Klik "Deteksi Model" untuk memuat daftar lengkap.`
+                      : "Klik \"Deteksi Model\" setelah Base URL dan API Key terisi."}
+                  </p>
+                )}
+
+                {form.models.length > 0 ? (
+                  <div className="mt-3 space-y-1.5">
+                    <AdminLabel htmlFor="prov-default-model">
+                      Model default
+                    </AdminLabel>
+                    <AdminSelect
+                      id="prov-default-model"
+                      value={form.defaultModel}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, defaultModel: e.target.value }))
+                      }
+                    >
+                      {form.models.map((modelId) => (
+                        <option key={modelId} value={modelId}>
+                          {modelId}
+                        </option>
+                      ))}
+                    </AdminSelect>
+                  </div>
+                ) : null}
+              </div>
+
+              <label className="flex cursor-pointer items-center gap-2.5 text-sm text-admin-fg">
+                <AdminCheckbox
+                  checked={form.isDefault}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, isDefault: e.target.checked }))
+                  }
+                />
+                <span>
+                  Jadikan provider default
+                  <span className="ml-1 text-xs text-admin-fg-muted">
+                    (dipakai AI Studio &amp; tombol AI)
+                  </span>
+                </span>
+              </label>
+
+              <div className="flex flex-wrap gap-3 border-t border-admin-border pt-4">
+                <AdminButton type="submit" variant="primary" disabled={saving}>
+                  {saving ? "Menyimpan…" : form.id ? "Simpan Perubahan" : "Simpan Provider"}
+                </AdminButton>
+                <AdminButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setShowForm(false);
+                    setForm(emptyForm);
+                    setError(null);
+                  }}
+                >
+                  Batal
+                </AdminButton>
+              </div>
+            </AdminCardBody>
+          </form>
+        </AdminCard>
       ) : null}
     </div>
   );

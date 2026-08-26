@@ -21,6 +21,112 @@
   --font-serif: var(--font-serif), Georgia, 'Times New Roman', serif;
 }
 
+/* ==========================================================================
+   Admin CMS design tokens (/admin only).
+   Scoped with an --admin-/-admin suffix so they never collide with the
+   public-site brand tokens above (same globals.css, two products). Values
+   use OKLCH for perceptual uniformity. Tailwind v4 auto-generates utilities
+   from every key here: bg-admin-*, text-admin-*, border-admin-*,
+   shadow-admin-*, rounded-admin-*.
+   ========================================================================== */
+@theme {
+  /* Canvas & surfaces (light, professional SaaS — distinct from the dark
+     luxury public site since this is a working tool, not a marketing page). */
+  --color-admin-bg: oklch(97.3% 0.004 260);
+  --color-admin-surface: oklch(100% 0 0);
+  --color-admin-surface-muted: oklch(98.2% 0.004 260);
+  --color-admin-surface-hover: oklch(96.5% 0.006 260);
+
+  --color-admin-border: oklch(91% 0.006 260);
+  --color-admin-border-strong: oklch(85% 0.01 260);
+
+  /* Text */
+  --color-admin-fg: oklch(21% 0.02 260);
+  --color-admin-fg-muted: oklch(46% 0.02 260);
+  --color-admin-fg-dim: oklch(64% 0.014 260);
+
+  /* Brand accent — reuses the site's gold so the admin panel still feels
+     like Grand Duta City Parung, not a generic dashboard template. */
+  --color-admin-accent: var(--color-brand-primary);
+  --color-admin-accent-hover: #e0961f;
+  --color-admin-accent-fg: oklch(21% 0.02 260);
+  --color-admin-accent-soft: oklch(96% 0.045 70);
+  --color-admin-accent-soft-fg: oklch(42% 0.1 50);
+
+  /* Semantic status colors */
+  --color-admin-success: oklch(56% 0.14 152);
+  --color-admin-success-soft: oklch(95.5% 0.045 152);
+  --color-admin-warning: oklch(64% 0.16 65);
+  --color-admin-warning-soft: oklch(95.5% 0.06 75);
+  --color-admin-danger: oklch(55% 0.19 25);
+  --color-admin-danger-soft: oklch(95.5% 0.04 20);
+  --color-admin-info: oklch(58% 0.12 240);
+  --color-admin-info-soft: oklch(95.5% 0.03 240);
+
+  /* Dark login surface */
+  --color-admin-login-bg: oklch(16% 0.012 260);
+  --color-admin-login-fg: oklch(97% 0.004 260);
+  --color-admin-login-fg-muted: oklch(66% 0.012 260);
+
+  /* Elevation */
+  --shadow-admin-xs: 0 1px 2px oklch(21% 0.02 260 / 0.05);
+  --shadow-admin-sm: 0 1px 3px oklch(21% 0.02 260 / 0.06), 0 1px 2px oklch(21% 0.02 260 / 0.04);
+  --shadow-admin-md: 0 8px 24px -6px oklch(21% 0.02 260 / 0.1), 0 2px 6px -1px oklch(21% 0.02 260 / 0.05);
+  --shadow-admin-lg: 0 20px 48px -12px oklch(21% 0.02 260 / 0.16), 0 4px 12px -2px oklch(21% 0.02 260 / 0.06);
+
+  /* Motion */
+  --ease-admin-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-admin-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@layer utilities {
+  /* Liquid glass — used on the admin topbar, dropdown menus, and dialogs. */
+  .admin-glass {
+    background: linear-gradient(
+      135deg,
+      oklch(100% 0 0 / 0.72) 0%,
+      oklch(100% 0 0 / 0.55) 100%
+    );
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid oklch(100% 0 0 / 0.6);
+  }
+
+  /* Flash-free modal/dialog entrance. */
+  .admin-modal-panel {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition:
+      opacity var(--dur-base, 220ms) var(--ease-admin-out),
+      transform var(--dur-base, 220ms) var(--ease-admin-spring);
+  }
+  @starting-style {
+    .admin-modal-panel {
+      opacity: 0;
+      transform: translateY(8px) scale(0.97);
+    }
+  }
+
+  .admin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(85% 0.01 260) transparent;
+  }
+  .admin-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .admin-scrollbar::-webkit-scrollbar-thumb {
+    background-color: oklch(85% 0.01 260);
+    border-radius: 9999px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .admin-modal-panel {
+      transition: none;
+    }
+  }
+}
+
 @layer utilities {
   /* Haptic Double-Bezel Utilities */
   .double-bezel-outer-dark {

@@ -1,22 +1,23 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { KeyRound } from "lucide-react";
 
 import { AdminClientError, adminPatch } from "@/lib/v2-admin/api-client";
+import {
+  AdminAlert,
+  AdminButton,
+  AdminCard,
+  AdminCardBody,
+  AdminInput,
+  AdminLabel,
+} from "@/components/admin/ui";
 
 type Props = {
   name: string;
   email: string;
   role: string;
 };
-
-const inputClass =
-  "w-full rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20";
-
-const labelClass = "block text-sm font-medium text-[#334155]";
-
-const primaryBtn =
-  "rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#e0951c] disabled:cursor-not-allowed disabled:opacity-50";
 
 const errorMessage = (err: unknown, fallback: string): string =>
   err instanceof AdminClientError ? err.message : fallback;
@@ -65,105 +66,99 @@ export default function AccountClient({ name, email, role }: Props) {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <header>
-        <h1 className="text-xl font-semibold text-[#0f172a]">Akun</h1>
-        <p className="mt-1 text-sm text-[#64748b]">
+        <h1 className="text-xl font-semibold text-admin-fg">Akun</h1>
+        <p className="mt-1 text-sm text-admin-fg-muted">
           Informasi akun dan ganti password.
         </p>
       </header>
 
-      <section className="rounded-xl border border-[#e2e8f0] bg-white p-5">
-        <h2 className="text-sm font-semibold text-[#334155]">Informasi akun</h2>
-        <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs text-[#94a3b8]">Nama</dt>
-            <dd className="mt-0.5 text-sm text-[#0f172a]">{name}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-[#94a3b8]">Email</dt>
-            <dd className="mt-0.5 text-sm text-[#0f172a]">{email}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-[#94a3b8]">Role</dt>
-            <dd className="mt-0.5 text-sm capitalize text-[#0f172a]">{role}</dd>
-          </div>
-        </dl>
-      </section>
+      <AdminCard>
+        <AdminCardBody>
+          <h2 className="text-sm font-semibold text-admin-fg">Informasi akun</h2>
+          <dl className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs text-admin-fg-dim">Nama</dt>
+              <dd className="mt-0.5 text-sm text-admin-fg">{name}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-admin-fg-dim">Email</dt>
+              <dd className="mt-0.5 text-sm text-admin-fg">{email}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-admin-fg-dim">Role</dt>
+              <dd className="mt-0.5 text-sm capitalize text-admin-fg">{role}</dd>
+            </div>
+          </dl>
+        </AdminCardBody>
+      </AdminCard>
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
 
-      {success ? (
-        <p
-          role="status"
-          className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
-        >
-          {success}
-        </p>
-      ) : null}
+      {success ? <AdminAlert variant="success">{success}</AdminAlert> : null}
 
-      <section className="rounded-xl border border-[#e2e8f0] bg-white p-5">
-        <h2 className="text-sm font-semibold text-[#334155]">Ganti password</h2>
-        <div className="mt-4 space-y-4">
-          <div>
-            <label className={labelClass} htmlFor="current-password">
-              Password saat ini
-            </label>
-            <input
-              id="current-password"
-              type="password"
-              autoComplete="current-password"
-              className={`mt-1.5 ${inputClass}`}
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              disabled={saving}
-            />
+      <AdminCard>
+        <AdminCardBody>
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-admin-fg">
+            <KeyRound className="h-4 w-4 text-admin-fg-muted" />
+            Ganti password
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <AdminLabel htmlFor="current-password">
+                Password saat ini
+              </AdminLabel>
+              <AdminInput
+                id="current-password"
+                type="password"
+                autoComplete="current-password"
+                className="mt-1.5"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                disabled={saving}
+              />
+            </div>
+            <div>
+              <AdminLabel htmlFor="new-password">
+                Password baru{" "}
+                <span className="text-admin-fg-dim">(min. 8 karakter)</span>
+              </AdminLabel>
+              <AdminInput
+                id="new-password"
+                type="password"
+                autoComplete="new-password"
+                className="mt-1.5"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={saving}
+              />
+            </div>
+            <div>
+              <AdminLabel htmlFor="confirm-password">
+                Konfirmasi password baru
+              </AdminLabel>
+              <AdminInput
+                id="confirm-password"
+                type="password"
+                autoComplete="new-password"
+                className="mt-1.5"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={saving}
+              />
+            </div>
+            <div>
+              <AdminButton
+                type="button"
+                variant="primary"
+                onClick={() => void handleSubmit()}
+                disabled={saving}
+              >
+                {saving ? "Menyimpan…" : "Ganti password"}
+              </AdminButton>
+            </div>
           </div>
-          <div>
-            <label className={labelClass} htmlFor="new-password">
-              Password baru <span className="text-[#94a3b8]">(min. 8 karakter)</span>
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              autoComplete="new-password"
-              className={`mt-1.5 ${inputClass}`}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              disabled={saving}
-            />
-          </div>
-          <div>
-            <label className={labelClass} htmlFor="confirm-password">
-              Konfirmasi password baru
-            </label>
-            <input
-              id="confirm-password"
-              type="password"
-              autoComplete="new-password"
-              className={`mt-1.5 ${inputClass}`}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={saving}
-            />
-          </div>
-          <div>
-            <button
-              type="button"
-              className={primaryBtn}
-              onClick={() => void handleSubmit()}
-              disabled={saving}
-            >
-              {saving ? "Menyimpan…" : "Ganti password"}
-            </button>
-          </div>
-        </div>
-      </section>
+        </AdminCardBody>
+      </AdminCard>
     </div>
   );
 }

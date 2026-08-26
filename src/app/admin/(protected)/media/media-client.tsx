@@ -4,6 +4,7 @@
 // berkas, dan impor foto stok (Unsplash/Pexels).
 
 import { useCallback, useRef, useState } from "react";
+import { Pencil, Search, Trash2, Upload, X } from "lucide-react";
 
 import {
   AdminClientError,
@@ -11,6 +12,15 @@ import {
   adminGet,
   adminPatch,
 } from "@/lib/v2-admin/api-client";
+import {
+  AdminAlert,
+  AdminButton,
+  AdminCard,
+  AdminEmptyState,
+  AdminInput,
+  AdminLabel,
+  AdminSelect,
+} from "@/components/admin/ui";
 
 export type MediaRow = {
   id: number;
@@ -53,11 +63,6 @@ type Props = {
 };
 
 type Tab = "library" | "upload" | "stock";
-
-const inputClass =
-  "w-full rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20";
-
-const labelClass = "block text-sm font-medium text-[#334155]";
 
 const errorMessage = (err: unknown, fallback: string): string =>
   err instanceof AdminClientError ? err.message : fallback;
@@ -317,21 +322,23 @@ export default function MediaClient({
   const tabClass = (target: Tab) =>
     `rounded-lg px-4 py-2 text-sm transition ${
       tab === target
-        ? "bg-[#fff5ea] font-semibold text-[#A85D16]"
-        : "text-[#475467] hover:bg-[#f1f5f9]"
+        ? "bg-admin-accent-soft font-semibold text-admin-accent-soft-fg"
+        : "text-admin-fg-muted hover:bg-admin-surface-hover"
     }`;
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Media</h1>
-        <p className="mt-1 text-sm text-[#475467]">
+        <h1 className="text-2xl font-semibold tracking-tight text-admin-fg">
+          Media
+        </h1>
+        <p className="mt-1 text-sm text-admin-fg-muted">
           {total} gambar di library. Semua gambar diunggah ke Cloudinary dan
           dilayani sebagai WebP/AVIF otomatis.
         </p>
       </header>
 
-      <div className="flex gap-1 rounded-lg border border-[#e2e8f0] bg-white p-1">
+      <div className="flex gap-1 rounded-lg border border-admin-border bg-admin-surface p-1">
         <button type="button" onClick={() => setTab("library")} className={tabClass("library")}>
           Library
         </button>
@@ -343,55 +350,46 @@ export default function MediaClient({
         </button>
       </div>
 
-      {error ? (
-        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
-      {notice ? (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {notice}
-        </p>
-      ) : null}
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
+      {notice ? <AdminAlert variant="success">{notice}</AdminAlert> : null}
 
       {!cloudinaryReady ? (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <AdminAlert variant="warning">
           Cloudinary belum dikonfigurasi. Upload dan impor foto stok dimatikan
           sampai <code className="font-mono">CLOUDINARY_CLOUD_NAME</code>,{" "}
           <code className="font-mono">CLOUDINARY_API_KEY</code>, dan{" "}
           <code className="font-mono">CLOUDINARY_API_SECRET</code> diset.
-        </p>
+        </AdminAlert>
       ) : null}
 
       {tab === "library" ? (
-        <section className="space-y-4 rounded-2xl border border-[#e2e8f0] bg-white p-5">
+        <section className="space-y-4 rounded-2xl border border-admin-border bg-admin-surface p-5">
           <form onSubmit={submitSearch} className="flex flex-wrap gap-2">
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Cari nama, alt text, atau nama berkas…"
-              className="min-w-0 flex-1 rounded-lg border border-[#e2e8f0] px-3.5 py-2 text-sm outline-none focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20"
-            />
-            <button
-              type="submit"
-              disabled={libLoading}
-              className="rounded-lg bg-[#0f172a] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1e293b] disabled:opacity-50"
-            >
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-admin-fg-dim" />
+              <AdminInput
+                type="search"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Cari nama, alt text, atau nama berkas…"
+                className="pl-9"
+              />
+            </div>
+            <AdminButton type="submit" variant="dark" disabled={libLoading}>
               {libLoading ? "Memuat…" : "Cari"}
-            </button>
+            </AdminButton>
             {appliedSearch ? (
-              <button
+              <AdminButton
                 type="button"
+                variant="secondary"
                 onClick={() => {
                   setSearchInput("");
                   void loadLibrary(1, "");
                 }}
                 disabled={libLoading}
-                className="rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm text-[#475467] transition hover:bg-[#f1f5f9] disabled:opacity-50"
               >
                 Reset
-              </button>
+              </AdminButton>
             ) : null}
           </form>
 
@@ -400,7 +398,7 @@ export default function MediaClient({
               {items.map((item) => (
                 <figure
                   key={item.id}
-                  className="flex flex-col overflow-hidden rounded-lg border border-[#e2e8f0]"
+                  className="flex flex-col overflow-hidden rounded-lg border border-admin-border"
                 >
                   {item.url ? (
                     // eslint-disable-next-line @next/next/no-img-element -- thumbnail Cloudinary dinamis di panel admin
@@ -411,41 +409,45 @@ export default function MediaClient({
                       className="h-32 w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-32 items-center justify-center bg-[#f8fafc] text-xs text-[#94a3b8]">
+                    <div className="flex h-32 items-center justify-center bg-admin-surface-muted text-xs text-admin-fg-dim">
                       Tanpa pratinjau
                     </div>
                   )}
                   <figcaption className="flex flex-1 flex-col gap-0.5 px-2.5 py-2">
-                    <p className="truncate text-xs font-medium">
+                    <p className="truncate text-xs font-medium text-admin-fg">
                       {item.name || `Media #${item.id}`}
                     </p>
-                    <p className="truncate text-[11px] text-[#64748b]">
+                    <p className="truncate text-[11px] text-admin-fg-muted">
                       {item.alt}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wide text-[#94a3b8]">
+                    <p className="text-[10px] uppercase tracking-wide text-admin-fg-dim">
                       {item.source ?? "upload"}
                       {item.width && item.height
                         ? ` · ${item.width}×${item.height}`
                         : ""}
                     </p>
                     <div className="mt-1.5 flex gap-1.5">
-                      <button
+                      <AdminButton
                         type="button"
+                        size="sm"
+                        variant="secondary"
                         onClick={() => startEdit(item)}
                         disabled={busyId === item.id}
-                        className="rounded-md border border-[#e2e8f0] px-2 py-1 text-[11px] text-[#475467] transition hover:bg-[#f1f5f9] disabled:opacity-50"
                       >
+                        <Pencil className="h-3 w-3" />
                         Edit
-                      </button>
+                      </AdminButton>
                       {canManage ? (
-                        <button
+                        <AdminButton
                           type="button"
+                          size="sm"
+                          variant="danger"
                           onClick={() => void handleDelete(item)}
                           disabled={busyId === item.id}
-                          className="rounded-md border border-red-200 px-2 py-1 text-[11px] text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                         >
+                          <Trash2 className="h-3 w-3" />
                           {busyId === item.id ? "…" : "Hapus"}
-                        </button>
+                        </AdminButton>
                       ) : null}
                     </div>
                   </figcaption>
@@ -453,116 +455,113 @@ export default function MediaClient({
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-sm text-[#94a3b8]">
-              {appliedSearch
-                ? "Tidak ada media yang cocok dengan pencarian."
-                : "Belum ada media. Unggah gambar atau impor dari foto stok."}
-            </p>
+            <AdminEmptyState
+              title={
+                appliedSearch
+                  ? "Tidak ada media yang cocok"
+                  : "Belum ada media"
+              }
+              description={
+                appliedSearch
+                  ? "Tidak ada media yang cocok dengan pencarian."
+                  : "Belum ada media. Unggah gambar atau impor dari foto stok."
+              }
+            />
           )}
 
           {totalPages > 1 ? (
-            <div className="flex items-center justify-between gap-3 border-t border-[#eef2f7] pt-4">
-              <button
+            <div className="flex items-center justify-between gap-3 border-t border-admin-border pt-4">
+              <AdminButton
                 type="button"
+                variant="secondary"
                 onClick={() => void loadLibrary(page - 1, appliedSearch)}
                 disabled={page <= 1 || libLoading}
-                className="rounded-lg border border-[#e2e8f0] px-3 py-1.5 text-sm text-[#475467] transition hover:bg-[#f1f5f9] disabled:opacity-50"
               >
                 &larr; Sebelumnya
-              </button>
-              <span className="text-xs text-[#64748b]">
+              </AdminButton>
+              <span className="text-xs text-admin-fg-muted">
                 Halaman {page} dari {totalPages}
               </span>
-              <button
+              <AdminButton
                 type="button"
+                variant="secondary"
                 onClick={() => void loadLibrary(page + 1, appliedSearch)}
                 disabled={page >= totalPages || libLoading}
-                className="rounded-lg border border-[#e2e8f0] px-3 py-1.5 text-sm text-[#475467] transition hover:bg-[#f1f5f9] disabled:opacity-50"
               >
                 Berikutnya &rarr;
-              </button>
+              </AdminButton>
             </div>
           ) : null}
         </section>
       ) : null}
 
       {tab === "upload" ? (
-        <form
-          onSubmit={submitUpload}
-          className="space-y-4 rounded-2xl border border-[#e2e8f0] bg-white p-5"
-        >
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-[#334155]" htmlFor="up-file">
-              Berkas gambar
-            </label>
-            <input
-              id="up-file"
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
-              disabled={!cloudinaryReady}
-              className="w-full rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[#f1f5f9] file:px-3 file:py-1.5 file:text-sm"
-            />
-            <p className="text-xs text-[#64748b]">
-              JPG, PNG, WebP, GIF, atau AVIF. Maksimal 10 MB.
-            </p>
-          </div>
+        <AdminCard>
+          <form onSubmit={submitUpload} className="space-y-4 p-5">
+            <div className="space-y-1.5">
+              <AdminLabel htmlFor="up-file">Berkas gambar</AdminLabel>
+              <input
+                id="up-file"
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                disabled={!cloudinaryReady}
+                className="w-full rounded-lg border border-admin-border bg-admin-surface px-3 py-2 text-sm text-admin-fg file:mr-3 file:rounded-md file:border-0 file:bg-admin-surface-muted file:px-3 file:py-1.5 file:text-sm file:text-admin-fg disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <p className="text-xs text-admin-fg-muted">
+                JPG, PNG, WebP, GIF, atau AVIF. Maksimal 10 MB.
+              </p>
+            </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-[#334155]" htmlFor="up-alt">
-              Alt text <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="up-alt"
-              className={inputClass}
-              value={uploadAlt}
-              onChange={(event) => setUploadAlt(event.target.value)}
-              placeholder="Deskripsi gambar untuk SEO & pembaca layar"
-              disabled={!cloudinaryReady}
-            />
-          </div>
+            <div className="space-y-1.5">
+              <AdminLabel htmlFor="up-alt">
+                Alt text <span className="text-admin-danger">*</span>
+              </AdminLabel>
+              <AdminInput
+                id="up-alt"
+                value={uploadAlt}
+                onChange={(event) => setUploadAlt(event.target.value)}
+                placeholder="Deskripsi gambar untuk SEO & pembaca layar"
+                disabled={!cloudinaryReady}
+              />
+            </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-[#334155]" htmlFor="up-name">
-              Nama internal (opsional)
-            </label>
-            <input
-              id="up-name"
-              className={inputClass}
-              value={uploadName}
-              onChange={(event) => setUploadName(event.target.value)}
-              placeholder="Nama untuk memudahkan pencarian di library"
-              disabled={!cloudinaryReady}
-            />
-          </div>
+            <div className="space-y-1.5">
+              <AdminLabel htmlFor="up-name">Nama internal (opsional)</AdminLabel>
+              <AdminInput
+                id="up-name"
+                value={uploadName}
+                onChange={(event) => setUploadName(event.target.value)}
+                placeholder="Nama untuk memudahkan pencarian di library"
+                disabled={!cloudinaryReady}
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={uploading || !cloudinaryReady}
-            className="rounded-lg bg-[#F5A524] px-4 py-2.5 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
-          >
-            {uploading ? "Mengunggah…" : "Unggah Gambar"}
-          </button>
-        </form>
+            <AdminButton type="submit" variant="primary" disabled={uploading || !cloudinaryReady}>
+              <Upload className="h-4 w-4" />
+              {uploading ? "Mengunggah…" : "Unggah Gambar"}
+            </AdminButton>
+          </form>
+        </AdminCard>
       ) : null}
 
       {tab === "stock" ? (
-        <section className="space-y-4 rounded-2xl border border-[#e2e8f0] bg-white p-5">
+        <section className="space-y-4 rounded-2xl border border-admin-border bg-admin-surface p-5">
           {!anyStock ? (
-            <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <AdminAlert variant="warning">
               Pencarian foto stok belum aktif. Set{" "}
               <code className="font-mono">UNSPLASH_ACCESS_KEY</code> dan/atau{" "}
               <code className="font-mono">PEXELS_API_KEY</code> di environment.
-            </p>
+            </AdminAlert>
           ) : (
             <>
               <div className="flex flex-wrap gap-2">
-                <select
+                <AdminSelect
                   value={stockProvider}
                   onChange={(event) =>
                     setStockProvider(event.target.value as "unsplash" | "pexels")
                   }
-                  className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-sm"
+                  className="w-auto"
                 >
                   {stockProviders.unsplash ? (
                     <option value="unsplash">Unsplash</option>
@@ -570,30 +569,33 @@ export default function MediaClient({
                   {stockProviders.pexels ? (
                     <option value="pexels">Pexels</option>
                   ) : null}
-                </select>
+                </AdminSelect>
 
-                <input
-                  type="search"
-                  value={stockQuery}
-                  onChange={(event) => setStockQuery(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      void searchStock();
-                    }
-                  }}
-                  placeholder="Cari foto (mis. rumah modern, kawasan hijau)…"
-                  className="min-w-0 flex-1 rounded-lg border border-[#e2e8f0] px-3.5 py-2 text-sm outline-none focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20"
-                />
+                <div className="relative min-w-0 flex-1">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-admin-fg-dim" />
+                  <AdminInput
+                    type="search"
+                    value={stockQuery}
+                    onChange={(event) => setStockQuery(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        void searchStock();
+                      }
+                    }}
+                    placeholder="Cari foto (mis. rumah modern, kawasan hijau)…"
+                    className="pl-9"
+                  />
+                </div>
 
-                <button
+                <AdminButton
                   type="button"
+                  variant="dark"
                   onClick={() => void searchStock()}
                   disabled={searching || !stockQuery.trim()}
-                  className="rounded-lg bg-[#0f172a] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1e293b] disabled:opacity-50"
                 >
                   {searching ? "Mencari…" : "Cari"}
-                </button>
+                </AdminButton>
               </div>
 
               {stockPhotos.length > 0 ? (
@@ -601,7 +603,7 @@ export default function MediaClient({
                   {stockPhotos.map((photo) => (
                     <figure
                       key={`${photo.provider}-${photo.id}`}
-                      className="overflow-hidden rounded-lg border border-[#e2e8f0]"
+                      className="overflow-hidden rounded-lg border border-admin-border"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element -- thumbnail dari CDN provider eksternal */}
                       <img
@@ -611,17 +613,19 @@ export default function MediaClient({
                         className="h-28 w-full object-cover"
                       />
                       <figcaption className="flex items-center justify-between gap-2 px-2 py-1.5">
-                        <span className="truncate text-[11px] text-[#64748b]">
+                        <span className="truncate text-[11px] text-admin-fg-muted">
                           © {photo.author}
                         </span>
-                        <button
+                        <AdminButton
                           type="button"
+                          size="sm"
+                          variant="soft"
                           onClick={() => void importPhoto(photo)}
                           disabled={importingId !== null || !cloudinaryReady}
-                          className="shrink-0 rounded-md bg-[#F5A524] px-2 py-1 text-[11px] font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
+                          className="shrink-0"
                         >
                           {importingId === photo.id ? "…" : "Impor"}
-                        </button>
+                        </AdminButton>
                       </figcaption>
                     </figure>
                   ))}
@@ -642,17 +646,18 @@ export default function MediaClient({
             if (event.target === event.currentTarget && !savingEdit) closeEdit();
           }}
         >
-          <div className="w-full max-w-md space-y-4 rounded-2xl bg-white p-5 shadow-2xl">
+          <div className="admin-modal-panel w-full max-w-md space-y-4 rounded-2xl bg-admin-surface p-5 shadow-admin-lg">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-base font-semibold">Edit Metadata</h2>
-              <button
-                type="button"
+              <h2 className="text-base font-semibold text-admin-fg">Edit Metadata</h2>
+              <AdminButton
+                variant="ghost"
+                size="icon"
                 onClick={closeEdit}
                 disabled={savingEdit}
-                className="rounded-lg border border-[#e2e8f0] px-3 py-1.5 text-sm transition hover:bg-[#f1f5f9] disabled:opacity-50"
+                aria-label="Tutup"
               >
-                Tutup
-              </button>
+                <X className="h-4 w-4" />
+              </AdminButton>
             </div>
 
             {editing.url ? (
@@ -665,12 +670,11 @@ export default function MediaClient({
             ) : null}
 
             <div className="space-y-1.5">
-              <label className={labelClass} htmlFor="edit-alt">
-                Alt text <span className="text-red-600">*</span>
-              </label>
-              <input
+              <AdminLabel htmlFor="edit-alt">
+                Alt text <span className="text-admin-danger">*</span>
+              </AdminLabel>
+              <AdminInput
                 id="edit-alt"
-                className={inputClass}
                 value={editAlt}
                 onChange={(event) => setEditAlt(event.target.value)}
                 disabled={savingEdit}
@@ -678,12 +682,9 @@ export default function MediaClient({
             </div>
 
             <div className="space-y-1.5">
-              <label className={labelClass} htmlFor="edit-caption">
-                Caption
-              </label>
-              <input
+              <AdminLabel htmlFor="edit-caption">Caption</AdminLabel>
+              <AdminInput
                 id="edit-caption"
-                className={inputClass}
                 value={editCaption}
                 onChange={(event) => setEditCaption(event.target.value)}
                 disabled={savingEdit}
@@ -691,12 +692,9 @@ export default function MediaClient({
             </div>
 
             <div className="space-y-1.5">
-              <label className={labelClass} htmlFor="edit-name">
-                Nama internal
-              </label>
-              <input
+              <AdminLabel htmlFor="edit-name">Nama internal</AdminLabel>
+              <AdminInput
                 id="edit-name"
-                className={inputClass}
                 value={editName}
                 onChange={(event) => setEditName(event.target.value)}
                 disabled={savingEdit}
@@ -704,22 +702,22 @@ export default function MediaClient({
             </div>
 
             <div className="flex justify-end gap-2 pt-1">
-              <button
+              <AdminButton
                 type="button"
+                variant="secondary"
                 onClick={closeEdit}
                 disabled={savingEdit}
-                className="rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm transition hover:bg-[#f1f5f9] disabled:opacity-50"
               >
                 Batal
-              </button>
-              <button
+              </AdminButton>
+              <AdminButton
                 type="button"
+                variant="primary"
                 onClick={() => void saveEdit()}
                 disabled={savingEdit}
-                className="rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
               >
                 {savingEdit ? "Menyimpan…" : "Simpan"}
-              </button>
+              </AdminButton>
             </div>
           </div>
         </div>

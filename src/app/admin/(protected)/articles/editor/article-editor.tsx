@@ -97,7 +97,7 @@ export default function ArticleEditor({
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white">
+    <div className="overflow-hidden rounded-xl border border-admin-border bg-admin-surface">
       <LexicalComposer initialConfig={initialConfig}>
         <EditorToolbar onRequestImage={() => setPickerOpen(true)} />
 

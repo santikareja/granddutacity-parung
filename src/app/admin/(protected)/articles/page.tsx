@@ -42,6 +42,7 @@ export default async function ArticlesPage({
       publishedAt: item.publishedAt ? item.publishedAt.toISOString() : null,
       updatedAt: item.updatedAt.toISOString(),
       aiGenerated: item.aiGenerated,
+      categoryNames: item.categoryNames,
     }));
     total = result.total;
     totalPages = result.totalPages;

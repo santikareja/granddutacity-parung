@@ -1,8 +1,18 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { Save } from "lucide-react";
 
 import { AdminClientError, adminPut } from "@/lib/v2-admin/api-client";
+import {
+  AdminAlert,
+  AdminButton,
+  AdminCard,
+  AdminCardBody,
+  AdminInput,
+  AdminLabel,
+  AdminTextarea,
+} from "@/components/admin/ui";
 
 export type SettingItem = {
   key: string;
@@ -26,14 +36,6 @@ const GROUP_ORDER: { id: string; label: string; description: string }[] = [
   { id: "social", label: "Sosial", description: "Tautan media sosial." },
   { id: "seo", label: "SEO", description: "Nilai default metadata SEO." },
 ];
-
-const inputClass =
-  "w-full rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20 disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-[#64748b]";
-
-const labelClass = "block text-sm font-medium text-[#334155]";
-
-const primaryBtn =
-  "rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#e0951c] disabled:cursor-not-allowed disabled:opacity-50";
 
 const errorMessage = (err: unknown, fallback: string): string =>
   err instanceof AdminClientError ? err.message : fallback;
@@ -121,103 +123,92 @@ export default function SettingsClient({ initialItems, canManage }: Props) {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <header>
-        <h1 className="text-xl font-semibold text-[#0f172a]">Pengaturan</h1>
-        <p className="mt-1 text-sm text-[#64748b]">
+        <h1 className="text-xl font-semibold text-admin-fg">Pengaturan</h1>
+        <p className="mt-1 text-sm text-admin-fg-muted">
           {canManage
             ? "Kelola pengaturan situs. Perubahan berlaku setelah disimpan."
             : "Pengaturan situs (hanya-baca). Perlu hak admin untuk mengubah."}
         </p>
       </header>
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
 
-      {success ? (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {success}
-        </p>
-      ) : null}
+      {success ? <AdminAlert variant="success">{success}</AdminAlert> : null}
 
       {initialItems.length === 0 ? (
-        <section className="rounded-xl border border-[#e2e8f0] bg-white p-5">
-          <p className="text-sm text-[#64748b]">
-            Belum ada pengaturan. Jalankan migrasi database untuk menyemai nilai
-            awal.
-          </p>
-        </section>
+        <AdminCard>
+          <AdminCardBody>
+            <p className="text-sm text-admin-fg-muted">
+              Belum ada pengaturan. Jalankan migrasi database untuk menyemai
+              nilai awal.
+            </p>
+          </AdminCardBody>
+        </AdminCard>
       ) : (
         <>
           {groups.map((group) => (
-            <section
-              key={group.id}
-              className="rounded-xl border border-[#e2e8f0] bg-white p-5"
-            >
-              <div className="border-b border-[#eef2f7] pb-3">
-                <h2 className="text-sm font-semibold text-[#334155]">
-                  {group.label}
-                </h2>
-                {group.description ? (
-                  <p className="mt-0.5 text-xs text-[#94a3b8]">
-                    {group.description}
-                  </p>
-                ) : null}
-              </div>
+            <AdminCard key={group.id}>
+              <AdminCardBody>
+                <div className="border-b border-admin-border pb-3">
+                  <h2 className="text-sm font-semibold text-admin-fg">
+                    {group.label}
+                  </h2>
+                  {group.description ? (
+                    <p className="mt-0.5 text-xs text-admin-fg-dim">
+                      {group.description}
+                    </p>
+                  ) : null}
+                </div>
 
-              <div className="mt-4 space-y-4">
-                {group.items.map((item) => {
-                  const fieldId = `setting-${item.key}`;
-                  return (
-                    <div key={item.key}>
-                      <label className={labelClass} htmlFor={fieldId}>
-                        {item.label ?? item.key}
-                      </label>
-                      {item.description ? (
-                        <p className="mt-0.5 text-xs text-[#94a3b8]">
-                          {item.description}
-                        </p>
-                      ) : null}
-                      {isTextareaType(item.type) ? (
-                        <textarea
-                          id={fieldId}
-                          className={`mt-1.5 ${inputClass}`}
-                          rows={4}
-                          value={values[item.key] ?? ""}
-                          onChange={(e) => setValue(item.key, e.target.value)}
-                          disabled={!canManage || saving}
-                        />
-                      ) : (
-                        <input
-                          id={fieldId}
-                          type={inputType(item.type)}
-                          className={`mt-1.5 ${inputClass}`}
-                          value={values[item.key] ?? ""}
-                          onChange={(e) => setValue(item.key, e.target.value)}
-                          disabled={!canManage || saving}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
+                <div className="space-y-4">
+                  {group.items.map((item) => {
+                    const fieldId = `setting-${item.key}`;
+                    return (
+                      <div key={item.key} className="space-y-1.5">
+                        <AdminLabel htmlFor={fieldId}>
+                          {item.label ?? item.key}
+                        </AdminLabel>
+                        {item.description ? (
+                          <p className="text-xs text-admin-fg-dim">
+                            {item.description}
+                          </p>
+                        ) : null}
+                        {isTextareaType(item.type) ? (
+                          <AdminTextarea
+                            id={fieldId}
+                            rows={4}
+                            value={values[item.key] ?? ""}
+                            onChange={(e) => setValue(item.key, e.target.value)}
+                            disabled={!canManage || saving}
+                          />
+                        ) : (
+                          <AdminInput
+                            id={fieldId}
+                            type={inputType(item.type)}
+                            value={values[item.key] ?? ""}
+                            onChange={(e) => setValue(item.key, e.target.value)}
+                            disabled={!canManage || saving}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </AdminCardBody>
+            </AdminCard>
           ))}
 
           {canManage ? (
             <div className="flex justify-end">
-              <button
+              <AdminButton
                 type="button"
-                className={primaryBtn}
+                variant="primary"
                 onClick={() => void handleSave()}
                 disabled={saving}
               >
+                <Save className="h-4 w-4" />
                 {saving ? "Menyimpan…" : "Simpan perubahan"}
-              </button>
+              </AdminButton>
             </div>
           ) : null}
         </>

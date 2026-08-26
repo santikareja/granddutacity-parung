@@ -6,6 +6,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  Sparkles,
+  Plus,
+  X,
+  ArrowLeft,
+  ArrowRight,
+  RotateCcw,
+  Save,
+  History,
+} from "lucide-react";
+
+import {
+  AdminAlert,
+  AdminButton,
+  AdminCard,
+  AdminCardBody,
+  AdminInput,
+  AdminLabel,
+  AdminSelect,
+  AdminTextarea,
+} from "@/components/admin/ui";
 
 type OutlineSection = { heading: string; subheadings: string[] };
 
@@ -41,9 +62,6 @@ const STEPS: { key: Step; label: string }[] = [
   { key: "outline", label: "3. Outline" },
   { key: "preview", label: "4. Artikel" },
 ];
-
-const inputClass =
-  "w-full rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20";
 
 export default function AiStudioClient({
   aiEnabled,
@@ -252,8 +270,10 @@ export default function AiStudioClient({
   if (!aiEnabled) {
     return (
       <div className="mx-auto max-w-3xl space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">AI Studio</h1>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-admin-fg">
+          AI Studio
+        </h1>
+        <AdminAlert variant="warning">
           <p className="font-medium">Layanan AI belum aktif.</p>
           <p className="mt-1.5">
             Tambahkan provider (Base URL + API Key) dan tandai satu sebagai
@@ -266,7 +286,7 @@ export default function AiStudioClient({
             </Link>
             .
           </p>
-        </div>
+        </AdminAlert>
       </div>
     );
   }
@@ -279,20 +299,22 @@ export default function AiStudioClient({
     <div className="mx-auto max-w-3xl space-y-5">
       <header>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5A524]">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-admin-accent">
+            <Sparkles className="h-3.5 w-3.5" />
             AI Content Studio
           </p>
           <Link
             href="/admin/ai-studio/history"
-            className="text-xs font-medium text-[#475467] underline-offset-2 hover:text-[#A85D16] hover:underline"
+            className="flex items-center gap-1 text-xs font-medium text-admin-fg-muted underline-offset-2 hover:text-admin-accent hover:underline"
           >
+            <History className="h-3.5 w-3.5" />
             Riwayat Tugas AI
           </Link>
         </div>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-admin-fg">
           Buat Artikel dengan AI
         </h1>
-        <p className="mt-1.5 text-sm text-[#475467]">
+        <p className="mt-1.5 text-sm text-admin-fg-muted">
           Alur bertahap dengan persetujuan Anda di setiap langkah.
           {aiModel ? (
             <>
@@ -306,17 +328,17 @@ export default function AiStudioClient({
       </header>
 
       {providers.length > 0 ? (
-        <div className="flex flex-wrap items-end gap-3 rounded-xl border border-[#e2e8f0] bg-white p-3">
+        <div className="flex flex-wrap items-end gap-3 rounded-xl border border-admin-border bg-admin-surface p-3">
           <div className="space-y-1">
             <label
-              className="block text-xs font-medium text-[#64748b]"
+              className="block text-xs font-medium text-admin-fg-muted"
               htmlFor="ai-provider"
             >
               Provider (opsional)
             </label>
-            <select
+            <AdminSelect
               id="ai-provider"
-              className={`${inputClass} w-52`}
+              className="w-52"
               value={providerId}
               onChange={(event) => {
                 setProviderId(
@@ -331,20 +353,20 @@ export default function AiStudioClient({
                   {provider.name}
                 </option>
               ))}
-            </select>
+            </AdminSelect>
           </div>
 
           {selectedProvider && selectedProvider.models.length > 0 ? (
             <div className="space-y-1">
               <label
-                className="block text-xs font-medium text-[#64748b]"
+                className="block text-xs font-medium text-admin-fg-muted"
                 htmlFor="ai-model"
               >
                 Model (opsional)
               </label>
-              <select
+              <AdminSelect
                 id="ai-model"
-                className={`${inputClass} w-52`}
+                className="w-52"
                 value={model}
                 onChange={(event) => setModel(event.target.value)}
               >
@@ -358,7 +380,7 @@ export default function AiStudioClient({
                     {m}
                   </option>
                 ))}
-              </select>
+              </AdminSelect>
             </div>
           ) : null}
         </div>
@@ -370,10 +392,10 @@ export default function AiStudioClient({
             key={item.key}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
               item.key === step
-                ? "bg-[#fff5ea] text-[#A85D16] ring-1 ring-[#F5A524]"
+                ? "bg-admin-accent-soft text-admin-accent-soft-fg ring-1 ring-admin-accent"
                 : doneSteps.includes(item.key)
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-white text-[#94a3b8] ring-1 ring-[#e2e8f0]"
+                  ? "bg-admin-success-soft text-admin-success"
+                  : "bg-admin-surface text-admin-fg-dim ring-1 ring-admin-border"
             }`}
           >
             {item.label}
@@ -381,309 +403,294 @@ export default function AiStudioClient({
         ))}
       </div>
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert>{error}</AdminAlert> : null}
 
       {step === "topic" ? (
-        <section className="space-y-4 rounded-2xl border border-[#e2e8f0] bg-white p-5">
-          <div className="space-y-1.5">
-            <label
-              className="block text-sm font-medium text-[#334155]"
-              htmlFor="ai-topic"
+        <AdminCard>
+          <AdminCardBody>
+            <div className="space-y-1.5">
+              <AdminLabel htmlFor="ai-topic">Ide topik artikel</AdminLabel>
+              <AdminTextarea
+                id="ai-topic"
+                className="min-h-28"
+                value={topic}
+                onChange={(event) => setTopic(event.target.value)}
+                placeholder="Contoh: Tips memilih rumah pertama di kawasan Parung"
+              />
+            </div>
+            <AdminButton
+              variant="primary"
+              size="lg"
+              onClick={() => void generateTitles()}
+              disabled={loading || !topic.trim()}
             >
-              Ide topik artikel
-            </label>
-            <textarea
-              id="ai-topic"
-              className={`${inputClass} min-h-28 resize-y`}
-              value={topic}
-              onChange={(event) => setTopic(event.target.value)}
-              placeholder="Contoh: Tips memilih rumah pertama di kawasan Parung"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={() => void generateTitles()}
-            disabled={loading || !topic.trim()}
-            className="rounded-lg bg-[#F5A524] px-4 py-2.5 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
-          >
-            {loading ? "Menghasilkan…" : "Generate 7 Judul"}
-          </button>
-        </section>
+              <Sparkles className="h-4 w-4" />
+              {loading ? "Menghasilkan…" : "Generate 7 Judul"}
+            </AdminButton>
+          </AdminCardBody>
+        </AdminCard>
       ) : null}
 
       {step === "titles" ? (
-        <section className="space-y-4 rounded-2xl border border-[#e2e8f0] bg-white p-5">
-          <p className="text-sm font-medium text-[#334155]">Pilih satu judul</p>
-          <div className="space-y-2">
-            {titles.map((title) => (
-              <button
-                key={title}
-                type="button"
-                onClick={() => setSelectedTitle(title)}
-                className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition ${
-                  selectedTitle === title
-                    ? "border-[#F5A524] bg-[#fff5ea] font-semibold"
-                    : "border-[#e2e8f0] hover:border-[#F5A524] hover:bg-[#fffaf3]"
-                }`}
+        <AdminCard>
+          <AdminCardBody>
+            <p className="text-sm font-medium text-admin-fg">Pilih satu judul</p>
+            <div className="space-y-2">
+              {titles.map((title) => (
+                <button
+                  key={title}
+                  type="button"
+                  onClick={() => setSelectedTitle(title)}
+                  className={`w-full rounded-lg border px-4 py-3 text-left text-sm transition ${
+                    selectedTitle === title
+                      ? "border-admin-accent bg-admin-accent-soft font-semibold text-admin-accent-soft-fg"
+                      : "border-admin-border text-admin-fg hover:border-admin-accent hover:bg-admin-surface-hover"
+                  }`}
+                >
+                  {title}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 border-t border-admin-border pt-4">
+              <AdminButton variant="secondary" onClick={() => setStep("topic")}>
+                <ArrowLeft className="h-4 w-4" />
+                Kembali
+              </AdminButton>
+              <AdminButton
+                variant="secondary"
+                onClick={() => void generateTitles()}
+                disabled={loading}
               >
-                {title}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2 border-t border-[#eef2f7] pt-4">
-            <button
-              type="button"
-              onClick={() => setStep("topic")}
-              className="rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm transition hover:bg-[#f1f5f9]"
-            >
-              Kembali
-            </button>
-            <button
-              type="button"
-              onClick={() => void generateTitles()}
-              disabled={loading}
-              className="rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm transition hover:bg-[#f1f5f9] disabled:opacity-50"
-            >
-              Generate ulang
-            </button>
-            <button
-              type="button"
-              onClick={() => void generateOutline()}
-              disabled={loading || !selectedTitle}
-              className="rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
-            >
-              {loading ? "Menghasilkan…" : "Generate Outline"}
-            </button>
-          </div>
-        </section>
+                <RotateCcw className="h-4 w-4" />
+                Generate ulang
+              </AdminButton>
+              <AdminButton
+                variant="primary"
+                onClick={() => void generateOutline()}
+                disabled={loading || !selectedTitle}
+              >
+                {loading ? "Menghasilkan…" : "Generate Outline"}
+                <ArrowRight className="h-4 w-4" />
+              </AdminButton>
+            </div>
+          </AdminCardBody>
+        </AdminCard>
       ) : null}
 
       {step === "outline" ? (
-        <section className="space-y-4 rounded-2xl border border-[#e2e8f0] bg-white p-5">
-          <div>
-            <p className="text-sm font-medium text-[#334155]">
-              Tinjau &amp; edit outline
-            </p>
-            <p className="mt-0.5 text-xs text-[#64748b]">
-              Judul: <span className="font-medium">{selectedTitle}</span>
-            </p>
-          </div>
+        <AdminCard>
+          <AdminCardBody>
+            <div>
+              <p className="text-sm font-medium text-admin-fg">
+                Tinjau &amp; edit outline
+              </p>
+              <p className="mt-0.5 text-xs text-admin-fg-muted">
+                Judul: <span className="font-medium">{selectedTitle}</span>
+              </p>
+            </div>
 
-          <div className="space-y-3">
-            {outline.map((section, sectionIndex) => (
-              <div
-                key={sectionIndex}
-                className="space-y-2 rounded-lg border border-[#e2e8f0] p-3"
-              >
-                <div className="flex gap-2">
-                  <input
-                    className={`${inputClass} font-medium`}
-                    value={section.heading}
-                    onChange={(event) =>
-                      updateHeading(sectionIndex, event.target.value)
-                    }
-                  />
+            <div className="space-y-3">
+              {outline.map((section, sectionIndex) => (
+                <div
+                  key={sectionIndex}
+                  className="space-y-2 rounded-lg border border-admin-border p-3"
+                >
+                  <div className="flex gap-2">
+                    <AdminInput
+                      className="font-medium"
+                      value={section.heading}
+                      onChange={(event) =>
+                        updateHeading(sectionIndex, event.target.value)
+                      }
+                    />
+                    <AdminButton
+                      variant="danger"
+                      size="icon"
+                      onClick={() => removeSection(sectionIndex)}
+                      title="Hapus bagian"
+                    >
+                      <X className="h-4 w-4" />
+                    </AdminButton>
+                  </div>
+                  {section.subheadings.map((sub, subIndex) => (
+                    <div key={subIndex} className="flex items-center gap-2">
+                      <AdminInput
+                        className="ml-4 text-xs"
+                        value={sub}
+                        onChange={(event) =>
+                          updateSub(sectionIndex, subIndex, event.target.value)
+                        }
+                        placeholder="Sub-poin (H3)"
+                      />
+                      <AdminButton
+                        variant="danger"
+                        size="icon"
+                        onClick={() => removeSub(sectionIndex, subIndex)}
+                        title="Hapus sub-poin"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </AdminButton>
+                    </div>
+                  ))}
                   <button
                     type="button"
-                    onClick={() => removeSection(sectionIndex)}
-                    title="Hapus bagian"
-                    className="shrink-0 rounded-lg border border-red-200 px-3 text-sm text-red-600 transition hover:bg-red-50"
+                    onClick={() => addSub(sectionIndex)}
+                    className="ml-4 flex items-center gap-1 rounded-lg border border-dashed border-admin-border-strong px-3 py-1 text-xs text-admin-fg-muted transition hover:border-admin-accent hover:bg-admin-surface-hover"
                   >
-                    ✕
+                    <Plus className="h-3 w-3" />
+                    Tambah Sub-poin
                   </button>
                 </div>
-                {section.subheadings.map((sub, subIndex) => (
-                  <div key={subIndex} className="flex items-center gap-2">
-                    <input
-                      className={`${inputClass} ml-4 text-xs`}
-                      value={sub}
-                      onChange={(event) =>
-                        updateSub(sectionIndex, subIndex, event.target.value)
-                      }
-                      placeholder="Sub-poin (H3)"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeSub(sectionIndex, subIndex)}
-                      title="Hapus sub-poin"
-                      className="shrink-0 rounded-lg border border-red-200 px-2.5 py-1 text-xs text-red-600 transition hover:bg-red-50"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => addSub(sectionIndex)}
-                  className="ml-4 rounded-lg border border-dashed border-[#cbd5e1] px-3 py-1 text-xs text-[#475467] transition hover:border-[#F5A524] hover:bg-[#fffaf3]"
-                >
-                  + Tambah Sub-poin
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <button
-            type="button"
-            onClick={addSection}
-            className="w-full rounded-lg border border-dashed border-[#cbd5e1] px-4 py-2 text-sm text-[#475467] transition hover:border-[#F5A524] hover:bg-[#fffaf3]"
-          >
-            + Tambah Bagian
-          </button>
-
-          <div className="flex flex-wrap gap-2 border-t border-[#eef2f7] pt-4">
             <button
               type="button"
-              onClick={() => setStep("titles")}
-              className="rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm transition hover:bg-[#f1f5f9]"
+              onClick={addSection}
+              className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-admin-border-strong px-4 py-2 text-sm text-admin-fg-muted transition hover:border-admin-accent hover:bg-admin-surface-hover"
             >
-              Kembali
+              <Plus className="h-4 w-4" />
+              Tambah Bagian
             </button>
-            <button
-              type="button"
-              onClick={() => void generateArticle()}
-              disabled={loading || outline.length === 0}
-              className="rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
-            >
-              {loading ? "Menulis artikel…" : "Setujui & Tulis Artikel"}
-            </button>
-          </div>
-          {loading ? (
-            <p className="text-xs text-[#64748b]">
-              Menulis 900–1.200 kata bisa memakan waktu hingga beberapa menit.
-              Jangan tutup halaman ini.
-            </p>
-          ) : null}
-        </section>
+
+            <div className="flex flex-wrap gap-2 border-t border-admin-border pt-4">
+              <AdminButton variant="secondary" onClick={() => setStep("titles")}>
+                <ArrowLeft className="h-4 w-4" />
+                Kembali
+              </AdminButton>
+              <AdminButton
+                variant="primary"
+                onClick={() => void generateArticle()}
+                disabled={loading || outline.length === 0}
+              >
+                {loading ? "Menulis artikel…" : "Setujui & Tulis Artikel"}
+                <ArrowRight className="h-4 w-4" />
+              </AdminButton>
+            </div>
+            {loading ? (
+              <p className="text-xs text-admin-fg-muted">
+                Menulis 900–1.200 kata bisa memakan waktu hingga beberapa menit.
+                Jangan tutup halaman ini.
+              </p>
+            ) : null}
+          </AdminCardBody>
+        </AdminCard>
       ) : null}
 
       {step === "preview" ? (
-        <section className="space-y-4 rounded-2xl border border-[#e2e8f0] bg-white p-5">
-          <div>
-            <p className="text-sm font-medium text-[#334155]">
-              Pratinjau artikel
-            </p>
-            <p className="mt-0.5 text-xs text-[#64748b]">
-              CTA ke homepage sudah ditambahkan otomatis di akhir artikel.
-            </p>
-          </div>
-
-          <div
-            className="gdc-editor max-h-[420px] overflow-y-auto rounded-lg border border-[#e2e8f0] bg-[#fdfdfd] p-4 text-sm"
-            // Field `html` sudah disanitasi di server dengan sanitizeAiHtml()
-            // (membuang tag/atribut aktif dan skema URL berbahaya) sebelum dirender di sini.
-            dangerouslySetInnerHTML={{ __html: articleHtml }}
-          />
-
-          <div className="space-y-3 rounded-lg border border-[#e2e8f0] bg-[#fbfcfe] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-medium text-[#334155]">SEO</p>
-              <button
-                type="button"
-                onClick={() => void generateSeo()}
-                disabled={loading || !articleContent}
-                className="rounded-lg border border-[#F5A524] bg-[#fff5ea] px-3 py-1.5 text-xs font-semibold text-[#A85D16] transition hover:bg-[#ffedd6] disabled:opacity-50"
-              >
-                {loading ? "Memproses…" : seo ? "Generate ulang SEO" : "Generate SEO"}
-              </button>
-            </div>
-            {seo ? (
-              <dl className="space-y-2 text-xs text-[#475467]">
-                <div>
-                  <dt className="font-semibold text-[#334155]">Meta Title</dt>
-                  <dd>{seo.metaTitle || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold text-[#334155]">
-                    Meta Description
-                  </dt>
-                  <dd>{seo.metaDescription || "—"}</dd>
-                </div>
-                <div className="flex flex-wrap gap-6">
-                  <div>
-                    <dt className="font-semibold text-[#334155]">Slug</dt>
-                    <dd className="font-mono">{seo.slug || "—"}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold text-[#334155]">
-                      Focus Keyword
-                    </dt>
-                    <dd>{seo.focusKeyword || "—"}</dd>
-                  </div>
-                </div>
-                <p className="pt-1 text-[11px] text-[#94a3b8]">
-                  SEO ini akan ikut tersimpan saat menyimpan draft.
-                </p>
-              </dl>
-            ) : (
-              <p className="text-xs text-[#94a3b8]">
-                Belum ada SEO. Klik &quot;Generate SEO&quot; untuk membuat meta
-                title, description, slug, dan focus keyword.
+        <AdminCard>
+          <AdminCardBody>
+            <div>
+              <p className="text-sm font-medium text-admin-fg">
+                Pratinjau artikel
               </p>
-            )}
-          </div>
-
-          {categories.length > 0 ? (
-            <div className="space-y-1.5">
-              <label
-                className="block text-sm font-medium text-[#334155]"
-                htmlFor="ai-category"
-              >
-                Kategori
-              </label>
-              <select
-                id="ai-category"
-                className={inputClass}
-                value={categoryId}
-                onChange={(event) =>
-                  setCategoryId(
-                    event.target.value ? Number(event.target.value) : "",
-                  )
-                }
-              >
-                <option value="">— Pilih nanti di editor —</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              <p className="mt-0.5 text-xs text-admin-fg-muted">
+                CTA ke homepage sudah ditambahkan otomatis di akhir artikel.
+              </p>
             </div>
-          ) : null}
 
-          <div className="flex flex-wrap gap-2 border-t border-[#eef2f7] pt-4">
-            <button
-              type="button"
-              onClick={() => setStep("outline")}
-              className="rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm transition hover:bg-[#f1f5f9]"
-            >
-              Kembali
-            </button>
-            <button
-              type="button"
-              onClick={() => void generateArticle()}
-              disabled={loading}
-              className="rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm transition hover:bg-[#f1f5f9] disabled:opacity-50"
-            >
-              Tulis ulang
-            </button>
-            <button
-              type="button"
-              onClick={() => void saveDraft()}
-              disabled={loading || !articleContent}
-              className="rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
-            >
-              {loading ? "Menyimpan…" : "Simpan Draft & Buka Editor"}
-            </button>
-          </div>
-        </section>
+            <div
+              className="gdc-editor admin-scrollbar max-h-[420px] overflow-y-auto rounded-lg border border-admin-border bg-admin-surface-muted p-4 text-sm"
+              // Field `html` sudah disanitasi di server dengan sanitizeAiHtml()
+              // (membuang tag/atribut aktif dan skema URL berbahaya) sebelum dirender di sini.
+              dangerouslySetInnerHTML={{ __html: articleHtml }}
+            />
+
+            <div className="space-y-3 rounded-lg border border-admin-border bg-admin-surface-muted p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-medium text-admin-fg">SEO</p>
+                <AdminButton
+                  variant="soft"
+                  size="sm"
+                  onClick={() => void generateSeo()}
+                  disabled={loading || !articleContent}
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {loading ? "Memproses…" : seo ? "Generate ulang SEO" : "Generate SEO"}
+                </AdminButton>
+              </div>
+              {seo ? (
+                <dl className="space-y-2 text-xs text-admin-fg-muted">
+                  <div>
+                    <dt className="font-semibold text-admin-fg">Meta Title</dt>
+                    <dd>{seo.metaTitle || "—"}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-admin-fg">
+                      Meta Description
+                    </dt>
+                    <dd>{seo.metaDescription || "—"}</dd>
+                  </div>
+                  <div className="flex flex-wrap gap-6">
+                    <div>
+                      <dt className="font-semibold text-admin-fg">Slug</dt>
+                      <dd className="font-mono">{seo.slug || "—"}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold text-admin-fg">
+                        Focus Keyword
+                      </dt>
+                      <dd>{seo.focusKeyword || "—"}</dd>
+                    </div>
+                  </div>
+                  <p className="pt-1 text-[11px] text-admin-fg-dim">
+                    SEO ini akan ikut tersimpan saat menyimpan draft.
+                  </p>
+                </dl>
+              ) : (
+                <p className="text-xs text-admin-fg-dim">
+                  Belum ada SEO. Klik &quot;Generate SEO&quot; untuk membuat meta
+                  title, description, slug, dan focus keyword.
+                </p>
+              )}
+            </div>
+
+            {categories.length > 0 ? (
+              <div className="space-y-1.5">
+                <AdminLabel htmlFor="ai-category">Kategori</AdminLabel>
+                <AdminSelect
+                  id="ai-category"
+                  value={categoryId}
+                  onChange={(event) =>
+                    setCategoryId(
+                      event.target.value ? Number(event.target.value) : "",
+                    )
+                  }
+                >
+                  <option value="">— Pilih nanti di editor —</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </AdminSelect>
+              </div>
+            ) : null}
+
+            <div className="flex flex-wrap gap-2 border-t border-admin-border pt-4">
+              <AdminButton variant="secondary" onClick={() => setStep("outline")}>
+                <ArrowLeft className="h-4 w-4" />
+                Kembali
+              </AdminButton>
+              <AdminButton
+                variant="secondary"
+                onClick={() => void generateArticle()}
+                disabled={loading}
+              >
+                <RotateCcw className="h-4 w-4" />
+                Tulis ulang
+              </AdminButton>
+              <AdminButton
+                variant="primary"
+                onClick={() => void saveDraft()}
+                disabled={loading || !articleContent}
+              >
+                <Save className="h-4 w-4" />
+                {loading ? "Menyimpan…" : "Simpan Draft & Buka Editor"}
+              </AdminButton>
+            </div>
+          </AdminCardBody>
+        </AdminCard>
       ) : null}
     </div>
   );

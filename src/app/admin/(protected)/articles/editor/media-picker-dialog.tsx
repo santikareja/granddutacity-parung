@@ -4,6 +4,9 @@
 // /api/v2/media (library yang sama dengan Payload).
 
 import { useCallback, useEffect, useState } from "react";
+import { X } from "lucide-react";
+
+import { AdminAlert, AdminButton, AdminInput } from "@/components/admin/ui";
 
 export type PickedMedia = {
   id: number;
@@ -102,42 +105,32 @@ export default function MediaPickerDialog({ onClose, onPick }: Props) {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between gap-3 border-b border-[#e2e8f0] px-5 py-4">
-          <h2 className="text-base font-semibold">Pilih Gambar</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-[#e2e8f0] px-3 py-1.5 text-sm transition hover:bg-[#f1f5f9]"
-          >
-            Tutup
-          </button>
+      <div className="admin-modal-panel flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-admin-surface shadow-admin-lg">
+        <div className="flex items-center justify-between gap-3 border-b border-admin-border px-5 py-4">
+          <h2 className="text-base font-semibold text-admin-fg">Pilih Gambar</h2>
+          <AdminButton variant="ghost" size="icon" onClick={onClose} aria-label="Tutup">
+            <X className="h-4 w-4" />
+          </AdminButton>
         </div>
 
-        <div className="border-b border-[#eef2f7] px-5 py-3">
-          <input
+        <div className="border-b border-admin-border px-5 py-3">
+          <AdminInput
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Cari nama atau alt text…"
-            className="w-full rounded-lg border border-[#e2e8f0] px-3.5 py-2 text-sm outline-none focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20"
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="admin-scrollbar flex-1 overflow-y-auto p-5">
           {loading ? (
-            <p className="py-8 text-center text-sm text-[#64748b]">
+            <p className="py-8 text-center text-sm text-admin-fg-muted">
               Memuat media…
             </p>
           ) : error ? (
-            <p
-              role="alert"
-              className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              {error}
-            </p>
+            <AdminAlert>{error}</AdminAlert>
           ) : filtered.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[#94a3b8]">
+            <p className="py-8 text-center text-sm text-admin-fg-dim">
               {items.length === 0
                 ? "Belum ada media di library."
                 : "Tidak ada media yang cocok."}
@@ -149,7 +142,7 @@ export default function MediaPickerDialog({ onClose, onPick }: Props) {
                   key={item.id}
                   type="button"
                   onClick={() => pick(item)}
-                  className="group overflow-hidden rounded-lg border border-[#e2e8f0] text-left transition hover:border-[#F5A524] hover:shadow-md"
+                  className="group overflow-hidden rounded-lg border border-admin-border text-left transition hover:border-admin-accent hover:shadow-admin-sm"
                 >
                   {item.url ? (
                     // eslint-disable-next-line @next/next/no-img-element -- thumbnail Cloudinary dinamis di panel admin
@@ -160,11 +153,11 @@ export default function MediaPickerDialog({ onClose, onPick }: Props) {
                       className="h-24 w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-24 items-center justify-center bg-[#f8fafc] text-xs text-[#94a3b8]">
+                    <div className="flex h-24 items-center justify-center bg-admin-surface-muted text-xs text-admin-fg-dim">
                       Tanpa pratinjau
                     </div>
                   )}
-                  <p className="truncate px-2 py-1.5 text-[11px] text-[#475467]">
+                  <p className="truncate px-2 py-1.5 text-[11px] text-admin-fg-muted">
                     {item.name || item.alt || `Media #${item.id}`}
                   </p>
                 </button>

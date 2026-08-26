@@ -3,6 +3,17 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Plus, Sparkles, ExternalLink, ArrowLeft, ArrowRight } from "lucide-react";
+
+import {
+  AdminAlert,
+  AdminBadge,
+  AdminButton,
+  AdminCard,
+  AdminEmptyState,
+  AdminInput,
+  AdminPageHeader,
+} from "@/components/admin/ui";
 
 export type ArticleRow = {
   id: number;
@@ -12,6 +23,7 @@ export type ArticleRow = {
   publishedAt: string | null;
   updatedAt: string;
   aiGenerated: boolean | null;
+  categoryNames: string[];
 };
 
 type Props = {
@@ -124,26 +136,26 @@ export default function ArticlesClient({
 
   return (
     <div className="mx-auto max-w-6xl space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Artikel</h1>
-          <p className="mt-1 text-sm text-[#475467]">{total} artikel total</p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            href="/admin/ai-studio"
-            className="rounded-lg border border-[#F5A524] bg-[#fff5ea] px-4 py-2 text-sm font-semibold text-[#A85D16] transition hover:bg-[#ffedd8]"
-          >
-            Buat dengan AI
-          </Link>
-          <Link
-            href="/admin/articles/new"
-            className="rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f]"
-          >
-            + Artikel Baru
-          </Link>
-        </div>
-      </header>
+      <AdminPageHeader
+        title="Artikel"
+        description={`${total} artikel total`}
+        actions={
+          <>
+            <AdminButton variant="soft" asChild>
+              <Link href="/admin/ai-studio">
+                <Sparkles className="h-4 w-4" />
+                Buat dengan AI
+              </Link>
+            </AdminButton>
+            <AdminButton variant="primary" asChild>
+              <Link href="/admin/articles/new">
+                <Plus className="h-4 w-4" />
+                Artikel Baru
+              </Link>
+            </AdminButton>
+          </>
+        }
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <form
@@ -153,22 +165,19 @@ export default function ArticlesClient({
           }}
           className="flex flex-1 gap-2"
         >
-          <input
+          <AdminInput
             type="search"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             placeholder="Cari judul atau slug…"
-            className="min-w-0 flex-1 rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2 text-sm outline-none focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20"
+            className="min-w-0 flex-1"
           />
-          <button
-            type="submit"
-            className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-sm transition hover:bg-[#f1f5f9]"
-          >
+          <AdminButton type="submit" variant="secondary">
             Cari
-          </button>
+          </AdminButton>
         </form>
 
-        <div className="flex gap-1 rounded-lg border border-[#e2e8f0] bg-white p-1">
+        <div className="flex gap-1 rounded-lg border border-admin-border bg-admin-surface p-1">
           {(["all", "published", "draft"] as const).map((option) => (
             <button
               key={option}
@@ -176,8 +185,8 @@ export default function ArticlesClient({
               onClick={() => applyFilter(option, searchInput)}
               className={`rounded-md px-3 py-1.5 text-sm transition ${
                 status === option
-                  ? "bg-[#fff5ea] font-semibold text-[#A85D16]"
-                  : "text-[#475467] hover:bg-[#f1f5f9]"
+                  ? "bg-admin-accent-soft font-semibold text-admin-accent-soft-fg"
+                  : "text-admin-fg-muted hover:bg-admin-surface-hover"
               }`}
             >
               {option === "all" ? "Semua" : option === "published" ? "Live" : "Draft"}
@@ -186,113 +195,129 @@ export default function ArticlesClient({
         </div>
       </div>
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert>{error}</AdminAlert> : null}
 
-      <section className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
+      <AdminCard className="overflow-hidden">
         {items.length > 0 ? (
-          <ul className="divide-y divide-[#eef2f7]">
-            {items.map((article) => (
-              <li
-                key={article.id}
-                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
-              >
-                <div className="min-w-0 flex-1">
-                  <Link
-                    href={`/admin/articles/${article.id}`}
-                    className="block truncate text-sm font-medium hover:text-[#A85D16]"
-                  >
-                    {article.title || "(tanpa judul)"}
-                  </Link>
-                  <p className="mt-0.5 truncate text-xs text-[#64748b]">
-                    /{article.slug || "-"} &middot; diperbarui{" "}
-                    {formatDate(article.updatedAt)}
-                    {article.aiGenerated ? " · AI" : ""}
-                  </p>
-                </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-admin-border text-[11px] font-semibold uppercase tracking-wider text-admin-fg-muted">
+                  <th className="px-5 py-3">Judul</th>
+                  <th className="px-5 py-3">Kategori</th>
+                  <th className="px-5 py-3">Status</th>
+                  <th className="px-5 py-3">Diperbarui</th>
+                  <th className="px-5 py-3 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-admin-border">
+                {items.map((article) => (
+                  <tr key={article.id} className="align-top">
+                    <td className="max-w-xs px-5 py-4">
+                      <Link
+                        href={`/admin/articles/${article.id}`}
+                        className="block truncate font-medium text-admin-fg hover:text-admin-accent"
+                      >
+                        {article.title || "(tanpa judul)"}
+                      </Link>
+                      <p className="mt-0.5 truncate text-xs text-admin-fg-muted">
+                        /{article.slug || "-"}
+                        {article.aiGenerated ? " · AI" : ""}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4">
+                      {article.categoryNames.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {article.categoryNames.map((name) => (
+                            <AdminBadge key={name} tone="neutral">
+                              {name}
+                            </AdminBadge>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-admin-fg-dim">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <AdminBadge tone={article.status === "published" ? "success" : "warning"}>
+                        {article.status === "published" ? "Live" : "Draft"}
+                      </AdminBadge>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4 text-admin-fg-muted">
+                      {formatDate(article.updatedAt)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <AdminButton
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => void toggleStatus(article)}
+                          disabled={busyId === article.id}
+                        >
+                          {article.status === "published" ? "Jadikan draft" : "Publish"}
+                        </AdminButton>
 
-                <div className="flex shrink-0 items-center gap-2">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                      article.status === "published"
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-amber-50 text-amber-700"
-                    }`}
-                  >
-                    {article.status === "published" ? "Live" : "Draft"}
-                  </span>
+                        {article.status === "published" && article.slug ? (
+                          <AdminButton size="sm" variant="ghost" asChild>
+                            <a
+                              href={`https://granddutacitysouthofjakarta.com/${article.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          </AdminButton>
+                        ) : null}
 
-                  <button
-                    type="button"
-                    onClick={() => void toggleStatus(article)}
-                    disabled={busyId === article.id}
-                    className="rounded-lg border border-[#e2e8f0] px-3 py-1.5 text-sm transition hover:bg-[#f1f5f9] disabled:opacity-50"
-                  >
-                    {article.status === "published" ? "Jadikan draft" : "Publish"}
-                  </button>
-
-                  {article.status === "published" && article.slug ? (
-                    <a
-                      href={`https://granddutacitysouthofjakarta.com/${article.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-lg border border-[#e2e8f0] px-3 py-1.5 text-sm transition hover:bg-[#f1f5f9]"
-                    >
-                      Lihat
-                    </a>
-                  ) : null}
-
-                  {canDelete ? (
-                    <button
-                      type="button"
-                      onClick={() => void remove(article)}
-                      disabled={busyId === article.id}
-                      className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-                    >
-                      Hapus
-                    </button>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
+                        {canDelete ? (
+                          <AdminButton
+                            size="sm"
+                            variant="danger"
+                            onClick={() => void remove(article)}
+                            disabled={busyId === article.id}
+                          >
+                            Hapus
+                          </AdminButton>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p className="px-5 py-10 text-center text-sm text-[#94a3b8]">
-            Tidak ada artikel yang cocok dengan filter ini.
-          </p>
+          <AdminEmptyState
+            title="Tidak ada artikel"
+            description="Tidak ada artikel yang cocok dengan filter ini."
+          />
         )}
-      </section>
+      </AdminCard>
 
       {totalPages > 1 ? (
         <nav className="flex items-center justify-between" aria-label="Paginasi">
           {page > 1 ? (
-            <Link
-              href={buildPageHref(page - 1)}
-              className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-sm transition hover:bg-[#f1f5f9]"
-            >
-              &larr; Sebelumnya
-            </Link>
+            <AdminButton variant="secondary" asChild>
+              <Link href={buildPageHref(page - 1)}>
+                <ArrowLeft className="h-4 w-4" />
+                Sebelumnya
+              </Link>
+            </AdminButton>
           ) : (
             <span />
           )}
 
-          <span className="text-sm text-[#64748b]">
+          <span className="text-sm text-admin-fg-muted">
             Halaman {page} dari {totalPages}
           </span>
 
           {page < totalPages ? (
-            <Link
-              href={buildPageHref(page + 1)}
-              className="rounded-lg border border-[#e2e8f0] bg-white px-4 py-2 text-sm transition hover:bg-[#f1f5f9]"
-            >
-              Berikutnya &rarr;
-            </Link>
+            <AdminButton variant="secondary" asChild>
+              <Link href={buildPageHref(page + 1)}>
+                Berikutnya
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </AdminButton>
           ) : (
             <span />
           )}

@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { ArrowLeft, Sparkles } from "lucide-react";
 
 import { listAiTasks } from "@/lib/v2-admin/ai-tasks";
+import {
+  AdminButton,
+  AdminCard,
+  AdminEmptyState,
+} from "@/components/admin/ui";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,10 +22,10 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  completed: "bg-emerald-50 text-emerald-700",
-  failed: "bg-red-50 text-red-700",
-  processing: "bg-amber-50 text-amber-700",
-  pending: "bg-slate-100 text-slate-600",
+  completed: "bg-admin-success-soft text-admin-success",
+  failed: "bg-admin-danger-soft text-admin-danger",
+  processing: "bg-admin-warning-soft text-admin-warning",
+  pending: "bg-admin-surface-muted text-admin-fg-muted",
 };
 
 const dateFormatter = new Intl.DateTimeFormat("id-ID", {
@@ -34,32 +40,33 @@ export default async function AiHistoryPage() {
     <div className="mx-auto max-w-4xl space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5A524]">
+          <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-admin-accent">
+            <Sparkles className="h-3.5 w-3.5" />
             AI Content Studio
           </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-admin-fg">
             Riwayat Tugas AI
           </h1>
-          <p className="mt-1.5 text-sm text-[#475467]">
+          <p className="mt-1.5 text-sm text-admin-fg-muted">
             Catatan ringkas setiap permintaan AI (tanpa menyimpan kredensial).
           </p>
         </div>
-        <Link
-          href="/admin/ai-studio"
-          className="rounded-lg border border-[#e2e8f0] px-4 py-2 text-sm transition hover:bg-[#f1f5f9]"
-        >
-          ← AI Studio
-        </Link>
+        <AdminButton variant="secondary" asChild>
+          <Link href="/admin/ai-studio">
+            <ArrowLeft className="h-4 w-4" />
+            AI Studio
+          </Link>
+        </AdminButton>
       </header>
 
       {tasks.length === 0 ? (
-        <div className="rounded-xl border border-[#e2e8f0] bg-white px-4 py-10 text-center text-sm text-[#64748b]">
-          Belum ada riwayat tugas AI.
-        </div>
+        <AdminCard>
+          <AdminEmptyState title="Belum ada riwayat tugas AI." />
+        </AdminCard>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white">
+        <AdminCard className="overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-[#e2e8f0] bg-[#f8fafc] text-xs uppercase tracking-wide text-[#64748b]">
+            <thead className="border-b border-admin-border bg-admin-surface-muted text-xs uppercase tracking-wide text-admin-fg-muted">
               <tr>
                 <th className="px-4 py-3 font-semibold">Jenis</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
@@ -67,34 +74,35 @@ export default async function AiHistoryPage() {
                 <th className="px-4 py-3 font-semibold">Catatan</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#eef2f7]">
+            <tbody className="divide-y divide-admin-border">
               {tasks.map((task) => (
                 <tr key={task.id}>
-                  <td className="px-4 py-3 font-medium text-[#334155]">
+                  <td className="px-4 py-3 font-medium text-admin-fg">
                     {TYPE_LABELS[task.type] ?? task.type}
                   </td>
                   <td className="px-4 py-3">
                     <span
                       className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
-                        STATUS_STYLES[task.status] ?? "bg-slate-100 text-slate-600"
+                        STATUS_STYLES[task.status] ??
+                        "bg-admin-surface-muted text-admin-fg-muted"
                       }`}
                     >
                       {task.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[#475467]">
+                  <td className="px-4 py-3 text-admin-fg-muted">
                     {task.createdAt
                       ? dateFormatter.format(new Date(task.createdAt))
                       : "—"}
                   </td>
-                  <td className="px-4 py-3 text-xs text-[#64748b]">
+                  <td className="px-4 py-3 text-xs text-admin-fg-muted">
                     {task.error ?? "—"}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </AdminCard>
       )}
     </div>
   );

@@ -1,8 +1,21 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { Ban, Check, Copy, KeyRound } from "lucide-react";
 
 import { adminDelete, adminGet, adminPost } from "@/lib/v2-admin/api-client";
+import {
+  AdminAlert,
+  AdminBadge,
+  AdminButton,
+  AdminCard,
+  AdminCardBody,
+  AdminCheckbox,
+  AdminEmptyState,
+  AdminInput,
+  AdminLabel,
+  AdminPageHeader,
+} from "@/components/admin/ui";
 
 export type AgentTokenForClient = {
   id: number;
@@ -20,11 +33,6 @@ export type AgentTokenForClient = {
 const AVAILABLE_SCOPES: { value: string; label: string }[] = [
   { value: "articles:write", label: "articles:write — buat artikel" },
 ];
-
-const inputClass =
-  "w-full rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20";
-
-const labelClass = "block text-sm font-medium text-[#334155]";
 
 const formatDate = (iso: string | null): string => {
   if (!iso) return "—";
@@ -154,51 +162,33 @@ export default function AgentTokensClient({
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Agent Tokens</h1>
-        <p className="mt-1 text-sm text-[#475467]">
-          Token untuk agent eksternal memposting artikel via API tanpa sesi
-          browser. Database hanya menyimpan hash SHA-256 — token asli hanya
-          tampil sekali saat dibuat.
-        </p>
-      </header>
+      <AdminPageHeader
+        title="Agent Tokens"
+        description="Token untuk agent eksternal memposting artikel via API tanpa sesi browser. Database hanya menyimpan hash SHA-256 — token asli hanya tampil sekali saat dibuat."
+      />
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
 
-      {notice ? (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {notice}
-        </p>
-      ) : null}
+      {notice ? <AdminAlert variant="success">{notice}</AdminAlert> : null}
 
       {newToken ? (
-        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5">
-          <p className="text-sm font-semibold text-amber-900">
+        <div className="rounded-2xl border border-admin-warning/25 bg-admin-warning-soft p-5">
+          <p className="text-sm font-semibold text-admin-warning">
             Token baru — salin sekarang!
           </p>
-          <p className="mt-1 text-xs text-amber-800">
+          <p className="mt-1 text-xs text-admin-warning">
             Ini satu-satunya kesempatan melihat token ini. Setelah halaman
             ditutup, token tidak bisa ditampilkan lagi (hanya hash yang
             disimpan).
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <code className="flex-1 break-all rounded-lg border border-amber-300 bg-white px-3 py-2 font-mono text-xs text-[#0f172a]">
+            <code className="flex-1 break-all rounded-lg border border-admin-warning/25 bg-admin-surface px-3 py-2 font-mono text-xs text-admin-fg">
               {newToken}
             </code>
-            <button
-              type="button"
-              onClick={() => void copyToken()}
-              className="rounded-lg bg-[#0f172a] px-3.5 py-2 text-sm font-medium text-white transition hover:bg-[#1e293b]"
-            >
-              {copied ? "Tersalin ✓" : "Salin"}
-            </button>
+            <AdminButton type="button" variant="dark" onClick={() => void copyToken()}>
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? "Tersalin" : "Salin"}
+            </AdminButton>
           </div>
           <button
             type="button"
@@ -206,92 +196,93 @@ export default function AgentTokensClient({
               setNewToken(null);
               setCopied(false);
             }}
-            className="mt-3 text-xs font-medium text-amber-900 underline"
+            className="mt-3 text-xs font-medium text-admin-warning underline"
           >
             Saya sudah menyimpannya, sembunyikan
           </button>
         </div>
       ) : null}
 
-      <form
-        onSubmit={create}
-        className="space-y-5 rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm"
-      >
-        <h2 className="text-base font-semibold">Buat Token Baru</h2>
+      <AdminCard>
+        <form onSubmit={create}>
+          <AdminCardBody>
+            <h2 className="text-base font-semibold text-admin-fg">Buat Token Baru</h2>
 
-        <div className="space-y-1.5">
-          <label className={labelClass} htmlFor="token-name">
-            Nama
-          </label>
-          <input
-            id="token-name"
-            className={inputClass}
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Agen konten n8n"
-          />
-        </div>
+            <div className="space-y-1.5">
+              <AdminLabel htmlFor="token-name">Nama</AdminLabel>
+              <AdminInput
+                id="token-name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Agen konten n8n"
+              />
+            </div>
 
-        <div className="space-y-1.5">
-          <span className={labelClass}>Scopes</span>
-          <div className="space-y-1.5">
-            {AVAILABLE_SCOPES.map((scope) => (
-              <label
-                key={scope.value}
-                className="flex cursor-pointer items-center gap-2.5 text-sm"
+            <div className="space-y-1.5">
+              <AdminLabel>Scopes</AdminLabel>
+              <div className="space-y-1.5">
+                {AVAILABLE_SCOPES.map((scope) => (
+                  <label
+                    key={scope.value}
+                    className="flex cursor-pointer items-center gap-2.5 text-sm text-admin-fg"
+                  >
+                    <AdminCheckbox
+                      checked={scopes.includes(scope.value)}
+                      onChange={() => toggleScope(scope.value)}
+                    />
+                    <span className="font-mono text-xs">{scope.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <AdminLabel htmlFor="token-expires">Kedaluwarsa (opsional)</AdminLabel>
+              <AdminInput
+                id="token-expires"
+                type="datetime-local"
+                value={expiresAt}
+                onChange={(e) => setExpiresAt(e.target.value)}
+              />
+              <p className="text-xs text-admin-fg-muted">
+                Kosongkan agar token tidak pernah kedaluwarsa.
+              </p>
+            </div>
+
+            <div className="border-t border-admin-border pt-4">
+              <AdminButton
+                type="submit"
+                variant="primary"
+                disabled={creating || scopes.length === 0}
               >
-                <input
-                  type="checkbox"
-                  checked={scopes.includes(scope.value)}
-                  onChange={() => toggleScope(scope.value)}
-                  className="h-4 w-4 accent-[#F5A524]"
-                />
-                <span className="font-mono text-xs">{scope.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+                <KeyRound className="h-4 w-4" />
+                {creating ? "Membuat…" : "Buat Token"}
+              </AdminButton>
+            </div>
+          </AdminCardBody>
+        </form>
+      </AdminCard>
 
-        <div className="space-y-1.5">
-          <label className={labelClass} htmlFor="token-expires">
-            Kedaluwarsa (opsional)
-          </label>
-          <input
-            id="token-expires"
-            type="datetime-local"
-            className={inputClass}
-            value={expiresAt}
-            onChange={(e) => setExpiresAt(e.target.value)}
-          />
-          <p className="text-xs text-[#64748b]">
-            Kosongkan agar token tidak pernah kedaluwarsa.
-          </p>
-        </div>
-
-        <div className="border-t border-[#eef2f7] pt-4">
-          <button
-            type="submit"
-            disabled={creating || scopes.length === 0}
-            className="rounded-lg bg-[#F5A524] px-4 py-2.5 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:opacity-50"
-          >
-            {creating ? "Membuat…" : "Buat Token"}
-          </button>
-        </div>
-      </form>
-
-      <section className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
-        <div className="border-b border-[#eef2f7] px-5 py-3">
-          <h2 className="text-sm font-semibold">Token Terdaftar</h2>
+      <AdminCard className="overflow-hidden">
+        <div className="border-b border-admin-border px-5 py-3">
+          <h2 className="text-sm font-semibold text-admin-fg">Token Terdaftar</h2>
         </div>
         {tokens.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-[#64748b]">
-            Belum ada token. Buat token pertama di atas.
-          </p>
+          <AdminEmptyState
+            title="Belum ada token"
+            description="Buat token pertama di atas."
+          />
         ) : (
-          <ul className="divide-y divide-[#eef2f7]">
+          <ul className="divide-y divide-admin-border">
             {tokens.map((token) => {
               const status = statusOf(token);
+              const statusTone =
+                status.label === "Aktif"
+                  ? "success"
+                  : status.label === "Dicabut"
+                    ? "danger"
+                    : "neutral";
               const revocable = token.isActive && !token.revokedAt;
               return (
                 <li
@@ -300,19 +291,15 @@ export default function AgentTokensClient({
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-semibold">
+                      <p className="truncate text-sm font-semibold text-admin-fg">
                         {token.name}
                       </p>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${status.className}`}
-                      >
-                        {status.label}
-                      </span>
+                      <AdminBadge tone={statusTone}>{status.label}</AdminBadge>
                     </div>
-                    <p className="mt-0.5 font-mono text-xs text-[#64748b]">
+                    <p className="mt-0.5 font-mono text-xs text-admin-fg-muted">
                       {token.tokenPrefix}…
                     </p>
-                    <p className="mt-0.5 text-xs text-[#64748b]">
+                    <p className="mt-0.5 text-xs text-admin-fg-muted">
                       Scopes: {token.scopes.join(", ") || "—"} · Terakhir dipakai:{" "}
                       {formatDate(token.lastUsedAt)}
                       {token.expiresAt
@@ -322,20 +309,22 @@ export default function AgentTokensClient({
                   </div>
 
                   {revocable ? (
-                    <button
+                    <AdminButton
                       type="button"
+                      size="sm"
+                      variant="danger"
                       onClick={() => void revoke(token)}
-                      className="shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50"
                     >
+                      <Ban className="h-3.5 w-3.5" />
                       Cabut
-                    </button>
+                    </AdminButton>
                   ) : null}
                 </li>
               );
             })}
           </ul>
         )}
-      </section>
+      </AdminCard>
     </div>
   );
 }

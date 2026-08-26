@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -59,7 +60,7 @@ export default function LoginForm() {
           autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-[#F5A524]/60 focus:ring-2 focus:ring-[#F5A524]/20"
+          className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-admin-accent/60 focus:ring-2 focus:ring-admin-accent/20"
           placeholder="admin@granddutacity.com"
         />
       </div>
@@ -79,15 +80,20 @@ export default function LoginForm() {
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 pr-20 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-[#F5A524]/60 focus:ring-2 focus:ring-[#F5A524]/20"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 pr-11 text-sm text-white placeholder-neutral-500 outline-none transition focus:border-admin-accent/60 focus:ring-2 focus:ring-admin-accent/20"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs font-medium text-neutral-400 transition hover:text-[#F5A524]"
+            aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
+            className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded text-neutral-400 transition hover:text-admin-accent"
           >
-            {showPassword ? "Sembunyikan" : "Lihat"}
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>
@@ -104,8 +110,9 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-lg bg-[#F5A524] px-4 py-2.5 text-sm font-semibold text-[#0f172a] transition hover:bg-[#e0961f] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-admin-accent px-4 py-2.5 text-sm font-semibold text-admin-accent-fg transition hover:bg-admin-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
+        <LogIn className="h-4 w-4" />
         {loading ? "Memproses..." : "Masuk ke Dashboard"}
       </button>
     </form>

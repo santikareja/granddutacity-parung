@@ -8,7 +8,7 @@
 //   2. Setiap artikel wajib diakhiri CTA berisi tautan ke homepage dengan anchor
 //      "Grand Duta City Parung" — lihat ensureCta().
 
-import { and, count, desc, eq, ilike, or, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 
 import { db } from "@/db";
 import { artikel, artikelRels, categories, media, tags } from "@/db/schema";
@@ -24,6 +24,7 @@ export type ArticleListItem = {
   updatedAt: Date;
   aiGenerated: boolean | null;
   featuredImageUrl: string | null;
+  categoryNames: string[];
 };
 
 export type ArticleListResult = {
@@ -107,8 +108,32 @@ export const listArticles = async (options: {
 
   const total = totalRows[0]?.value ?? 0;
 
+  // Ambil nama kategori untuk halaman ini saja (bukan seluruh tabel), lalu
+  // kelompokkan per artikel. Dipakai untuk kolom "Kategori" di daftar admin.
+  const articleIds = rows.map((row) => row.id);
+  const categoryNamesByArticle = new Map<number, string[]>();
+  if (articleIds.length > 0) {
+    const rels = await db
+      .select({
+        parentId: artikelRels.parentId,
+        categoryName: categories.name,
+      })
+      .from(artikelRels)
+      .innerJoin(categories, eq(artikelRels.categoriesId, categories.id))
+      .where(inArray(artikelRels.parentId, articleIds));
+
+    for (const rel of rels) {
+      const list = categoryNamesByArticle.get(rel.parentId) ?? [];
+      list.push(rel.categoryName);
+      categoryNamesByArticle.set(rel.parentId, list);
+    }
+  }
+
   return {
-    items: rows as ArticleListItem[],
+    items: rows.map((row) => ({
+      ...row,
+      categoryNames: categoryNamesByArticle.get(row.id) ?? [],
+    })) as ArticleListItem[],
     total,
     page,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),

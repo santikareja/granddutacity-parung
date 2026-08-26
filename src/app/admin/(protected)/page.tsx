@@ -1,7 +1,24 @@
 import Link from "next/link";
+import {
+  CheckCircle2,
+  FileEdit,
+  Images,
+  FolderTree,
+  Tags,
+  Sparkles,
+  Newspaper,
+  SlidersHorizontal,
+  ArrowRight,
+} from "lucide-react";
 
 import { getSessionUser } from "@/lib/v2-auth/session";
 import { getDashboardStats, getRecentArticles } from "@/lib/v2-admin/queries";
+import {
+  AdminAlert,
+  AdminBadge,
+  AdminCard,
+  AdminStatCard,
+} from "@/components/admin/ui";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,11 +57,11 @@ const formatRelative = (date: Date): string => {
 };
 
 const STAT_CARDS = [
-  { key: "published", label: "Published", accent: "text-emerald-600" },
-  { key: "draft", label: "Draft", accent: "text-amber-600" },
-  { key: "media", label: "Media", accent: "text-violet-600" },
-  { key: "categories", label: "Kategori", accent: "text-rose-600" },
-  { key: "tags", label: "Tag", accent: "text-teal-600" },
+  { key: "published", label: "Published", icon: CheckCircle2, tone: "success" },
+  { key: "draft", label: "Draft", icon: FileEdit, tone: "warning" },
+  { key: "media", label: "Media", icon: Images, tone: "info" },
+  { key: "categories", label: "Kategori", icon: FolderTree, tone: "accent" },
+  { key: "tags", label: "Tag", icon: Tags, tone: "neutral" },
 ] as const;
 
 const QUICK_ACTIONS = [
@@ -52,18 +69,21 @@ const QUICK_ACTIONS = [
     href: "/admin/ai-studio",
     title: "AI Studio",
     desc: "Topik → judul → outline → artikel",
+    icon: Sparkles,
     primary: true,
   },
   {
     href: "/admin/articles",
     title: "Kelola Artikel",
     desc: "Edit, publish, atur SEO",
+    icon: Newspaper,
     primary: false,
   },
   {
     href: "/admin/settings/ai",
     title: "Konfigurasi AI",
     desc: "Provider, API key, model",
+    icon: SlidersHorizontal,
     primary: false,
   },
 ];
@@ -77,81 +97,87 @@ export default async function V2AdminDashboard() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <header className="rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5A524]">
+      <header className="rounded-2xl border border-admin-border bg-admin-surface p-6 shadow-admin-xs">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-admin-accent">
           {getGreeting()}
         </p>
-        <h1 className="mt-1.5 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-admin-fg">
           {user?.name || "Admin"}
         </h1>
-        <p className="mt-1.5 text-sm text-[#475467]">
-          <strong className="font-semibold text-[#0f172a]">{stats.published}</strong>{" "}
+        <p className="mt-1.5 text-sm text-admin-fg-muted">
+          <strong className="font-semibold text-admin-fg">{stats.published}</strong>{" "}
           artikel tayang &middot;{" "}
-          <strong className="font-semibold text-[#0f172a]">{stats.draft}</strong> draft
+          <strong className="font-semibold text-admin-fg">{stats.draft}</strong> draft
           &middot;{" "}
-          <strong className="font-semibold text-[#0f172a]">{stats.media}</strong> media
+          <strong className="font-semibold text-admin-fg">{stats.media}</strong> media
         </p>
       </header>
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert>{error}</AdminAlert> : null}
 
       <section aria-label="Statistik konten">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {STAT_CARDS.map((card) => (
-            <div
+            <AdminStatCard
               key={card.key}
-              className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm"
-            >
-              <p className={`text-2xl font-bold ${card.accent}`}>
-                {stats[card.key]}
-              </p>
-              <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[#64748b]">
-                {card.label}
-              </p>
-            </div>
+              label={card.label}
+              value={stats[card.key]}
+              icon={card.icon}
+              tone={card.tone}
+            />
           ))}
         </div>
       </section>
 
       <section aria-label="Aksi cepat">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {QUICK_ACTIONS.map((action) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className={`flex flex-col gap-1 rounded-xl border p-4 transition hover:-translate-y-0.5 ${
-                action.primary
-                  ? "border-[#F5A524] bg-[#fff5ea]"
-                  : "border-[#e2e8f0] bg-white hover:border-[#F5A524]"
-              }`}
-            >
-              <span className="text-sm font-semibold">{action.title}</span>
-              <span className="text-xs text-[#64748b]">{action.desc}</span>
-            </Link>
-          ))}
+          {QUICK_ACTIONS.map((action) => {
+            const Icon = action.icon;
+            return (
+              <Link
+                key={action.href}
+                href={action.href}
+                className={`group flex flex-col gap-2 rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-admin-sm ${
+                  action.primary
+                    ? "border-admin-accent/40 bg-admin-accent-soft"
+                    : "border-admin-border bg-admin-surface hover:border-admin-accent/40"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+                      action.primary
+                        ? "bg-admin-accent text-admin-accent-fg"
+                        : "bg-admin-surface-muted text-admin-fg-muted"
+                    }`}
+                  >
+                    <Icon className="h-4.5 w-4.5" strokeWidth={2} />
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-admin-fg-dim opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-admin-fg">{action.title}</p>
+                  <p className="text-xs text-admin-fg-muted">{action.desc}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-[#eef2f7] px-5 py-4">
-          <h2 className="text-base font-semibold">Artikel Terbaru</h2>
+      <AdminCard>
+        <div className="flex items-center justify-between border-b border-admin-border px-5 py-4">
+          <h2 className="text-base font-semibold text-admin-fg">Artikel Terbaru</h2>
           <Link
             href="/admin/articles"
-            className="text-sm font-medium text-[#A85D16] hover:underline"
+            className="text-sm font-medium text-admin-accent hover:underline"
           >
             Lihat semua &rarr;
           </Link>
         </div>
 
         {recent.length > 0 ? (
-          <ul className="divide-y divide-[#eef2f7]">
+          <ul className="divide-y divide-admin-border">
             {recent.map((article) => (
               <li
                 key={article.id}
@@ -160,34 +186,28 @@ export default async function V2AdminDashboard() {
                 <div className="min-w-0">
                   <Link
                     href={`/admin/articles/${article.id}`}
-                    className="block truncate text-sm font-medium hover:text-[#A85D16]"
+                    className="block truncate text-sm font-medium text-admin-fg hover:text-admin-accent"
                   >
                     {article.title || "(tanpa judul)"}
                   </Link>
-                  <p className="mt-0.5 text-xs text-[#64748b]">
+                  <p className="mt-0.5 text-xs text-admin-fg-muted">
                     {formatRelative(article.updatedAt)}
                     {article.aiGenerated ? " · dibuat AI" : ""}
                   </p>
                 </div>
 
-                <span
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                    article.status === "published"
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-amber-50 text-amber-700"
-                  }`}
-                >
+                <AdminBadge tone={article.status === "published" ? "success" : "warning"}>
                   {article.status === "published" ? "Live" : "Draft"}
-                </span>
+                </AdminBadge>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="px-5 py-8 text-center text-sm text-[#94a3b8]">
+          <p className="px-5 py-8 text-center text-sm text-admin-fg-dim">
             Belum ada artikel, atau data gagal dimuat.
           </p>
         )}
-      </section>
+      </AdminCard>
     </div>
   );
 }

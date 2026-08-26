@@ -27,6 +27,22 @@ import {
 import { TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { $setBlocksType } from "@lexical/selection";
 import { mergeRegister } from "@lexical/utils";
+import {
+  Undo2,
+  Redo2,
+  Bold,
+  Italic,
+  Underline,
+  Pilcrow,
+  Heading2,
+  Heading3,
+  Quote,
+  List,
+  ListOrdered,
+  Link2,
+  ImagePlus,
+  Sparkles,
+} from "lucide-react";
 
 import { adminPost, AdminClientError } from "@/lib/v2-admin/api-client";
 
@@ -45,9 +61,9 @@ type ToolbarProps = {
 };
 
 const btnBase =
-  "rounded-md px-2.5 py-1.5 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed";
-const btnIdle = `${btnBase} text-[#475467] hover:bg-[#f1f5f9]`;
-const btnActive = `${btnBase} bg-[#fff5ea] font-semibold text-[#A85D16]`;
+  "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed";
+const btnIdle = `${btnBase} text-admin-fg-muted hover:bg-admin-surface-hover hover:text-admin-fg`;
+const btnActive = `${btnBase} bg-admin-accent-soft font-semibold text-admin-accent-soft-fg`;
 
 export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
   const [editor] = useLexicalComposerContext();
@@ -205,7 +221,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
   );
 
   return (
-    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b border-[#e2e8f0] bg-white/95 px-3 py-2 backdrop-blur">
+    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b border-admin-border bg-admin-surface/95 px-3 py-2 backdrop-blur">
       <button
         type="button"
         title="Undo (Ctrl+Z)"
@@ -213,7 +229,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         disabled={!canUndo}
         className={btnIdle}
       >
-        ↶
+        <Undo2 className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -222,10 +238,10 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         disabled={!canRedo}
         className={btnIdle}
       >
-        ↷
+        <Redo2 className="h-4 w-4" />
       </button>
 
-      <span className="mx-1 h-5 w-px bg-[#e2e8f0]" />
+      <span className="mx-1 h-5 w-px bg-admin-border" />
 
       <button
         type="button"
@@ -233,7 +249,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
         className={activeFormats.bold ? btnActive : btnIdle}
       >
-        <strong>B</strong>
+        <Bold className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -241,7 +257,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
         className={activeFormats.italic ? btnActive : btnIdle}
       >
-        <em>I</em>
+        <Italic className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -249,10 +265,10 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline")}
         className={activeFormats.underline ? btnActive : btnIdle}
       >
-        <span className="underline">U</span>
+        <Underline className="h-4 w-4" />
       </button>
 
-      <span className="mx-1 h-5 w-px bg-[#e2e8f0]" />
+      <span className="mx-1 h-5 w-px bg-admin-border" />
 
       <button
         type="button"
@@ -260,7 +276,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={() => applyBlock(() => $createParagraphNode())}
         className={btnIdle}
       >
-        ¶
+        <Pilcrow className="h-4 w-4" />
       </button>
       {/* H1 sengaja tidak disediakan: judul artikel sudah menjadi H1 di halaman publik. */}
       <button
@@ -269,7 +285,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={() => applyBlock(() => $createHeadingNode("h2"))}
         className={btnIdle}
       >
-        H2
+        <Heading2 className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -277,7 +293,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={() => applyBlock(() => $createHeadingNode("h3"))}
         className={btnIdle}
       >
-        H3
+        <Heading3 className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -285,10 +301,10 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={() => applyBlock(() => $createQuoteNode())}
         className={btnIdle}
       >
-        &ldquo;
+        <Quote className="h-4 w-4" />
       </button>
 
-      <span className="mx-1 h-5 w-px bg-[#e2e8f0]" />
+      <span className="mx-1 h-5 w-px bg-admin-border" />
 
       <button
         type="button"
@@ -298,7 +314,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         }
         className={btnIdle}
       >
-        • List
+        <List className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -308,10 +324,10 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         }
         className={btnIdle}
       >
-        1. List
+        <ListOrdered className="h-4 w-4" />
       </button>
 
-      <span className="mx-1 h-5 w-px bg-[#e2e8f0]" />
+      <span className="mx-1 h-5 w-px bg-admin-border" />
 
       <button
         type="button"
@@ -319,7 +335,7 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={() => insertLink(editor)}
         className={btnIdle}
       >
-        🔗 Link
+        <Link2 className="h-4 w-4" />
       </button>
       <button
         type="button"
@@ -327,19 +343,20 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
         onClick={onRequestImage}
         className={btnIdle}
       >
-        🖼 Gambar
+        <ImagePlus className="h-4 w-4" />
       </button>
 
-      <span className="mx-1 h-5 w-px bg-[#e2e8f0]" />
+      <span className="mx-1 h-5 w-px bg-admin-border" />
 
       <span
-        className="px-1 text-[11px] font-bold uppercase tracking-wide text-[#A85D16]"
+        className="flex items-center gap-1 px-1 text-[11px] font-bold uppercase tracking-wide text-admin-accent"
         title={
           hasSelection
             ? "Alat AI untuk teks terpilih"
             : "Pilih (blok) teks lebih dulu"
         }
       >
+        <Sparkles className="h-3 w-3" />
         AI
       </span>
       {AI_TOOLS.map((tool) => (

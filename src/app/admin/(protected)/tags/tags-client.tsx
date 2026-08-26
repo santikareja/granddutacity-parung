@@ -1,7 +1,17 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
 
+import {
+  AdminAlert,
+  AdminButton,
+  AdminCard,
+  AdminCardBody,
+  AdminEmptyState,
+  AdminInput,
+  AdminLabel,
+} from "@/components/admin/ui";
 import {
   AdminClientError,
   adminDelete,
@@ -21,17 +31,6 @@ type Props = {
   initialItems: TagRow[];
   canManage: boolean;
 };
-
-const inputClass =
-  "w-full rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-[#F5A524] focus:ring-2 focus:ring-[#F5A524]/20";
-
-const labelClass = "block text-sm font-medium text-[#334155]";
-
-const primaryBtn =
-  "rounded-lg bg-[#F5A524] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#e0951c] disabled:cursor-not-allowed disabled:opacity-50";
-
-const ghostBtn =
-  "rounded-lg border border-[#e2e8f0] px-3 py-1.5 text-sm text-[#475467] transition hover:bg-[#f1f5f9] disabled:opacity-50";
 
 const errorMessage = (err: unknown, fallback: string): string =>
   err instanceof AdminClientError ? err.message : fallback;
@@ -129,57 +128,49 @@ export default function TagsClient({ initialItems, canManage }: Props) {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <header>
-        <h1 className="text-xl font-semibold text-[#0f172a]">Tag</h1>
-        <p className="mt-1 text-sm text-[#64748b]">
+        <h1 className="text-xl font-semibold text-admin-fg">Tag</h1>
+        <p className="mt-1 text-sm text-admin-fg-muted">
           Kelola tag artikel. Slug dibuat otomatis dari nama.
         </p>
       </header>
 
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AdminAlert>{error}</AdminAlert> : null}
 
       {canManage ? (
-        <section className="rounded-xl border border-[#e2e8f0] bg-white p-5">
-          <h2 className="text-sm font-semibold text-[#334155]">Tambah tag</h2>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <label className={labelClass} htmlFor="tag-name">
-                Nama
-              </label>
-              <input
-                id="tag-name"
-                className={`mt-1.5 ${inputClass}`}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="mis. Investasi"
+        <AdminCard>
+          <AdminCardBody>
+            <h2 className="text-sm font-semibold text-admin-fg">Tambah tag</h2>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="flex-1">
+                <AdminLabel htmlFor="tag-name">Nama</AdminLabel>
+                <AdminInput
+                  id="tag-name"
+                  className="mt-1.5"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="mis. Investasi"
+                  disabled={creating}
+                />
+              </div>
+              <AdminButton
+                type="button"
+                variant="primary"
+                onClick={() => void handleCreate()}
                 disabled={creating}
-              />
+              >
+                <Plus className="h-4 w-4" />
+                {creating ? "Menyimpan…" : "Tambah tag"}
+              </AdminButton>
             </div>
-            <button
-              type="button"
-              className={primaryBtn}
-              onClick={() => void handleCreate()}
-              disabled={creating}
-            >
-              {creating ? "Menyimpan…" : "Tambah tag"}
-            </button>
-          </div>
-        </section>
+          </AdminCardBody>
+        </AdminCard>
       ) : null}
 
-      <section className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white">
+      <AdminCard className="overflow-hidden">
         {items.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-[#64748b]">
-            Belum ada tag.
-          </p>
+          <AdminEmptyState title="Belum ada tag." />
         ) : (
-          <ul className="divide-y divide-[#eef2f7]">
+          <ul className="divide-y divide-admin-border">
             {items.map((row) => {
               const isEditing = editingId === row.id;
               const isBusy = busyId === row.id;
@@ -187,59 +178,66 @@ export default function TagsClient({ initialItems, canManage }: Props) {
                 <li key={row.id} className="px-5 py-4">
                   {isEditing ? (
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <input
-                        className={`flex-1 ${inputClass}`}
+                      <AdminInput
+                        className="flex-1"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         placeholder="Nama"
                         disabled={isBusy}
                       />
                       <div className="flex gap-2">
-                        <button
+                        <AdminButton
                           type="button"
-                          className={primaryBtn}
+                          variant="primary"
+                          size="sm"
                           onClick={() => void handleUpdate(row.id)}
                           disabled={isBusy}
                         >
                           {isBusy ? "Menyimpan…" : "Simpan"}
-                        </button>
-                        <button
+                        </AdminButton>
+                        <AdminButton
                           type="button"
-                          className={ghostBtn}
+                          variant="ghost"
+                          size="sm"
                           onClick={cancelEdit}
                           disabled={isBusy}
                         >
+                          <X className="h-3.5 w-3.5" />
                           Batal
-                        </button>
+                        </AdminButton>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between gap-4">
                       <div className="min-w-0">
-                        <p className="font-medium text-[#0f172a]">{row.name}</p>
-                        <p className="mt-0.5 text-xs text-[#94a3b8]">
+                        <p className="font-medium text-admin-fg">{row.name}</p>
+                        <p className="mt-0.5 text-xs text-admin-fg-dim">
                           {row.slug ? `/${row.slug} · ` : ""}
                           {row.articleCount} artikel
                         </p>
                       </div>
                       {canManage ? (
                         <div className="flex shrink-0 gap-2">
-                          <button
+                          <AdminButton
                             type="button"
-                            className={ghostBtn}
+                            variant="secondary"
+                            size="sm"
                             onClick={() => startEdit(row)}
                             disabled={isBusy}
                           >
+                            <Pencil className="h-3.5 w-3.5" />
                             Edit
-                          </button>
-                          <button
+                          </AdminButton>
+                          <AdminButton
                             type="button"
-                            className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                            variant="danger"
+                            size="sm"
                             onClick={() => void handleDelete(row)}
                             disabled={isBusy}
                           >
+                            <Trash2 className="h-3.5 w-3.5" />
                             {isBusy ? "…" : "Hapus"}
-                          </button>
+                          </AdminButton>
                         </div>
                       ) : null}
                     </div>
@@ -249,7 +247,7 @@ export default function TagsClient({ initialItems, canManage }: Props) {
             })}
           </ul>
         )}
-      </section>
+      </AdminCard>
     </div>
   );
 }

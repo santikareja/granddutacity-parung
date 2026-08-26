@@ -394,3 +394,51 @@ html.lenis body {
     transform: none !important;
   }
 }
+
+/* ==========================================================================
+   Editor Lexical CMS kustom (/v2-admin). Kelas dipakai editorTheme di
+   src/app/v2-admin/articles/editor/theme.ts. Dijaga mirip tampilan artikel
+   publik agar penulis melihat hasil yang mendekati versi tayang.
+   ========================================================================== */
+.gdc-editor__p { margin: 0 0 0.85rem; line-height: 1.7; }
+.gdc-editor__h2 { margin: 1.6rem 0 0.7rem; font-size: 1.4rem; font-weight: 700; line-height: 1.3; }
+.gdc-editor__h3 { margin: 1.3rem 0 0.55rem; font-size: 1.15rem; font-weight: 700; line-height: 1.35; }
+.gdc-editor__h4 { margin: 1.1rem 0 0.5rem; font-size: 1.02rem; font-weight: 700; }
+.gdc-editor__quote {
+  margin: 1rem 0;
+  border-left: 3px solid #F5A524;
+  padding: 0.25rem 0 0.25rem 0.9rem;
+  color: #475467;
+  font-style: italic;
+}
+.gdc-editor__ul { margin: 0 0 0.85rem 1.35rem; list-style: disc; }
+.gdc-editor__ol { margin: 0 0 0.85rem 1.35rem; list-style: decimal; }
+.gdc-editor__li { margin: 0.28rem 0; line-height: 1.65; }
+.gdc-editor__li-nested { list-style-type: circle; }
+.gdc-editor__link { color: #A85D16; text-decoration: underline; text-underline-offset: 2px; }
+.gdc-editor__bold { font-weight: 700; }
+.gdc-editor__italic { font-style: italic; }
+.gdc-editor__underline { text-decoration: underline; text-underline-offset: 2px; }
+.gdc-editor__strike { text-decoration: line-through; }
+.gdc-editor__code {
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 0.1rem 0.32rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+
+/* Area kontenteditable */
+.gdc-editor__input {
+  min-height: 420px;
+  padding: 1.25rem 1.15rem 2.5rem;
+  outline: none;
+}
+.gdc-editor__placeholder {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.15rem;
+  color: #94a3b8;
+  pointer-events: none;
+  user-select: none;
+}

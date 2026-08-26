@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import "../globals.css";
+
 // Layout induk /admin sengaja passthrough tanpa guard sesi. Guard dipindah ke
 // route group (protected)/layout.tsx sehingga /admin/login (di luar group
 // tersebut) tidak ikut terjaga — mencegah redirect loop bagi pengunjung anonim.
@@ -16,5 +18,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <html lang="id">
+      <body>{children}</body>
+    </html>
+  );
 }

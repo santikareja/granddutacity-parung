@@ -7,7 +7,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowLeft, ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
 import ArticleEditor from "./editor/article-editor";
@@ -375,12 +374,20 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
               <AdminCardTitle>Gambar Utama</AdminCardTitle>
               {form.featuredImageUrl ? (
                 <div className="relative h-40 w-full overflow-hidden rounded-lg border border-admin-border">
-                  <Image
+                  {/* Sengaja <img>, BUKAN next/image. URL media berasal dari DB
+                      (warisan Payload) dan bentuknya tidak dijamin: host di luar
+                      images.remotePatterns, path relatif tanpa "/" di depan, atau
+                      protocol-relative "//" semuanya membuat next/image MELEMPAR
+                      error saat render. Karena tidak ada error boundary di atas
+                      komponen ini, satu URL menyimpang cukup untuk mematikan
+                      seluruh halaman editor. Pratinjau admin juga tidak perlu
+                      optimasi gambar. Pola ini sama dengan media-client.tsx,
+                      media-picker-dialog.tsx, dan upload-node.tsx. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- pratinjau media dinamis di panel admin */}
+                  <img
                     src={form.featuredImageUrl}
                     alt="Pratinjau gambar utama"
-                    fill
-                    sizes="320px"
-                    className="object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </div>
               ) : (

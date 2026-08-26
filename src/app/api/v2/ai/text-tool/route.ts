@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 
 import { requireApiUser, apiError } from "@/lib/v2-auth/api-guard";
-import { chatCompletion } from "@/lib/ai/client";
-import { resolveAiConfigWithModel } from "@/lib/v2-admin/ai-runtime";
+import { AiRequestError } from "@/lib/ai/client";
+import {
+  AI_BUDGETS,
+  AI_NOT_CONFIGURED_MESSAGE,
+  resolveAiCandidates,
+  runAiTask,
+} from "@/lib/v2-admin/ai-rotation";
 import { buildTextToolPrompt, type TextToolMode } from "@/lib/ai/prompts";
 import { logAiTask } from "@/lib/v2-admin/ai-tasks";
 
@@ -49,41 +54,60 @@ export async function POST(request: Request) {
     );
   }
 
-  const config = await resolveAiConfigWithModel(
-    typeof body.providerId === "number" ? body.providerId : undefined,
-    typeof body.model === "string" ? body.model : undefined,
-  );
+  const candidates = await resolveAiCandidates({
+    providerId: typeof body.providerId === "number" ? body.providerId : undefined,
+    model: typeof body.model === "string" ? body.model : undefined,
+    maxCandidates: AI_BUDGETS.quick.maxCandidates,
+  });
 
-  if (!config) {
-    return apiError(
-      "Layanan AI belum dikonfigurasi. Tambahkan provider di Konfigurasi AI.",
-      503,
-    );
-  }
+  if (candidates.length === 0) return apiError(AI_NOT_CONFIGURED_MESSAGE, 503);
 
   const typedMode = mode as TextToolMode;
 
   try {
-    const raw = await chatCompletion({
-      config,
+    const result = await runAiTask<string>({
+      candidates,
       messages: buildTextToolPrompt(typedMode, text),
+      // Anggaran quick: route ini maxDuration 120 detik.
+      budget: AI_BUDGETS.quick,
       // Proofread harus konservatif; mode lain boleh lebih kreatif.
       temperature: typedMode === "proofread" ? 0.2 : 0.6,
-    });
+      taskLabel: `text-tool:${typedMode}`,
+      parse: (raw) => {
+        // Beberapa model tetap membungkus hasil dengan code fence atau label
+        // meski dilarang. Bersihkan yang mudah, tolak yang benar-benar kosong.
+        const cleaned = raw
+          .trim()
+          .replace(/^```[a-z]*\s*/i, "")
+          .replace(/```$/, "")
+          .replace(/^(hasil|berikut|output)\s*:\s*/i, "")
+          .trim();
 
-    const result = raw.trim();
-    if (!result) return apiError("AI tidak menghasilkan teks.", 502);
+        if (!cleaned) {
+          throw new AiRequestError("AI tidak menghasilkan teks.", 502);
+        }
+        return cleaned;
+      },
+    });
 
     // Log best-effort (tanpa menggagalkan respons). Simpan ringkasan aman saja.
     void logAiTask({
       type: "text-tool",
       status: "completed",
       input: { mode: typedMode, length: text.length },
-      output: { length: result.length },
+      output: {
+        length: result.value.length,
+        model: result.model,
+        rotated: result.rotated,
+      },
       userId: guard.user.id,
     });
 
-    return NextResponse.json({ text: result });
+    return NextResponse.json({
+      text: result.value,
+      model: result.model,
+      rotated: result.rotated,
+    });
   } catch (error) {
     console.error("[api/v2/ai/text-tool] gagal:", error);
 
@@ -97,7 +121,7 @@ export async function POST(request: Request) {
 
     return apiError(
       error instanceof Error ? error.message : "Gagal memproses teks.",
-      502,
+      error instanceof AiRequestError ? error.status : 502,
     );
   }
 }

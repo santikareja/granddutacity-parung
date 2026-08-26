@@ -4,28 +4,35 @@
 // dijalankan sungguhan di dalam test:
 //   - `chatCompletion` (@/lib/ai/client)       → memanggil provider AI via fetch
 //   - `requireApiUser` (@/lib/v2-auth/api-guard) → butuh sesi/cookie
-//   - `resolveAiConfigWithModel` (@/lib/v2-admin/ai-runtime) → membaca DB (Drizzle)
+//   - `resolveAiCandidates` (@/lib/v2-admin/ai-rotation) → membaca DB (Drizzle)
 //
 // Modul ini menyediakan mock fn yang dapat dikontrol + fixture + builder request.
-// File test yang memakainya cukup memasang `vi.mock(...)` pada ketiga modul di
-// atas dan mengarahkannya ke mock fn di sini (binding import sudah ter-hoist
-// sehingga aman direferensikan dari factory `vi.mock`).
+//
+// PENTING soal bentuk `vi.mock`: pakai `importOriginal` lalu timpa hanya fungsi
+// yang perlu dikontrol. Factory yang mengembalikan objek kosong-sebagian akan
+// membuat export lain (mis. `AiRequestError`, `runAiTask`) tidak tersedia, dan
+// handler yang mengaksesnya akan gagal dengan error yang menyesatkan.
 //
 // Contoh pemakaian pada file test:
 //
 //   import {
 //     chatCompletionMock,
 //     requireApiUserMock,
-//     resolveAiConfigWithModelMock,
+//     resolveAiCandidatesMock,
 //     resetAiArticleMocks,
 //     mockAiHtml,
 //     buildArticleRequest,
 //   } from "@/test/helpers/ai-article-mocks";
 //
-//   vi.mock("@/lib/ai/client", () => ({ chatCompletion: chatCompletionMock }));
-//   vi.mock("@/lib/v2-admin/ai-runtime", () => ({
-//     resolveAiConfigWithModel: resolveAiConfigWithModelMock,
-//   }));
+//   vi.mock("@/lib/ai/client", async (importOriginal) => {
+//     const actual = await importOriginal<typeof import("@/lib/ai/client")>();
+//     return { ...actual, chatCompletion: chatCompletionMock };
+//   });
+//   vi.mock("@/lib/v2-admin/ai-rotation", async (importOriginal) => {
+//     const actual =
+//       await importOriginal<typeof import("@/lib/v2-admin/ai-rotation")>();
+//     return { ...actual, resolveAiCandidates: resolveAiCandidatesMock };
+//   });
 //   vi.mock("@/lib/v2-auth/api-guard", async (importOriginal) => {
 //     const actual = await importOriginal<typeof import("@/lib/v2-auth/api-guard")>();
 //     return { ...actual, requireApiUser: requireApiUserMock };
@@ -54,6 +61,14 @@ export const requireApiUserMock = vi.fn();
 // Mock resolusi konfigurasi AI. Secara default mengembalikan config env palsu.
 export const resolveAiConfigWithModelMock = vi.fn();
 
+// Mock penyusun daftar kandidat model (@/lib/v2-admin/ai-rotation).
+//
+// Handler artikel kini memakai rotasi model: satu tugas dicoba pada beberapa
+// model berurutan bila model sebelumnya timeout/gagal. Yang di-mock HANYA
+// penyusun daftar kandidatnya (karena membaca tabel ai_providers lewat Drizzle);
+// logika rotasi `runAiTask` dibiarkan asli agar tetap teruji.
+export const resolveAiCandidatesMock = vi.fn();
+
 // Fixture: user admin terautentikasi.
 export const FAKE_SESSION_USER: SessionUser = {
   id: 1,
@@ -78,9 +93,12 @@ export const resetAiArticleMocks = (): void => {
   chatCompletionMock.mockReset();
   requireApiUserMock.mockReset();
   resolveAiConfigWithModelMock.mockReset();
+  resolveAiCandidatesMock.mockReset();
 
   requireApiUserMock.mockResolvedValue(FAKE_GUARD_OK);
   resolveAiConfigWithModelMock.mockResolvedValue(FAKE_AI_CONFIG);
+  // Satu kandidat sehat: jalur sukses hanya memanggil chatCompletion sekali.
+  resolveAiCandidatesMock.mockResolvedValue([FAKE_AI_CONFIG]);
 };
 
 // Kontrol keluaran HTML mentah dari provider AI untuk sebuah test.

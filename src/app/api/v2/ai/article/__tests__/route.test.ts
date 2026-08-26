@@ -2,7 +2,7 @@
 //
 // File ini SENGAJA hanya memvalidasi bahwa:
 //   1. Vitest berjalan (mode single-run) dengan alias path "@/..." ter-resolve.
-//   2. Mock untuk chatCompletion, requireApiUser, dan resolveAiConfigWithModel
+//   2. Mock untuk chatCompletion, requireApiUser, dan resolveAiCandidates
 //      dapat mengendalikan handler POST /api/v2/ai/article tanpa dependensi
 //      eksternal (DB/sesi/provider AI).
 //
@@ -16,18 +16,24 @@ import {
   mockAiHtml,
   requireApiUserMock,
   resetAiArticleMocks,
-  resolveAiConfigWithModelMock,
+  resolveAiCandidatesMock,
   validArticleBody,
 } from "@/test/helpers/ai-article-mocks";
 
 // Arahkan dependensi eksternal handler ke mock terkontrol.
-vi.mock("@/lib/ai/client", () => ({
-  chatCompletion: chatCompletionMock,
-}));
+// Timpa hanya `chatCompletion`; export lain (AiRequestError dll) tetap asli.
+vi.mock("@/lib/ai/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/ai/client")>();
+  return { ...actual, chatCompletion: chatCompletionMock };
+});
 
-vi.mock("@/lib/v2-admin/ai-runtime", () => ({
-  resolveAiConfigWithModel: resolveAiConfigWithModelMock,
-}));
+// Handler memakai rotasi model. Hanya penyusun kandidat yang di-mock (baca DB);
+// logika rotasinya sendiri dibiarkan asli.
+vi.mock("@/lib/v2-admin/ai-rotation", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/v2-admin/ai-rotation")>();
+  return { ...actual, resolveAiCandidates: resolveAiCandidatesMock };
+});
 
 vi.mock("@/lib/v2-auth/api-guard", async (importOriginal) => {
   const actual =
@@ -60,12 +66,14 @@ describe("infrastruktur pengujian AI Studio (Task 1)", () => {
     expect(data.content).toBeTruthy();
   });
 
-  it("mock requireApiUser & resolveAiConfigWithModel membypass DB/sesi", async () => {
+  it("mock requireApiUser & resolveAiCandidates membypass DB/sesi", async () => {
     mockAiHtml("<p>ok</p>");
 
     await POST(buildArticleRequest(validArticleBody()));
 
     expect(requireApiUserMock).toHaveBeenCalled();
-    expect(resolveAiConfigWithModelMock).toHaveBeenCalled();
+    // Handler kini menyusun daftar kandidat model (untuk rotasi) alih-alih satu
+    // config tunggal; inilah dependensi DB yang harus ter-mock.
+    expect(resolveAiCandidatesMock).toHaveBeenCalled();
   });
 });

@@ -12,6 +12,10 @@ export const editorTheme: EditorThemeClasses = {
     h2: "gdc-editor__h2",
     h3: "gdc-editor__h3",
     h4: "gdc-editor__h4",
+    // h5/h6 bisa datang dari artikel warisan atau keluaran AI. Tanpa kelas,
+    // heading tersebut tampil seperti paragraf biasa dan hierarki hilang.
+    h5: "gdc-editor__h5",
+    h6: "gdc-editor__h6",
   },
   list: {
     ul: "gdc-editor__ul",
@@ -22,6 +26,15 @@ export const editorTheme: EditorThemeClasses = {
     },
   },
   link: "gdc-editor__link",
+  hr: "gdc-editor__hr",
+  // Tabel: tanpa kelas ini tabel tampil tanpa garis sama sekali di editor,
+  // sehingga penulis tidak bisa melihat batas sel.
+  table: "gdc-editor__table",
+  tableRow: "gdc-editor__tr",
+  tableCell: "gdc-editor__td",
+  tableCellHeader: "gdc-editor__th",
+  tableSelected: "gdc-editor__table-selected",
+  tableCellSelected: "gdc-editor__td-selected",
   text: {
     bold: "gdc-editor__bold",
     italic: "gdc-editor__italic",

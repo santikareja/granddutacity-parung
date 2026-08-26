@@ -221,7 +221,9 @@ export default function EditorToolbar({ onRequestImage }: ToolbarProps) {
   );
 
   return (
-    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b border-admin-border bg-admin-surface/95 px-3 py-2 backdrop-blur">
+    // Sticky terhadap kontainer scroll konten admin (div.flex-1.overflow-auto
+    // di admin-shell). z-10 sengaja di bawah topbar shell (z-20).
+    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 rounded-t-xl border-b border-admin-border bg-admin-surface/95 px-3 py-2 backdrop-blur">
       <button
         type="button"
         title="Undo (Ctrl+Z)"

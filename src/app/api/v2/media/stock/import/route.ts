@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { requireApiUser, apiError } from "@/lib/v2-auth/api-guard";
-import { chatCompletion, parseJsonFromAi } from "@/lib/ai/client";
-import { resolveAiConfig } from "@/lib/v2-admin/ai-runtime";
+import { AiRequestError, parseJsonFromAi } from "@/lib/ai/client";
+import {
+  AI_BUDGETS,
+  resolveAiCandidates,
+  runAiTask,
+} from "@/lib/v2-admin/ai-rotation";
 import { buildImageMetaPrompt } from "@/lib/ai/prompts";
 import {
   downloadStockImage,
@@ -82,29 +86,56 @@ export async function POST(request: Request) {
     let alt = description || (author ? `Foto oleh ${author}` : "Foto stok");
     let caption: string | null = null;
 
-    const aiConfig = await resolveAiConfig();
-    if (aiConfig) {
+    // Metadata AI bersifat best-effort: kegagalan (termasuk semua model gagal)
+    // tidak boleh menggagalkan impor gambar. Anggaran `quick` dipakai karena
+    // route ini maxDuration 120 detik dan sebagian besar waktunya sudah
+    // terpakai untuk mengunduh + mengunggah gambar.
+    const aiCandidates = await resolveAiCandidates({
+      maxCandidates: AI_BUDGETS.quick.maxCandidates,
+    });
+
+    if (aiCandidates.length > 0) {
       try {
-        const raw = await chatCompletion({
-          config: aiConfig,
+        const meta = await runAiTask({
+          candidates: aiCandidates,
           messages: buildImageMetaPrompt(
             typeof body.context === "string" && body.context.trim()
               ? body.context.trim()
               : "Artikel properti Grand Duta City Parung",
             description,
           ),
+          budget: AI_BUDGETS.quick,
           temperature: 0.6,
           responseFormatJson: true,
-        });
-        const meta = parseJsonFromAi<{
-          name?: string;
-          alt?: string;
-          caption?: string;
-        }>(raw);
+          taskLabel: "image-meta",
+          parse: (raw) => {
+            const parsed = parseJsonFromAi<{
+              name?: unknown;
+              alt?: unknown;
+              caption?: unknown;
+            }>(raw);
 
-        if (meta.name?.trim()) name = meta.name.trim();
-        if (meta.alt?.trim()) alt = meta.alt.trim();
-        if (meta.caption?.trim()) caption = meta.caption.trim();
+            const altText =
+              typeof parsed.alt === "string" ? parsed.alt.trim() : "";
+
+            // alt text adalah satu-satunya field yang wajib ada (SEO +
+            // aksesibilitas). Tanpa itu, keluaran model tidak berguna.
+            if (!altText) {
+              throw new AiRequestError("Metadata gambar tanpa alt text.", 502);
+            }
+
+            return {
+              name: typeof parsed.name === "string" ? parsed.name.trim() : "",
+              alt: altText,
+              caption:
+                typeof parsed.caption === "string" ? parsed.caption.trim() : "",
+            };
+          },
+        });
+
+        if (meta.value.name) name = meta.value.name;
+        alt = meta.value.alt;
+        if (meta.value.caption) caption = meta.value.caption;
       } catch (error) {
         console.error("[media/stock/import] metadata AI gagal:", error);
       }

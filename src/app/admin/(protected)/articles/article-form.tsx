@@ -9,11 +9,20 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
-import ArticleEditor from "./editor/article-editor";
+import ArticleEditor, {
+  type EditorApplyRequest,
+} from "./editor/article-editor";
 import MediaPickerDialog, {
+  type MediaCapabilities,
   type PickedMedia,
 } from "./editor/media-picker-dialog";
-import { createEmptyState, slugify } from "@/lib/v2-admin/lexical";
+import AiAssistPanel from "./ai-assist-panel";
+import {
+  createEmptyState,
+  prepareStateForEditor,
+  prepareStateForStorage,
+  slugify,
+} from "@/lib/v2-admin/lexical";
 import {
   AdminAlert,
   AdminBadge,
@@ -53,11 +62,22 @@ type Props = {
   initial: ArticleFormData;
   categories: Option[];
   tags: Option[];
+  /** Menentukan tab mana yang aktif di dialog pemilih gambar. */
+  mediaCapabilities: MediaCapabilities;
+  aiEnabled: boolean;
+  aiModel: string | null;
 };
 
 const AUTOSAVE_DELAY_MS = 4000;
 
-export default function ArticleForm({ initial, categories, tags }: Props) {
+export default function ArticleForm({
+  initial,
+  categories,
+  tags,
+  mediaCapabilities,
+  aiEnabled,
+  aiModel,
+}: Props) {
   const router = useRouter();
 
   const [form, setForm] = useState<ArticleFormData>(initial);
@@ -68,6 +88,13 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [showImagePicker, setShowImagePicker] = useState(false);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
+
+  // Permintaan penggantian isi editor dari AI Assist. Token yang naik adalah
+  // pemicunya, karena `LexicalComposer` tidak membaca ulang state awal.
+  const [applyRequest, setApplyRequest] = useState<EditorApplyRequest | null>(
+    null,
+  );
 
   // Ref agar timer autosave & handler membaca state terbaru tanpa jadi dependensi.
   // Penulisan ref dilakukan di effect (bukan saat render) sesuai aturan lint repo.
@@ -89,7 +116,10 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
         title: data.title,
         slug: data.slug || slugify(data.title),
         excerpt: data.excerpt,
-        content: data.content,
+        // Bangun kembali `fields` tautan gaya Payload sebelum menyimpan; editor
+        // Lexical hanya menulis `url` di level atas dan renderer publik membaca
+        // `fields.url`. Tanpa ini, href tautan hilang setiap kali menyimpan.
+        content: prepareStateForStorage(data.content),
         featuredImageId: data.featuredImageId,
         status,
         seoMetaTitle: data.seoMetaTitle,
@@ -214,6 +244,43 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
     setShowImagePicker(false);
   }, []);
 
+  /**
+   * Terapkan Lexical state dari AI Assist ke editor DAN ke state form.
+   *
+   * Keduanya perlu di-set: `applyRequest` mengganti isi editor yang sudah
+   * ter-mount, sementara `form.content` adalah yang benar-benar dikirim ke
+   * server saat disimpan. Tanpa yang kedua, penyimpanan sebelum penulis
+   * mengetik apa pun akan mengirim konten lama.
+   */
+  const applyAiContent = useCallback(
+    (state: unknown, meta: { topic: string }) => {
+      // Hasil AI memakai bentuk tautan Payload (fields.url), jadi harus
+      // dinaikkan dulu ke bentuk yang dimengerti LinkNode sebelum masuk editor.
+      setApplyRequest({
+        state: prepareStateForEditor(state),
+        token: Date.now(),
+      });
+      setForm((prev) => ({
+        ...prev,
+        content: state,
+        aiGenerated: true,
+        aiTopic: meta.topic || prev.aiTopic,
+      }));
+      setDirty(true);
+    },
+    [],
+  );
+
+  const applyAiTitle = useCallback((title: string) => {
+    setForm((prev) => ({
+      ...prev,
+      title,
+      // Slug hanya diisi bila penulis belum menentukannya sendiri.
+      slug: prev.slug || slugify(title),
+    }));
+    setDirty(true);
+  }, []);
+
   const clearFeaturedImage = useCallback(() => {
     setForm((prev) => ({
       ...prev,
@@ -254,7 +321,13 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4">
+    // Saat panel AI terbuka, sisakan ruang di kanan pada layar lebar agar panel
+    // tidak menutupi sidebar form. Di layar kecil panel memang menutupi penuh.
+    <div
+      className={`mx-auto max-w-6xl space-y-4 transition-[margin] duration-200 ${
+        aiPanelOpen ? "xl:mr-[456px]" : ""
+      }`}
+    >
       <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-admin-border bg-admin-surface px-4 py-3 shadow-admin-xs">
         <div className="flex items-center gap-3">
           <AdminButton variant="ghost" size="icon" asChild>
@@ -279,6 +352,14 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <AdminButton
+            variant="dark"
+            onClick={() => setAiPanelOpen((open) => !open)}
+            aria-expanded={aiPanelOpen}
+          >
+            <Sparkles className="h-4 w-4" />
+            AI Assist
+          </AdminButton>
           <AdminButton
             variant="secondary"
             onClick={() => void persist("draft", "manual")}
@@ -315,8 +396,13 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
           </div>
 
           <ArticleEditor
-            initialState={initial.content ?? createEmptyState()}
+            initialState={prepareStateForEditor(
+              initial.content ?? createEmptyState(),
+            )}
             onChange={handleEditorChange}
+            mediaCapabilities={mediaCapabilities}
+            mediaContext={form.title || form.aiTopic || undefined}
+            applyRequest={applyRequest}
           />
         </div>
 
@@ -513,8 +599,21 @@ export default function ArticleForm({ initial, categories, tags }: Props) {
 
       {showImagePicker ? (
         <MediaPickerDialog
+          capabilities={mediaCapabilities}
+          context={form.title || form.aiTopic || undefined}
           onClose={() => setShowImagePicker(false)}
           onPick={pickFeaturedImage}
+        />
+      ) : null}
+
+      {aiPanelOpen ? (
+        <AiAssistPanel
+          aiEnabled={aiEnabled}
+          aiModel={aiModel}
+          currentTitle={form.title}
+          onClose={() => setAiPanelOpen(false)}
+          onApplyTitle={applyAiTitle}
+          onApplyContent={applyAiContent}
         />
       ) : null}
     </div>

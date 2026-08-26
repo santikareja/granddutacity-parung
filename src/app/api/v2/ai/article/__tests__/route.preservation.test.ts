@@ -19,7 +19,7 @@
 //     dipakai <h2> (yang tidak berubah oleh sanitizeAiHtml). Untuk <h1> hanya
 //     TEKS-nya yang diasersi (tidak hilang; hanya level heading diselaraskan).
 //   - Path error tidak berubah: judul kosong → 400, outline kosong → 400,
-//     keluaran AI kosong → 502, provider null → 503.
+//     keluaran AI kosong → 502, provider belum terkonfigurasi → 503.
 //   - stripCodeFence() tetap membuang pembungkus ```html ... ```.
 //
 // _Requirements: 3.1, 3.2, 3.3, 3.4_
@@ -30,7 +30,7 @@ import {
   buildArticleRequest,
   mockAiHtml,
   resetAiArticleMocks,
-  resolveAiConfigWithModelMock,
+  resolveAiCandidatesMock,
   validArticleBody,
 } from "@/test/helpers/ai-article-mocks";
 
@@ -44,13 +44,19 @@ import {
 } from "@/test/helpers/ai-article-mocks";
 
 // Arahkan dependensi eksternal handler ke mock terkontrol.
-vi.mock("@/lib/ai/client", () => ({
-  chatCompletion: chatCompletionMock,
-}));
+// Timpa hanya `chatCompletion`; export lain (AiRequestError dll) tetap asli.
+vi.mock("@/lib/ai/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/ai/client")>();
+  return { ...actual, chatCompletion: chatCompletionMock };
+});
 
-vi.mock("@/lib/v2-admin/ai-runtime", () => ({
-  resolveAiConfigWithModel: resolveAiConfigWithModelMock,
-}));
+// Handler memakai rotasi model. Hanya penyusun kandidat yang di-mock (baca DB);
+// logika rotasinya sendiri dibiarkan asli.
+vi.mock("@/lib/v2-admin/ai-rotation", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/v2-admin/ai-rotation")>();
+  return { ...actual, resolveAiCandidates: resolveAiCandidatesMock };
+});
 
 vi.mock("@/lib/v2-auth/api-guard", async (importOriginal) => {
   const actual =
@@ -221,8 +227,10 @@ describe("Preservation — konten aman, `content`, dan alur normal tak berubah (
       expect(status).toBe(502);
     });
 
-    it("provider belum terkonfigurasi (resolveAiConfigWithModel null) → 503", async () => {
-      resolveAiConfigWithModelMock.mockResolvedValue(null);
+    it("provider belum terkonfigurasi (tidak ada kandidat model) → 503", async () => {
+      // Dengan rotasi model, "provider belum terkonfigurasi" berarti daftar
+      // kandidat kosong. Perilaku yang dikunci tetap sama: 503.
+      resolveAiCandidatesMock.mockResolvedValue([]);
       mockAiHtml("<p>tidak dipakai</p>");
       const response = await POST(buildArticleRequest(validArticleBody()));
       expect(response.status).toBe(503);

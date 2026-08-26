@@ -548,3 +548,67 @@ html.lenis body {
   pointer-events: none;
   user-select: none;
 }
+
+/* Heading level 5/6: bisa datang dari artikel warisan atau keluaran AI. */
+.gdc-editor__h5 { margin: 1rem 0 0.45rem; font-size: 0.96rem; font-weight: 700; }
+.gdc-editor__h6 {
+  margin: 1rem 0 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475467;
+}
+
+.gdc-editor__hr {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid #d0d5dd;
+}
+.gdc-editor__hr.selected {
+  outline: 2px solid #F5A524;
+  outline-offset: 2px;
+}
+
+/* Tabel di editor. Tanpa aturan ini tabel tampil tanpa garis sel sama sekali,
+   sehingga penulis tidak bisa melihat strukturnya. Bentuknya dijaga mendekati
+   tabel artikel publik (lihat .article-rich-content th/td di atas). */
+.gdc-editor__table {
+  margin: 1.25rem 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+.gdc-editor__tr { border: none; }
+.gdc-editor__td,
+.gdc-editor__th {
+  border: 1px solid #d0d5dd;
+  padding: 0.5rem 0.65rem;
+  vertical-align: top;
+  text-align: left;
+  min-width: 90px;
+  position: relative;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.gdc-editor__th {
+  background: #f9fafb;
+  font-weight: 700;
+}
+.gdc-editor__table-selected { outline: 2px solid #F5A524; }
+.gdc-editor__td-selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(245, 165, 36, 0.14);
+  pointer-events: none;
+}
+
+/* Paragraf di dalam sel tidak boleh mewarisi margin bawah paragraf biasa,
+   kalau tidak setiap sel jadi terlalu tinggi. */
+.gdc-editor__td .gdc-editor__p,
+.gdc-editor__th .gdc-editor__p {
+  margin: 0;
+}

@@ -14,10 +14,22 @@ export class AiDisabledError extends Error {
 
 export class AiRequestError extends Error {
   status: number;
-  constructor(message: string, status = 502) {
+  /**
+   * Apakah kegagalan ini pantas dicoba ulang pada model/provider LAIN.
+   *
+   * Hampir semua kegagalan provider bersifat spesifik-model atau
+   * spesifik-provider (timeout, rate limit, model tidak dikenal, context
+   * terlalu panjang, response_format tidak didukung, kunci API tidak valid),
+   * jadi default-nya true. Yang TIDAK pantas dirotasi hanyalah kondisi
+   * "tidak ada konfigurasi sama sekali" (AiDisabledError).
+   */
+  retryable: boolean;
+
+  constructor(message: string, status = 502, retryable = true) {
     super(message);
     this.name = "AiRequestError";
     this.status = status;
+    this.retryable = retryable;
   }
 }
 
@@ -34,6 +46,12 @@ type ChatCompletionOptions = {
   /** Minta provider mengembalikan JSON object bila didukung. */
   responseFormatJson?: boolean;
   signal?: AbortSignal;
+  /**
+   * Batas waktu SATU panggilan. Wajib diisi oleh pemanggil yang memakai rotasi
+   * model, agar satu model yang menggantung tidak menghabiskan seluruh
+   * anggaran waktu request.
+   */
+  timeoutMs?: number;
 };
 
 type ChatCompletionResponse = {
@@ -42,9 +60,10 @@ type ChatCompletionResponse = {
   }>;
 };
 
-// Timeout longgar (5 menit): generasi artikel panjang bisa lama. Tidak ada
-// timeout buatan yang lebih pendek — hanya kegagalan/timeout jaringan yang
-// menghentikan panggilan.
+// Timeout longgar (5 menit) HANYA sebagai jaring terakhir bila pemanggil tidak
+// menentukan timeoutMs. Pemanggil yang memakai rotasi model (lihat
+// src/lib/v2-admin/ai-rotation.ts) selalu memberi batas per percobaan yang jauh
+// lebih pendek supaya masih ada waktu mencoba model berikutnya.
 const DEFAULT_TIMEOUT_MS = 300_000;
 
 export const chatCompletion = async ({
@@ -54,13 +73,24 @@ export const chatCompletion = async ({
   maxTokens,
   responseFormatJson = false,
   signal,
+  timeoutMs,
 }: ChatCompletionOptions): Promise<string> => {
   if (!config || !config.baseUrl || !config.apiKey || !config.model) {
     throw new AiDisabledError();
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+  const effectiveTimeout =
+    typeof timeoutMs === "number" && timeoutMs > 0
+      ? timeoutMs
+      : DEFAULT_TIMEOUT_MS;
+  // Bedakan timeout kita sendiri dari abort eksternal, supaya pesan errornya
+  // menyebut penyebab yang benar.
+  let timedOut = false;
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, effectiveTimeout);
 
   // Gabungkan abort eksternal (mis. dari req) dengan timeout internal.
   if (signal) {
@@ -111,7 +141,18 @@ export const chatCompletion = async ({
       throw error;
     }
     if (error instanceof Error && error.name === "AbortError") {
-      throw new AiRequestError("Permintaan ke provider AI timeout/dibatalkan.", 504);
+      if (timedOut) {
+        throw new AiRequestError(
+          `Model "${config.model}" tidak merespons dalam ${Math.round(effectiveTimeout / 1000)} detik.`,
+          504,
+        );
+      }
+      // Dibatalkan dari luar (mis. klien memutus koneksi): jangan rotasi.
+      throw new AiRequestError(
+        "Permintaan ke provider AI dibatalkan.",
+        499,
+        false,
+      );
     }
     throw new AiRequestError(
       error instanceof Error ? error.message : "Gagal memanggil provider AI.",

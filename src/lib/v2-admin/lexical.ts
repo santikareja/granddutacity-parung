@@ -136,6 +136,197 @@ export const ensureCta = (state: unknown): unknown => {
   };
 };
 
+// --- Kompatibilitas node `link` Payload <-> Lexical -------------------------
+//
+// MASALAH: korpus artikel ini (dan buildCtaParagraph di atas) menyimpan tautan
+// dalam bentuk Payload: `{ type: "link", fields: { linkType, newTab, url } }`.
+// Sementara `LinkNode` bawaan @lexical/link memakai `SerializedLinkNode` yang
+// hanya mengenal `{ url, target, rel, title }` di level atas dan MEMBUANG key
+// yang tidak dikenalnya saat exportJSON.
+//
+// Akibatnya, tanpa penyesuaian: buka artikel di editor → LinkNode memuat url
+// kosong (karena membaca `serialized.url` yang tidak ada) → simpan → `fields`
+// hilang dan seluruh href tautan artikel yang sudah tayang menjadi kosong,
+// termasuk backlink CTA wajib ke homepage.
+//
+// Solusi: transformasi di dua batas. Tidak menyentuh internal Lexical sama
+// sekali, sehingga aman dan bisa diuji sebagai fungsi murni.
+
+const LINK_TYPES = new Set(["link", "autolink"]);
+
+const mapNodes = (
+  nodes: LexNode[],
+  transform: (node: LexNode) => LexNode,
+): LexNode[] => nodes.map(transform);
+
+const transformTree = (
+  node: LexNode,
+  visit: (node: LexNode) => LexNode,
+): LexNode => {
+  const visited = visit(node);
+  if (!Array.isArray(visited.children)) return visited;
+  return {
+    ...visited,
+    children: mapNodes(visited.children, (child) => transformTree(child, visit)),
+  };
+};
+
+const transformState = (
+  state: unknown,
+  visit: (node: LexNode) => LexNode,
+): unknown => {
+  if (!state || typeof state !== "object" || !("root" in state)) return state;
+  const root = (state as { root?: { children?: LexNode[] } }).root;
+  if (!root || !Array.isArray(root.children)) return state;
+
+  return {
+    ...(state as Record<string, unknown>),
+    root: {
+      ...root,
+      children: mapNodes(root.children, (child) => transformTree(child, visit)),
+    },
+  };
+};
+
+/**
+ * Siapkan state dari database untuk dimuat editor Lexical.
+ *
+ * Menaikkan `fields.url` menjadi `url`/`target`/`rel` di level atas agar
+ * `LinkNode` bawaan membacanya dengan benar. `fields` tetap dibawa (tidak
+ * merugikan; Lexical mengabaikannya).
+ */
+export const prepareStateForEditor = (state: unknown): unknown =>
+  transformState(state, (node) => {
+    if (!node.type || !LINK_TYPES.has(node.type)) return node;
+
+    const fields = (node.fields ?? {}) as {
+      url?: unknown;
+      newTab?: unknown;
+      linkType?: unknown;
+    };
+    const fieldUrl = typeof fields.url === "string" ? fields.url : "";
+    const existingUrl = typeof node.url === "string" ? node.url : "";
+    const url = existingUrl || fieldUrl;
+    if (!url) return node;
+
+    const newTab =
+      fields.newTab === true ||
+      node.target === "_blank" ||
+      node.newTab === true;
+
+    return {
+      ...node,
+      url,
+      target: newTab ? "_blank" : null,
+      rel: newTab ? "noopener noreferrer" : null,
+    };
+  });
+
+/**
+ * Siapkan state dari editor untuk disimpan ke database.
+ *
+ * Membangun kembali `fields` gaya Payload dari `url`/`target` level atas, karena
+ * itulah yang dibaca renderer publik (lexical-renderer.tsx membaca
+ * `node.fields.url`). Node yang sudah punya `fields.url` dibiarkan apa adanya.
+ */
+export const prepareStateForStorage = (state: unknown): unknown =>
+  transformState(state, (node) => {
+    if (!node.type || !LINK_TYPES.has(node.type)) return node;
+
+    const fields = (node.fields ?? {}) as {
+      url?: unknown;
+      newTab?: unknown;
+      linkType?: unknown;
+    };
+    const topUrl = typeof node.url === "string" ? node.url : "";
+    const fieldUrl = typeof fields.url === "string" ? fields.url : "";
+
+    // Prioritaskan url dari editor: itu yang mencerminkan hasil penyuntingan.
+    const url = topUrl || fieldUrl;
+    if (!url) return node;
+
+    const newTab = node.target === "_blank" || fields.newTab === true;
+    const linkType =
+      typeof fields.linkType === "string" && fields.linkType
+        ? fields.linkType
+        : "custom";
+
+    return {
+      ...node,
+      fields: { ...fields, linkType, newTab, url },
+    };
+  });
+
+export type OutlineSectionInput = {
+  heading: string;
+  subheadings?: string[];
+};
+
+const headingNode = (tag: "h2" | "h3", text: string): LexNode => ({
+  type: "heading",
+  tag,
+  format: "",
+  indent: 0,
+  version: 1,
+  direction: "ltr",
+  children: [textNode(text)],
+});
+
+const emptyParagraph = (): LexNode => ({
+  type: "paragraph",
+  format: "",
+  indent: 0,
+  version: 1,
+  direction: "ltr",
+  textFormat: 0,
+  textStyle: "",
+  children: [],
+});
+
+/**
+ * Ubah outline (hasil AI, sudah disetujui penulis) menjadi Lexical state.
+ *
+ * Sengaja TIDAK memakai htmlToLexicalState: fungsi itu bergantung pada jsdom
+ * sehingga hanya bisa jalan di server, sedangkan panel AI Assist menerapkan
+ * outline ke editor langsung dari browser.
+ *
+ * Setiap heading diikuti paragraf kosong agar penulis punya tempat mengisi isi
+ * tiap bagian.
+ */
+export const outlineToLexicalState = (
+  sections: OutlineSectionInput[],
+): LexicalState => {
+  const children: LexNode[] = [];
+
+  for (const section of sections) {
+    const heading = section.heading?.trim();
+    if (!heading) continue;
+
+    children.push(headingNode("h2", heading));
+    children.push(emptyParagraph());
+
+    for (const sub of section.subheadings ?? []) {
+      const subHeading = sub?.trim();
+      if (!subHeading) continue;
+      children.push(headingNode("h3", subHeading));
+      children.push(emptyParagraph());
+    }
+  }
+
+  if (children.length === 0) children.push(emptyParagraph());
+
+  return {
+    root: {
+      type: "root",
+      format: "",
+      indent: 0,
+      version: 1,
+      direction: "ltr",
+      children,
+    },
+  };
+};
+
 // Ambil ID media dari node upload pertama (untuk auto featured image).
 export const findFirstUploadMediaId = (
   node: LexNode | null | undefined,

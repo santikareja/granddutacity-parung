@@ -20,7 +20,7 @@ import {
   mockAiHtml,
   requireApiUserMock,
   resetAiArticleMocks,
-  resolveAiConfigWithModelMock,
+  resolveAiCandidatesMock,
   validArticleBody,
 } from "@/test/helpers/ai-article-mocks";
 
@@ -29,13 +29,19 @@ import { htmlToLexicalState } from "@/lib/v2-admin/html-to-lexical";
 import { ensureCta } from "@/lib/v2-admin/lexical";
 import { sanitizeAiHtml } from "@/lib/ai/sanitize-html";
 
-vi.mock("@/lib/ai/client", () => ({
-  chatCompletion: chatCompletionMock,
-}));
+// Timpa hanya `chatCompletion`; export lain (AiRequestError dll) tetap asli.
+vi.mock("@/lib/ai/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/ai/client")>();
+  return { ...actual, chatCompletion: chatCompletionMock };
+});
 
-vi.mock("@/lib/v2-admin/ai-runtime", () => ({
-  resolveAiConfigWithModel: resolveAiConfigWithModelMock,
-}));
+// Handler memakai rotasi model. Hanya penyusun kandidat yang di-mock (baca DB);
+// logika rotasinya sendiri dibiarkan asli.
+vi.mock("@/lib/v2-admin/ai-rotation", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/v2-admin/ai-rotation")>();
+  return { ...actual, resolveAiCandidates: resolveAiCandidatesMock };
+});
 
 vi.mock("@/lib/v2-auth/api-guard", async (importOriginal) => {
   const actual =

@@ -5,6 +5,9 @@ import {
   listCategories,
   listTags,
 } from "@/lib/v2-admin/articles";
+import { resolveAiConfig } from "@/lib/v2-admin/ai-runtime";
+import { hasCloudinaryConfig } from "@/lib/v2-admin/media-upload";
+import { hasPexels, hasUnsplash } from "@/lib/v2-admin/stock-photos";
 import ArticleForm, { type ArticleFormData } from "../article-form";
 
 export const runtime = "nodejs";
@@ -21,10 +24,12 @@ export default async function EditArticlePage({
   const id = Number(rawId);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const [article, categories, tags] = await Promise.all([
+  const [article, categories, tags, aiConfig] = await Promise.all([
     getArticleById(id),
     listCategories().catch(() => []),
     listTags().catch(() => []),
+    // Kegagalan resolusi AI tidak boleh menggagalkan halaman editor.
+    resolveAiConfig().catch(() => null),
   ]);
 
   if (!article) notFound();
@@ -47,5 +52,17 @@ export default async function EditArticlePage({
     aiTopic: article.aiTopic,
   };
 
-  return <ArticleForm initial={initial} categories={categories} tags={tags} />;
+  return (
+    <ArticleForm
+      initial={initial}
+      categories={categories}
+      tags={tags}
+      mediaCapabilities={{
+        cloudinaryReady: hasCloudinaryConfig(),
+        stockProviders: { unsplash: hasUnsplash(), pexels: hasPexels() },
+      }}
+      aiEnabled={aiConfig !== null}
+      aiModel={aiConfig?.model ?? null}
+    />
+  );
 }

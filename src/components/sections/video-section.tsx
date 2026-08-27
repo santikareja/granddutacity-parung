@@ -39,7 +39,7 @@ export function VideoSection() {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-8 md:px-14 relative z-10">
         
         {/* Section Header */}
-        <Reveal className="text-center mb-6 sm:mb-14 flex flex-col items-center">
+        <Reveal className="text-center mb-4 sm:mb-8 flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] mb-4 sm:mb-6 w-max">
             <Play className="w-3 h-3 text-[#D49A3D]" />
             <span>Video Kawasan</span>
@@ -52,31 +52,10 @@ export function VideoSection() {
             Video Kawasan Grand Duta City Parung
           </h2>
 
-          <p className="max-w-2xl text-[#090D0A]/70 text-xs sm:text-base font-normal leading-[1.8] mb-0 sm:mb-8">
-            Jelajahi keindahan dan fasilitas premium Grand Duta City Parung melalui video kawasan. 
-            Lihat langsung keindahannya langsung dari rumah Anda dan rasakan pengalaman mewah di area hunian terbesar Parung, 
-            South of Jakarta dengan fasilitas kota mandiri 200 Ha.
-          </p>
-
-          {/* Video Stats — disembunyikan di mobile agar video langsung di bawah sub-heading */}
-          <div className="hidden sm:flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[9px] sm:text-[11px] text-[#090D0A]/60 font-sans font-semibold tracking-wider">
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[#D49A3D]" />
-              <span>3 Menit Tour</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-[#D49A3D]" />
-              <span>Virtual HD</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Play className="w-3.5 h-3.5 text-[#D49A3D]" />
-              <span>Aerial View</span>
-            </div>
-          </div>
         </Reveal>
 
-        {/* Video Container — full-bleed on mobile (negatif margin sebesar padding container agar mentok tepi tanpa overflow) */}
-        <Reveal delay={120} className="relative w-full max-w-4xl -mx-4 sm:mx-auto">
+        {/* Video Container — full-bleed di mobile (100vw dipusatkan ke viewport agar mentok kiri-kanan, section overflow-hidden mencegah scroll) */}
+        <Reveal delay={120} className="relative left-1/2 w-screen -translate-x-1/2 sm:left-auto sm:w-full sm:max-w-4xl sm:translate-x-0 sm:mx-auto">
           {/* Video Wrapper with Premium Frame */}
           <div className="relative overflow-hidden bg-[#090D0A]/5 border-y border-[#090D0A]/10 sm:rounded-[2rem] sm:border sm:shadow-[0_25px_60px_rgba(9,13,10,0.12)] sm:p-2">
             
@@ -116,13 +95,14 @@ export function VideoSection() {
                     {/* Dark overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#090D0A]/60 via-[#090D0A]/20 to-transparent" />
 
-                    {/* Center play button */}
+                    {/* Center play button — modern glass */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/95 flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.3)] group-hover/play:scale-110 group-hover/play:bg-white transition-all duration-300">
-                        <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 sm:w-8 sm:h-8 ml-1 text-[#FF0000]">
-                          <path d="M8 5.14v14.72a1 1 0 001.5.86l11.4-7.36a1 1 0 000-1.72L9.5 4.28a1 1 0 00-1.5.86z" fill="currentColor" />
-                        </svg>
-                      </div>
+                      <span className="relative flex items-center justify-center">
+                        <span className="absolute h-[4.5rem] w-[4.5rem] sm:h-24 sm:w-24 rounded-full bg-white/25 animate-ping [animation-duration:2.8s]" />
+                        <span className="relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full border border-white/40 bg-white/15 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-white/25">
+                          <Play className="h-6 w-6 sm:h-7 sm:w-7 translate-x-[1px] fill-white text-white" />
+                        </span>
+                      </span>
                     </div>
 
                     {/* "Tap to play" hint on mobile */}
@@ -138,6 +118,30 @@ export function VideoSection() {
             </div>
           </div>
           
+        </Reveal>
+
+        {/* Deskripsi di bawah video */}
+        <Reveal delay={160} className="text-center mt-6 sm:mt-10 flex flex-col items-center">
+          <p className="max-w-2xl text-[#090D0A]/70 text-xs sm:text-base font-normal leading-[1.8]">
+            Jelajahi keindahan dan fasilitas premium Grand Duta City Parung melalui video kawasan.
+            Lihat langsung keindahannya langsung dari rumah Anda dan rasakan pengalaman mewah di area hunian terbesar Parung,
+            South of Jakarta dengan fasilitas kota mandiri 200 Ha.
+          </p>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[9px] sm:text-[11px] text-[#090D0A]/60 font-sans font-semibold tracking-wider">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#D49A3D]" />
+              <span>3 Menit Tour</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-[#D49A3D]" />
+              <span>Virtual HD</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Play className="w-3.5 h-3.5 text-[#D49A3D]" />
+              <span>Aerial View</span>
+            </div>
+          </div>
         </Reveal>
 
         {/* Call to Action */}

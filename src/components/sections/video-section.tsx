@@ -42,7 +42,7 @@ export function VideoSection() {
         <Reveal className="text-center mb-4 sm:mb-8 flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] mb-4 sm:mb-6 w-max">
             <Play className="w-3 h-3 text-[#D49A3D]" />
-            <span>Video Kawasan</span>
+            <span>GDC Parung</span>
           </div>
 
           <h2 
@@ -95,13 +95,10 @@ export function VideoSection() {
                     {/* Dark overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#090D0A]/60 via-[#090D0A]/20 to-transparent" />
 
-                    {/* Center play button — red circle, white triangle */}
+                    {/* Center play button — red circle, white triangle (statis, tanpa animasi) */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="relative flex items-center justify-center">
-                        <span className="absolute h-[4.5rem] w-[4.5rem] sm:h-24 sm:w-24 rounded-full bg-[#FF0000]/30 animate-ping [animation-duration:2.8s]" />
-                        <span className="relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-[#FF0000] shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-[#e60000]">
-                          <Play className="h-6 w-6 sm:h-7 sm:w-7 translate-x-[1px] fill-white text-white" />
-                        </span>
+                      <span className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-[#FF0000] shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+                        <Play className="h-6 w-6 sm:h-7 sm:w-7 translate-x-[1px] fill-white text-white" />
                       </span>
                     </div>
 

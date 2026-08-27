@@ -39,7 +39,7 @@ export function VideoSection() {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-8 md:px-14 relative z-10">
         
         {/* Section Header */}
-        <Reveal className="text-center mb-8 sm:mb-14 flex flex-col items-center">
+        <Reveal className="text-center mb-6 sm:mb-14 flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[9px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] mb-4 sm:mb-6 w-max">
             <Play className="w-3 h-3 text-[#D49A3D]" />
             <span>Video Kawasan</span>
@@ -52,14 +52,14 @@ export function VideoSection() {
             Video Kawasan Grand Duta City Parung
           </h2>
 
-          <p className="max-w-2xl text-[#090D0A]/70 text-xs sm:text-base font-normal leading-[1.8] mb-6 sm:mb-8">
+          <p className="max-w-2xl text-[#090D0A]/70 text-xs sm:text-base font-normal leading-[1.8] mb-0 sm:mb-8">
             Jelajahi keindahan dan fasilitas premium Grand Duta City Parung melalui video kawasan. 
             Lihat langsung keindahannya langsung dari rumah Anda dan rasakan pengalaman mewah di area hunian terbesar Parung, 
             South of Jakarta dengan fasilitas kota mandiri 200 Ha.
           </p>
 
-          {/* Video Stats */}
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[9px] sm:text-[11px] text-[#090D0A]/60 font-sans font-semibold tracking-wider">
+          {/* Video Stats — hidden on mobile to move video closer */}
+          <div className="hidden sm:flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[9px] sm:text-[11px] text-[#090D0A]/60 font-sans font-semibold tracking-wider">
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-[#D49A3D]" />
               <span>3 Menit Tour</span>
@@ -76,12 +76,12 @@ export function VideoSection() {
         </Reveal>
 
         {/* Video Container */}
-        <Reveal delay={120} className="relative w-full max-w-4xl mx-auto">
-          {/* Video Wrapper with Premium Frame */}
-          <div className="relative rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden bg-[#090D0A]/5 border border-[#090D0A]/10 shadow-[0_25px_60px_rgba(9,13,10,0.12)] p-1.5 sm:p-2">
+        <Reveal delay={120} className="relative w-full max-w-4xl mx-auto -mx-4 sm:mx-auto">
+          {/* Video Wrapper with Premium Frame — full-bleed on mobile */}
+          <div className="relative overflow-hidden bg-[#090D0A]/5 border-y border-[#090D0A]/10 sm:border sm:rounded-[2rem] sm:shadow-[0_25px_60px_rgba(9,13,10,0.12)] sm:p-2">
             
             {/* Inner Container */}
-            <div className="relative w-full rounded-[calc(1.5rem-0.375rem)] sm:rounded-[calc(2rem-0.5rem)] overflow-hidden bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
+            <div className="relative w-full overflow-hidden bg-white sm:rounded-[calc(2rem-0.5rem)] sm:shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
               
               {/* YouTube Facade → loads iframe only on click */}
               <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
@@ -91,23 +91,21 @@ export function VideoSection() {
                     title={VIDEO_TITLE}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
-                    className="absolute inset-0 w-full h-full rounded-[calc(1.5rem-0.375rem)] sm:rounded-[calc(2rem-0.5rem)] border-0"
+                    className="absolute inset-0 w-full h-full sm:rounded-[calc(2rem-0.5rem)] border-0"
                   />
                 ) : (
                   <button
                     type="button"
                     aria-label={`Putar video: ${VIDEO_TITLE}`}
                     onClick={handlePlay}
-                    className="absolute inset-0 w-full h-full cursor-pointer group/play bg-[#090D0A] rounded-[calc(1.5rem-0.375rem)] sm:rounded-[calc(2rem-0.5rem)] overflow-hidden border-0 p-0"
+                    className="absolute inset-0 w-full h-full cursor-pointer group/play bg-[#090D0A] sm:rounded-[calc(2rem-0.5rem)] overflow-hidden border-0 p-0"
                   >
-                    {/* YouTube Thumbnail — via next/image: WebP responsif + cache panjang dari origin sendiri,
-                        bukan JPEG 1280x720 dari i.ytimg.com yang TTL-nya hanya 2 jam. */}
                     <Image
                       src={thumbnailUrl}
                       alt={VIDEO_TITLE}
                       width={480}
                       height={360}
-                      sizes="(max-width: 960px) calc(100vw - 2rem), 896px"
+                      sizes="(max-width: 960px) 100vw, 896px"
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover opacity-85 group-hover/play:opacity-100 transition-opacity duration-300"
@@ -134,15 +132,7 @@ export function VideoSection() {
               </div>
 
               {/* Overlay Gradient for Visual Enhancement */}
-              <div className="absolute inset-0 pointer-events-none rounded-[calc(1.5rem-0.375rem)] sm:rounded-[calc(2rem-0.5rem)] bg-gradient-to-t from-transparent via-transparent to-[#090D0A]/5" />
-            </div>
-
-            {/* Floating Play Button Enhancement (when not playing) */}
-            <div className="absolute top-4 right-4 z-10">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#090D0A]/90 lg:bg-[#090D0A]/80 lg:backdrop-blur-sm border border-white/15 text-white text-[10px] tracking-widest font-sans font-medium shadow-lg">
-                <Play className="w-3 h-3" />
-                <span>YOUTUBE</span>
-              </div>
+              <div className="absolute inset-0 pointer-events-none sm:rounded-[calc(2rem-0.5rem)] bg-gradient-to-t from-transparent via-transparent to-[#090D0A]/5" />
             </div>
           </div>
           

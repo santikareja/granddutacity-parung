@@ -684,7 +684,7 @@ export default function PricelistPage() {
             {/* H1 — unique, no cannibalisation with homepage/cluster pages */}
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#F5F1E8] mb-5 drop-shadow-xl">
               Pricelist Grand Duta City SOJ Parung Bogor<br />
-              <span className="italic font-normal text-[#F5A524]">| Harga Ladera & Cascada Terbaru.</span>
+              <span className="block mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl italic font-normal text-[#F5A524]">| Harga Ladera & Cascada Terbaru.</span>
             </h1>
             <p className="text-[#F5F1E8]/80 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed">
               Pricelist{" "}

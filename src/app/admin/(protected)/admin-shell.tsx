@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -19,9 +19,15 @@ import {
   ExternalLink,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   X,
   type LucideIcon,
 } from "lucide-react";
+
+// Preferensi lipat sidebar disimpan agar penulis tidak perlu mengaturnya ulang
+// setiap kali membuka panel.
+const COLLAPSE_KEY = "gdc-admin-sidebar-collapsed";
 
 type NavItem = {
   href: string;
@@ -88,6 +94,25 @@ export default function AdminShell({ children, user }: AdminShellProps) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  // Dibaca setelah mount, bukan saat render, agar HTML server dan klien identik.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage hanya ada di browser; membacanya saat render akan memecah hidrasi
+    setCollapsed(window.localStorage.getItem(COLLAPSE_KEY) === "1");
+  }, []);
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+      } catch {
+        // Mode privat/kuota penuh: cukup jangan simpan, jangan gagalkan UI.
+      }
+      return next;
+    });
+  }, []);
 
   const signOut = useCallback(async () => {
     setSigningOut(true);
@@ -125,23 +150,35 @@ export default function AdminShell({ children, user }: AdminShellProps) {
 
   const initial = (user.name || user.email).charAt(0).toUpperCase();
 
-  const sidebarContent = (
+  // Mode lipat hanya berlaku pada layar md ke atas. Di mobile sidebar tampil
+  // sebagai drawer penuh, jadi melipatnya tidak ada gunanya.
+  const renderSidebar = (iconOnly: boolean) => (
     <>
-      <div className="flex items-center gap-3 border-b border-admin-border px-5 py-5">
+      <div
+        className={`flex items-center border-b border-admin-border py-5 ${
+          iconOnly ? "justify-center px-3" : "gap-3 px-5"
+        }`}
+      >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-admin-accent text-sm font-bold text-admin-accent-fg">
           GD
         </div>
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-admin-accent">
-            CMS Studio
-          </p>
-          <h1 className="truncate text-sm font-semibold leading-tight text-admin-fg">
-            Grand Duta City Parung
-          </h1>
-        </div>
+        {iconOnly ? null : (
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-admin-accent">
+              CMS Studio
+            </p>
+            <h1 className="truncate text-sm font-semibold leading-tight text-admin-fg">
+              Grand Duta City Parung
+            </h1>
+          </div>
+        )}
       </div>
 
-      <nav className="admin-scrollbar flex-1 space-y-5 overflow-y-auto p-4">
+      <nav
+        className={`admin-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto ${
+          iconOnly ? "px-2 py-4" : "p-4"
+        }`}
+      >
         {NAV_GROUPS.map((group) => {
           const items = group.items.filter(
             (item) => !item.adminOnly || user.role === "admin",
@@ -150,9 +187,15 @@ export default function AdminShell({ children, user }: AdminShellProps) {
 
           return (
             <div key={group.label}>
-              <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-admin-fg-dim">
-                {group.label}
-              </p>
+              {iconOnly ? (
+                // Garis pemisah menggantikan label grup agar pengelompokan
+                // tetap terbaca tanpa teks.
+                <div className="mx-2 mb-2 h-px bg-admin-border" />
+              ) : (
+                <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-admin-fg-dim">
+                  {group.label}
+                </p>
+              )}
               <div className="space-y-0.5">
                 {items.map((item) => {
                   const Icon = item.icon;
@@ -163,14 +206,24 @@ export default function AdminShell({ children, user }: AdminShellProps) {
                       href={item.href}
                       onClick={() => setMobileNavOpen(false)}
                       aria-current={active ? "page" : undefined}
-                      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition ${
+                      // title dipakai sebagai tooltip saat teksnya disembunyikan.
+                      title={iconOnly ? item.label : undefined}
+                      className={`flex items-center rounded-lg text-sm transition ${
+                        iconOnly
+                          ? "justify-center px-2 py-2.5"
+                          : "gap-2.5 px-3 py-2"
+                      } ${
                         active
                           ? "bg-admin-accent-soft font-semibold text-admin-accent-soft-fg"
                           : "text-admin-fg-muted hover:bg-admin-surface-hover hover:text-admin-fg"
                       }`}
                     >
                       <Icon className="h-4 w-4 shrink-0" strokeWidth={2} />
-                      <span className="truncate">{item.label}</span>
+                      {iconOnly ? (
+                        <span className="sr-only">{item.label}</span>
+                      ) : (
+                        <span className="truncate">{item.label}</span>
+                      )}
                     </Link>
                   );
                 })}
@@ -180,22 +233,42 @@ export default function AdminShell({ children, user }: AdminShellProps) {
         })}
       </nav>
 
-      <div className="border-t border-admin-border p-4">
+      <div className={`border-t border-admin-border ${iconOnly ? "p-2" : "p-4"}`}>
         <a
           href="https://granddutacitysouthofjakarta.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-admin-fg-muted transition hover:bg-admin-surface-hover hover:text-admin-fg"
+          title={iconOnly ? "Lihat Website" : undefined}
+          className={`flex items-center rounded-lg text-sm text-admin-fg-muted transition hover:bg-admin-surface-hover hover:text-admin-fg ${
+            iconOnly ? "justify-center px-2 py-2.5" : "gap-2.5 px-3 py-2"
+          }`}
         >
           <ExternalLink className="h-4 w-4 shrink-0" strokeWidth={2} />
-          <span>Lihat Website</span>
+          {iconOnly ? (
+            <span className="sr-only">Lihat Website</span>
+          ) : (
+            <span>Lihat Website</span>
+          )}
         </a>
       </div>
     </>
   );
 
   return (
-    <div className="flex min-h-screen bg-admin-bg text-admin-fg">
+    // h-dvh + overflow-hidden DISENGAJA.
+    //
+    // Sebelumnya di sini `min-h-screen`, sementara area konten memakai
+    // `overflow-auto`. Kombinasi itu merusak `position: sticky` di dalam konten:
+    // `overflow-auto` menjadikan div konten sebagai sticky root, tetapi karena
+    // tingginya tidak pernah dibatasi (induk hanya min-height) div itu tidak
+    // pernah menggulir — yang menggulir adalah dokumen. Akibatnya toolbar editor
+    // ber-`sticky top-0` ikut hanyut ke atas dan tampak "tidak sticky".
+    //
+    // Dengan tinggi viewport yang tegas, div konten benar-benar menjadi
+    // kontainer scroll, sehingga sticky di dalamnya bekerja. Sidebar dan topbar
+    // juga tetap di tempat pada halaman yang panjang. `dvh` dipakai agar aman
+    // terhadap bilah alamat browser mobile.
+    <div className="flex h-dvh overflow-hidden bg-admin-bg text-admin-fg">
       {/* Overlay mobile: menutup nav saat area gelap disentuh. */}
       {mobileNavOpen ? (
         <button
@@ -206,16 +279,26 @@ export default function AdminShell({ children, user }: AdminShellProps) {
         />
       ) : null}
 
+      {/* Drawer mobile: selalu lebar penuh, tidak terpengaruh mode lipat. */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-admin-border bg-admin-surface transition-transform duration-200 md:static md:w-64 md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-admin-border bg-admin-surface transition-transform duration-200 md:hidden ${
           mobileNavOpen ? "translate-x-0" : ""
         }`}
       >
-        {sidebarContent}
+        {renderSidebar(false)}
+      </aside>
+
+      {/* Sidebar desktop: bisa dilipat menjadi ikon saja. */}
+      <aside
+        className={`hidden shrink-0 flex-col border-r border-admin-border bg-admin-surface transition-[width] duration-200 md:flex ${
+          collapsed ? "w-[68px]" : "w-64"
+        }`}
+      >
+        {renderSidebar(collapsed)}
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="admin-glass sticky top-0 z-20 flex h-16 items-center justify-between px-4 md:px-6">
+        <header className="admin-glass z-20 flex h-16 shrink-0 items-center justify-between px-4 md:px-6">
           <button
             type="button"
             onClick={() => setMobileNavOpen((prev) => !prev)}
@@ -226,6 +309,21 @@ export default function AdminShell({ children, user }: AdminShellProps) {
               <X className="h-4.5 w-4.5" />
             ) : (
               <Menu className="h-4.5 w-4.5" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            className="hidden h-9 w-9 items-center justify-center rounded-lg border border-admin-border text-admin-fg-muted transition hover:bg-admin-surface-hover hover:text-admin-fg md:flex"
+            aria-label={collapsed ? "Perluas sidebar" : "Lipat sidebar"}
+            title={collapsed ? "Perluas sidebar" : "Lipat sidebar"}
+            aria-pressed={collapsed}
+          >
+            {collapsed ? (
+              <PanelLeftOpen className="h-4.5 w-4.5" />
+            ) : (
+              <PanelLeftClose className="h-4.5 w-4.5" />
             )}
           </button>
 
@@ -255,7 +353,15 @@ export default function AdminShell({ children, user }: AdminShellProps) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-4 md:p-8">{children}</div>
+        {/* min-h-0 wajib: tanpa itu, flex item menolak menyusut di bawah tinggi
+            kontennya dan overflow-y-auto tidak akan pernah menggulir.
+            Padding sengaja dipindah ke wrapper DALAM, bukan di kontainer scroll:
+            offset `sticky top-0` dihitung dari padding box scrollport, jadi
+            padding di sini akan menyisakan celah tempat konten menyembul di atas
+            toolbar editor yang sedang menempel. */}
+        <div className="admin-scrollbar min-h-0 flex-1 overflow-y-auto">
+          <div className="p-4 md:p-8">{children}</div>
+        </div>
       </div>
     </div>
   );

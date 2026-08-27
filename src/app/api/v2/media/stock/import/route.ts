@@ -141,6 +141,15 @@ export async function POST(request: Request) {
       }
     }
 
+    // Atribusi disusun di sini, BUKAN diminta ke AI: nama fotografer adalah
+    // fakta yang datang dari penyedia foto, jadi tidak boleh ada peluang model
+    // mengarangnya. Lisensi Unsplash/Pexels juga mewajibkan kredit yang benar.
+    const providerLabel = provider === "unsplash" ? "Unsplash" : "Pexels";
+    const credit = author
+      ? `Foto: ${author} / ${providerLabel}`
+      : `Foto: ${providerLabel}`;
+    caption = caption ? `${caption} · ${credit}` : credit;
+
     const ext = mimeType.includes("png") ? "png" : "jpg";
     const result = await uploadMedia({
       buffer,

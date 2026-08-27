@@ -305,7 +305,9 @@ export default function AiAssistPanel({
 
   return (
     <aside
-      className="admin-modal-panel fixed inset-y-0 right-0 z-40 flex w-full max-w-[440px] flex-col border-l border-admin-border bg-admin-surface shadow-admin-lg"
+      // Lebar ditahan 340px (turun dari 440px): panel ini hanya berisi kontrol,
+      // sedangkan area yang benar-benar butuh ruang adalah editor teks.
+      className="admin-modal-panel fixed inset-y-0 right-0 z-40 flex w-full max-w-[340px] flex-col border-l border-admin-border bg-admin-surface shadow-admin-lg"
       role="dialog"
       aria-modal="false"
       aria-label="AI Assist"

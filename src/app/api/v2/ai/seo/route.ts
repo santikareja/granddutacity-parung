@@ -16,6 +16,23 @@ export const runtime = "nodejs";
 // Panggilan model bisa lama; beri ruang agar tidak terputus di tengah.
 export const maxDuration = 300;
 
+// Batas keras kolom `excerpt` dan field form artikel.
+const MAX_EXCERPT = 160;
+
+/**
+ * Potong teks pada batas kata terdekat agar tidak terpotong di tengah kata.
+ *
+ * Model kadang meleset sedikit dari batas karakter yang diminta. Memotongnya di
+ * sini lebih baik daripada menolak seluruh hasil SEO hanya karena excerpt
+ * kelebihan beberapa karakter.
+ */
+const clampText = (value: string, max: number): string => {
+  if (value.length <= max) return value;
+  const cut = value.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd();
+};
+
 // POST /api/v2/ai/seo — { title, content } → { metaTitle, metaDescription, slug, focusKeyword }
 export async function POST(request: Request) {
   const guard = await requireApiUser();
@@ -64,21 +81,22 @@ export async function POST(request: Request) {
         const parsed = parseJsonFromAi<{
           metaTitle?: unknown;
           metaDescription?: unknown;
+          excerpt?: unknown;
           slug?: unknown;
           focusKeyword?: unknown;
         }>(raw);
 
+        const asText = (value: unknown): string =>
+          typeof value === "string" ? value.trim() : "";
+
         const seo = {
-          metaTitle:
-            typeof parsed.metaTitle === "string" ? parsed.metaTitle.trim() : "",
-          metaDescription:
-            typeof parsed.metaDescription === "string"
-              ? parsed.metaDescription.trim()
-              : "",
-          focusKeyword:
-            typeof parsed.focusKeyword === "string"
-              ? parsed.focusKeyword.trim()
-              : "",
+          metaTitle: asText(parsed.metaTitle),
+          metaDescription: asText(parsed.metaDescription),
+          // Excerpt ikut satu paket dengan SEO supaya penulis tidak perlu
+          // menulisnya terpisah. Dipotong keras di 160 karakter karena kolom
+          // `excerpt` di database dan field di form memakai batas itu.
+          excerpt: clampText(asText(parsed.excerpt), MAX_EXCERPT),
+          focusKeyword: asText(parsed.focusKeyword),
           slug:
             typeof parsed.slug === "string" && parsed.slug.trim()
               ? slugify(parsed.slug)
@@ -105,6 +123,7 @@ export async function POST(request: Request) {
       output: {
         slug: result.value.slug,
         focusKeyword: result.value.focusKeyword,
+        hasExcerpt: result.value.excerpt.length > 0,
         model: result.model,
         rotated: result.rotated,
       },

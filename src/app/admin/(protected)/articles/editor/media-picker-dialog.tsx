@@ -12,7 +12,7 @@
 // library". Pengelolaan penuh (edit metadata, hapus) tetap di halaman /admin/media.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ImagePlus, Search, Upload, X } from "lucide-react";
+import { ImagePlus, Search, Sparkles, Upload, X } from "lucide-react";
 
 import {
   AdminClientError,
@@ -104,7 +104,9 @@ export default function MediaPickerDialog({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadAlt, setUploadAlt] = useState("");
   const [uploadName, setUploadName] = useState("");
+  const [uploadCaption, setUploadCaption] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [metaBusy, setMetaBusy] = useState(false);
 
   // --- Foto stok ------------------------------------------------------------
   const anyStock =
@@ -199,6 +201,8 @@ export default function MediaPickerDialog({
         formData.append("file", file);
         formData.append("alt", alt);
         if (uploadName.trim()) formData.append("name", uploadName.trim());
+        if (uploadCaption.trim())
+          formData.append("caption", uploadCaption.trim());
 
         const response = await fetch("/api/v2/media/upload", {
           method: "POST",
@@ -228,8 +232,48 @@ export default function MediaPickerDialog({
         setUploading(false);
       }
     },
-    [uploadAlt, uploadName, onPick],
+    [uploadAlt, uploadName, uploadCaption, onPick],
   );
+
+  /**
+   * Isi judul, alt, dan caption dengan AI.
+   *
+   * Model tidak melihat gambarnya (bukan model vision), jadi petunjuk yang
+   * dipakai adalah konteks artikel plus nama berkas. Hasilnya diposisikan
+   * sebagai draf yang wajib diperiksa penulis, bukan kebenaran final.
+   */
+  const generateMeta = useCallback(async () => {
+    const file = fileInputRef.current?.files?.[0];
+    const filename = file?.name ?? "";
+
+    setMetaBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const data = await adminPost<{
+        name?: string;
+        alt?: string;
+        caption?: string;
+      }>("/api/v2/ai/image-meta", {
+        body: {
+          context: context?.trim() || "",
+          description: filename
+            ? `Nama berkas: ${filename.replace(/\.[a-z0-9]+$/i, "").replace(/[-_]+/g, " ")}`
+            : "",
+        },
+        timeoutMs: 120_000,
+      });
+
+      if (data.alt) setUploadAlt(data.alt);
+      if (data.name) setUploadName(data.name);
+      if (data.caption) setUploadCaption(data.caption);
+      setNotice("Metadata dibuat AI. Periksa dan sesuaikan sebelum mengunggah.");
+    } catch (err) {
+      setError(errorMessage(err, "Gagal membuat metadata dengan AI."));
+    } finally {
+      setMetaBusy(false);
+    }
+  }, [context]);
 
   const searchStock = useCallback(async () => {
     const query = stockQuery.trim();
@@ -477,6 +521,22 @@ export default function MediaPickerDialog({
                   </p>
                 </div>
 
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-admin-border bg-admin-surface-muted px-3 py-2">
+                  <p className="text-xs text-admin-fg-muted">
+                    Isi judul, alt, dan caption dengan AI.
+                  </p>
+                  <AdminButton
+                    type="button"
+                    variant="dark"
+                    size="sm"
+                    onClick={() => void generateMeta()}
+                    disabled={metaBusy}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    {metaBusy ? "Memproses…" : "Isi dengan AI"}
+                  </AdminButton>
+                </div>
+
                 <div className="space-y-1.5">
                   <AdminLabel htmlFor="pick-up-alt">
                     Alt text <span className="text-admin-danger">*</span>
@@ -487,17 +547,33 @@ export default function MediaPickerDialog({
                     onChange={(event) => setUploadAlt(event.target.value)}
                     placeholder="Deskripsi gambar untuk SEO & pembaca layar"
                   />
+                  <p className="text-xs text-admin-fg-dim">
+                    {uploadAlt.length}/125 karakter. AI tidak melihat gambarnya,
+                    jadi periksa kesesuaiannya.
+                  </p>
                 </div>
 
                 <div className="space-y-1.5">
                   <AdminLabel htmlFor="pick-up-name">
-                    Nama internal (opsional)
+                    Judul internal (opsional)
                   </AdminLabel>
                   <AdminInput
                     id="pick-up-name"
                     value={uploadName}
                     onChange={(event) => setUploadName(event.target.value)}
                     placeholder="Memudahkan pencarian di library"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <AdminLabel htmlFor="pick-up-caption">
+                    Caption (opsional)
+                  </AdminLabel>
+                  <AdminInput
+                    id="pick-up-caption"
+                    value={uploadCaption}
+                    onChange={(event) => setUploadCaption(event.target.value)}
+                    placeholder="Keterangan yang tampil di bawah gambar"
                   />
                 </div>
 

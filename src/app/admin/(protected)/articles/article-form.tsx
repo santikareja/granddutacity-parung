@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ImageIcon, Sparkles, Trash2 } from "lucide-react";
 
+import { AdminClientError, adminPost } from "@/lib/v2-admin/api-client";
+
 import ArticleEditor, {
   type EditorApplyRequest,
 } from "./editor/article-editor";
@@ -69,6 +71,18 @@ type Props = {
 };
 
 const AUTOSAVE_DELAY_MS = 4000;
+
+/**
+ * Warna keterangan panjang karakter: netral saat masih kosong, hijau di rentang
+ * ideal, kuning bila di bawah ideal, merah bila melewati batas keras.
+ */
+const lengthHintClass = (length: number, ideal: number, max: number): string => {
+  const base = "text-xs";
+  if (length === 0) return `${base} text-admin-fg-dim`;
+  if (length > max) return `${base} font-medium text-admin-danger`;
+  if (length >= ideal) return `${base} text-admin-success`;
+  return `${base} text-admin-warning`;
+};
 
 export default function ArticleForm({
   initial,
@@ -293,30 +307,47 @@ export default function ArticleForm({
   const toggleId = (list: number[], id: number): number[] =>
     list.includes(id) ? list.filter((v) => v !== id) : [...list, id];
 
+  const [seoBusy, setSeoBusy] = useState(false);
+
   const generateSeo = useCallback(async () => {
     setError(null);
+    setSeoBusy(true);
     try {
-      const response = await fetch("/api/v2/ai/seo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // adminPost dipakai agar timeout bisa dinaikkan: default klien 10 detik
+      // terlalu pendek untuk panggilan model, apalagi bila sistem berotasi.
+      const data = await adminPost<{
+        metaTitle?: string;
+        metaDescription?: string;
+        excerpt?: string;
+        focusKeyword?: string;
+        slug?: string;
+      }>("/api/v2/ai/seo", {
+        body: {
           title: formRef.current.title,
           content: formRef.current.content,
-        }),
+        },
+        timeoutMs: 190_000,
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Gagal menghasilkan SEO.");
 
       setForm((prev) => ({
         ...prev,
         seoMetaTitle: data.metaTitle || prev.seoMetaTitle,
         seoMetaDescription: data.metaDescription || prev.seoMetaDescription,
         seoFocusKeyword: data.focusKeyword || prev.seoFocusKeyword,
+        // Excerpt ikut terisi satu paket dengan SEO. Yang sudah ditulis penulis
+        // tidak ditimpa — hasil AI hanya mengisi yang masih kosong.
+        excerpt: prev.excerpt.trim() ? prev.excerpt : (data.excerpt ?? ""),
         slug: prev.slug || data.slug || prev.slug,
       }));
       setDirty(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal menghasilkan SEO.");
+      setError(
+        err instanceof AdminClientError || err instanceof Error
+          ? err.message
+          : "Gagal menghasilkan SEO.",
+      );
+    } finally {
+      setSeoBusy(false);
     }
   }, []);
 
@@ -324,8 +355,10 @@ export default function ArticleForm({
     // Saat panel AI terbuka, sisakan ruang di kanan pada layar lebar agar panel
     // tidak menutupi sidebar form. Di layar kecil panel memang menutupi penuh.
     <div
-      className={`mx-auto max-w-6xl space-y-4 transition-[margin] duration-200 ${
-        aiPanelOpen ? "xl:mr-[456px]" : ""
+      className={`space-y-4 transition-[margin] duration-200 ${
+        // Saat panel AI terbuka, sisakan ruang di kanan pada layar lebar dan
+        // lepaskan batas lebar terpusat agar editor memakai sisa ruang.
+        aiPanelOpen ? "lg:mr-[356px]" : "mx-auto max-w-6xl"
       }`}
     >
       <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-admin-border bg-admin-surface px-4 py-3 shadow-admin-xs">
@@ -382,7 +415,14 @@ export default function ArticleForm({
 
       {error ? <AdminAlert>{error}</AdminAlert> : null}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div
+        className={`grid grid-cols-1 gap-4 ${
+          // Panel AI terbuka: kolom pengaturan turun ke bawah supaya editor
+          // memakai lebar penuh. Tanpa ini editor terhimpit di antara sidebar
+          // pengaturan 320px dan panel AI.
+          aiPanelOpen ? "" : "lg:grid-cols-[minmax(0,1fr)_320px]"
+        }`}
+      >
         <div className="space-y-4">
           <div className="space-y-1.5">
             <AdminLabel htmlFor="art-title">Judul</AdminLabel>
@@ -448,8 +488,9 @@ export default function ArticleForm({
                   onChange={(event) => update("excerpt", event.target.value)}
                   placeholder="Otomatis dari paragraf pertama bila kosong"
                 />
-                <p className="text-xs text-admin-fg-dim">
-                  {form.excerpt.length}/160 karakter
+                <p className={lengthHintClass(form.excerpt.length, 120, 160)}>
+                  {form.excerpt.length}/160 karakter · ikut terisi saat menekan
+                  &quot;Isi dengan AI&quot; di kartu SEO.
                 </p>
               </div>
             </AdminCardBody>
@@ -510,9 +551,15 @@ export default function ArticleForm({
             <AdminCardBody>
               <div className="flex items-center justify-between gap-2">
                 <AdminCardTitle>SEO</AdminCardTitle>
-                <AdminButton variant="dark" size="sm" onClick={() => void generateSeo()}>
+                <AdminButton
+                  variant="dark"
+                  size="sm"
+                  onClick={() => void generateSeo()}
+                  disabled={seoBusy}
+                  title="Mengisi meta title, meta description, excerpt, slug, dan focus keyword"
+                >
                   <Sparkles className="h-3.5 w-3.5" />
-                  Isi dengan AI
+                  {seoBusy ? "Memproses…" : "Isi dengan AI"}
                 </AdminButton>
               </div>
               <div className="space-y-1.5">
@@ -522,6 +569,10 @@ export default function ArticleForm({
                   value={form.seoMetaTitle}
                   onChange={(event) => update("seoMetaTitle", event.target.value)}
                 />
+                <p className={lengthHintClass(form.seoMetaTitle.length, 50, 60)}>
+                  {form.seoMetaTitle.length}/60 karakter · ideal 50–60. Di atas
+                  60 dipotong Google.
+                </p>
               </div>
               <div className="space-y-1.5">
                 <AdminLabel htmlFor="art-meta-desc">Meta description</AdminLabel>
@@ -533,6 +584,16 @@ export default function ArticleForm({
                     update("seoMetaDescription", event.target.value)
                   }
                 />
+                <p
+                  className={lengthHintClass(
+                    form.seoMetaDescription.length,
+                    150,
+                    160,
+                  )}
+                >
+                  {form.seoMetaDescription.length}/160 karakter · ideal 150–160.
+                  Di seluler kadang terpotong di 120–140.
+                </p>
               </div>
               <div className="space-y-1.5">
                 <AdminLabel htmlFor="art-keyword">Focus keyword</AdminLabel>

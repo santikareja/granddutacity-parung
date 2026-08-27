@@ -177,10 +177,14 @@ ISI
 - Sertakan hal yang perlu dipertimbangkan atau dicek pembaca, bukan hanya sisi positif. Ini yang membedakan artikel kredibel dari brosur.
 - Boleh menyebut karakter kawasan dan nama cluster/tipe yang ada di daftar fakta. Jangan menyebut angka harga, cicilan, luas, atau stok.
 
-TAUTAN INTERNAL
-- Sisipkan 2-4 tautan internal yang benar-benar relevan dengan kalimatnya, memakai anchor teks deskriptif (bukan "klik di sini").
+TAUTAN INTERNAL (batas ketat)
+- MAKSIMAL 3 tautan internal di seluruh artikel. Lebih sedikit lebih baik.
+- Sisipkan tautan HANYA bila topik kalimatnya benar-benar relevan dengan halaman tujuan. Kalau tidak ada yang relevan, JANGAN memaksakan tautan sama sekali — artikel tanpa tautan internal lebih baik daripada tautan yang dipaksakan.
+- Jangan menautkan halaman yang sama dua kali.
+- Anchor teks harus deskriptif dan menyatu dalam kalimat. Dilarang "klik di sini", "baca di sini", atau menautkan seluruh kalimat.
 - Path yang boleh dipakai HANYA: ${ALLOWED_LINK_PATHS}
 - Jangan menautkan ke domain luar.
+- CATATAN: tautan CTA ke homepage TIDAK termasuk hitungan ini dan BUKAN tugasmu — sistem menambahkannya otomatis di akhir artikel. Jangan menulis tautan ke homepage sendiri.
 
 KONTRAK KELUARAN (WAJIB)
 - Balas HANYA dengan potongan HTML isi artikel. Tanpa penjelasan, tanpa catatan, tanpa code fence, tanpa markdown.
@@ -216,20 +220,46 @@ export const buildSeoPrompt = (
     content: `${FOUNDATION}
 
 TUGAS
-Buat setelan SEO untuk artikel berdasarkan judul dan ringkasan isinya.
+Buat setelan SEO LENGKAP untuk artikel berdasarkan judul dan ringkasan isinya.
 
 ATURAN TIAP FIELD
-- metaTitle: 50-60 karakter. Mengandung keyword utama di bagian awal. Boleh diakhiri " | ${BRAND_NAME}" HANYA bila total masih di bawah 60 karakter.
-- metaDescription: 145-160 karakter. Merangkum isi nyata artikel dan memberi alasan mengklik. Bukan sekadar mengulang judul. Tanpa angka harga.
-- slug: huruf kecil semua, kata dipisah tanda hubung, hanya a-z dan 0-9, tanpa kata sambung berlebihan, maksimal 6 kata.
-- focusKeyword: satu frasa 2-4 kata yang paling mungkin diketik pembaca untuk menemukan artikel ini.
+
+metaTitle — judul untuk hasil pencarian
+- Panjang ideal 50-60 karakter. JANGAN melebihi 60 karakter; di atas itu Google memotongnya dan menggantinya dengan tanda titik tiga.
+- Letakkan keyword utama di BAGIAN DEPAN judul.
+- Buat menarik untuk diklik: janjikan manfaat atau jawaban yang jelas, bukan judul datar.
+- Tambahkan " | ${BRAND_NAME}" di bagian belakang HANYA bila total keseluruhan masih di bawah 60 karakter. Bila tidak muat, hilangkan nama merek — panjang lebih penting.
+- Tanpa tanda kutip, tanpa tanda seru, tanpa ALL CAPS.
+
+metaDescription — ringkasan di hasil pencarian
+- Panjang ideal 150-160 karakter. JANGAN melebihi 160 karakter.
+- Masukkan keyword utama secara natural, bukan ditempel di awal secara kaku.
+- Berikan ringkasan yang jelas tentang isi artikel, bukan mengulang metaTitle.
+- Akhiri dengan ajakan singkat, misalnya "Baca selengkapnya", "Pelajari di sini", atau "Cek panduannya".
+- Karena versi seluler kadang hanya menampilkan 120-140 karakter, letakkan informasi terpenting di awal.
+- Tanpa angka harga atau cicilan.
+
+excerpt — ringkasan yang tampil di kartu artikel situs
+- MAKSIMAL 160 karakter. Ini batas keras kolom database.
+- 1-2 kalimat yang membuat pembaca ingin membuka artikel.
+- Boleh mirip metaDescription tetapi TIDAK identik: excerpt ditulis untuk pembaca yang sudah ada di situs, jadi tanpa ajakan gaya hasil pencarian dan lebih mengalir.
+- Tanpa angka harga atau cicilan.
+
+slug — potongan URL
+- Huruf kecil semua, kata dipisah tanda hubung, hanya a-z dan 0-9.
+- Maksimal 6 kata, tanpa kata sambung berlebihan (dan, di, untuk, yang).
+- Mengandung keyword utama.
+
+focusKeyword
+- Satu frasa 2-4 kata yang paling mungkin benar-benar diketik pembaca untuk menemukan artikel ini.
 
 PENTING
 - Semua field harus mencerminkan isi artikel yang diberikan, bukan tema umum properti.
-- Jangan mengarang keyword yang tidak dibahas artikel.
+- Jangan mengarang keyword atau klaim yang tidak dibahas artikel.
+- Hitung panjang karakter dengan cermat sebelum menjawab. Field yang melebihi batas dianggap gagal.
 
 ${jsonContract(
-  `{"metaTitle": "...", "metaDescription": "...", "slug": "...", "focusKeyword": "..."}`,
+  `{"metaTitle": "...", "metaDescription": "...", "excerpt": "...", "slug": "...", "focusKeyword": "..."}`,
 )}`,
   },
   {
@@ -299,22 +329,36 @@ export const buildImageMetaPrompt = (
 ${ANTI_HALLUCINATION}
 
 TUGAS
-Buat metadata untuk sebuah gambar yang akan dipakai di artikel.
+Buat metadata profesional untuk sebuah gambar yang akan dipakai di artikel properti.
 
 ATURAN TIAP FIELD
-- name: nama internal singkat dan deskriptif untuk memudahkan pencarian di media library. Maksimal 8 kata.
-- alt: alt text deskriptif untuk SEO dan pembaca layar. Maksimal 125 karakter. Jelaskan APA yang terlihat di gambar. Jangan memulai dengan "gambar" atau "foto".
-- caption: satu kalimat keterangan. Boleh string kosong bila gambar tidak butuh keterangan.
+
+name — judul internal untuk media library
+- 4-8 kata, deskriptif, mudah dicari kembali oleh tim redaksi.
+- Pola yang disukai: objek utama + konteks. Misalnya "Fasad Rumah Dua Lantai Kawasan Hijau".
+- Tanpa nama berkas mentah, tanpa deretan angka acak, tanpa format slug bertanda hubung.
+
+alt — alt text untuk SEO dan pembaca layar
+- Maksimal 125 karakter. Satu frasa padat, bukan paragraf.
+- Jelaskan APA yang terlihat, bukan kesimpulan atau perasaan. Pembaca layar membacakannya apa adanya.
+- JANGAN memulai dengan "Gambar", "Foto", "Ilustrasi", atau "Tampilan".
+- Sebut kata kunci relevan hanya bila memang terlihat. Jangan menumpuk keyword.
+
+caption — keterangan di bawah gambar
+- Satu kalimat yang MENAMBAH informasi, bukan mengulang alt text.
+- Boleh string kosong bila gambar tidak butuh keterangan.
+- JANGAN menuliskan kredit fotografer, nama penyedia foto, atau simbol hak cipta. Sistem menambahkan atribusi secara otomatis dan terpisah; menulisnya sendiri akan membuat kredit ganda.
 
 PENTING
-- Deskripsikan hanya apa yang disebut deskripsi foto. Jangan mengarang objek, lokasi, atau nama fasilitas yang tidak disebutkan.
-- Bila deskripsi foto sangat umum, buat alt text yang umum pula. Jangan mengaitkannya dengan cluster atau tipe unit tertentu tanpa dasar.
+- Deskripsikan HANYA apa yang disebut deskripsi foto atau yang jelas tersirat dari nama berkas.
+- Bila deskripsi foto sangat umum atau kosong, buat metadata yang umum pula. JANGAN mengaitkannya dengan Cluster Ladera/Cascada atau tipe unit tertentu tanpa dasar — itu halusinasi yang merugikan pembaca.
+- Bahasa Indonesia, nada redaksional, bukan bahasa iklan.
 
 ${jsonContract(`{"name": "...", "alt": "...", "caption": "..."}`)}`,
   },
   {
     role: "user",
     content: `Konteks artikel: ${context}
-Deskripsi foto dari penyedia: ${photoDescription || "(tidak ada deskripsi)"}`,
+Deskripsi foto dari penyedia: ${photoDescription || "(tidak ada deskripsi — buat metadata yang umum dan aman)"}`,
   },
 ];

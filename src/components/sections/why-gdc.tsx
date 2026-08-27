@@ -195,7 +195,7 @@ export function WhyGdc() {
         </div>
 
         {/* Asymmetrical Bento Grid for Core Pillars */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 sm:gap-6">
           {reasons.map((item, idx) => {
             const Icon = item.icon;
             return (
@@ -204,28 +204,28 @@ export function WhyGdc() {
                 delay={70 * idx}
                 className={`${item.colSpan} group relative rounded-[1.75rem] sm:rounded-[2rem] p-1 bg-[#090D0A]/[0.02] border border-[#090D0A]/8 hover:border-[#D49A3D]/40 shadow-[0_10px_30px_rgba(9,13,10,0.03)] hover:shadow-[0_20px_40px_rgba(212,154,61,0.12)] transition-all duration-500`}
               >
-                <div className="h-full rounded-[calc(1.75rem-0.25rem)] sm:rounded-[calc(2rem-0.375rem)] p-5 sm:p-7 bg-white flex flex-col justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
+                <div className="h-full rounded-[calc(1.75rem-0.25rem)] sm:rounded-[calc(2rem-0.375rem)] p-6 sm:p-7 bg-white flex flex-col justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]">
                   <div>
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="w-11 h-11 rounded-2xl bg-[#090D0A]/5 group-hover:bg-[#C8521A] text-[#B45309] group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-sm">
-                        <Icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                    <div className="flex items-center justify-between mb-5 sm:mb-5">
+                      <div className="w-14 h-14 sm:w-11 sm:h-11 rounded-2xl bg-[#090D0A]/5 group-hover:bg-[#C8521A] text-[#B45309] group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-sm">
+                        <Icon className="w-6 h-6 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:scale-110" />
                       </div>
-                      <span className="text-[10px] tracking-[0.2em] uppercase font-sans font-bold text-[#090D0A]/40 group-hover:text-[#B45309] transition-colors">
+                      <span className="text-[11px] sm:text-[10px] tracking-[0.2em] uppercase font-sans font-bold text-[#090D0A]/40 group-hover:text-[#B45309] transition-colors">
                         {item.tag}
                       </span>
                     </div>
 
-                    <p className="font-serif text-lg sm:text-xl font-bold text-[#090D0A] mb-2 group-hover:text-[#B45309] transition-colors">
+                    <p className="font-serif text-xl sm:text-xl font-bold text-[#090D0A] mb-2.5 sm:mb-2 group-hover:text-[#B45309] transition-colors">
                       {item.title}
                     </p>
-                    <p className="text-[#090D0A]/70 text-xs sm:text-sm font-normal leading-[1.75]">
+                    <p className="text-[#090D0A]/70 text-sm sm:text-sm font-normal leading-[1.8] sm:leading-[1.75]">
                       {item.desc}
                     </p>
                   </div>
 
-                  <div className="pt-4 mt-4 border-t border-[#090D0A]/5 flex items-center justify-between text-[11px] font-sans font-semibold text-[#090D0A]/60 group-hover:text-[#B45309] transition-colors">
+                  <div className="pt-5 mt-5 sm:pt-4 sm:mt-4 border-t border-[#090D0A]/5 flex items-center justify-between text-xs sm:text-[11px] font-sans font-semibold text-[#090D0A]/60 group-hover:text-[#B45309] transition-colors">
                     <span>Pelajari Keunggulan</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 -translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                    <ArrowUpRight className="w-4 h-4 sm:w-3.5 sm:h-3.5 -translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                   </div>
                 </div>
               </Reveal>

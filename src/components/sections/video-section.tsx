@@ -58,7 +58,7 @@ export function VideoSection() {
             South of Jakarta dengan fasilitas kota mandiri 200 Ha.
           </p>
 
-          {/* Video Stats — hidden on mobile to move video closer */}
+          {/* Video Stats — disembunyikan di mobile agar video langsung di bawah sub-heading */}
           <div className="hidden sm:flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[9px] sm:text-[11px] text-[#090D0A]/60 font-sans font-semibold tracking-wider">
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-[#D49A3D]" />
@@ -75,10 +75,10 @@ export function VideoSection() {
           </div>
         </Reveal>
 
-        {/* Video Container */}
-        <Reveal delay={120} className="relative w-full max-w-4xl mx-auto -mx-4 sm:mx-auto">
-          {/* Video Wrapper with Premium Frame — full-bleed on mobile */}
-          <div className="relative overflow-hidden bg-[#090D0A]/5 border-y border-[#090D0A]/10 sm:border sm:rounded-[2rem] sm:shadow-[0_25px_60px_rgba(9,13,10,0.12)] sm:p-2">
+        {/* Video Container — full-bleed on mobile (negatif margin sebesar padding container agar mentok tepi tanpa overflow) */}
+        <Reveal delay={120} className="relative w-full max-w-4xl -mx-4 sm:mx-auto">
+          {/* Video Wrapper with Premium Frame */}
+          <div className="relative overflow-hidden bg-[#090D0A]/5 border-y border-[#090D0A]/10 sm:rounded-[2rem] sm:border sm:shadow-[0_25px_60px_rgba(9,13,10,0.12)] sm:p-2">
             
             {/* Inner Container */}
             <div className="relative w-full overflow-hidden bg-white sm:rounded-[calc(2rem-0.5rem)] sm:shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
@@ -100,6 +100,8 @@ export function VideoSection() {
                     onClick={handlePlay}
                     className="absolute inset-0 w-full h-full cursor-pointer group/play bg-[#090D0A] sm:rounded-[calc(2rem-0.5rem)] overflow-hidden border-0 p-0"
                   >
+                    {/* YouTube Thumbnail — via next/image: WebP responsif + cache panjang dari origin sendiri,
+                        bukan JPEG 1280x720 dari i.ytimg.com yang TTL-nya hanya 2 jam. */}
                     <Image
                       src={thumbnailUrl}
                       alt={VIDEO_TITLE}

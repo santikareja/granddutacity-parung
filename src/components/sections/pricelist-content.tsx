@@ -22,7 +22,7 @@ import { BankSlider } from "@/components/ui/bank-slider";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Reveal } from "@/components/ui/reveal";
 
-// â”€â”€â”€ TYPES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- TYPES ---------------------------------------------------------------
 interface PriceRow {
   kavling: string;
   type: string;
@@ -46,54 +46,69 @@ interface SimulationOption {
   row: PriceRow;
 }
 
-// â”€â”€â”€ FORMATTERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- FORMATTERS ----------------------------------------------------------
 const fmt = (n: number) =>
   "Rp " + n.toLocaleString("id-ID");
 
 const fmtPercent = (n: number) =>
   `${n.toLocaleString("id-ID", { maximumFractionDigits: 2 })}%`;
 
-// â”€â”€â”€ LADERA DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const laderaT66: PriceRow[] = [
-  { kavling: "J.6/19â€“21, J.7/2â€“3,5â€“10,20â€“21, J.8/2â€“3", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1191210600, kpr: 1372093600, dp10: 137209360, bookingFee: 5000000, plafond: 1229884240 },
-  { kavling: "J.7/1", type: "T-66 HK", lb: 66, lt: 99.75, tunaiKeras: 1392353100, kpr: 1607348000, dp10: 160734800, bookingFee: 5000000, plafond: 1441613200, isHook: true },
-  { kavling: "J.7/22", type: "T-66 HK", lb: 66, lt: 98.48, tunaiKeras: 1385050600, kpr: 1598807100, dp10: 159880710, bookingFee: 5000000, plafond: 1433926390, isHook: true },
-  { kavling: "J.8/1", type: "T-66 HK", lb: 66, lt: 124.14, tunaiKeras: 1532595600, kpr: 1771374300, dp10: 177137430, bookingFee: 5000000, plafond: 1589236870, isHook: true },
-  { kavling: "J.8/10", type: "T-66 HK", lb: 66, lt: 107.79, tunaiKeras: 1465530600, kpr: 1692935700, dp10: 169293570, bookingFee: 5000000, plafond: 1518642130, isHook: true },
-  { kavling: "J.8/11,12,15â€“18", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1209210600, kpr: 1393146200, dp10: 139314620, bookingFee: 5000000, plafond: 1248831580 },
-  { kavling: "J.8/19", type: "T-66 HK", lb: 66, lt: 104.85, tunaiKeras: 1447890600, kpr: 1672304100, dp10: 167230410, bookingFee: 5000000, plafond: 1500073690, isHook: true },
-  { kavling: "J.10/6", type: "T-66", lb: 66, lt: 108, tunaiKeras: 1425210600, kpr: 1645777800, dp10: 164577780, bookingFee: 5000000, plafond: 1476200020 },
-  { kavling: "J.13/1", type: "T-66 HK", lb: 66, lt: 114, tunaiKeras: 1462860600, kpr: 1689812900, dp10: 168981290, bookingFee: 5000000, plafond: 1515831610, isHook: true },
-  { kavling: "J.13/2,3,5,6", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1172910600, kpr: 1350690100, dp10: 135069010, bookingFee: 5000000, plafond: 1210621090 },
-  { kavling: "J.13/9", type: "T-66 HK", lb: 66, lt: 108, tunaiKeras: 1385790600, kpr: 1599672600, dp10: 159967260, bookingFee: 5000000, plafond: 1434705340, isHook: true },
-  { kavling: "J.13/16", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1155210600, kpr: 1329988400, dp10: 132998840, bookingFee: 5000000, plafond: 1191989560 },
-  { kavling: "J.14/8", type: "T-66", lb: 66, lt: 78, tunaiKeras: 1206210600, kpr: 1389637500, dp10: 138963750, bookingFee: 5000000, plafond: 1245673750 },
-  { kavling: "J.15/5", type: "T-66", lb: 66, lt: 72, tunaiKeras: 1173210600, kpr: 1351041000, dp10: 135104100, bookingFee: 5000000, plafond: 1210936900 },
+// --- LADERA DATA ----------------------------------------------------------
+interface HookSummary {
+  kavling: string;
+  cashRange: string;
+  landRange: string;
+}
+
+const laderaVerona: PriceRow[] = [
+  { kavling: "J.23 No. 11, 16, 17, 18", type: "Verona 39/60", lb: 39, lt: 60, tunaiKeras: 695052700, kpr: 800000000, dp10: 80000000, bookingFee: 5000000, plafond: 715000000 },
 ];
 
-const laderaT47: PriceRow[] = [
-  { kavling: "J.17/1", type: "T-47 HK", lb: 47, lt: 127.85, tunaiKeras: 1183975700, kpr: 1366915300, dp10: 136691530, bookingFee: 5000000, plafond: 1225223770, isHook: true },
-  { kavling: "J.17/2,3,5,6", type: "T-47", lb: 47, lt: 72, tunaiKeras: 894013200, kpr: 1027777800, dp10: 102777780, bookingFee: 5000000, plafond: 920000020 },
-  { kavling: "J.17/7", type: "T-47 HK", lb: 47, lt: 131.79, tunaiKeras: 1202690700, kpr: 1388804100, dp10: 138880410, bookingFee: 5000000, plafond: 1244923690, isHook: true },
-  { kavling: "J.17/8, J.18/1", type: "T-47 HK", lb: 47, lt: 107.79, tunaiKeras: 1061743200, kpr: 1223953300, dp10: 122395330, bookingFee: 5000000, plafond: 1096557970, isHook: true },
-  { kavling: "J.17/9â€“12,15, J.18/2,3,5â€“7, J.19/15â€“21,25â€“31", type: "T-47", lb: 47, lt: 72, tunaiKeras: 876013200, kpr: 1006725200, dp10: 100672520, bookingFee: 5000000, plafond: 901052680 },
-  { kavling: "J.17/16", type: "T-47 HK", lb: 47, lt: 116.73, tunaiKeras: 1101973200, kpr: 1271005900, dp10: 127100590, bookingFee: 5000000, plafond: 1138905310, isHook: true },
-  { kavling: "J.18/10", type: "T-47 HK", lb: 47, lt: 131.79, tunaiKeras: 1136795700, kpr: 1311734000, dp10: 131173400, bookingFee: 5000000, plafond: 1175560600, isHook: true },
-  { kavling: "J.18/19", type: "T-47 HK", lb: 47, lt: 120.63, tunaiKeras: 1089365700, kpr: 1256260300, dp10: 125626030, bookingFee: 5000000, plafond: 1125634270, isHook: true },
-  { kavling: "J.19/5,6,7,9", type: "T-47", lb: 47, lt: 72, tunaiKeras: 858013200, kpr: 985672600, dp10: 98567260, bookingFee: 5000000, plafond: 882105340 },
-  { kavling: "J.19/22", type: "T-47 HK", lb: 47, lt: 120.11, tunaiKeras: 1117183200, kpr: 1288795400, dp10: 128879540, bookingFee: 5000000, plafond: 1154915860, isHook: true },
-  { kavling: "J.20/3,9,10,15,17,22â€“23,25â€“26,28â€“33,35â€“38", type: "T-47", lb: 47, lt: 72, tunaiKeras: 850813200, kpr: 977251500, dp10: 97725150, bookingFee: 5000000, plafond: 874526350 },
-  { kavling: "J.20/20", type: "T-47 HK", lb: 47, lt: 129.13, tunaiKeras: 1112577700, kpr: 1283408800, dp10: 128340880, bookingFee: 5000000, plafond: 1150067920, isHook: true },
-  { kavling: "J.20/21", type: "T-47 HK", lb: 47, lt: 117.76, tunaiKeras: 1065392200, kpr: 1228221100, dp10: 122822110, bookingFee: 5000000, plafond: 1100398990, isHook: true },
-  { kavling: "J.20/40", type: "T-47 HK", lb: 47, lt: 107.79, tunaiKeras: 1024016700, kpr: 1179828700, dp10: 117982870, bookingFee: 5000000, plafond: 1056845830, isHook: true },
-  { kavling: "J.21/1, J.11/19", type: "T-47 HK", lb: 47, lt: 119.78, tunaiKeras: 1115698200, kpr: 1287058500, dp10: 128705850, bookingFee: 5000000, plafond: 1153352650, isHook: true },
-  { kavling: "J.21/9", type: "T-47 HK", lb: 47, lt: 117.9, tunaiKeras: 1107238200, kpr: 1277163800, dp10: 127716380, bookingFee: 5000000, plafond: 1144447420, isHook: true },
-  { kavling: "J.21/10", type: "T-47 HK", lb: 47, lt: 142.75, tunaiKeras: 1219063200, kpr: 1407953300, dp10: 140795330, bookingFee: 5000000, plafond: 1262157970, isHook: true },
-  { kavling: "J.21/19", type: "T-47 HK", lb: 47, lt: 131.78, tunaiKeras: 1169698200, kpr: 1350216400, dp10: 135021640, bookingFee: 5000000, plafond: 1210194760, isHook: true },
-  { kavling: "J.11/1", type: "T-47 HK", lb: 47, lt: 118.06, tunaiKeras: 1107958200, kpr: 1278005900, dp10: 127800590, bookingFee: 5000000, plafond: 1145205310, isHook: true },
+const laderaVeronaHook: PriceRow = {
+  kavling: "J.23 No. 12 dan 15",
+  type: "Verona 39/60 Hook",
+  lb: 39,
+  lt: 60,
+  tunaiKeras: 665052700,
+  kpr: 764912300,
+  dp10: 76491230,
+  bookingFee: 5000000,
+  plafond: 683421070,
+  isHook: true,
+};
+
+const laderaMalta: PriceRow[] = [
+  { kavling: "J.17 No. 3, 5, 6", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 888750000, kpr: 1021929900, dp10: 102192990, bookingFee: 5000000, plafond: 914736910 },
+  { kavling: "J.17 No. 9, 10, 11, 12, 15; J.18 No. 2, 3, 5, 6; J.19 No. 16, 17, 18, 19, 21, 28, 29, 30, 31", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 870750000, kpr: 1000877200, dp10: 100087720, bookingFee: 5000000, plafond: 895789480 },
+  { kavling: "J.19 No. 5, 6, 7, 9", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 852750000, kpr: 979824600, dp10: 97982460, bookingFee: 5000000, plafond: 876842140 },
+  { kavling: "J.20 No. 15, 23, 28, 30, 32, 35, 36, 38", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 845550000, kpr: 971403600, dp10: 97140360, bookingFee: 5000000, plafond: 869263240 },
 ];
 
-// â”€â”€â”€ CASCADA DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const laderaMaltaHook: HookSummary = {
+  kavling: "J.11 No. 19; J.17 No. 1, 7, 8, 16; J.18 No. 1, 10; J.19 No. 22; J.20 No. 20, 21, 40",
+  cashRange: "Rp 1.018.753.500 – Rp 1.197.427.500",
+  landRange: "107,79 – 131,79 m²",
+};
+
+const laderaTuscan: PriceRow[] = [
+  { kavling: "J.7 No. 2, 3, 5, 6, 10, 20, 21; J.8 No. 3", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1129800000, kpr: 1303859700, dp10: 130385970, bookingFee: 5000000, plafond: 1168473730 },
+  { kavling: "J.8 No. 11, 12, 15, 16, 17, 18", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1147800000, kpr: 1324912300, dp10: 132491230, bookingFee: 5000000, plafond: 1187421070 },
+  { kavling: "J.13 No. 3, 5", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1111500000, kpr: 1282456200, dp10: 128245620, bookingFee: 5000000, plafond: 1149210580 },
+];
+
+const laderaTuscanHook: HookSummary = {
+  kavling: "J.7 No. 1, 22; J.8 No. 1, 19",
+  cashRange: "Rp 1.323.640.000 – Rp 1.471.185.000",
+  landRange: "98,48 – 124,14 m²",
+};
+
+const laderaFrontera = {
+  type: "Frontera 89/90",
+  status: "Segera Hadir",
+  description: "Pricelist resmi belum dirilis.",
+};
+
+// --- CASCADA DATA ----------------------------------------------------------
 const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
   {
     group: "T-39",
@@ -107,7 +122,7 @@ const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
     group: "T-42",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp",
     rows: [
-      { kavling: "H.18/20,22,23,27, H.19/3,6,7,10â€“12,16,19,20", type: "T-42", lb: 42, lt: 60, tunaiKeras: 822668500, kpr: 942760300, dp10: 94276030, bookingFee: 5000000, plafond: 843484270 },
+      { kavling: "H.18/20,22,23,27, H.19/3,6,7,10–12,16,19,20", type: "T-42", lb: 42, lt: 60, tunaiKeras: 822668500, kpr: 942760300, dp10: 94276030, bookingFee: 5000000, plafond: 843484270 },
       { kavling: "H.18/16", type: "T-42 HK", lb: 42, lt: 117.6, tunaiKeras: 1103918500, kpr: 1271707700, dp10: 127170770, bookingFee: 5000000, plafond: 1139536930, isHook: true },
     ],
   },
@@ -137,7 +152,7 @@ const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
     group: "T-69",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Victoria_scolcc.webp",
     rows: [
-      { kavling: "H.14/9,11,12,17â€“20", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1183660600, kpr: 1363263200, dp10: 136326320, bookingFee: 5000000, plafond: 1221936880 },
+      { kavling: "H.14/9,11,12,17–20", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1183660600, kpr: 1363263200, dp10: 136326320, bookingFee: 5000000, plafond: 1221936880 },
       { kavling: "H.14/21,22", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1165160600, kpr: 1341625800, dp10: 134162580, bookingFee: 5000000, plafond: 1202463220 },
       { kavling: "H.14/28,31", type: "T-69", lb: 69, lt: 73, tunaiKeras: 1159660600, kpr: 1335193000, dp10: 133519300, bookingFee: 5000000, plafond: 1196673700 },
     ],
@@ -146,7 +161,7 @@ const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
     group: "T-88",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Alexandra_hhvq3f.webp",
     rows: [
-      { kavling: "H.1/12,15â€“20", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1636618500, kpr: 1893859700, dp10: 189385970, bookingFee: 5000000, plafond: 1699473730 },
+      { kavling: "H.1/12,15–20", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1636618500, kpr: 1893859700, dp10: 189385970, bookingFee: 5000000, plafond: 1699473730 },
       { kavling: "H.1/21,22,23", type: "T-88", lb: 88, lt: 106, tunaiKeras: 1643868500, kpr: 1902339200, dp10: 190233920, bookingFee: 5000000, plafond: 1707105280 },
       { kavling: "H.1/25,27,29,31", type: "T-88", lb: 88, lt: 107, tunaiKeras: 1651118500, kpr: 1910818800, dp10: 191081880, bookingFee: 5000000, plafond: 1714736920 },
       { kavling: "H.3/10", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1365768500, kpr: 1577076100, dp10: 157707610, bookingFee: 5000000, plafond: 1414368490 },
@@ -168,31 +183,32 @@ const createSimulationOptions = (
   }));
 
 const SIMULATION_OPTIONS: SimulationOption[] = [
-  ...createSimulationOptions("ladera", "T-66", laderaT66),
-  ...createSimulationOptions("ladera", "T-47", laderaT47),
+  ...createSimulationOptions("ladera", "Verona 39/60", [...laderaVerona, laderaVeronaHook]),
+  ...createSimulationOptions("ladera", "Malta 47/72", laderaMalta),
+  ...createSimulationOptions("ladera", "Tuscan 66/72", laderaTuscan),
   ...cascadaData.flatMap((group) => createSimulationOptions("cascada", group.group, group.rows)),
 ];
 
 const DEFAULT_SIMULATION_ID = SIMULATION_OPTIONS[0]?.id ?? "";
 
-// â”€â”€â”€ STATIC CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- STATIC CONTENT --------------------------------------------------------
 const PAYMENT_METHODS = [
   {
     icon: <Banknote className="w-5 h-5" />,
     title: "A. Tunai Keras",
     steps: [
-      "Booking Fee Rp 5.000.000 â€” dibayar hari ke-1",
-      "Down Payment = 50% âˆ’ Booking Fee â€” dibayar hari ke-15 setelah BF",
-      "Pelunasan 50% â€” dibayar hari ke-30 setelah BF",
+      "Booking Fee Rp 5.000.000 — dibayar hari ke-1",
+      "Down Payment = 50% - Booking Fee — dibayar hari ke-15 setelah BF",
+      "Pelunasan 50% — dibayar hari ke-30 setelah BF",
     ],
   },
   {
     icon: <CreditCard className="w-5 h-5" />,
     title: "B. KPR Bank",
     steps: [
-      "Booking Fee Rp 5.000.000 â€” dibayar hari ke-1",
-      "Down Payment â€” dibayar hari ke-15 setelah BF",
-      "Akad Kredit (KPR) â€” dilakukan hari ke-30 setelah BF",
+      "Booking Fee Rp 5.000.000 — dibayar hari ke-1",
+      "Down Payment — dibayar hari ke-15 setelah BF",
+      "Akad Kredit (KPR) — dilakukan hari ke-30 setelah BF",
       "Unit hook: DP minimum 5%",
     ],
   },
@@ -247,60 +263,102 @@ function parseNumericInput(value: string, fallback: number) {
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
 }
 
-// â”€â”€â”€ PRICE TABLE COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- PRICE TABLE COMPONENT -------------------------------------------------
 function PriceTable({ rows }: { rows: PriceRow[] }) {
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-[#0b120c]/10 shadow-sm">
-      <table className="w-full min-w-[900px] text-sm">
-        <thead>
-          <tr className="bg-[#0b120c] text-[#F5F1E8]">
-            <th className="px-4 py-3 text-left font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Kavling</th>
-            <th className="px-4 py-3 text-left font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Tipe</th>
-            <th className="px-4 py-3 text-center font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">LB / LT</th>
-            <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Tunai Keras</th>
-            <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">KPR</th>
-            <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">DP 10%</th>
-            <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Booking Fee</th>
-            <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Plafond KPR</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr
-              key={i}
-              className={cn(
-                "border-t border-[#0b120c]/5 transition-colors duration-200 hover:bg-[#F5A524]/5",
-                row.isHook ? "bg-[#F5A524]/5" : i % 2 === 0 ? "bg-[#F5F1E8]" : "bg-[#F5F1E8]/50"
-              )}
-            >
-              <td className="px-4 py-3 text-[#0b120c]/80 font-sans text-xs leading-snug">{row.kavling}</td>
-              <td className="px-4 py-3 whitespace-nowrap">
-                <span className={cn(
-                  "inline-block px-2 py-0.5 rounded font-mono text-xs font-bold",
-                  row.isHook
-                    ? "bg-[#F5A524]/20 text-[#c47a2a]"
-                    : "bg-[#F5A524]/10 text-[#F5A524]"
-                )}>
-                  {row.type}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-center font-mono text-xs text-[#0b120c]/70 whitespace-nowrap">
-                {row.lb} / {row.lt} mÂ²
-              </td>
-              <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c] whitespace-nowrap">{fmt(row.tunaiKeras)}</td>
-              <td className="px-4 py-3 text-right font-mono text-xs font-bold text-red-600 whitespace-nowrap">{fmt(row.kpr)}</td>
-              <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c]/70 whitespace-nowrap">{fmt(row.dp10)}</td>
-              <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c]/50 whitespace-nowrap">{fmt(row.bookingFee)}</td>
-              <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c] whitespace-nowrap">{fmt(row.plafond)}</td>
+    <>
+      <div className="space-y-3 md:hidden">
+        {rows.map((row, index) => (
+          <article
+            key={`${row.type}-${row.kavling}`}
+            className={cn(
+              "rounded-2xl border p-4 shadow-sm",
+              row.isHook
+                ? "border-[#F5A524]/35 bg-[#F5A524]/10"
+                : index % 2 === 0
+                  ? "border-[#0b120c]/10 bg-white"
+                  : "border-[#0b120c]/10 bg-[#F5F1E8]"
+            )}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-[#0b120c]/10 pb-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.2em] text-[#0b120c]/45">Kavling</p>
+                <p className="mt-1 text-sm leading-relaxed text-[#0b120c]">{row.kavling}</p>
+              </div>
+              <span className={cn(
+                "shrink-0 rounded px-2 py-1 font-mono text-xs font-bold",
+                row.isHook ? "bg-[#F5A524]/20 text-[#c47a2a]" : "bg-[#F5A524]/10 text-[#b86d0e]"
+              )}>
+                {row.type}
+              </span>
+            </div>
+            <p className="mt-3 text-xs text-[#0b120c]/60">LB {row.lb} m² · LT {row.lt} m²</p>
+            <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4">
+              {[
+                { label: "Tunai keras", value: fmt(row.tunaiKeras), accent: false },
+                { label: "Harga KPR", value: fmt(row.kpr), accent: true },
+                { label: "DP 10%", value: fmt(row.dp10), accent: false },
+                { label: "Plafond KPR", value: fmt(row.plafond), accent: false },
+              ].map((item) => (
+                <div key={item.label}>
+                  <dt className="text-[10px] font-sans uppercase tracking-[0.12em] text-[#0b120c]/45">{item.label}</dt>
+                  <dd className={cn("mt-1 break-words font-mono text-xs font-semibold", item.accent ? "text-red-600" : "text-[#0b120c]")}>{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-4 border-t border-[#0b120c]/10 pt-3 text-xs text-[#0b120c]/55">Booking fee: <span className="font-mono text-[#0b120c]">{fmt(row.bookingFee)}</span></p>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden w-full overflow-x-auto rounded-xl border border-[#0b120c]/10 shadow-sm md:block">
+        <table className="w-full min-w-[900px] text-sm">
+          <thead>
+            <tr className="bg-[#0b120c] text-[#F5F1E8]">
+              <th className="px-4 py-3 text-left font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Kavling</th>
+              <th className="px-4 py-3 text-left font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Tipe</th>
+              <th className="px-4 py-3 text-center font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">LB / LT</th>
+              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Tunai Keras</th>
+              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">KPR</th>
+              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">DP 10%</th>
+              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Booking Fee</th>
+              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Plafond KPR</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map((row, index) => (
+              <tr
+                key={`${row.type}-${row.kavling}`}
+                className={cn(
+                  "border-t border-[#0b120c]/5 transition-colors duration-200 hover:bg-[#F5A524]/5",
+                  row.isHook ? "bg-[#F5A524]/5" : index % 2 === 0 ? "bg-[#F5F1E8]" : "bg-[#F5F1E8]/50"
+                )}
+              >
+                <td className="px-4 py-3 text-[#0b120c]/80 font-sans text-xs leading-snug">{row.kavling}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className={cn(
+                    "inline-block px-2 py-0.5 rounded font-mono text-xs font-bold",
+                    row.isHook ? "bg-[#F5A524]/20 text-[#c47a2a]" : "bg-[#F5A524]/10 text-[#b86d0e]"
+                  )}>
+                    {row.type}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-center font-mono text-xs text-[#0b120c]/70 whitespace-nowrap">{row.lb} / {row.lt} m²</td>
+                <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c] whitespace-nowrap">{fmt(row.tunaiKeras)}</td>
+                <td className="px-4 py-3 text-right font-mono text-xs font-bold text-red-600 whitespace-nowrap">{fmt(row.kpr)}</td>
+                <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c]/70 whitespace-nowrap">{fmt(row.dp10)}</td>
+                <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c]/50 whitespace-nowrap">{fmt(row.bookingFee)}</td>
+                <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c] whitespace-nowrap">{fmt(row.plafond)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
-// â”€â”€â”€ ACCORDIAN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- ACCORDIAN -------------------------------------------------------------
 function Accordion({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -312,7 +370,7 @@ function Accordion({ title, children, defaultOpen = false }: { title: string; ch
         <span className="font-serif text-lg md:text-xl font-semibold text-[#0b120c]">{title}</span>
         <ChevronDown className={cn("w-5 h-5 text-[#F5A524] shrink-0 transition-transform duration-300", open && "rotate-180")} />
       </button>
-      {/* Akordeon CSS: grid-template-rows 0frâ†’1fr tanpa JS */}
+      {/* Akordeon CSS: grid-template-rows 0fr→1fr tanpa JS */}
       <div
         className="grid transition-[grid-template-rows,opacity] duration-300 ease-in-out overflow-hidden"
         style={{
@@ -610,13 +668,13 @@ function KprSimulator({ activeTab }: { activeTab: ClusterKey }) {
   );
 }
 
-// â”€â”€â”€ MAIN COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- MAIN COMPONENT --------------------------------------------------------
 export default function PricelistPage() {
   const [activeTab, setActiveTab] = useState<ClusterKey>("ladera");
 
   return (
     <>
-      {/* â”€â”€ HERO â”€â”€ */}
+      {/* -- HERO -- */}
       <div className="relative w-full h-[70vh] min-h-[560px] overflow-hidden bg-[#0b120c] flex items-center justify-center">
         <Image
           src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp"
@@ -651,9 +709,9 @@ export default function PricelistPage() {
               ]} />
             </div>
             <p className="text-[#F5A524] text-[10px] md:text-xs tracking-[0.5em] uppercase font-sans font-semibold mb-5 drop-shadow-md">
-              Grand Duta City Parung Â· South of Jakarta
+              Grand Duta City Parung · South of Jakarta
             </p>
-            {/* H1 â€” unique, no cannibalisation with homepage/cluster pages */}
+            {/* H1 — unique, no cannibalisation with homepage/cluster pages */}
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#F5F1E8] mb-5 drop-shadow-xl">
               Pricelist Grand Duta City SOJ Parung Bogor<br />
               <span className="italic font-normal text-[#F5A524]">| Harga Ladera & Cascada Terbaru.</span>
@@ -670,7 +728,7 @@ export default function PricelistPage() {
         </div>
       </div>
 
-      {/* â”€â”€ INTRO STATS BAR â”€â”€ */}
+      {/* -- INTRO STATS BAR -- */}
       <div className="bg-[#0b120c] border-t border-[#F5F1E8]/5">
         <div className="max-w-screen-xl mx-auto px-6 md:px-14 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-[#F5F1E8] text-center">
           {[
@@ -687,13 +745,13 @@ export default function PricelistPage() {
         </div>
       </div>
 
-      {/* â”€â”€ MAIN CONTENT â”€â”€ */}
+      {/* -- MAIN CONTENT -- */}
       <div className="bg-[#F5F1E8] relative">
         <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(#0b120c_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
 
         <div className="max-w-screen-xl mx-auto px-6 md:px-14 lg:px-20 py-20 relative z-10">
 
-          {/* â”€â”€ SECTION LABEL â”€â”€ */}
+          {/* -- SECTION LABEL -- */}
           <Reveal className="mb-12">
             <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-4">
               Daftar Harga Terbaru
@@ -709,7 +767,7 @@ export default function PricelistPage() {
             </div>
           </Reveal>
 
-          {/* â”€â”€ TAB SWITCHER â”€â”€ */}
+          {/* -- TAB SWITCHER -- */}
           <div className="flex gap-3 mb-10 flex-wrap">
             {(["ladera", "cascada"] as const).map((tab) => (
               <button
@@ -727,71 +785,108 @@ export default function PricelistPage() {
             ))}
           </div>
 
-          {/* â”€â”€ LADERA â”€â”€ */}
+          {/* -- LADERA -- */}
           {activeTab === "ladera" && (
             <div
               key="ladera"
-              className="space-y-8"
+              className="space-y-6"
               style={{ animation: "heroFadeUp 0.4s ease-out both" }}
             >
-                {/* Hero image + intro */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-4">
-                  <div className="lg:col-span-2 relative h-60 lg:h-auto rounded-xl overflow-hidden shadow-md">
-                    <Image
-                      src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp"
-                      alt="Cluster Ladera Grand Duta City"
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 40vw"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b120c]/60 to-transparent" />
-                    <div className="absolute bottom-4 left-4">
-                      <span className="text-[#F5F1E8] font-serif text-xl font-bold drop-shadow">Cluster Ladera</span>
-                      <p className="text-[#F5F1E8]/70 text-xs mt-1 font-sans">American Classic Modern</p>
-                    </div>
-                  </div>
-                  <div className="lg:col-span-3 flex flex-col justify-center gap-4">
-                    <h3 className="font-serif text-2xl md:text-3xl font-semibold text-[#0b120c]">
-                      Hunian Bergaya<br />
-                      <span className="italic font-normal text-[#0b120c]/50">American Classic Modern</span>
-                    </h3>
-                    <p className="text-[#0b120c]/70 text-sm leading-relaxed font-light">
-                      Cluster Ladera menawarkan tipe T-66 dan T-47 dengan pilihan kavling reguler maupun hook (HK).
-                      Kavling hook memiliki luas tanah lebih besar dan posisi strategis di sudut kavling dengan harga berbeda.
-                    </p>
-                    <div className="flex gap-4 flex-wrap mt-2">
-                      <div className="flex items-center gap-2 text-xs font-sans">
-                        <span className="w-3 h-3 rounded-sm bg-[#F5A524]/20 border border-[#F5A524]/30 inline-block" />
-                        <span className="text-[#0b120c]/60">Unit Reguler</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs font-sans">
-                        <span className="w-3 h-3 rounded-sm bg-[#F5A524]/20 border border-[#F5A524]/40 inline-block" />
-                        <span className="text-[#0b120c]/60">Unit Hook (HK) â€” LT lebih luas</span>
-                      </div>
-                    </div>
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+                <div className="relative h-60 overflow-hidden rounded-xl shadow-md lg:col-span-2 lg:h-auto">
+                  <Image
+                    src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp"
+                    alt="Cluster Ladera Grand Duta City"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 40vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b120c]/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4">
+                    <span className="font-serif text-xl font-bold text-[#F5F1E8] drop-shadow">Cluster Ladera</span>
+                    <p className="mt-1 font-sans text-xs text-[#F5F1E8]/70">American Classic Modern</p>
                   </div>
                 </div>
-
-                <Accordion title="Pricelist T-66 â€” Cluster Ladera" defaultOpen>
-                  <div className="mb-3 flex items-center gap-2">
-                    <Home className="w-4 h-4 text-[#F5A524]" />
-                    <span className="text-xs text-[#0b120c]/60 font-sans">LB 66 mÂ², LT bervariasi (72â€“124 mÂ²)</span>
+                <div className="flex flex-col justify-center gap-4 lg:col-span-3">
+                  <h3 className="font-serif text-2xl font-semibold text-[#0b120c] md:text-3xl">
+                    Pilihan hunian Ladera<br />
+                    <span className="font-normal italic text-[#0b120c]/50">per tipe, harga, dan posisi unit</span>
+                  </h3>
+                  <p className="text-sm font-light leading-relaxed text-[#0b120c]/70">
+                    Pilih tipe untuk melihat kelompok harga unit standar. Unit hook ditampilkan terpisah karena luas tanah dan harganya berbeda.
+                  </p>
+                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#F5A524]/30 bg-[#F5A524]/10 px-4 py-2 text-xs text-[#0b120c]/70">
+                    <Clock className="h-3.5 w-3.5 text-[#b86d0e]" />
+                    <span>Terakhir diperbarui: <strong className="font-semibold text-[#0b120c]">27 Agustus 2026</strong></span>
                   </div>
-                  <PriceTable rows={laderaT66} />
-                </Accordion>
+                </div>
+              </div>
 
-                <Accordion title="Pricelist T-47 â€” Cluster Ladera">
-                  <div className="mb-3 flex items-center gap-2">
-                    <Home className="w-4 h-4 text-[#F5A524]" />
-                    <span className="text-xs text-[#0b120c]/60 font-sans">LB 47 mÂ², LT bervariasi (72â€“142 mÂ²)</span>
+              <Accordion title="Verona 39/60" defaultOpen>
+                <div className="mb-4 flex items-center gap-2 text-xs text-[#0b120c]/60">
+                  <Home className="h-4 w-4 text-[#F5A524]" />
+                  <span>Unit standar dan hook tersedia pada Blok J.23.</span>
+                </div>
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0b120c]/50">Unit standar</p>
+                    <PriceTable rows={laderaVerona} />
                   </div>
-                  <PriceTable rows={laderaT47} />
-                </Accordion>
+                  <div className="rounded-2xl border border-[#F5A524]/35 bg-[#F5A524]/10 p-4 md:p-5">
+                    <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#b86d0e]">Unit hook — harga berbeda</p>
+                    <PriceTable rows={[laderaVeronaHook]} />
+                  </div>
+                </div>
+              </Accordion>
+
+              <Accordion title="Malta 47/72">
+                <div className="mb-4 flex items-center gap-2 text-xs text-[#0b120c]/60">
+                  <Home className="h-4 w-4 text-[#F5A524]" />
+                  <span>Unit standar terdiri dari empat kelompok harga berdasarkan blok.</span>
+                </div>
+                <div className="space-y-5">
+                  <PriceTable rows={laderaMalta} />
+                  <div className="rounded-2xl border border-[#F5A524]/35 bg-[#F5A524]/10 p-5">
+                    <div className="flex flex-col gap-2 border-b border-[#0b120c]/10 pb-4 sm:flex-row sm:items-baseline sm:justify-between">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#b86d0e]">Unit hook — 11 unit</p>
+                      <p className="font-mono text-sm font-semibold text-[#0b120c]">{laderaMaltaHook.cashRange}</p>
+                    </div>
+                    <p className="mt-4 text-sm leading-relaxed text-[#0b120c]/75">{laderaMaltaHook.kavling}</p>
+                    <p className="mt-3 text-xs text-[#0b120c]/60">Luas tanah bervariasi: <strong className="font-medium text-[#0b120c]">{laderaMaltaHook.landRange}</strong>. Harga cash keras mengikuti luas tanah unit.</p>
+                  </div>
+                </div>
+              </Accordion>
+
+              <Accordion title="Tuscan 66/72">
+                <div className="mb-4 flex items-center gap-2 text-xs text-[#0b120c]/60">
+                  <Home className="h-4 w-4 text-[#F5A524]" />
+                  <span>Unit standar terdiri dari tiga kelompok harga berdasarkan blok.</span>
+                </div>
+                <div className="space-y-5">
+                  <PriceTable rows={laderaTuscan} />
+                  <div className="rounded-2xl border border-[#F5A524]/35 bg-[#F5A524]/10 p-5">
+                    <div className="flex flex-col gap-2 border-b border-[#0b120c]/10 pb-4 sm:flex-row sm:items-baseline sm:justify-between">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#b86d0e]">Unit hook — 4 unit</p>
+                      <p className="font-mono text-sm font-semibold text-[#0b120c]">{laderaTuscanHook.cashRange}</p>
+                    </div>
+                    <p className="mt-4 text-sm leading-relaxed text-[#0b120c]/75">{laderaTuscanHook.kavling}</p>
+                    <p className="mt-3 text-xs text-[#0b120c]/60">Luas tanah bervariasi: <strong className="font-medium text-[#0b120c]">{laderaTuscanHook.landRange}</strong>. Harga cash keras mengikuti luas tanah unit.</p>
+                  </div>
+                </div>
+              </Accordion>
+
+              <Accordion title="Frontera 89/90">
+                <div className="rounded-2xl border border-dashed border-[#F5A524]/50 bg-[#F5A524]/10 p-6 text-center sm:p-8">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#b86d0e]">{laderaFrontera.status}</p>
+                  <h4 className="mt-3 font-serif text-2xl font-semibold text-[#0b120c]">{laderaFrontera.type}</h4>
+                  <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#0b120c]/65">{laderaFrontera.description}</p>
+                </div>
+              </Accordion>
             </div>
           )}
 
-            {/* â”€â”€ CASCADA â”€â”€ */}
+            {/* -- CASCADA -- */}
             {activeTab === "cascada" && (
               <div
                 key="cascada"
@@ -827,7 +922,7 @@ export default function PricelistPage() {
                 </div>
 
                 {cascadaData.map((group) => (
-                  <Accordion key={group.group} title={`Pricelist ${group.group} â€” Cluster Cascada`} defaultOpen={group.group === "T-88"}>
+                  <Accordion key={group.group} title={`Pricelist ${group.group} — Cluster Cascada`} defaultOpen={group.group === "T-88"}>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
                       <div className="relative h-48 rounded-lg overflow-hidden shadow-sm md:col-span-1">
                         <Image src={group.image} alt={`Tipe ${group.group} Cluster Cascada Grand Duta City`} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover" />
@@ -843,7 +938,7 @@ export default function PricelistPage() {
 
           <KprSimulator activeTab={activeTab} />
 
-          {/* â”€â”€ PAYMENT METHODS â”€â”€ */}
+          {/* -- PAYMENT METHODS -- */}
           <Reveal className="mt-20 mb-6">
             <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-4">
               Cara Pembayaran
@@ -881,7 +976,7 @@ export default function PricelistPage() {
 
           <BankSlider className="mb-14" />
 
-          {/* â”€â”€ INCLUDES / EXCLUDES â”€â”€ */}
+          {/* -- INCLUDES / EXCLUDES -- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <div className="bg-[#F5A524]/5 border border-[#F5A524]/20 rounded-xl p-7">
               <div className="flex items-center gap-2 mb-5">
@@ -891,7 +986,7 @@ export default function PricelistPage() {
               <ul className="space-y-3">
                 {INCLUSIONS.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-[#0b120c]/70 font-light">
-                    <span className="text-[#F5A524] mt-0.5 shrink-0">âœ“</span>
+                    <span className="text-[#F5A524] mt-0.5 shrink-0">✓</span>
                     {item}
                   </li>
                 ))}
@@ -905,7 +1000,7 @@ export default function PricelistPage() {
               <ul className="space-y-3">
                 {EXCLUSIONS.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-[#0b120c]/70 font-light">
-                    <span className="text-red-400 mt-0.5 shrink-0">âœ•</span>
+                    <span className="text-red-400 mt-0.5 shrink-0">✕</span>
                     {item}
                   </li>
                 ))}
@@ -913,7 +1008,7 @@ export default function PricelistPage() {
             </div>
           </div>
 
-          {/* â”€â”€ NOTES â”€â”€ */}
+          {/* -- NOTES -- */}
           <div className="bg-[#F5F1E8] border border-[#0b120c]/10 rounded-xl p-7 mb-14">
             <h3 className="font-serif text-lg font-semibold text-[#0b120c] mb-5 flex items-center gap-2">
               <Info className="w-4 h-4 text-[#F5A524]" /> Catatan Penting
@@ -928,7 +1023,7 @@ export default function PricelistPage() {
             </ul>
           </div>
 
-          {/* â”€â”€ REKENING â”€â”€ */}
+          {/* -- REKENING -- */}
           <div className="bg-[#0b120c] rounded-xl p-8 mb-14 text-[#F5F1E8]">
             <div className="flex items-center gap-3 mb-6">
               <Building2 className="w-5 h-5 text-[#F5A524]" />
@@ -950,7 +1045,7 @@ export default function PricelistPage() {
             </div>
           </div>
 
-          {/* â”€â”€ CTA â”€â”€ */}
+          {/* -- CTA -- */}
           <Reveal className="text-center py-6">
             <p className="text-[#0b120c]/40 text-[9px] tracking-[0.4em] uppercase font-sans mb-6">
               Ada pertanyaan seputar harga?
@@ -966,7 +1061,7 @@ export default function PricelistPage() {
             </a>
           </Reveal>
 
-          {/* â”€â”€ INTERNAL LINKS â”€â”€ */}
+          {/* -- INTERNAL LINKS -- */}
           <div className="mt-16 pt-10 border-t border-[#0b120c]/10 text-center">
             <h3 className="font-serif text-2xl font-semibold text-[#0b120c] mb-6">Informasi Terkait</h3>
             <div className="flex flex-wrap justify-center gap-3">
@@ -977,7 +1072,7 @@ export default function PricelistPage() {
             </div>
           </div>
 
-          {/* â”€â”€ BACK LINK â”€â”€ */}
+          {/* -- BACK LINK -- */}
           <div className="mt-10 flex justify-center border-t border-[#0b120c]/10 pt-10">
             <Link
               href="/"

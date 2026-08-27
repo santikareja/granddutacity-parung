@@ -7,16 +7,20 @@ import { PromoPopup } from "@/components/ui/promo-popup";
 import { WhatsAppButton } from "@/components/ui/whatsapp-button";
 import "../globals.css";
 
+// Keduanya variable font di Google Fonts. Tanpa array `weight`, next/font
+// mengunduh SATU file variabel per style (bukan satu file per weight):
+// 4 file sans + 6 file serif (3 weight x 2 style) -> 1 file sans + 2 file serif.
+// 7 permintaan font berprioritas tinggi lenyap dari critical path, sehingga
+// bandwidth pada koneksi lambat dipakai untuk poster hero (elemen LCP).
+// Rentang weight tetap penuh, jadi tidak ada perubahan tampilan.
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-sans",
 });
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
   preload: true,

@@ -228,7 +228,7 @@ export function Hero() {
       {/* Left Sidebar Branding */}
       <div
         className="absolute left-8 top-1/2 -translate-y-1/2 z-20 hidden xl:flex flex-col items-center gap-6"
-        style={{ animation: "fadeIn 0.7s ease-out 1.4s both" }}
+        style={{ animation: "fadeIn 0.6s ease-out 0.5s both" }}
       >
         <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
         <span
@@ -250,7 +250,7 @@ export function Hero() {
       {/* Right Sidebar Branding */}
       <div
         className="absolute right-8 top-1/2 -translate-y-1/2 z-20 hidden lg:flex flex-col items-center gap-6"
-        style={{ animation: "fadeIn 0.7s ease-out 1.4s both" }}
+        style={{ animation: "fadeIn 0.6s ease-out 0.5s both" }}
       >
         <div className="w-px h-16 bg-gradient-to-b from-transparent via-[#F8F6F0]/20 to-transparent" />
         <span
@@ -286,7 +286,7 @@ export function Hero() {
          <div className="mb-4 sm:mb-6">
              <h1
                className="flex flex-col items-center gap-1 sm:gap-2 [text-shadow:0_4px_24px_rgba(0,0,0,0.8)]"
-               style={{ animation: "heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both" }}
+               style={{ animation: "heroFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both" }}
              >
              <span
                 className="font-serif font-bold text-[#F8F6F0] uppercase tracking-[-0.01em] sm:tracking-[0.02em] leading-[1.05]"
@@ -306,11 +306,12 @@ export function Hero() {
 
           {/* Supporting Copy — CSS animation instead of framer-motion to
                eliminate LCP render delay (this <p> is the LCP element).
-               Delay pendek: fill-mode "both" membuat teks tak terlihat selama
-               delay berlangsung, dan LCP baru tercatat saat teks ter-paint. */}
+               Delay ditekan seminimal mungkin: fill-mode "both" menahan teks di
+               opacity 0 selama delay, jadi setiap milidetik delay langsung
+               menunda LCP/Speed Index. */}
           <p
             className="text-[#F8F6F0]/90 text-[13px] sm:text-base md:text-lg font-normal max-w-2xl mb-5 sm:mb-8 leading-[1.7] [text-shadow:0_1px_12px_rgba(0,0,0,0.8)] px-2"
-            style={{ animation: "heroFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both" }}
+            style={{ animation: "heroFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both" }}
           >
             Investasi &amp; hunian prestisius di Grand Duta City Parung — kota mandiri 200 Ha persembahan{" "}
             <span className="text-[#F8F6F0] font-semibold">Duta Putra Land</span>. Cicilan mulai{" "}
@@ -321,7 +322,7 @@ export function Hero() {
                avoid blocking LCP with framer-motion hydration. */}
           <div
             className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
-            style={{ animation: "heroFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both" }}
+            style={{ animation: "heroFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both" }}
           >
             {/* Primary Island Button-in-Button CTA */}
             <a
@@ -348,7 +349,7 @@ export function Hero() {
           {/* Floating Trust Strip */}
           <div
             className="mt-6 sm:mt-10 inline-flex flex-wrap items-center justify-center gap-x-3.5 sm:gap-x-6 gap-y-1.5 py-1.5 px-4 sm:py-2 sm:px-5 rounded-full bg-[#090D0A]/75 lg:bg-[#090D0A]/60 lg:backdrop-blur-md border border-white/10 text-[#F8F6F0]/80 text-[9px] sm:text-[11px] tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-medium"
-            style={{ animation: "heroFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.6s both" }}
+            style={{ animation: "heroFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.26s both" }}
           >
             <div className="flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5 text-[#D49A3D]" />

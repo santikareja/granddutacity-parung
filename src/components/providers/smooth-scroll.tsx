@@ -2,8 +2,19 @@
 
 import { useEffect, useState } from "react";
 import type { LenisOptions } from "lenis";
-import { ReactLenis } from "lenis/react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+
+// Impor dinamis + ssr:false. Sebelumnya `ReactLenis` diimpor statis, sehingga
+// bundle Lenis ikut diunduh dan diparse di mobile padahal komponennya tidak
+// pernah dirender di sana (lihat guard smoothWheelEnabled di bawah). Dengan
+// dynamic(), chunk-nya baru diminta saat komponen benar-benar dirender —
+// yaitu hanya di perangkat berpenunjuk presisi (desktop).
+// `LenisOptions` tetap impor tipe: dihapus saat kompilasi, nol biaya runtime.
+const ReactLenis = dynamic(
+  () => import("lenis/react").then((mod) => mod.ReactLenis),
+  { ssr: false },
+);
 
 // Lenis is intentionally desktop-only.
 //

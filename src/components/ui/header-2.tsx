@@ -90,13 +90,15 @@ export function Header() {
 						href="/"
 						className="group relative flex items-center w-[110px] sm:w-[135px] aspect-[16/5] transition-transform duration-300 hover:scale-[1.02]"
 					>
+						{/* Tetap eager (logo ada di atas fold), tapi TANPA prioritas tinggi:
+						    `priority`/fetchPriority="high" membuatnya berebut slot antrean
+						    prioritas dengan poster hero yang merupakan elemen LCP. Logo ini
+						    SVG kecil, jadi prioritas normal sudah cukup cepat. */}
 						<Image
 							src="/logo.svg"
 							alt="Grand Duta City Parung"
 							fill
-							priority
 							loading="eager"
-							fetchPriority="high"
 							sizes="(max-width: 768px) 110px, 135px"
 							className="object-contain transition-opacity duration-300 group-hover:opacity-90"
 						/>

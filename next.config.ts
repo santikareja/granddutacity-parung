@@ -4,7 +4,16 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   trailingSlash: false,
   experimental: {
-    optimizeCss: true,
+    // `optimizeCss: true` dihapus — ia butuh critters/beasties yang TIDAK
+    // terpasang di proyek ini, jadi flag itu tidak pernah melakukan apa pun.
+    //
+    // `inlineCss: true` sudah diuji sebagai penggantinya lalu ditolak: CSS di
+    // sini ~27 KB gzip (globals.css memuat token admin + tema editor Lexical +
+    // prose artikel), dan Next menduplikasi CSS inline ke RSC payload. Hasil
+    // ukur pada halaman depan: HTML gzip 46.7 KB -> 104.7 KB (+58 KB). Di Slow
+    // 4G tambahan itu setara dengan round-trip yang dihemat, jadi netral saja
+    // sambil mengorbankan cache stylesheet antar-halaman. Prasyarat agar inline
+    // menguntungkan adalah memperkecil globals.css lebih dulu.
     optimizePackageImports: [
       "lucide-react",
     ],

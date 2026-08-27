@@ -174,7 +174,7 @@ const prepare = (
 
 export const createArticle = async (
   input: ArticleWriteInput,
-): Promise<{ id: number }> => {
+): Promise<{ id: number; slug: string | null }> => {
   const fields = prepare(input);
 
   return db.transaction(async (tx) => {
@@ -199,7 +199,7 @@ export const createArticle = async (
         aiOutline: fields.aiOutline,
         updatedAt: new Date(),
       })
-      .returning({ id: artikel.id });
+      .returning({ id: artikel.id, slug: artikel.slug });
 
     const created = rows[0];
     await syncRels(tx, created.id, input.categoryIds ?? [], input.tagIds ?? []);
@@ -210,7 +210,7 @@ export const createArticle = async (
 export const updateArticle = async (
   id: number,
   input: ArticleWriteInput,
-): Promise<{ id: number } | null> => {
+): Promise<{ id: number; slug: string | null } | null> => {
   const existingRows = await db
     .select({
       publishedAt: artikel.publishedAt,
@@ -247,7 +247,7 @@ export const updateArticle = async (
         updatedAt: new Date(),
       })
       .where(eq(artikel.id, id))
-      .returning({ id: artikel.id });
+      .returning({ id: artikel.id, slug: artikel.slug });
 
     const updated = rows[0];
     if (!updated) return null;
@@ -257,19 +257,22 @@ export const updateArticle = async (
   });
 };
 
-export const deleteArticle = async (id: number): Promise<boolean> => {
+export const deleteArticle = async (
+  id: number,
+): Promise<{ id: number; slug: string | null } | null> => {
   const rows = await db
     .delete(artikel)
     .where(eq(artikel.id, id))
-    .returning({ id: artikel.id });
-  return rows.length > 0;
+    .returning({ id: artikel.id, slug: artikel.slug });
+  return rows[0] ?? null;
 };
 
 // Ubah status publish tanpa menyentuh field lain (untuk aksi cepat di list).
+// Mengembalikan slug agar pemanggil bisa merevalidasi halaman live artikel.
 export const setArticleStatus = async (
   id: number,
   status: ArticleStatus,
-): Promise<boolean> => {
+): Promise<{ id: number; slug: string | null } | null> => {
   const existingRows = await db
     .select({ publishedAt: artikel.publishedAt })
     .from(artikel)
@@ -277,7 +280,7 @@ export const setArticleStatus = async (
     .limit(1);
 
   const existing = existingRows[0];
-  if (!existing) return false;
+  if (!existing) return null;
 
   const publishedAt =
     status === "published" && !existing.publishedAt
@@ -293,7 +296,7 @@ export const setArticleStatus = async (
       updatedAt: new Date(),
     })
     .where(eq(artikel.id, id))
-    .returning({ id: artikel.id });
+    .returning({ id: artikel.id, slug: artikel.slug });
 
-  return rows.length > 0;
+  return rows[0] ?? null;
 };

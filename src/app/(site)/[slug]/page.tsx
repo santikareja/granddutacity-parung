@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Header } from "@/components/ui/header-2";
 import { SmartImage } from "@/components/ui/smart-image";
+import { cloudinaryDisplay } from "@/lib/cloudinary";
 import {
   articleArchiveEntries,
   getAuthorDefinition,
@@ -88,7 +89,11 @@ function SidebarArticleList({ title, items }: { title: string; items: MiniArticl
         {items.map((item) => (
           <Link key={`${title}-${item.href}`} href={item.href} className="group flex gap-3">
             <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border border-[#0B120C]/10">
-              <SmartImage alt={item.thumbnailAlt} className="h-full w-full object-cover" src={item.thumbnail} />
+              <SmartImage
+                alt={item.thumbnailAlt}
+                className="h-full w-full object-cover"
+                src={cloudinaryDisplay(item.thumbnail, { width: 200 })}
+              />
             </div>
             <div className="min-w-0">
               <p className="line-clamp-2 text-sm leading-5 text-[#0B120C] transition-colors group-hover:text-[#A85D16]">
@@ -366,12 +371,15 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
             <article className="min-w-0">
               {featuredImageUrl && featuredImage ? (
                 <figure className="mb-10">
+                  {/* Gambar utama di-crop 4:3 (1280x960) agar konsisten dan
+                      ringan. width/height mengikuti rasio itu supaya ruang yang
+                      dipesan tepat dan tidak ada pergeseran layout (CLS). */}
                   <SmartImage
                     alt={featuredImage.alt || article.title}
                     className="h-auto w-full rounded-lg border border-[#0b120c]/10"
-                    height={featuredImage.height || undefined}
-                    src={featuredImageUrl}
-                    width={featuredImage.width || undefined}
+                    height={960}
+                    src={cloudinaryDisplay(featuredImageUrl, { width: 1280 })}
+                    width={1280}
                   />
                   {featuredImage.caption ? (
                     <figcaption className="mt-3 text-sm leading-relaxed text-[#475467]">{featuredImage.caption}</figcaption>
@@ -429,7 +437,7 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
                             <SmartImage
                               alt={item.thumbnailAlt}
                               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              src={item.thumbnail}
+                              src={cloudinaryDisplay(item.thumbnail, { width: 640 })}
                             />
                           </div>
                           <div className="p-4">

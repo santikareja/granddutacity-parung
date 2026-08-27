@@ -7,7 +7,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ImageIcon, Sparkles, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  ImageIcon,
+  Plus,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 
 import { AdminClientError, adminPost } from "@/lib/v2-admin/api-client";
 
@@ -103,6 +110,11 @@ export default function ArticleForm({
   const [dirty, setDirty] = useState(false);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
+  // Slug live artikel, sumber kebenaran dari server (bukan tebakan klien) agar
+  // tombol "Lihat Artikel" selalu menunjuk URL yang benar-benar tersimpan.
+  const [savedSlug, setSavedSlug] = useState<string | null>(
+    initial.slug || null,
+  );
 
   // Permintaan penggantian isi editor dari AI Assist. Token yang naik adalah
   // pemicunya, karena `LexicalComposer` tidak membaca ulang state awal.
@@ -185,6 +197,10 @@ export default function ArticleForm({
           // Ganti URL tanpa reload agar refresh tidak membuat duplikat.
           window.history.replaceState(null, "", `/admin/articles/${newId}`);
         }
+
+        // Slug dari server = URL live artikel. Dipakai tombol "Lihat Artikel".
+        const savedSlugFromServer: string | undefined = result?.article?.slug;
+        if (savedSlugFromServer) setSavedSlug(savedSlugFromServer);
 
         setForm((prev) => ({ ...prev, status }));
         setSavedAt(
@@ -351,6 +367,11 @@ export default function ArticleForm({
     }
   }, []);
 
+  // Slug untuk tombol "Lihat Artikel": utamakan slug tersimpan dari server,
+  // jatuh ke slug/judul form (slugify idempoten, sama dengan perhitungan server).
+  const liveSlug =
+    savedSlug || (form.slug ? slugify(form.slug) : slugify(form.title));
+
   return (
     // Saat panel AI terbuka, sisakan ruang di kanan pada layar lebar agar panel
     // tidak menutupi sidebar form. Di layar kecil panel memang menutupi penuh.
@@ -385,6 +406,27 @@ export default function ArticleForm({
         </div>
 
         <div className="flex flex-wrap gap-2">
+          {/* Buka artikel live di tab baru. Muncul hanya bila sudah tayang dan
+              punya slug, agar editor tetap terbuka sementara artikel diperiksa. */}
+          {form.status === "published" && liveSlug ? (
+            <AdminButton variant="secondary" asChild>
+              <a
+                href={`/${liveSlug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="h-4 w-4" />
+                Lihat Artikel
+              </a>
+            </AdminButton>
+          ) : null}
+          {/* Mulai artikel baru tanpa harus lewat daftar. */}
+          <AdminButton variant="secondary" asChild>
+            <Link href="/admin/articles/new">
+              <Plus className="h-4 w-4" />
+              Artikel Baru
+            </Link>
+          </AdminButton>
           <AdminButton
             variant="dark"
             onClick={() => setAiPanelOpen((open) => !open)}

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import { requireApiUser, apiError } from "@/lib/v2-auth/api-guard";
 import { listArticles } from "@/lib/v2-admin/articles";
@@ -6,6 +7,18 @@ import { createArticle } from "@/lib/v2-admin/article-write";
 import { recordAudit } from "@/lib/v2-admin/audit";
 
 export const runtime = "nodejs";
+
+// Segarkan cache ISR halaman publik agar artikel yang baru dibuat/diubah
+// langsung terlihat, tanpa menunggu jendela revalidate (5 menit).
+const revalidateArticle = (slug: string | null | undefined): void => {
+  try {
+    if (slug) revalidatePath(`/${slug}`);
+    revalidatePath("/artikel");
+  } catch (error) {
+    // Revalidasi gagal tidak boleh menggagalkan penyimpanan artikel.
+    console.error("[api/v2/articles] revalidate gagal:", error);
+  }
+};
 
 const asNumberArray = (value: unknown): number[] =>
   Array.isArray(value)
@@ -87,6 +100,11 @@ export async function POST(request: Request) {
         status: body.status === "published" ? "published" : "draft",
       },
     });
+
+    // Artikel baru yang langsung dipublish harus segera tampil di URL live-nya.
+    if (created.slug && body.status === "published") {
+      revalidateArticle(created.slug);
+    }
 
     return NextResponse.json({ article: created }, { status: 201 });
   } catch (error) {

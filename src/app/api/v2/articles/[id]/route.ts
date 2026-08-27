@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import { requireApiUser, requireApiAdmin, apiError } from "@/lib/v2-auth/api-guard";
 import { getArticleById } from "@/lib/v2-admin/articles";
@@ -10,6 +11,17 @@ import {
 import { recordAudit } from "@/lib/v2-admin/audit";
 
 export const runtime = "nodejs";
+
+// Segarkan cache ISR halaman publik agar perubahan artikel langsung terlihat,
+// tanpa menunggu jendela revalidate (5 menit).
+const revalidateArticle = (slug: string | null | undefined): void => {
+  try {
+    if (slug) revalidatePath(`/${slug}`);
+    revalidatePath("/artikel");
+  } catch (error) {
+    console.error("[api/v2/articles/:id] revalidate gagal:", error);
+  }
+};
 
 const parseId = (raw: string): number | null => {
   const id = Number(raw);
@@ -69,8 +81,10 @@ export async function PATCH(
 
   try {
     if (body.statusOnly === true) {
-      const ok = await setArticleStatus(id, status);
-      if (!ok) return apiError("Artikel tidak ditemukan.", 404);
+      const updated = await setArticleStatus(id, status);
+      if (!updated) return apiError("Artikel tidak ditemukan.", 404);
+
+      revalidateArticle(updated.slug);
 
       // Audit best-effort (fire-and-forget): tidak menyentuh response.
       void recordAudit({
@@ -114,6 +128,8 @@ export async function PATCH(
 
     if (!updated) return apiError("Artikel tidak ditemukan.", 404);
 
+    revalidateArticle(updated.slug);
+
     // Audit best-effort (fire-and-forget): tidak menyentuh response.
     void recordAudit({
       action: "article:update",
@@ -150,6 +166,9 @@ export async function DELETE(
   try {
     const removed = await deleteArticle(id);
     if (!removed) return apiError("Artikel tidak ditemukan.", 404);
+
+    // Halaman artikel yang dihapus harus berhenti tampil dari cache.
+    revalidateArticle(removed.slug);
 
     // Audit best-effort (fire-and-forget): tidak menyentuh response.
     void recordAudit({

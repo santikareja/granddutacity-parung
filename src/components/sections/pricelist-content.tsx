@@ -1,21 +1,22 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ChevronDown,
-  ChevronRight,
   Phone,
   Info,
   Home,
-  Building2,
   CreditCard,
   FileText,
   Banknote,
   ArrowLeft,
   Clock,
   Calculator,
+  Sparkles,
+  ShieldCheck,
+  Wallet,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BankSlider } from "@/components/ui/bank-slider";
@@ -34,6 +35,8 @@ interface PriceRow {
   bookingFee: number;
   plafond: number;
   isHook?: boolean;
+  blocks?: string;
+  units?: number;
 }
 
 type ClusterKey = "ladera" | "cascada";
@@ -61,7 +64,7 @@ interface HookSummary {
 }
 
 const laderaVerona: PriceRow[] = [
-  { kavling: "J.23 No. 11, 16, 17, 18", type: "Verona 39/60", lb: 39, lt: 60, tunaiKeras: 695052700, kpr: 800000000, dp10: 80000000, bookingFee: 5000000, plafond: 715000000 },
+  { kavling: "J.23 No. 11, 16, 17, 18", type: "Verona 39/60", lb: 39, lt: 60, tunaiKeras: 695052700, kpr: 800000000, dp10: 80000000, bookingFee: 5000000, plafond: 715000000, blocks: "J.23", units: 4 },
 ];
 
 const laderaVeronaHook: PriceRow = {
@@ -75,13 +78,15 @@ const laderaVeronaHook: PriceRow = {
   bookingFee: 5000000,
   plafond: 683421070,
   isHook: true,
+  blocks: "J.23",
+  units: 2,
 };
 
 const laderaMalta: PriceRow[] = [
-  { kavling: "J.17 No. 3, 5, 6", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 888750000, kpr: 1021929900, dp10: 102192990, bookingFee: 5000000, plafond: 914736910 },
-  { kavling: "J.17 No. 9, 10, 11, 12, 15; J.18 No. 2, 3, 5, 6; J.19 No. 16, 17, 18, 19, 21, 28, 29, 30, 31", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 870750000, kpr: 1000877200, dp10: 100087720, bookingFee: 5000000, plafond: 895789480 },
-  { kavling: "J.19 No. 5, 6, 7, 9", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 852750000, kpr: 979824600, dp10: 97982460, bookingFee: 5000000, plafond: 876842140 },
-  { kavling: "J.20 No. 15, 23, 28, 30, 32, 35, 36, 38", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 845550000, kpr: 971403600, dp10: 97140360, bookingFee: 5000000, plafond: 869263240 },
+  { kavling: "J.17 No. 3, 5, 6", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 888750000, kpr: 1021929900, dp10: 102192990, bookingFee: 5000000, plafond: 914736910, blocks: "J.17", units: 3 },
+  { kavling: "J.17 No. 9, 10, 11, 12, 15; J.18 No. 2, 3, 5, 6; J.19 No. 16, 17, 18, 19, 21, 28, 29, 30, 31", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 870750000, kpr: 1000877200, dp10: 100087720, bookingFee: 5000000, plafond: 895789480, blocks: "J.17, J.18, J.19", units: 18 },
+  { kavling: "J.19 No. 5, 6, 7, 9", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 852750000, kpr: 979824600, dp10: 97982460, bookingFee: 5000000, plafond: 876842140, blocks: "J.19", units: 4 },
+  { kavling: "J.20 No. 15, 23, 28, 30, 32, 35, 36, 38", type: "Malta 47/72", lb: 47, lt: 72, tunaiKeras: 845550000, kpr: 971403600, dp10: 97140360, bookingFee: 5000000, plafond: 869263240, blocks: "J.20", units: 8 },
 ];
 
 const laderaMaltaHook: HookSummary = {
@@ -91,9 +96,9 @@ const laderaMaltaHook: HookSummary = {
 };
 
 const laderaTuscan: PriceRow[] = [
-  { kavling: "J.7 No. 2, 3, 5, 6, 10, 20, 21; J.8 No. 3", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1129800000, kpr: 1303859700, dp10: 130385970, bookingFee: 5000000, plafond: 1168473730 },
-  { kavling: "J.8 No. 11, 12, 15, 16, 17, 18", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1147800000, kpr: 1324912300, dp10: 132491230, bookingFee: 5000000, plafond: 1187421070 },
-  { kavling: "J.13 No. 3, 5", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1111500000, kpr: 1282456200, dp10: 128245620, bookingFee: 5000000, plafond: 1149210580 },
+  { kavling: "J.7 No. 2, 3, 5, 6, 10, 20, 21; J.8 No. 3", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1129800000, kpr: 1303859700, dp10: 130385970, bookingFee: 5000000, plafond: 1168473730, blocks: "J.7, J.8", units: 8 },
+  { kavling: "J.8 No. 11, 12, 15, 16, 17, 18", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1147800000, kpr: 1324912300, dp10: 132491230, bookingFee: 5000000, plafond: 1187421070, blocks: "J.8", units: 6 },
+  { kavling: "J.13 No. 3, 5", type: "Tuscan 66/72", lb: 66, lt: 72, tunaiKeras: 1111500000, kpr: 1282456200, dp10: 128245620, bookingFee: 5000000, plafond: 1149210580, blocks: "J.13", units: 2 },
 ];
 
 const laderaTuscanHook: HookSummary = {
@@ -109,63 +114,81 @@ const laderaFrontera = {
 };
 
 // --- CASCADA DATA ----------------------------------------------------------
-const cascadaData: { group: string; image: string; rows: PriceRow[] }[] = [
+type CascadaEntry =
+  | { kind: "table"; group: string; name?: string; image: string; rows: PriceRow[]; note?: string }
+  | { kind: "range"; group: string; name?: string; image: string; lb: number; ltInfo: string; cashRange: string; note?: string };
+
+const cascadaData: CascadaEntry[] = [
   {
+    kind: "range",
     group: "T-39",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp",
-    rows: [
-      { kavling: "H.11/20, H.11/21", type: "T-39", lb: 39, lt: 65, tunaiKeras: 778463200, kpr: 892631600, dp10: 89263160, bookingFee: 5000000, plafond: 798368440 },
-      { kavling: "H.13/3", type: "T-39", lb: 39, lt: 69, tunaiKeras: 795809200, kpr: 912919300, dp10: 91291930, bookingFee: 5000000, plafond: 816627370 },
-    ],
+    lb: 39,
+    ltInfo: "65 m² & 69 m²",
+    cashRange: "Rp 773.200.000 – Rp 790.546.000",
+    note: "Tidak ada unit hook untuk tipe ini.",
   },
   {
+    kind: "table",
     group: "T-42",
+    name: "Aira",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp",
     rows: [
-      { kavling: "H.18/20,22,23,27, H.19/3,6,7,10–12,16,19,20", type: "T-42", lb: 42, lt: 60, tunaiKeras: 822668500, kpr: 942760300, dp10: 94276030, bookingFee: 5000000, plafond: 843484270 },
-      { kavling: "H.18/16", type: "T-42 HK", lb: 42, lt: 117.6, tunaiKeras: 1103918500, kpr: 1271707700, dp10: 127170770, bookingFee: 5000000, plafond: 1139536930, isHook: true },
+      { kavling: "H.18/20,22,27; H.19/3,6,7,11,12,16,19,20", type: "T-42", lb: 42, lt: 60, tunaiKeras: 790500000, kpr: 907017600, dp10: 90701760, bookingFee: 5000000, plafond: 811315840, blocks: "H.18, H.19", units: 11 },
     ],
+    note: "11 unit standar. Tidak ada unit hook untuk tipe ini.",
   },
   {
+    kind: "range",
     group: "T-47",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Malta_tkq7di.webp",
-    rows: [
-      { kavling: "H.10/33A", type: "T-47", lb: 47, lt: 72, tunaiKeras: 849373200, kpr: 975567300, dp10: 97556730, bookingFee: 5000000, plafond: 873010570 },
-      { kavling: "H.11/3", type: "T-47", lb: 47, lt: 78, tunaiKeras: 874153200, kpr: 1004549800, dp10: 100454980, bookingFee: 5000000, plafond: 899094820 },
-    ],
+    lb: 47,
+    ltInfo: "72 m² & 78 m²",
+    cashRange: "Rp 844.110.000 – Rp 868.890.000",
+    note: "Tidak ada unit hook untuk tipe ini.",
   },
   {
+    kind: "table",
     group: "T-58",
+    name: "Manoa",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Manoa_j8uvcr.webp",
     rows: [
-      { kavling: "H.15/3, H.16/19,20,22, H.18/6", type: "T-58", lb: 58, lt: 60, tunaiKeras: 929815800, kpr: 1068421100, dp10: 106842110, bookingFee: 5000000, plafond: 956578990 },
+      { kavling: "H.15/3; H.16/19,20,22; H.18/6", type: "T-58", lb: 58, lt: 60, tunaiKeras: 903500000, kpr: 1039181300, dp10: 103918130, bookingFee: 5000000, plafond: 930263170, blocks: "H.15, H.16, H.18", units: 5 },
     ],
+    note: "5 unit standar. Tidak ada unit hook untuk tipe ini.",
   },
   {
+    kind: "table",
     group: "T-62",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Manoa_j8uvcr.webp",
     rows: [
-      { kavling: "H.18/1", type: "T-62 HK", lb: 62, lt: 112.8, tunaiKeras: 1226065800, kpr: 1414912300, dp10: 141491230, bookingFee: 5000000, plafond: 1268421070, isHook: true },
+      { kavling: "H.18/1", type: "T-62 HK", lb: 62, lt: 112.8, tunaiKeras: 1199750000, kpr: 1385672600, dp10: 138567260, bookingFee: 5000000, plafond: 1242105340, isHook: true, blocks: "H.18", units: 1 },
     ],
+    note: "Satu-satunya unit hook (HK) di Cluster Cascada.",
   },
   {
+    kind: "table",
     group: "T-69",
+    name: "Victoria",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Victoria_scolcc.webp",
     rows: [
-      { kavling: "H.14/9,11,12,17–20", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1183660600, kpr: 1363263200, dp10: 136326320, bookingFee: 5000000, plafond: 1221936880 },
-      { kavling: "H.14/21,22", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1165160600, kpr: 1341625800, dp10: 134162580, bookingFee: 5000000, plafond: 1202463220 },
-      { kavling: "H.14/28,31", type: "T-69", lb: 69, lt: 73, tunaiKeras: 1159660600, kpr: 1335193000, dp10: 133519300, bookingFee: 5000000, plafond: 1196673700 },
+      { kavling: "H.14/9,12,17,18,19", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1122250000, kpr: 1295029300, dp10: 129502930, bookingFee: 5000000, plafond: 1160526370, blocks: "H.14", units: 5 },
+      { kavling: "H.14/22 (harga khusus)", type: "T-69", lb: 69, lt: 74, tunaiKeras: 1103750000, kpr: 1273391900, dp10: 127339190, bookingFee: 5000000, plafond: 1141052710, blocks: "H.14", units: 1 },
     ],
+    note: "5 unit standar + 1 unit dengan harga khusus (H.14/22).",
   },
   {
+    kind: "table",
     group: "T-88",
+    name: "Alexandra",
     image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Alexandra_hhvq3f.webp",
     rows: [
-      { kavling: "H.1/12,15–20", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1636618500, kpr: 1893859700, dp10: 189385970, bookingFee: 5000000, plafond: 1699473730 },
-      { kavling: "H.1/21,22,23", type: "T-88", lb: 88, lt: 106, tunaiKeras: 1643868500, kpr: 1902339200, dp10: 190233920, bookingFee: 5000000, plafond: 1707105280 },
-      { kavling: "H.1/25,27,29,31", type: "T-88", lb: 88, lt: 107, tunaiKeras: 1651118500, kpr: 1910818800, dp10: 191081880, bookingFee: 5000000, plafond: 1714736920 },
-      { kavling: "H.3/10", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1365768500, kpr: 1577076100, dp10: 157707610, bookingFee: 5000000, plafond: 1414368490 },
+      { kavling: "H.1/20; H.11/2,5,6,7,8,9", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1610302700, kpr: 1864619900, dp10: 186461990, bookingFee: 5000000, plafond: 1673157910, blocks: "H.1, H.11", units: 7 },
+      { kavling: "H.1/21,22,23", type: "T-88", lb: 88, lt: 106, tunaiKeras: 1617552700, kpr: 1873099500, dp10: 187309950, bookingFee: 5000000, plafond: 1680789550, blocks: "H.1", units: 3 },
+      { kavling: "H.1/25,29", type: "T-88", lb: 88, lt: 107, tunaiKeras: 1624802700, kpr: 1881579000, dp10: 188157900, bookingFee: 5000000, plafond: 1688421100, blocks: "H.1", units: 2 },
+      { kavling: "H.3/10 (harga khusus)", type: "T-88", lb: 88, lt: 105, tunaiKeras: 1339452700, kpr: 1547836300, dp10: 154783630, bookingFee: 5000000, plafond: 1388052670, blocks: "H.3", units: 1 },
     ],
+    note: "3 tingkat harga sesuai luas tanah + 1 unit dengan harga khusus (H.3/10).",
   },
 ];
 
@@ -186,7 +209,9 @@ const SIMULATION_OPTIONS: SimulationOption[] = [
   ...createSimulationOptions("ladera", "Verona 39/60", [...laderaVerona, laderaVeronaHook]),
   ...createSimulationOptions("ladera", "Malta 47/72", laderaMalta),
   ...createSimulationOptions("ladera", "Tuscan 66/72", laderaTuscan),
-  ...cascadaData.flatMap((group) => createSimulationOptions("cascada", group.group, group.rows)),
+  ...cascadaData.flatMap((group) =>
+    group.kind === "table" ? createSimulationOptions("cascada", group.group, group.rows) : []
+  ),
 ];
 
 const DEFAULT_SIMULATION_ID = SIMULATION_OPTIONS[0]?.id ?? "";
@@ -212,19 +237,43 @@ const PAYMENT_METHODS = [
       "Unit hook: DP minimum 5%",
     ],
   },
+  {
+    icon: <Wallet className="w-5 h-5" />,
+    title: "C. Cash Bertahap 12 Bulan",
+    steps: [
+      "Booking Fee Rp 5.000.000 — dibayar di awal",
+      "Down Payment 20% dari harga unit",
+      "Sisa 80% diangsur bertahap dalam 12 kali angsuran",
+    ],
+  },
+];
+
+// Promo yang mengikuti Program Pemerintah (berlaku selama program berjalan).
+const GOVERNMENT_PROMOS = [
+  { title: "Free AJB", desc: "Biaya Akta Jual Beli ditanggung." },
+  { title: "Free SHM", desc: "Sertifikat Hak Milik atas nama pembeli." },
+  { title: "Free BPHTB", desc: "Bea perolehan hak atas tanah & bangunan." },
+  { title: "PPN DTP 100%", desc: "PPN sepenuhnya ditanggung pemerintah." },
+];
+
+// Subsidi tambahan langsung dari developer.
+const DEVELOPER_SUBSIDIES = [
+  {
+    icon: <Wallet className="h-5 w-5" />,
+    title: "Subsidi DP 10%",
+    desc: "Bantuan uang muka 10% langsung dari developer.",
+  },
+  {
+    icon: <TrendingUp className="h-5 w-5" />,
+    title: "Subsidi KPR s.d. Rp 35 Juta",
+    desc: "Potongan biaya KPR hingga Rp 35 juta.",
+  },
 ];
 
 const INCLUSIONS = [
-  "Free PPN / Subsidi PPN (selisih perubahan PPN wajib dibayar pembeli)",
   "Izin Mendirikan Bangunan (IMB)",
-  "Biaya penyambungan daya listrik 2.200 W",
-  "Biaya pemasangan PDAM",
-];
-
-const EXCLUSIONS = [
-  "Biaya BPHTB dan AJB",
-  "Biaya Balik Nama Sertifikat HGB",
-  "Perabot, elektronik, dan biaya penyambungan telepon",
+  "Penyambungan daya listrik 2.200 W",
+  "Pemasangan jaringan air PDAM",
 ];
 
 const NOTES = [
@@ -266,120 +315,53 @@ function parseNumericInput(value: string, fallback: number) {
 // --- PRICE TABLE COMPONENT -------------------------------------------------
 function PriceTable({ rows }: { rows: PriceRow[] }) {
   return (
-    <>
-      <div className="space-y-3 md:hidden">
-        {rows.map((row, index) => (
-          <article
-            key={`${row.type}-${row.kavling}`}
-            className={cn(
-              "rounded-2xl border p-4 shadow-sm",
-              row.isHook
-                ? "border-[#F5A524]/35 bg-[#F5A524]/10"
-                : index % 2 === 0
-                  ? "border-[#0b120c]/10 bg-white"
-                  : "border-[#0b120c]/10 bg-[#F5F1E8]"
+    <div className={cn("grid grid-cols-1 gap-4", rows.length > 1 && "sm:grid-cols-2")}>
+      {rows.map((row) => (
+        <article
+          key={`${row.type}-${row.kavling}`}
+          className={cn(
+            "rounded-2xl border p-5 shadow-sm",
+            row.isHook ? "border-[#F5A524]/40 bg-[#F5A524]/10" : "border-[#0b120c]/10 bg-white"
+          )}
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={cn(
+              "rounded px-2 py-1 font-mono text-xs font-bold",
+              row.isHook ? "bg-[#F5A524]/25 text-[#c47a2a]" : "bg-[#F5A524]/15 text-[#b86d0e]"
+            )}>
+              {row.type}
+            </span>
+            {row.isHook && (
+              <span className="rounded-full bg-[#c47a2a]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#c47a2a]">Hook</span>
             )}
-          >
-            <div className="flex items-start justify-between gap-3 border-b border-[#0b120c]/10 pb-3">
-              <div className="min-w-0">
-                <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.2em] text-[#0b120c]/45">Kavling</p>
-                <p className="mt-1 text-sm leading-relaxed text-[#0b120c]">{row.kavling}</p>
+            {typeof row.units === "number" && (
+              <span className="ml-auto text-[11px] font-medium text-[#0b120c]/55">{row.units} unit</span>
+            )}
+          </div>
+
+          <p className="mt-3 text-sm leading-relaxed text-[#0b120c]/75">Blok {row.blocks ?? row.kavling}</p>
+          <p className="mt-1 text-xs text-[#0b120c]/50">LB {row.lb} m² · LT {row.lt} m²</p>
+
+          <div className="mt-4 rounded-xl bg-[#F5F1E8] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0b120c]/45">Harga KPR</p>
+            <p className="mt-1 font-mono text-lg font-bold text-red-600 sm:text-xl">{fmt(row.kpr)}</p>
+          </div>
+
+          <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
+            {[
+              { label: "Tunai Keras", value: fmt(row.tunaiKeras) },
+              { label: "DP 10%", value: fmt(row.dp10) },
+              { label: "Plafond KPR", value: fmt(row.plafond) },
+              { label: "Booking Fee", value: fmt(row.bookingFee) },
+            ].map((item) => (
+              <div key={item.label}>
+                <dt className="text-[10px] font-sans uppercase tracking-[0.1em] text-[#0b120c]/45">{item.label}</dt>
+                <dd className="mt-0.5 font-mono text-sm font-semibold text-[#0b120c]">{item.value}</dd>
               </div>
-              <span className={cn(
-                "shrink-0 rounded px-2 py-1 font-mono text-xs font-bold",
-                row.isHook ? "bg-[#F5A524]/20 text-[#c47a2a]" : "bg-[#F5A524]/10 text-[#b86d0e]"
-              )}>
-                {row.type}
-              </span>
-            </div>
-            <p className="mt-3 text-xs text-[#0b120c]/60">LB {row.lb} m² · LT {row.lt} m²</p>
-            <dl className="mt-4 grid grid-cols-2 gap-x-3 gap-y-4">
-              {[
-                { label: "Tunai keras", value: fmt(row.tunaiKeras), accent: false },
-                { label: "Harga KPR", value: fmt(row.kpr), accent: true },
-                { label: "DP 10%", value: fmt(row.dp10), accent: false },
-                { label: "Plafond KPR", value: fmt(row.plafond), accent: false },
-              ].map((item) => (
-                <div key={item.label}>
-                  <dt className="text-[10px] font-sans uppercase tracking-[0.12em] text-[#0b120c]/45">{item.label}</dt>
-                  <dd className={cn("mt-1 break-words font-mono text-xs font-semibold", item.accent ? "text-red-600" : "text-[#0b120c]")}>{item.value}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-4 border-t border-[#0b120c]/10 pt-3 text-xs text-[#0b120c]/55">Booking fee: <span className="font-mono text-[#0b120c]">{fmt(row.bookingFee)}</span></p>
-          </article>
-        ))}
-      </div>
-
-      <div className="hidden w-full overflow-x-auto rounded-xl border border-[#0b120c]/10 shadow-sm md:block">
-        <table className="w-full min-w-[900px] text-sm">
-          <thead>
-            <tr className="bg-[#0b120c] text-[#F5F1E8]">
-              <th className="px-4 py-3 text-left font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Kavling</th>
-              <th className="px-4 py-3 text-left font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Tipe</th>
-              <th className="px-4 py-3 text-center font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">LB / LT</th>
-              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Tunai Keras</th>
-              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">KPR</th>
-              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">DP 10%</th>
-              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Booking Fee</th>
-              <th className="px-4 py-3 text-right font-sans text-[10px] tracking-[0.2em] uppercase whitespace-nowrap">Plafond KPR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr
-                key={`${row.type}-${row.kavling}`}
-                className={cn(
-                  "border-t border-[#0b120c]/5 transition-colors duration-200 hover:bg-[#F5A524]/5",
-                  row.isHook ? "bg-[#F5A524]/5" : index % 2 === 0 ? "bg-[#F5F1E8]" : "bg-[#F5F1E8]/50"
-                )}
-              >
-                <td className="px-4 py-3 text-[#0b120c]/80 font-sans text-xs leading-snug">{row.kavling}</td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={cn(
-                    "inline-block px-2 py-0.5 rounded font-mono text-xs font-bold",
-                    row.isHook ? "bg-[#F5A524]/20 text-[#c47a2a]" : "bg-[#F5A524]/10 text-[#b86d0e]"
-                  )}>
-                    {row.type}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-center font-mono text-xs text-[#0b120c]/70 whitespace-nowrap">{row.lb} / {row.lt} m²</td>
-                <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c] whitespace-nowrap">{fmt(row.tunaiKeras)}</td>
-                <td className="px-4 py-3 text-right font-mono text-xs font-bold text-red-600 whitespace-nowrap">{fmt(row.kpr)}</td>
-                <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c]/70 whitespace-nowrap">{fmt(row.dp10)}</td>
-                <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c]/50 whitespace-nowrap">{fmt(row.bookingFee)}</td>
-                <td className="px-4 py-3 text-right font-mono text-xs text-[#0b120c] whitespace-nowrap">{fmt(row.plafond)}</td>
-              </tr>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-}
-
-// --- ACCORDIAN -------------------------------------------------------------
-function Accordion({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="border border-[#0b120c]/10 rounded-xl overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-6 py-5 bg-[#F5F1E8] hover:bg-[#F5F1E8] transition-colors duration-200 text-left"
-      >
-        <span className="font-serif text-lg md:text-xl font-semibold text-[#0b120c]">{title}</span>
-        <ChevronDown className={cn("w-5 h-5 text-[#F5A524] shrink-0 transition-transform duration-300", open && "rotate-180")} />
-      </button>
-      {/* Akordeon CSS: grid-template-rows 0fr→1fr tanpa JS */}
-      <div
-        className="grid transition-[grid-template-rows,opacity] duration-300 ease-in-out overflow-hidden"
-        style={{
-          gridTemplateRows: open ? "1fr" : "0fr",
-          opacity: open ? 1 : 0,
-        }}
-      >
-        <div className="px-6 pb-6 pt-2 bg-[#F5F1E8]">{children}</div>
-      </div>
+          </dl>
+        </article>
+      ))}
     </div>
   );
 }
@@ -686,18 +668,6 @@ export default function PricelistPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0b120c]/60 via-transparent to-[#0b120c]" />
 
-        {/* Breadcrumb */}
-        <nav
-          aria-label="Breadcrumb"
-          className="absolute top-24 left-0 right-0 px-6 md:px-14 lg:px-20 z-20"
-        >
-          <ol className="flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase text-[#F5F1E8]/50 font-sans">
-            <li><Link href="/" className="hover:text-[#F5F1E8] transition-colors">Home</Link></li>
-            <li><ChevronRight className="w-3 h-3" /></li>
-            <li className="text-[#F5A524]">Pricelist</li>
-          </ol>
-        </nav>
-
         <div className="relative z-10 text-center px-6 max-w-4xl pt-16 flex flex-col items-center">
           <div
             className="flex flex-col items-center"
@@ -722,7 +692,7 @@ export default function PricelistPage() {
               terbaru untuk Cluster Ladera dan Cascada, lengkap dengan kisaran harga, tipe unit, dan informasi awal simulasi KPR. Untuk konfirmasi harga dan unit tersedia, hubungi marketing.
             </p>
             <div className="mt-8 text-[#F5F1E8]/50 font-sans text-xs flex justify-center items-center gap-2">
-              <Clock className="w-4 h-4 text-[#F5A524]" /> Tanggal update: 9 Maret 2026
+              <Clock className="w-4 h-4 text-[#F5A524]" /> Tanggal update: 27 Agustus 2026
             </div>
           </div>
         </div>
@@ -823,12 +793,15 @@ export default function PricelistPage() {
                 </div>
               </div>
 
-              <Accordion title="Verona 39/60" defaultOpen>
-                <div className="mb-4 flex items-center gap-2 text-xs text-[#0b120c]/60">
-                  <Home className="h-4 w-4 text-[#F5A524]" />
-                  <span>Unit standar dan hook tersedia pada Blok J.23.</span>
-                </div>
-                <div className="space-y-5">
+              <section aria-labelledby="ladera-verona" className="overflow-hidden rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8]">
+                <header className="border-b border-[#0b120c]/10 px-5 py-5 md:px-6">
+                  <h3 id="ladera-verona" className="font-serif text-lg font-semibold text-[#0b120c] md:text-xl">Verona 39/60</h3>
+                </header>
+                <div className="space-y-5 px-5 py-5 md:px-6 md:py-6">
+                  <div className="flex items-center gap-2 text-xs text-[#0b120c]/60">
+                    <Home className="h-4 w-4 text-[#F5A524]" />
+                    <span>Unit standar dan hook tersedia pada Blok J.23.</span>
+                  </div>
                   <div>
                     <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0b120c]/50">Unit standar</p>
                     <PriceTable rows={laderaVerona} />
@@ -838,14 +811,17 @@ export default function PricelistPage() {
                     <PriceTable rows={[laderaVeronaHook]} />
                   </div>
                 </div>
-              </Accordion>
+              </section>
 
-              <Accordion title="Malta 47/72">
-                <div className="mb-4 flex items-center gap-2 text-xs text-[#0b120c]/60">
-                  <Home className="h-4 w-4 text-[#F5A524]" />
-                  <span>Unit standar terdiri dari empat kelompok harga berdasarkan blok.</span>
-                </div>
-                <div className="space-y-5">
+              <section aria-labelledby="ladera-malta" className="overflow-hidden rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8]">
+                <header className="border-b border-[#0b120c]/10 px-5 py-5 md:px-6">
+                  <h3 id="ladera-malta" className="font-serif text-lg font-semibold text-[#0b120c] md:text-xl">Malta 47/72</h3>
+                </header>
+                <div className="space-y-5 px-5 py-5 md:px-6 md:py-6">
+                  <div className="flex items-center gap-2 text-xs text-[#0b120c]/60">
+                    <Home className="h-4 w-4 text-[#F5A524]" />
+                    <span>Unit standar terdiri dari empat kelompok harga berdasarkan blok.</span>
+                  </div>
                   <PriceTable rows={laderaMalta} />
                   <div className="rounded-2xl border border-[#F5A524]/35 bg-[#F5A524]/10 p-5">
                     <div className="flex flex-col gap-2 border-b border-[#0b120c]/10 pb-4 sm:flex-row sm:items-baseline sm:justify-between">
@@ -856,14 +832,17 @@ export default function PricelistPage() {
                     <p className="mt-3 text-xs text-[#0b120c]/60">Luas tanah bervariasi: <strong className="font-medium text-[#0b120c]">{laderaMaltaHook.landRange}</strong>. Harga cash keras mengikuti luas tanah unit.</p>
                   </div>
                 </div>
-              </Accordion>
+              </section>
 
-              <Accordion title="Tuscan 66/72">
-                <div className="mb-4 flex items-center gap-2 text-xs text-[#0b120c]/60">
-                  <Home className="h-4 w-4 text-[#F5A524]" />
-                  <span>Unit standar terdiri dari tiga kelompok harga berdasarkan blok.</span>
-                </div>
-                <div className="space-y-5">
+              <section aria-labelledby="ladera-tuscan" className="overflow-hidden rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8]">
+                <header className="border-b border-[#0b120c]/10 px-5 py-5 md:px-6">
+                  <h3 id="ladera-tuscan" className="font-serif text-lg font-semibold text-[#0b120c] md:text-xl">Tuscan 66/72</h3>
+                </header>
+                <div className="space-y-5 px-5 py-5 md:px-6 md:py-6">
+                  <div className="flex items-center gap-2 text-xs text-[#0b120c]/60">
+                    <Home className="h-4 w-4 text-[#F5A524]" />
+                    <span>Unit standar terdiri dari tiga kelompok harga berdasarkan blok.</span>
+                  </div>
                   <PriceTable rows={laderaTuscan} />
                   <div className="rounded-2xl border border-[#F5A524]/35 bg-[#F5A524]/10 p-5">
                     <div className="flex flex-col gap-2 border-b border-[#0b120c]/10 pb-4 sm:flex-row sm:items-baseline sm:justify-between">
@@ -874,15 +853,20 @@ export default function PricelistPage() {
                     <p className="mt-3 text-xs text-[#0b120c]/60">Luas tanah bervariasi: <strong className="font-medium text-[#0b120c]">{laderaTuscanHook.landRange}</strong>. Harga cash keras mengikuti luas tanah unit.</p>
                   </div>
                 </div>
-              </Accordion>
+              </section>
 
-              <Accordion title="Frontera 89/90">
-                <div className="rounded-2xl border border-dashed border-[#F5A524]/50 bg-[#F5A524]/10 p-6 text-center sm:p-8">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#b86d0e]">{laderaFrontera.status}</p>
-                  <h4 className="mt-3 font-serif text-2xl font-semibold text-[#0b120c]">{laderaFrontera.type}</h4>
-                  <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#0b120c]/65">{laderaFrontera.description}</p>
+              <section aria-labelledby="ladera-frontera" className="overflow-hidden rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8]">
+                <header className="border-b border-[#0b120c]/10 px-5 py-5 md:px-6">
+                  <h3 id="ladera-frontera" className="font-serif text-lg font-semibold text-[#0b120c] md:text-xl">Frontera 89/90</h3>
+                </header>
+                <div className="p-5 md:p-6">
+                  <div className="rounded-2xl border border-dashed border-[#F5A524]/50 bg-[#F5A524]/10 p-6 text-center sm:p-8">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#b86d0e]">{laderaFrontera.status}</p>
+                    <h4 className="mt-3 font-serif text-2xl font-semibold text-[#0b120c]">{laderaFrontera.type}</h4>
+                    <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#0b120c]/65">{laderaFrontera.description}</p>
+                  </div>
                 </div>
-              </Accordion>
+              </section>
             </div>
           )}
 
@@ -921,18 +905,37 @@ export default function PricelistPage() {
                   </div>
                 </div>
 
-                {cascadaData.map((group) => (
-                  <Accordion key={group.group} title={`Pricelist ${group.group} — Cluster Cascada`} defaultOpen={group.group === "T-88"}>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
-                      <div className="relative h-48 rounded-lg overflow-hidden shadow-sm md:col-span-1">
-                        <Image src={group.image} alt={`Tipe ${group.group} Cluster Cascada Grand Duta City`} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover" />
+                {cascadaData.map((group) => {
+                  const typeNumber = group.group.replace("T-", "");
+                  const title = group.name ? `${group.name} · Tipe ${typeNumber}` : `Tipe ${typeNumber}`;
+                  return (
+                    <section
+                      key={group.group}
+                      aria-label={title}
+                      className="overflow-hidden rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8]"
+                    >
+                      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[#0b120c]/10 px-5 py-4 md:px-6">
+                        <h3 className="font-serif text-lg font-semibold text-[#0b120c] md:text-xl">{title}</h3>
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0b120c]/45">Cluster Cascada</span>
+                      </header>
+                      <div className="px-5 py-5 md:px-6 md:py-6">
+                        {group.kind === "table" ? (
+                          <PriceTable rows={group.rows} />
+                        ) : (
+                          <div className="rounded-2xl border border-[#0b120c]/10 bg-white p-5 sm:p-6">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0b120c]/50">Cash Keras</p>
+                            <p className="mt-2 font-mono text-lg font-semibold text-[#0b120c] sm:text-xl">{group.cashRange}</p>
+                            <p className="mt-3 text-sm text-[#0b120c]/70">LB {group.lb} m² · pilihan luas tanah {group.ltInfo}.</p>
+                            <p className="mt-3 text-xs leading-relaxed text-[#0b120c]/55">Estimasi KPR dan simulasi cicilan untuk tipe ini tersedia melalui marketing.</p>
+                          </div>
+                        )}
+                        {group.note && (
+                          <p className="mt-4 text-xs text-[#0b120c]/60">{group.note}</p>
+                        )}
                       </div>
-                      <div className="md:col-span-3">
-                        <PriceTable rows={group.rows} />
-                      </div>
-                    </div>
-                  </Accordion>
-                ))}
+                    </section>
+                  );
+                })}
               </div>
             )}
 
@@ -948,7 +951,7 @@ export default function PricelistPage() {
             </h2>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {PAYMENT_METHODS.map((m) => (
               <Reveal
                 key={m.title}
@@ -976,36 +979,68 @@ export default function PricelistPage() {
 
           <BankSlider className="mb-14" />
 
-          {/* -- INCLUDES / EXCLUDES -- */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-[#F5A524]/5 border border-[#F5A524]/20 rounded-xl p-7">
-              <div className="flex items-center gap-2 mb-5">
-                <FileText className="w-4 h-4 text-[#F5A524]" />
-                <h3 className="font-serif text-lg font-semibold text-[#0b120c]">Sudah Termasuk</h3>
+          {/* -- PROMO & BENEFIT -- */}
+          <Reveal className="mb-6">
+            <p className="text-[#F5A524] text-[10px] tracking-[0.5em] uppercase font-sans font-semibold mb-4">
+              Promo Berjalan
+            </p>
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+              <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#0b120c] leading-tight">
+                Untung Lebih<br />
+                <span className="italic font-normal text-[#0b120c]/50">saat beli sekarang</span>
+              </h2>
+              <p className="text-[#0b120c]/60 text-sm font-light max-w-sm leading-relaxed">
+                Manfaatkan program pemerintah dan subsidi developer agar biaya awal jauh lebih ringan.
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Promo program pemerintah */}
+          <Reveal className="mb-6 overflow-hidden rounded-2xl bg-[#0b120c] text-[#F5F1E8]">
+            <div className="flex items-center gap-2 px-6 pt-6 pb-4 md:px-8">
+              <Sparkles className="h-4 w-4 text-[#F5A524]" />
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#F5F1E8]/70">
+                Gratis Biaya — Program Pemerintah
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-px bg-[#F5F1E8]/10 lg:grid-cols-4">
+              {GOVERNMENT_PROMOS.map((promo) => (
+                <div key={promo.title} className="bg-[#0b120c] p-6 md:p-8">
+                  <p className="font-serif text-xl font-semibold text-[#F5A524] md:text-2xl">{promo.title}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-[#F5F1E8]/60">{promo.desc}</p>
+                </div>
+              ))}
+            </div>
+            <p className="px-6 pt-4 pb-6 text-[11px] leading-relaxed text-[#F5F1E8]/45 md:px-8">
+              *Berlaku selama Program Pemerintah masih berjalan dan sesuai ketentuan yang ditetapkan.
+            </p>
+          </Reveal>
+
+          {/* Subsidi developer + sudah termasuk */}
+          <div className="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {DEVELOPER_SUBSIDIES.map((subsidy) => (
+              <Reveal key={subsidy.title} className="rounded-2xl border border-[#F5A524]/25 bg-[#F5A524]/10 p-6">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F5A524]/20 text-[#b86d0e]">
+                  {subsidy.icon}
+                </div>
+                <h3 className="mt-4 font-serif text-lg font-semibold text-[#0b120c]">{subsidy.title}</h3>
+                <p className="mt-2 text-sm font-light leading-relaxed text-[#0b120c]/65">{subsidy.desc}</p>
+              </Reveal>
+            ))}
+            <Reveal className="rounded-2xl border border-[#0b120c]/10 bg-white p-6">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-[#F5A524]" />
+                <h3 className="font-serif text-lg font-semibold text-[#0b120c]">Sudah Termasuk Harga</h3>
               </div>
-              <ul className="space-y-3">
-                {INCLUSIONS.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-[#0b120c]/70 font-light">
-                    <span className="text-[#F5A524] mt-0.5 shrink-0">✓</span>
+              <ul className="mt-4 space-y-3">
+                {INCLUSIONS.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm font-light text-[#0b120c]/70">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#F5A524]" />
                     {item}
                   </li>
                 ))}
               </ul>
-            </div>
-            <div className="bg-red-50/50 border border-red-100 rounded-xl p-7">
-              <div className="flex items-center gap-2 mb-5">
-                <Info className="w-4 h-4 text-red-400" />
-                <h3 className="font-serif text-lg font-semibold text-[#0b120c]">Tidak Termasuk</h3>
-              </div>
-              <ul className="space-y-3">
-                {EXCLUSIONS.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-[#0b120c]/70 font-light">
-                    <span className="text-red-400 mt-0.5 shrink-0">✕</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            </Reveal>
           </div>
 
           {/* -- NOTES -- */}
@@ -1021,28 +1056,6 @@ export default function PricelistPage() {
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* -- REKENING -- */}
-          <div className="bg-[#0b120c] rounded-xl p-8 mb-14 text-[#F5F1E8]">
-            <div className="flex items-center gap-3 mb-6">
-              <Building2 className="w-5 h-5 text-[#F5A524]" />
-              <h3 className="font-serif text-xl font-semibold">Rekening Booking Fee</h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
-              <div>
-                <p className="text-[#F5F1E8]/40 text-[9px] tracking-[0.3em] uppercase mb-2">Atas Nama</p>
-                <p className="font-semibold text-[#F5F1E8]">PT. DUTA PUTRA MAHKOTA</p>
-              </div>
-              <div>
-                <p className="text-[#F5F1E8]/40 text-[9px] tracking-[0.3em] uppercase mb-2">Bank</p>
-                <p className="font-semibold text-[#F5F1E8]">BCA Cab. Duta Merlin</p>
-              </div>
-              <div>
-                <p className="text-[#F5F1E8]/40 text-[9px] tracking-[0.3em] uppercase mb-2">Nomor Rekening</p>
-                <p className="font-mono font-bold text-[#F5A524] text-xl tracking-wider">308-322-6699</p>
-              </div>
-            </div>
           </div>
 
           {/* -- CTA -- */}

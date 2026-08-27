@@ -16,9 +16,14 @@ import {
 } from "@/lib/articles";
 import {
   getPublishedArticleBySlug,
-  getPublishedArticles,
+  getPublishedArticleSummaries,
 } from "@/lib/public/queries";
 import type { PublicArticle, PublicMedia, PublicTag } from "@/types/content";
+
+// ISR: render sekali lalu sajikan dari cache selama 5 menit. Pembukaan artikel
+// yang sama berikutnya tidak lagi menyentuh database, sehingga jauh lebih cepat.
+// Rentang 5 menit cukup singkat agar artikel/urutan baru tetap cepat muncul.
+export const revalidate = 300;
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const SIDEBAR_PROMO_BANNER =
@@ -147,7 +152,9 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
   const { slug } = await params;
   const [article, publishedArticles] = await Promise.all([
     getPublishedArticleBySlug(slug),
-    getPublishedArticles(50),
+    // Ringkasan (tanpa kolom konten/taksonomi) — cukup untuk sidebar, artikel
+    // terkait, dan navigasi sebelum/berikutnya.
+    getPublishedArticleSummaries(50),
   ]);
 
   if (!article) {
@@ -317,7 +324,12 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
       />
       <Header />
-      <main className="relative w-full overflow-hidden bg-brand-light">
+      {/* overflow-x-clip, BUKAN overflow-hidden: keduanya mencegah scroll
+          horizontal, tetapi `overflow: hidden` menjadikan elemen ini scroll
+          container sehingga `position: sticky` di dalamnya (sidebar) tidak
+          pernah aktif. `overflow: clip` mengekang sumbu-x tanpa membuat scroll
+          container, jadi sticky tetap bekerja. Didukung target browser proyek. */}
+      <main className="relative w-full overflow-x-clip bg-brand-light">
         <section className="relative overflow-hidden bg-[#0B120C] pt-28 pb-16 md:pt-36 md:pb-20">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,165,36,0.16),transparent_28%),linear-gradient(180deg,rgba(11,18,12,0.94),rgba(11,18,12,1))]" />
           <div className="relative mx-auto max-w-4xl px-6 md:px-10">
@@ -437,7 +449,12 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
             </article>
 
             <aside className="mt-10 lg:mt-0">
-              <div className="space-y-5">
+              {/* Sticky pada layar lg+: sidebar ikut turun saat artikel digulir
+                  sehingga kolom kanan tidak kosong. top-24 memberi jarak di
+                  bawah header yang fixed. Grid item aside meregang setinggi
+                  artikel, jadi elemen sticky punya ruang untuk bergerak. */}
+              <div className="space-y-5 lg:sticky lg:top-24">
+
                 <Link
                   href="/pricelist-grand-duta-city"
                   className="group block overflow-hidden rounded-2xl border border-[#0B120C]/10 bg-white/80 shadow-[0_10px_30px_rgba(11,18,12,0.08)]"

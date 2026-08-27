@@ -398,6 +398,60 @@ export const getPublishedArticles = async (
 };
 
 /**
+ * Ringkasan artikel published untuk daftar sidebar / navigasi prev-next.
+ *
+ * Berbeda dari getPublishedArticles: query ini SENGAJA tidak menarik kolom
+ * `content` (Lexical state jsonb yang besar) maupun taksonomi (tags/kategori),
+ * karena konsumen ringkasan — kartu sidebar, artikel terkait, dan navigasi
+ * sebelum/berikutnya di halaman detail — hanya memakai judul, slug, excerpt,
+ * dan gambar utama. Untuk 50 artikel, membawa 50 blob konten penuh + query
+ * taksonomi di SETIAP pembukaan artikel adalah beban terbesar yang tidak
+ * terpakai. `content` diisi state kosong agar bentuk objek tetap valid.
+ */
+export const getPublishedArticleSummaries = async (
+  limit: number,
+): Promise<PublicArticle[]> => {
+  try {
+    const rows = await db
+      .select({
+        id: artikel.id,
+        title: artikel.title,
+        slug: artikel.slug,
+        excerpt: artikel.excerpt,
+        publishedAt: artikel.publishedAt,
+        createdAt: artikel.createdAt,
+        updatedAt: artikel.updatedAt,
+        media: mediaColumns,
+      })
+      .from(artikel)
+      .leftJoin(media, eq(artikel.featuredImageId, media.id))
+      .where(eq(artikel.status, "published"))
+      .orderBy(desc(artikel.publishedAt))
+      .limit(limit);
+
+    return rows.map((row) => ({
+      id: row.id,
+      title: row.title ?? "",
+      slug: row.slug ?? "",
+      excerpt: row.excerpt ?? null,
+      content: EMPTY_LEXICAL_STATE,
+      status: "published" as const,
+      publishedAt: toIso(row.publishedAt),
+      createdAt: toIso(row.createdAt) ?? new Date(0).toISOString(),
+      updatedAt: toIso(row.updatedAt) ?? new Date(0).toISOString(),
+      seo: { metaTitle: null, metaDescription: null, focusKeyword: null },
+      featuredImage: mapMedia(row.media as MediaRow),
+    }));
+  } catch (error) {
+    console.warn(
+      "[public/queries] getPublishedArticleSummaries gagal (database tidak tersedia):",
+      error instanceof Error ? error.message : error,
+    );
+    return [];
+  }
+};
+
+/**
  * Entri sitemap: hanya slug + publishedAt untuk artikel published.
  * depth 0, limit 500, ORDER BY publishedAt DESC.
  */

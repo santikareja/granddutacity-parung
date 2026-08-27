@@ -95,11 +95,11 @@ export function VideoSection() {
                     {/* Dark overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#090D0A]/60 via-[#090D0A]/20 to-transparent" />
 
-                    {/* Center play button — modern glass */}
+                    {/* Center play button — red circle, white triangle */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="relative flex items-center justify-center">
-                        <span className="absolute h-[4.5rem] w-[4.5rem] sm:h-24 sm:w-24 rounded-full bg-white/25 animate-ping [animation-duration:2.8s]" />
-                        <span className="relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full border border-white/40 bg-white/15 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-white/25">
+                        <span className="absolute h-[4.5rem] w-[4.5rem] sm:h-24 sm:w-24 rounded-full bg-[#FF0000]/30 animate-ping [animation-duration:2.8s]" />
+                        <span className="relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-[#FF0000] shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-300 group-hover/play:scale-110 group-hover/play:bg-[#e60000]">
                           <Play className="h-6 w-6 sm:h-7 sm:w-7 translate-x-[1px] fill-white text-white" />
                         </span>
                       </span>
@@ -120,15 +120,9 @@ export function VideoSection() {
           
         </Reveal>
 
-        {/* Deskripsi di bawah video */}
-        <Reveal delay={160} className="text-center mt-6 sm:mt-10 flex flex-col items-center">
-          <p className="max-w-2xl text-[#090D0A]/70 text-xs sm:text-base font-normal leading-[1.8]">
-            Jelajahi keindahan dan fasilitas premium Grand Duta City Parung melalui video kawasan.
-            Lihat langsung keindahannya langsung dari rumah Anda dan rasakan pengalaman mewah di area hunian terbesar Parung,
-            South of Jakarta dengan fasilitas kota mandiri 200 Ha.
-          </p>
-
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[9px] sm:text-[11px] text-[#090D0A]/60 font-sans font-semibold tracking-wider">
+        {/* Stats + deskripsi di bawah video */}
+        <Reveal delay={160} className="text-center mt-5 sm:mt-8 flex flex-col items-center">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[9px] sm:text-[11px] text-[#090D0A]/60 font-sans font-semibold tracking-wider">
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-[#D49A3D]" />
               <span>3 Menit Tour</span>
@@ -142,6 +136,12 @@ export function VideoSection() {
               <span>Aerial View</span>
             </div>
           </div>
+
+          <p className="mt-4 sm:mt-6 max-w-2xl text-[#090D0A]/70 text-xs sm:text-base font-normal leading-[1.8]">
+            Jelajahi keindahan dan fasilitas premium Grand Duta City Parung melalui video kawasan.
+            Lihat langsung keindahannya langsung dari rumah Anda dan rasakan pengalaman mewah di area hunian terbesar Parung,
+            South of Jakarta dengan fasilitas kota mandiri 200 Ha.
+          </p>
         </Reveal>
 
         {/* Call to Action */}

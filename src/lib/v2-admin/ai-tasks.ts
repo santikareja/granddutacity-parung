@@ -19,7 +19,8 @@ export type AiTaskType =
   | "factual-article"
   | "seo"
   | "text-tool"
-  | "image-meta";
+  | "image-meta"
+  | "tumblr-crosspost";
 
 export type AiTaskStatus = "pending" | "processing" | "completed" | "failed";
 

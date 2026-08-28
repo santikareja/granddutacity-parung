@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { artikel } from "@/db/schema";
 import { requireAgentToken } from "@/lib/v2-auth/agent-guard";
 import { createArticle } from "@/lib/v2-admin/article-write";
+import { crossPostArticleToTumblr } from "@/lib/social/crosspost";
 import { htmlToLexicalState } from "@/lib/v2-admin/html-to-lexical";
 import { sanitizeAiHtml } from "@/lib/ai/sanitize-html";
 import { checkRateLimit } from "@/lib/v2-admin/rate-limit";
@@ -130,6 +131,11 @@ export async function POST(request: Request) {
       .from(artikel)
       .where(eq(artikel.id, created.id))
       .limit(1);
+
+    // Cross-post Tumblr non-blocking bila artikel dibuat langsung published.
+    if (created.justPublished) {
+      after(() => crossPostArticleToTumblr(created.id));
+    }
 
     return NextResponse.json(
       { id: created.id, slug: rows[0]?.slug ?? null },

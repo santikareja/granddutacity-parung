@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { revalidatePath } from "next/cache";
 
 import { requireApiUser, requireApiAdmin, apiError } from "@/lib/v2-auth/api-guard";
@@ -9,6 +9,7 @@ import {
   updateArticle,
 } from "@/lib/v2-admin/article-write";
 import { recordAudit } from "@/lib/v2-admin/audit";
+import { crossPostArticleToTumblr } from "@/lib/social/crosspost";
 
 export const runtime = "nodejs";
 
@@ -96,6 +97,13 @@ export async function PATCH(
         summary: { status },
       });
 
+      // Cross-post Tumblr non-blocking, hanya saat transisi ke published.
+      // `after()` menjalankannya setelah response terkirim & tetap hidup di
+      // lingkungan serverless (tidak seperti fire-and-forget biasa).
+      if (updated.justPublished) {
+        after(() => crossPostArticleToTumblr(id, { userId: guard.user.id }));
+      }
+
       return NextResponse.json({ ok: true, status });
     }
 
@@ -139,6 +147,11 @@ export async function PATCH(
       userEmail: guard.user.email,
       summary: { title, status },
     });
+
+    // Cross-post Tumblr non-blocking, hanya saat transisi ke published.
+    if (updated.justPublished) {
+      after(() => crossPostArticleToTumblr(id, { userId: guard.user.id }));
+    }
 
     return NextResponse.json({ article: updated });
   } catch (error) {

@@ -71,3 +71,30 @@ export const hasPexelsConfig = (): boolean =>
 
 export const hasAnyStockConfig = (): boolean =>
   hasUnsplashConfig() || hasPexelsConfig();
+
+// --- Tumblr cross-posting (backlink otomatis saat artikel dipublish) --------
+// OAuth 1.0a: butuh consumer key/secret + token/token secret + nama blog target.
+// Bila salah satu kosong, fitur cross-post dilewati rapi (disabled state).
+export type TumblrConfig = {
+  consumerKey: string;
+  consumerSecret: string;
+  token: string;
+  tokenSecret: string;
+  blogName: string;
+};
+
+export const getTumblrConfig = (): TumblrConfig | null => {
+  const consumerKey = process.env.TUMBLR_CONSUMER_KEY?.trim();
+  const consumerSecret = process.env.TUMBLR_CONSUMER_SECRET?.trim();
+  const token = process.env.TUMBLR_TOKEN?.trim();
+  const tokenSecret = process.env.TUMBLR_TOKEN_SECRET?.trim();
+  const blogName = process.env.TUMBLR_BLOG_NAME?.trim();
+
+  if (!consumerKey || !consumerSecret || !token || !tokenSecret || !blogName) {
+    return null;
+  }
+
+  return { consumerKey, consumerSecret, token, tokenSecret, blogName };
+};
+
+export const hasTumblrConfig = (): boolean => getTumblrConfig() !== null;

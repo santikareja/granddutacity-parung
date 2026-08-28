@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { revalidatePath } from "next/cache";
 
 import { requireApiUser, apiError } from "@/lib/v2-auth/api-guard";
 import { listArticles } from "@/lib/v2-admin/articles";
 import { createArticle } from "@/lib/v2-admin/article-write";
 import { recordAudit } from "@/lib/v2-admin/audit";
+import { crossPostArticleToTumblr } from "@/lib/social/crosspost";
 
 export const runtime = "nodejs";
 
@@ -104,6 +105,11 @@ export async function POST(request: Request) {
     // Artikel baru yang langsung dipublish harus segera tampil di URL live-nya.
     if (created.slug && body.status === "published") {
       revalidateArticle(created.slug);
+    }
+
+    // Cross-post Tumblr non-blocking untuk artikel yang langsung dipublish.
+    if (created.justPublished) {
+      after(() => crossPostArticleToTumblr(created.id, { userId: guard.user.id }));
     }
 
     return NextResponse.json({ article: created }, { status: 201 });

@@ -174,8 +174,10 @@ const prepare = (
 
 export const createArticle = async (
   input: ArticleWriteInput,
-): Promise<{ id: number; slug: string | null }> => {
+): Promise<{ id: number; slug: string | null; justPublished: boolean }> => {
   const fields = prepare(input);
+  // Artikel baru: setiap publish adalah transisi baru → layak cross-post.
+  const justPublished = fields.status === "published";
 
   return db.transaction(async (tx) => {
     const rows = await tx
@@ -203,18 +205,19 @@ export const createArticle = async (
 
     const created = rows[0];
     await syncRels(tx, created.id, input.categoryIds ?? [], input.tagIds ?? []);
-    return created;
+    return { ...created, justPublished };
   });
 };
 
 export const updateArticle = async (
   id: number,
   input: ArticleWriteInput,
-): Promise<{ id: number; slug: string | null } | null> => {
+): Promise<{ id: number; slug: string | null; justPublished: boolean } | null> => {
   const existingRows = await db
     .select({
       publishedAt: artikel.publishedAt,
       featuredImageId: artikel.featuredImageId,
+      status: artikel.status,
     })
     .from(artikel)
     .where(eq(artikel.id, id))
@@ -224,6 +227,9 @@ export const updateArticle = async (
   if (!existing) return null;
 
   const fields = prepare(input, existing);
+  // Cross-post hanya saat transisi dari non-published → published.
+  const justPublished =
+    fields.status === "published" && existing.status !== "published";
 
   return db.transaction(async (tx) => {
     const rows = await tx
@@ -253,7 +259,7 @@ export const updateArticle = async (
     if (!updated) return null;
 
     await syncRels(tx, id, input.categoryIds ?? [], input.tagIds ?? []);
-    return updated;
+    return { ...updated, justPublished };
   });
 };
 
@@ -272,9 +278,9 @@ export const deleteArticle = async (
 export const setArticleStatus = async (
   id: number,
   status: ArticleStatus,
-): Promise<{ id: number; slug: string | null } | null> => {
+): Promise<{ id: number; slug: string | null; justPublished: boolean } | null> => {
   const existingRows = await db
-    .select({ publishedAt: artikel.publishedAt })
+    .select({ publishedAt: artikel.publishedAt, status: artikel.status })
     .from(artikel)
     .where(eq(artikel.id, id))
     .limit(1);
@@ -287,6 +293,9 @@ export const setArticleStatus = async (
       ? new Date()
       : existing.publishedAt;
 
+  // Cross-post hanya saat transisi dari non-published → published.
+  const justPublished = status === "published" && existing.status !== "published";
+
   const rows = await db
     .update(artikel)
     .set({
@@ -298,5 +307,7 @@ export const setArticleStatus = async (
     .where(eq(artikel.id, id))
     .returning({ id: artikel.id, slug: artikel.slug });
 
-  return rows[0] ?? null;
+  const updated = rows[0];
+  if (!updated) return null;
+  return { ...updated, justPublished };
 };

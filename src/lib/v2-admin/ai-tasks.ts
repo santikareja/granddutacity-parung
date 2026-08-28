@@ -16,6 +16,7 @@ export type AiTaskType =
   | "titles"
   | "outline"
   | "article"
+  | "factual-article"
   | "seo"
   | "text-tool"
   | "image-meta";

@@ -36,6 +36,33 @@ export const getStockConfig = (): StockProviderConfig => ({
   pexelsKey: process.env.PEXELS_API_KEY,
 });
 
+// --- Sumber data faktual (artikel berbasis data) ---------------------------
+// Semua opsional: bila kosong, tool terkait dilewati dengan rapi (bukan crash).
+export type FactualSourceConfig = {
+  bpsAppId?: string;
+  tavilyKey?: string;
+  serpapiKey?: string;
+};
+
+export const getFactualSourceConfig = (): FactualSourceConfig => ({
+  bpsAppId: process.env.BPS_APP_ID?.trim() || undefined,
+  tavilyKey: process.env.TAVILY_API_KEY?.trim() || undefined,
+  serpapiKey: process.env.SERPAPI_API_KEY?.trim() || undefined,
+});
+
+export const hasBpsConfig = (): boolean =>
+  Boolean(process.env.BPS_APP_ID?.trim());
+
+export const hasTavilyConfig = (): boolean =>
+  Boolean(process.env.TAVILY_API_KEY?.trim());
+
+export const hasSerpapiConfig = (): boolean =>
+  Boolean(process.env.SERPAPI_API_KEY?.trim());
+
+// Fitur artikel faktual butuh minimal satu sumber web (Tavily atau SerpApi).
+export const hasFactualConfig = (): boolean =>
+  hasTavilyConfig() || hasSerpapiConfig() || hasBpsConfig();
+
 export const hasUnsplashConfig = (): boolean =>
   Boolean(process.env.UNSPLASH_ACCESS_KEY);
 

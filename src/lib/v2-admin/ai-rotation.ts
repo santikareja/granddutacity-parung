@@ -72,6 +72,13 @@ export const AI_BUDGETS = {
    */
   articleWriter: { perAttemptMs: 120_000, totalMs: 190_000, maxCandidates: 3 },
   articleEditor: { perAttemptMs: 70_000, totalMs: 95_000, maxCandidates: 2 },
+  /**
+   * Artikel faktual (route maxDuration 300): perencanaan tool + penulisan,
+   * dengan sisa waktu untuk panggilan tool eksternal. 60 + 170 + ~45s tool
+   * tetap di bawah 300.
+   */
+  factualPlan: { perAttemptMs: 30_000, totalMs: 60_000, maxCandidates: 2 },
+  factualArticle: { perAttemptMs: 120_000, totalMs: 170_000, maxCandidates: 2 },
 } as const satisfies Record<string, AiBudget>;
 
 // Sisa waktu minimum yang masih layak untuk mencoba satu model lagi. Di bawah

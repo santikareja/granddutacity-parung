@@ -37,13 +37,15 @@ import {
 
 type OutlineSection = { heading: string; subheadings: string[] };
 
-type Step = "titles" | "outline" | "content" | "faktual";
+type Step = "titles" | "outline" | "content";
 
+// Alur SATU rantai: judul → outline (dari judul) → artikel (dari judul+outline,
+// diperkaya data faktual). Tidak ada lagi tahap "Faktual" terpisah yang menulis
+// tanpa melihat judul/outline — itulah sumber artikel yang tidak nyambung.
 const STEPS: { key: Step; label: string }[] = [
   { key: "titles", label: "1. Judul" },
   { key: "outline", label: "2. Outline" },
-  { key: "content", label: "3. Konten" },
-  { key: "faktual", label: "Faktual" },
+  { key: "content", label: "3. Artikel" },
 ];
 
 const WORD_OPTIONS = [600, 800, 1000, 1200, 1500, 2000, 2500, 3000];
@@ -75,13 +77,14 @@ export default function AiAssistPanel({
   onApplyContent,
 }: Props) {
   const [step, setStep] = useState<Step>("titles");
-  const [busy, setBusy] = useState<
-    null | "titles" | "outline" | "content" | "faktual"
-  >(null);
+  const [busy, setBusy] = useState<null | "titles" | "outline" | "content">(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const [topic, setTopic] = useState("");
+  const [category, setCategory] = useState("");
   const [titles, setTitles] = useState<string[]>([]);
   const [selectedTitle, setSelectedTitle] = useState(currentTitle);
   const [outline, setOutline] = useState<OutlineSection[]>([]);
@@ -89,15 +92,13 @@ export default function AiAssistPanel({
   const [articleContent, setArticleContent] = useState<unknown>(null);
   const [articleWordCount, setArticleWordCount] = useState<number | null>(null);
 
-  // --- Artikel faktual (berbasis data BPS/Tavily) ---------------------------
-  const [category, setCategory] = useState("");
-  const [factualContent, setFactualContent] = useState<unknown>(null);
-  const [factualWordCount, setFactualWordCount] = useState<number | null>(null);
-  const [factualSources, setFactualSources] = useState<
+  // --- Hasil grounding data faktual yang menyertai artikel ------------------
+  const [sources, setSources] = useState<
     { source_name: string; source_url: string; provider: string }[]
   >([]);
-  const [factualReasons, setFactualReasons] = useState<string[]>([]);
-  const [factualNeedsReview, setFactualNeedsReview] = useState(false);
+  const [reviewReasons, setReviewReasons] = useState<string[]>([]);
+  const [needsReview, setNeedsReview] = useState(false);
+  const [groundingNote, setGroundingNote] = useState<string | null>(null);
   // Model yang benar-benar dipakai pada permintaan terakhir. Bisa berbeda dari
   // model default bila sistem berotasi karena model pertama timeout/gagal.
   const [usedModel, setUsedModel] = useState<string | null>(null);
@@ -118,10 +119,7 @@ export default function AiAssistPanel({
   );
 
   const run = useCallback(
-    async (
-      kind: "titles" | "outline" | "content" | "faktual",
-      task: () => Promise<void>,
-    ) => {
+    async (kind: "titles" | "outline" | "content", task: () => Promise<void>) => {
       setBusy(kind);
       setError(null);
       setNotice(null);
@@ -180,7 +178,12 @@ export default function AiAssistPanel({
         sections: OutlineSection[];
         model?: string;
         rotated?: boolean;
-      }>("/api/v2/ai/outline", { body: { title }, timeoutMs: 190_000 });
+        // Topik ikut dikirim: judul saja sering membuat model melebar dari
+        // maksud awal penulis. Judul tetap yang mengikat strukturnya.
+      }>("/api/v2/ai/outline", {
+        body: { title, topic: topic.trim() },
+        timeoutMs: 190_000,
+      });
       setOutline(
         (Array.isArray(data.sections) ? data.sections : []).map((section) => ({
           heading: section.heading ?? "",
@@ -231,14 +234,48 @@ export default function AiAssistPanel({
         rotated?: boolean;
         wordCount?: number;
         warning?: string;
+        sources?: {
+          source_name: string;
+          source_url: string;
+          provider: string;
+        }[];
+        grounding?: {
+          primary?: string;
+          reason?: string;
+          fallbackUsed?: boolean;
+          rejected?: number;
+        };
+        validation?: { needsReview?: boolean; reasons?: string[] };
       }>("/api/v2/ai/article", {
-        body: { title, outline: usable, targetWords },
+        // Judul + outline + topik + kategori dikirim bersama: inilah yang
+        // membuat artikel akhir menempel pada judul yang dipilih penulis.
+        body: { title, outline: usable, targetWords, topic: topic.trim(), category: category.trim() },
         // Server memberi maxDuration 300s untuk artikel panjang; timeout klien
         // harus setidaknya sama, kalau tidak permintaan dibatalkan sepihak.
         timeoutMs: 300_000,
       });
 
       setArticleContent(data.content ?? null);
+      setSources(Array.isArray(data.sources) ? data.sources : []);
+      setReviewReasons(
+        Array.isArray(data.validation?.reasons)
+          ? (data.validation?.reasons as string[])
+          : [],
+      );
+      setNeedsReview(Boolean(data.validation?.needsReview));
+      setGroundingNote(
+        data.grounding?.reason
+          ? `${data.grounding.reason}${
+              data.grounding.fallbackUsed
+                ? " Sumber utama tidak memberi hasil, sistem beralih ke sumber cadangan."
+                : ""
+            }${
+              data.grounding.rejected
+                ? ` ${data.grounding.rejected} hasil dibuang karena domainnya tidak tepercaya.`
+                : ""
+            }`
+          : null,
+      );
       const words =
         typeof data.wordCount === "number"
           ? data.wordCount
@@ -267,60 +304,6 @@ export default function AiAssistPanel({
     onApplyContent(articleContent, { topic: topic.trim() });
     setNotice("Artikel diterapkan ke editor.");
   }, [articleContent, onApplyContent, topic]);
-
-  // --- Artikel faktual ------------------------------------------------------
-  const generateFactual = () =>
-    run("faktual", async () => {
-      const trimmed = topic.trim();
-      if (!trimmed) {
-        setError("Masukkan topik terlebih dahulu.");
-        return;
-      }
-      const data = await adminPost<{
-        content: unknown;
-        wordCount?: number;
-        sources?: {
-          source_name: string;
-          source_url: string;
-          provider: string;
-        }[];
-        validation?: { needsReview?: boolean; reasons?: string[] };
-        model?: string;
-        rotated?: boolean;
-      }>("/api/v2/ai/factual-article", {
-        body: { topic: trimmed, category: category.trim(), targetWords },
-        timeoutMs: 300_000,
-      });
-
-      setFactualContent(data.content ?? null);
-      setFactualWordCount(
-        typeof data.wordCount === "number" ? data.wordCount : null,
-      );
-      setFactualSources(Array.isArray(data.sources) ? data.sources : []);
-      const reasons = Array.isArray(data.validation?.reasons)
-        ? (data.validation?.reasons as string[])
-        : [];
-      setFactualReasons(reasons);
-      setFactualNeedsReview(Boolean(data.validation?.needsReview));
-      noteModel(data.model, data.rotated);
-
-      if (data.validation?.needsReview) {
-        setNotice(
-          "Artikel faktual siap, tetapi ada catatan review. Periksa sebelum menerapkan.",
-        );
-      } else {
-        setNotice("Artikel faktual siap dan lolos validasi. Periksa lalu terapkan.");
-      }
-    });
-
-  const applyFactualToEditor = useCallback(() => {
-    if (!factualContent) {
-      setError("Belum ada artikel faktual yang di-generate.");
-      return;
-    }
-    onApplyContent(factualContent, { topic: topic.trim() });
-    setNotice("Artikel faktual diterapkan ke editor.");
-  }, [factualContent, onApplyContent, topic]);
 
   // --- Editor outline -------------------------------------------------------
   const updateHeading = (index: number, value: string) =>
@@ -640,6 +623,29 @@ export default function AiAssistPanel({
                   </p>
                 </div>
 
+                <p className="text-xs text-admin-fg-muted">
+                  Artikel ditulis dari judul dan outline di atas. Sebelum menulis,
+                  sistem mencari data faktual terkini yang relevan (statistik BPS
+                  atau pencarian web, dipilih otomatis dengan cadangan bila yang
+                  pertama gagal). Tautan rujukan hanya diizinkan ke sumber
+                  tepercaya seperti BPS, Wikipedia, dan media besar.
+                </p>
+
+                <div className="space-y-1.5">
+                  <AdminLabel htmlFor="ai-category">
+                    Kategori <span className="text-admin-fg-dim">(opsional)</span>
+                  </AdminLabel>
+                  <AdminInput
+                    id="ai-category"
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    placeholder="Mis. Investasi, KPR, Tips Properti"
+                  />
+                  <p className="text-xs text-admin-fg-dim">
+                    Membantu sistem memilih sumber data yang tepat.
+                  </p>
+                </div>
+
                 <div className="space-y-1.5">
                   <AdminLabel htmlFor="ai-words">Target jumlah kata</AdminLabel>
                   <AdminSelect
@@ -691,6 +697,65 @@ export default function AiAssistPanel({
                         : ""}
                       .
                     </p>
+
+                    {needsReview && reviewReasons.length > 0 ? (
+                      <AdminAlert variant="warning">
+                        <span className="font-semibold">Perlu review:</span>
+                        <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                          {reviewReasons.map((reason, i) => (
+                            <li key={i}>{reason}</li>
+                          ))}
+                        </ul>
+                      </AdminAlert>
+                    ) : (
+                      <AdminAlert variant="success">
+                        Lolos validasi kualitas: panjang, struktur heading,
+                        kutipan sumber, dan angka sesuai data.
+                      </AdminAlert>
+                    )}
+
+                    {groundingNote ? (
+                      <p className="text-[11px] text-admin-fg-dim">
+                        {groundingNote}
+                      </p>
+                    ) : null}
+
+                    {sources.length > 0 ? (
+                      <div className="rounded-lg border border-admin-border p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-admin-fg-dim">
+                          Sumber data ({sources.length})
+                        </p>
+                        <ul className="mt-1.5 space-y-1.5">
+                          {sources.map((source, i) => (
+                            <li key={i} className="text-xs">
+                              <a
+                                href={source.source_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-admin-accent-soft-fg underline"
+                              >
+                                {source.source_name}
+                              </a>
+                              <span className="ml-1 text-admin-fg-dim">
+                                ({source.provider})
+                              </span>
+                              {/* URL ditampilkan penuh agar penulis bisa
+                                  memverifikasi domainnya, bukan hanya nama. */}
+                              <span className="mt-0.5 block break-all font-mono text-[10px] text-admin-fg-dim">
+                                {source.source_url}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-admin-fg-dim">
+                        Tidak ada sumber tepercaya yang berhasil diambil; artikel
+                        ditulis kualitatif tanpa angka statistik dan tanpa tautan
+                        eksternal.
+                      </p>
+                    )}
+
                     <div className="flex flex-wrap gap-2">
                       <AdminButton variant="secondary" onClick={applyArticleToEditor}>
                         <Check className="h-4 w-4" />
@@ -707,160 +772,14 @@ export default function AiAssistPanel({
                     </div>
                     <p className="text-[11px] text-admin-fg-dim">
                       Menerapkan akan MENGGANTI seluruh isi editor, termasuk
-                      kerangka outline yang sudah ada.
+                      kerangka outline yang sudah ada. Tautan yang terpasang bisa
+                      diperiksa di kartu &quot;Tautan di Artikel&quot;.
                     </p>
                   </div>
                 ) : null}
               </div>
             ) : null}
 
-            {/* --- Faktual: artikel berbasis data (BPS/Tavily) ------------ */}
-            {step === "faktual" ? (
-              <div className="space-y-4">
-                <p className="text-xs text-admin-fg-muted">
-                  Menulis artikel berbasis data faktual. Sistem memilih sumber
-                  (statistik BPS dan/atau pencarian web), lalu menulis artikel
-                  yang mengutip 1-2 sumber secara natural. Angka yang tidak ada
-                  di sumber akan ditandai untuk review.
-                </p>
-
-                <div className="space-y-1.5">
-                  <AdminLabel htmlFor="ai-factual-topic">Topik</AdminLabel>
-                  <AdminTextarea
-                    id="ai-factual-topic"
-                    className="min-h-20"
-                    value={topic}
-                    onChange={(event) => setTopic(event.target.value)}
-                    placeholder="Mis. tren harga properti dan daya beli rumah di kawasan Bogor"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <AdminLabel htmlFor="ai-factual-category">Kategori</AdminLabel>
-                  <AdminInput
-                    id="ai-factual-category"
-                    value={category}
-                    onChange={(event) => setCategory(event.target.value)}
-                    placeholder="Mis. Investasi, KPR, Tips Properti"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <AdminLabel htmlFor="ai-factual-words">
-                    Target jumlah kata
-                  </AdminLabel>
-                  <AdminSelect
-                    id="ai-factual-words"
-                    value={String(targetWords)}
-                    onChange={(event) =>
-                      setTargetWords(Number(event.target.value))
-                    }
-                  >
-                    {WORD_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option.toLocaleString("id-ID")} kata
-                      </option>
-                    ))}
-                  </AdminSelect>
-                </div>
-
-                <AdminButton
-                  variant="primary"
-                  onClick={() => void generateFactual()}
-                  disabled={busy !== null || !topic.trim()}
-                >
-                  <Wand2 className="h-4 w-4" />
-                  {busy === "faktual"
-                    ? "Meriset & menulis…"
-                    : factualContent
-                      ? "Generate ulang"
-                      : "Generate Artikel Faktual"}
-                </AdminButton>
-
-                {busy === "faktual" ? (
-                  <p className="text-xs text-admin-fg-muted">
-                    Sedang meriset sumber lalu menulis. Ini bisa memakan satu
-                    sampai beberapa menit — jangan tutup halaman.
-                  </p>
-                ) : null}
-
-                {factualContent ? (
-                  <div className="space-y-3 border-t border-admin-border pt-3">
-                    <p className="text-sm text-admin-fg">
-                      Artikel faktual selesai
-                      {factualWordCount
-                        ? ` (~${factualWordCount.toLocaleString("id-ID")} kata)`
-                        : ""}
-                      .
-                    </p>
-
-                    {factualNeedsReview && factualReasons.length > 0 ? (
-                      <AdminAlert variant="warning">
-                        <span className="font-semibold">Perlu review:</span>
-                        <ul className="mt-1 list-disc space-y-0.5 pl-4">
-                          {factualReasons.map((reason, i) => (
-                            <li key={i}>{reason}</li>
-                          ))}
-                        </ul>
-                      </AdminAlert>
-                    ) : (
-                      <AdminAlert variant="success">
-                        Lolos validasi kualitas (kutipan sumber, panjang,
-                        struktur, dan angka sesuai data).
-                      </AdminAlert>
-                    )}
-
-                    {factualSources.length > 0 ? (
-                      <div className="rounded-lg border border-admin-border p-3">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-admin-fg-dim">
-                          Sumber ({factualSources.length})
-                        </p>
-                        <ul className="mt-1.5 space-y-1.5">
-                          {factualSources.map((source, i) => (
-                            <li key={i} className="text-xs">
-                              <a
-                                href={source.source_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-admin-accent-soft-fg underline"
-                              >
-                                {source.source_name}
-                              </a>
-                              <span className="ml-1 text-admin-fg-dim">
-                                ({source.provider})
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <p className="text-[11px] text-admin-fg-dim">
-                        Tidak ada sumber eksternal yang berhasil diambil;
-                        artikel ditulis kualitatif.
-                      </p>
-                    )}
-
-                    <div className="flex flex-wrap gap-2">
-                      <AdminButton variant="secondary" onClick={applyFactualToEditor}>
-                        <Check className="h-4 w-4" />
-                        Terapkan ke Editor
-                      </AdminButton>
-                      <AdminButton
-                        variant="ghost"
-                        onClick={() => void generateFactual()}
-                        disabled={busy !== null}
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                        Coba lagi
-                      </AdminButton>
-                    </div>
-                    <p className="text-[11px] text-admin-fg-dim">
-                      Menerapkan akan MENGGANTI seluruh isi editor.
-                    </p>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
           </div>
 
           <footer className="flex items-center justify-between gap-2 border-t border-admin-border px-5 py-3">

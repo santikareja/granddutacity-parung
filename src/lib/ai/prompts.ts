@@ -19,6 +19,7 @@ import {
   jsonContract,
 } from "./brand-facts";
 import type { ChatMessage } from "./client";
+import type { ToolSource } from "./factual/sources";
 
 // Kandidat tautan internal ke artikel lain, disuplai route dari artikel yang
 // benar-benar sudah published. AI TIDAK boleh mengarang slug; ia hanya boleh
@@ -84,13 +85,21 @@ ${jsonContract(`{"titles": ["judul 1", "judul 2", ..., "judul ${count}"]}`, [
 // Outline
 // ---------------------------------------------------------------------------
 
-export const buildOutlinePrompt = (title: string): ChatMessage[] => [
+export const buildOutlinePrompt = (
+  title: string,
+  topic = "",
+): ChatMessage[] => [
   {
     role: "system",
     content: `${FOUNDATION}
 
 TUGAS
 Susun kerangka (outline) artikel dari judul yang sudah dipilih pengguna.
+
+KETERIKATAN PADA JUDUL (WAJIB)
+- Kerangka ini HARUS menjadi turunan langsung dari judul. Setiap bagian wajib membantu menuntaskan janji judul.
+- Jangan berpindah topik, jangan memperluas cakupan ke hal yang tidak dijanjikan judul.
+- Bila judul menyebut angka (mis. "7 Hal"), jumlah bagian inti harus konsisten dengan angka itu.
 
 STRUKTUR
 - 5-8 bagian H2. Setiap H2 boleh memiliki 0-4 sub-bagian H3.
@@ -123,7 +132,13 @@ ${jsonContract(
   },
   {
     role: "user",
-    content: `Judul artikel: ${title}`,
+    // Topik asli disertakan sebagai konteks niat penulis. Judul tetap yang
+    // mengikat; topik hanya menjelaskan sudut yang dimaksud saat judul dibuat.
+    content: topic.trim()
+      ? `Judul artikel: ${title}
+
+Topik/brief asli penulis (konteks niat, jangan menggantikan judul): ${topic.trim()}`
+      : `Judul artikel: ${title}`,
   },
 ];
 
@@ -142,11 +157,24 @@ export const buildArticlePrompt = (
   outline: OutlineSection[],
   targetWords: number = DEFAULT_ARTICLE_WORDS,
   relatedArticles: RelatedArticle[] = [],
+  sources: ToolSource[] = [],
+  topic = "",
 ): ChatMessage[] => {
   // Daftar artikel yang boleh ditautkan (maksimal beberapa agar prompt ringkas).
   const relatedList = relatedArticles
     .slice(0, 6)
     .map((a) => `  ${a.path} — ${a.title}`)
+    .join("\n");
+
+  // Sumber data faktual yang sudah tersaring otoritasnya oleh sistem. Model
+  // hanya melihat daftar ini, jadi ia tidak mungkin menautkan domain pesaing.
+  const sourcesList = sources
+    .map(
+      (source, index) =>
+        `  [${index + 1}] ${source.source_name} — ${source.source_url}\n      ${source.data_summary}${
+          source.tahun_data ? ` (tahun data: ${source.tahun_data})` : ""
+        }`,
+    )
     .join("\n");
   const outlineText = outline
     .map((section, index) => {
@@ -192,23 +220,46 @@ ISI
 - Sertakan hal yang perlu dipertimbangkan atau dicek pembaca, bukan hanya sisi positif. Ini yang membedakan artikel kredibel dari brosur.
 - Boleh menyebut karakter kawasan dan nama cluster/tipe yang ada di daftar fakta. Jangan menyebut angka harga, cicilan, luas, atau stok.
 
-TAUTAN INTERNAL (batas sangat ketat)
-- MAKSIMAL 1 tautan internal di seluruh isi artikel, dan itu HANYA boleh menuju salah satu artikel pada daftar di bawah.
-- Sisipkan tautan itu HANYA bila ada artikel yang topiknya benar-benar relevan dengan salah satu kalimatmu. Bila tidak ada yang relevan, JANGAN menautkan apa pun — nol tautan lebih baik daripada tautan yang dipaksakan.
-- Pakai PERSIS path dari daftar. Dilarang mengarang path/slug lain. Dilarang menautkan halaman statis (cluster, pricelist, lokasi, dll.) maupun domain luar.
-- Anchor teks harus deskriptif dan menyatu dalam kalimat. Dilarang "klik di sini", "baca selengkapnya", atau menautkan seluruh kalimat.
-- JANGAN menulis tautan ke homepage/beranda sendiri. Sistem menambahkan satu tautan CTA ke homepage secara otomatis di akhir artikel; menulisnya sendiri membuat tautan ganda.
+${
+  sourcesList
+    ? `DATA FAKTUAL YANG TERSEDIA (hasil pencarian sistem — HANYA ini yang boleh menjadi dasar angka & klaim faktual)
+${sourcesList}
+
+CARA MEMAKAI DATA
+- Setiap angka, persentase, atau klaim faktual yang kamu tulis WAJIB dapat dilacak ke salah satu sumber di atas. Bila sebuah klaim tidak didukung data di atas, tulis secara kualitatif tanpa angka, atau lewati klaim itu.
+- Jalin data ke dalam argumen. Jangan menempelkan blok "menurut data ..." yang terputus dari pembahasan.
+- Kaitkan data makro dengan implikasi praktis bagi pembaca yang sedang mempertimbangkan hunian. Data mentah tanpa tafsir tidak bernilai.
+- Sebutkan tahun data bila relevan agar pembaca tahu kebaruannya.`
+    : `TIDAK ADA data eksternal yang tersedia untuk topik ini. Tulis artikel secara KUALITATIF: tanpa angka statistik spesifik, tanpa persentase, dan TANPA tautan eksternal apa pun.`
+}
+
+KEBIJAKAN TAUTAN (batas keras — patuhi persis)
+
+A. TAUTAN INTERNAL — total maksimal 3 di seluruh artikel, minimal 1.
+- Sistem OTOMATIS menambahkan 1 tautan ke homepage di akhir artikel. Itu sudah memenuhi syarat minimal 1 dan sudah dihitung sebagai 1 dari 3.
+- Karena itu kamu boleh menulis MAKSIMAL 2 tautan internal lagi di dalam isi, dan HANYA ke path dari daftar di bawah.
+- JANGAN menulis tautan ke homepage/beranda sendiri. Sistem menanganinya; menulisnya sendiri membuat tautan ganda.
+- Sisipkan hanya bila benar-benar relevan dengan kalimat tempatnya berada. Nol tautan tambahan lebih baik daripada tautan yang dipaksakan.
+- Pakai PERSIS path dari daftar. Dilarang mengarang path/slug.
+- Anchor teks deskriptif dan menyatu dalam kalimat. Dilarang "klik di sini", "baca selengkapnya", atau menautkan seluruh kalimat.
 ${
   relatedList
-    ? `\nDAFTAR ARTIKEL YANG BOLEH DITAUTKAN (pilih maksimal satu, hanya bila relevan):\n${relatedList}`
-    : "\nTIDAK ADA artikel relevan yang tersedia untuk ditautkan. Tulis artikel TANPA tautan internal di dalam isi."
+    ? `\nDAFTAR ARTIKEL YANG BOLEH DITAUTKAN (pilih maksimal dua, hanya bila relevan):\n${relatedList}`
+    : "\nTIDAK ADA artikel internal yang tersedia untuk ditautkan. Tulis artikel TANPA tautan internal tambahan di dalam isi."
 }
+
+B. TAUTAN EKSTERNAL — maksimal 2, dan HANYA ke source_url pada daftar DATA FAKTUAL di atas.
+- Pakai URL lengkap PERSIS seperti tertulis di daftar sumber. Dilarang menyingkat, menebak, atau memodifikasi URL.
+- Tautkan hanya untuk mendukung angka/klaim faktual, disisipkan natural di dalam kalimat. Contoh gaya: "Berdasarkan data <a href="URL">Badan Pusat Statistik</a>, indeks harga properti residensial ...".
+- DILARANG KERAS menautkan domain apa pun yang tidak ada di daftar sumber. Secara khusus dilarang menautkan situs pengembang properti lain, portal jual-beli properti, marketplace, atau blog acak — itu merugikan situs ini.
+- JANGAN membuat daftar "Referensi"/"Sumber" terpisah di akhir artikel. Tautan harus menyatu dalam kalimat.
+- Bila daftar DATA FAKTUAL kosong, tulis TANPA tautan eksternal sama sekali.
 
 KONTRAK KELUARAN (WAJIB)
 - Balas HANYA dengan potongan HTML isi artikel. Tanpa penjelasan, tanpa catatan, tanpa code fence, tanpa markdown.
 - JANGAN memakai <h1>. Judul artikel sudah menjadi H1 di halaman.
 - JANGAN memakai <html>, <head>, <body>, <script>, <style>, <iframe>, atau atribut style/class.
-- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a href="/...">, <table>, <thead>, <tbody>, <tr>, <th>, <td>.
+- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a href="/..."> untuk internal, <a href="https://..."> HANYA untuk source_url dari daftar sumber, <table>, <thead>, <tbody>, <tr>, <th>, <td>.
 - Bila menyajikan perbandingan, pakai <table> lengkap dengan <thead> berisi <th>, dan <tbody> berisi <td>. Setiap baris harus punya jumlah sel yang sama. Isi tabel tidak boleh berupa angka harga.
 - Daftar bertingkat ditulis sebagai <ul> di dalam <li>, bukan dengan indentasi teks.
 - JANGAN menulis paragraf penutup berisi ajakan ke homepage; sistem menambahkan CTA itu otomatis. Menulisnya sendiri akan membuat CTA ganda.`,
@@ -216,11 +267,13 @@ KONTRAK KELUARAN (WAJIB)
     {
       role: "user",
       content: `Judul: ${title}
-
-Kerangka yang disetujui:
+${topic.trim() ? `\nTopik/brief asli penulis (konteks, bukan pengganti judul): ${topic.trim()}\n` : ""}
+Kerangka yang disetujui (WAJIB diikuti urutan dan cakupannya):
 ${outlineText}
 
-Target panjang: ${targetWords} kata.`,
+Target panjang: ${targetWords} kata.
+
+Artikel harus menuntaskan janji judul di atas menggunakan kerangka itu. Jangan menulis artikel tentang hal lain.`,
     },
   ];
 };
@@ -264,7 +317,7 @@ YANG DILARANG DIUBAH
 KONTRAK KELUARAN (WAJIB)
 - Balas HANYA dengan potongan HTML isi artikel final. Tanpa penjelasan, tanpa catatan, tanpa code fence, tanpa markdown.
 - JANGAN memakai <h1>, <html>, <head>, <body>, <script>, <style>, <iframe>, atau atribut style/class.
-- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a href="/...">, <table>, <thead>, <tbody>, <tr>, <th>, <td>.
+- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a> (internal maupun eksternal, href dipertahankan apa adanya), <table>, <thead>, <tbody>, <tr>, <th>, <td>.
 - JANGAN menulis paragraf penutup berisi ajakan ke homepage; sistem menambahkannya otomatis.`,
   },
   {

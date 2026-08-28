@@ -11,7 +11,9 @@ import {
   ArrowLeft,
   ExternalLink,
   ImageIcon,
+  Link2,
   Plus,
+  Send,
   Sparkles,
   Trash2,
 } from "lucide-react";
@@ -28,9 +30,11 @@ import MediaPickerDialog, {
 import AiAssistPanel from "./ai-assist-panel";
 import {
   createEmptyState,
+  extractLinks,
   prepareStateForEditor,
   prepareStateForStorage,
   slugify,
+  summarizeLinks,
 } from "@/lib/v2-admin/lexical";
 import {
   AdminAlert,
@@ -372,6 +376,51 @@ export default function ArticleForm({
   const liveSlug =
     savedSlug || (form.slug ? slugify(form.slug) : slugify(form.title));
 
+  // --- Cross-post Tumblr (manual) -------------------------------------------
+  const [tumblrBusy, setTumblrBusy] = useState(false);
+  const [tumblrNotice, setTumblrNotice] = useState<string | null>(null);
+
+  const crossPostTumblr = useCallback(
+    async (force: boolean) => {
+      const id = articleIdRef.current;
+      if (!id) {
+        setError("Simpan dan publish artikel terlebih dahulu.");
+        return;
+      }
+
+      setTumblrBusy(true);
+      setTumblrNotice(null);
+      setError(null);
+      try {
+        const data = await adminPost<{ message?: string; postId?: string }>(
+          `/api/v2/articles/${id}/tumblr`,
+          { body: { force }, timeoutMs: 60_000 },
+        );
+        setTumblrNotice(data.message ?? "Berhasil dipost ke Tumblr.");
+      } catch (err) {
+        const message =
+          err instanceof AdminClientError || err instanceof Error
+            ? err.message
+            : "Gagal cross-post ke Tumblr.";
+        // 409 = sudah pernah dipost. Tawarkan kirim ulang alih-alih diam.
+        if (err instanceof AdminClientError && err.status === 409) {
+          setTumblrNotice(`${message} Tekan "Kirim ulang" bila tetap ingin.`);
+        } else {
+          setError(message);
+        }
+      } finally {
+        setTumblrBusy(false);
+      }
+    },
+    [],
+  );
+
+  // Inventaris tautan yang benar-benar ada di konten editor saat ini. Dihitung
+  // dari state Lexical, jadi selalu mencerminkan isi terkini tanpa perlu simpan.
+  const contentLinks = extractLinks(form.content);
+  const linkSummary = summarizeLinks(contentLinks);
+  const internalTotal = linkSummary.internal + linkSummary.homepage;
+
   return (
     // Saat panel AI terbuka, sisakan ruang di kanan pada layar lebar agar panel
     // tidak menutupi sidebar form. Di layar kecil panel memang menutupi penuh.
@@ -456,6 +505,21 @@ export default function ArticleForm({
       </header>
 
       {error ? <AdminAlert>{error}</AdminAlert> : null}
+      {tumblrNotice ? (
+        <AdminAlert variant="info">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span>{tumblrNotice}</span>
+            <AdminButton
+              size="sm"
+              variant="ghost"
+              onClick={() => void crossPostTumblr(true)}
+              disabled={tumblrBusy}
+            >
+              Kirim ulang
+            </AdminButton>
+          </div>
+        </AdminAlert>
+      ) : null}
 
       <div
         className={`grid grid-cols-1 gap-4 ${
@@ -504,6 +568,100 @@ export default function ArticleForm({
                   &ldquo;Perbarui&rdquo; untuk menerapkan perubahan ke situs.
                 </AdminAlert>
               ) : null}
+
+              {/* Cross-post manual hanya relevan setelah artikel tayang: Tumblr
+                  perlu URL live yang bisa diakses pembaca. */}
+              {form.status === "published" && articleId ? (
+                <div className="space-y-1.5 border-t border-admin-border pt-3">
+                  <AdminButton
+                    variant="secondary"
+                    onClick={() => void crossPostTumblr(false)}
+                    disabled={tumblrBusy}
+                    className="w-full"
+                  >
+                    <Send className="h-4 w-4" />
+                    {tumblrBusy ? "Mengirim ke Tumblr…" : "Cross-post ke Tumblr"}
+                  </AdminButton>
+                  <p className="text-xs text-admin-fg-dim">
+                    Membuat link post berisi judul, URL artikel, dan ringkasan.
+                    Artikel yang baru dipublish biasanya sudah terkirim otomatis.
+                  </p>
+                </div>
+              ) : null}
+            </AdminCardBody>
+          </AdminCard>
+
+          {/* Inventaris tautan: sebelumnya href hanya tersimpan di dalam state
+              Lexical dan tidak pernah terlihat, sehingga tautan ke domain yang
+              tidak diinginkan bisa lolos tanpa disadari. */}
+          <AdminCard>
+            <AdminCardBody>
+              <AdminCardTitle>Tautan di Artikel</AdminCardTitle>
+              {contentLinks.length === 0 ? (
+                <p className="text-xs text-admin-fg-dim">
+                  Belum ada tautan di konten. Satu tautan ke homepage
+                  ditambahkan otomatis saat artikel disimpan.
+                </p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-1.5">
+                    <AdminBadge tone={internalTotal > 3 ? "warning" : "success"}>
+                      Internal {internalTotal}/3
+                    </AdminBadge>
+                    <AdminBadge
+                      tone={linkSummary.external > 2 ? "warning" : "neutral"}
+                    >
+                      Eksternal {linkSummary.external}
+                    </AdminBadge>
+                    {linkSummary.homepage === 0 ? (
+                      <AdminBadge tone="warning">Homepage belum ada</AdminBadge>
+                    ) : null}
+                  </div>
+
+                  {internalTotal > 3 ? (
+                    <AdminAlert variant="warning">
+                      Tautan internal melebihi batas 3. Hapus yang paling tidak
+                      relevan agar artikel tidak terbaca seperti spam tautan.
+                    </AdminAlert>
+                  ) : null}
+
+                  <ul className="space-y-2">
+                    {contentLinks.map((link, index) => (
+                      <li
+                        key={`${link.url}-${index}`}
+                        className="rounded-lg border border-admin-border p-2"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <Link2
+                            className="h-3 w-3 shrink-0 text-admin-fg-dim"
+                            aria-hidden
+                          />
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-admin-fg-dim">
+                            {link.kind === "homepage"
+                              ? "Homepage"
+                              : link.kind === "internal"
+                                ? "Internal"
+                                : "Eksternal"}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-admin-fg">
+                          {link.anchor || <em>(tanpa teks anchor)</em>}
+                        </p>
+                        {/* URL ditampilkan penuh dan bisa dibuka, supaya penulis
+                            bisa memverifikasi tujuan tautan sebelum publish. */}
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-0.5 block break-all font-mono text-[10px] text-admin-accent-soft-fg underline"
+                        >
+                          {link.url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </AdminCardBody>
           </AdminCard>
 

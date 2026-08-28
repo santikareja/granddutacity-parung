@@ -404,3 +404,101 @@ export const slugify = (value: string): string =>
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+
+// --- Inventaris tautan -------------------------------------------------------
+//
+// Penulis perlu bisa MELIHAT tautan apa saja yang terpasang di artikel: sebelum
+// ini href hanya tersimpan di dalam state Lexical dan tidak pernah ditampilkan,
+// sehingga tautan salah (mis. ke domain pesaing) lolos tanpa disadari.
+//
+// Fungsi murni, aman dipanggil dari komponen client (tidak menyentuh jsdom/DB).
+
+export type ArticleLinkKind = "homepage" | "internal" | "external";
+
+export type ArticleLink = {
+  url: string;
+  /** Teks anchor yang terlihat pembaca. */
+  anchor: string;
+  kind: ArticleLinkKind;
+};
+
+const HOMEPAGE_HOSTS = new Set([
+  "granddutacitysouthofjakarta.com",
+  "www.granddutacitysouthofjakarta.com",
+]);
+
+// Klasifikasi tautan. CTA ke homepage sengaja dipisah dari "internal" biasa
+// supaya penulis bisa memastikan kuota tautan internal (maksimal 3, minimal 1
+// yaitu homepage) benar-benar terpenuhi.
+const classifyUrl = (url: string): ArticleLinkKind => {
+  const trimmed = url.trim();
+  if (trimmed.startsWith("/")) return "internal";
+
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.toLowerCase();
+    if (!HOMEPAGE_HOSTS.has(host)) return "external";
+    // Domain sendiri: root = CTA homepage, path lain = tautan internal absolut.
+    return parsed.pathname.replace(/\/+$/, "").length === 0
+      ? "homepage"
+      : "internal";
+  } catch {
+    // Bukan URL absolut yang valid dan bukan path root-relative.
+    return "external";
+  }
+};
+
+// Ambil url dari node link, mendukung kedua bentuk: `fields.url` (gaya Payload,
+// bentuk penyimpanan) dan `url` di level atas (bentuk editor Lexical).
+const linkUrlOf = (node: LexNode): string => {
+  const top = typeof node.url === "string" ? node.url : "";
+  if (top) return top;
+  const fields = (node.fields ?? {}) as { url?: unknown };
+  return typeof fields.url === "string" ? fields.url : "";
+};
+
+const walkLinks = (node: LexNode | null | undefined, out: ArticleLink[]): void => {
+  if (!node) return;
+
+  if (node.type && LINK_TYPES.has(node.type)) {
+    const url = linkUrlOf(node).trim();
+    if (url) {
+      out.push({
+        url,
+        anchor: collectText(node).trim(),
+        kind: classifyUrl(url),
+      });
+    }
+    // Tautan tidak bersarang di dalam tautan; tidak perlu turun lebih jauh.
+    return;
+  }
+
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) walkLinks(child, out);
+  }
+};
+
+/**
+ * Kumpulkan seluruh tautan di dalam sebuah Lexical state, berurutan sesuai
+ * kemunculannya di artikel. Duplikat TIDAK dihapus: dua tautan ke URL yang sama
+ * memang dua tautan, dan penulis perlu melihatnya untuk menilai spam.
+ */
+export const extractLinks = (state: unknown): ArticleLink[] => {
+  if (!state || typeof state !== "object" || !("root" in state)) return [];
+  const root = (state as { root?: { children?: LexNode[] } }).root;
+  if (!root || !Array.isArray(root.children)) return [];
+
+  const out: ArticleLink[] = [];
+  for (const child of root.children) walkLinks(child, out);
+  return out;
+};
+
+/** Ringkasan jumlah tautan per jenis — dipakai untuk badge di UI editor. */
+export const summarizeLinks = (
+  links: ArticleLink[],
+): { homepage: number; internal: number; external: number; total: number } => ({
+  homepage: links.filter((l) => l.kind === "homepage").length,
+  internal: links.filter((l) => l.kind === "internal").length,
+  external: links.filter((l) => l.kind === "external").length,
+  total: links.length,
+});

@@ -21,6 +21,10 @@ import { htmlToLexicalState } from "@/lib/v2-admin/html-to-lexical";
 import { ensureCta } from "@/lib/v2-admin/lexical";
 import { sanitizeAiHtml } from "@/lib/ai/sanitize-html";
 import { logAiTask } from "@/lib/v2-admin/ai-tasks";
+import { gatherGroundingSources } from "@/lib/ai/factual/ground";
+import { planGrounding } from "@/lib/ai/factual/plan";
+import { validateArticleQuality } from "@/lib/ai/factual/validate";
+import type { ToolSource } from "@/lib/ai/factual/sources";
 
 export const runtime = "nodejs";
 // Generasi artikel panjang bisa memakan waktu lama. AI_BUDGETS.long menjaga
@@ -40,8 +44,13 @@ const countWords = (html: string): number =>
     .filter((word) => word.length > 0).length;
 
 // POST /api/v2/ai/article
-// { title, outline, targetWords?, providerId?, model? }
-//   → { html, content, model, providerName?, rotated, wordCount, warning? }
+// { title, outline, targetWords?, topic?, category?, grounding?, providerId?, model? }
+//   → { html, content, model, providerName?, rotated, wordCount, sources,
+//       grounding, validation, warning? }
+//
+// Satu jalur untuk SEMUA generasi artikel. Urutannya terikat: judul → outline →
+// grounding data faktual → penulis → editor → validasi. Tidak ada lagi jalur
+// "artikel faktual" terpisah yang menulis tanpa melihat judul/outline.
 export async function POST(request: Request) {
   const guard = await requireApiUser();
   if (!guard.ok) return guard.response;
@@ -50,6 +59,9 @@ export async function POST(request: Request) {
     title?: unknown;
     outline?: unknown;
     targetWords?: unknown;
+    topic?: unknown;
+    category?: unknown;
+    grounding?: unknown;
     providerId?: unknown;
     model?: unknown;
   };
@@ -93,6 +105,12 @@ export async function POST(request: Request) {
         )
       : DEFAULT_ARTICLE_WORDS;
 
+  const topic = typeof body.topic === "string" ? body.topic.trim() : "";
+  const category = typeof body.category === "string" ? body.category.trim() : "";
+  // Grounding aktif secara default. Penulis bisa mematikannya (grounding: false)
+  // bila ingin artikel murni kualitatif tanpa menunggu pencarian data.
+  const groundingEnabled = body.grounding !== false;
+
   // Anggaran token harus mengikuti target panjang. Dengan maxTokens tetap 4000,
   // artikel 2.000+ kata terpotong di tengah tag HTML dan hasil konversinya
   // rusak. Faktor 3.2 memberi ruang untuk kata Indonesia (>1 token/kata) plus
@@ -116,11 +134,63 @@ export async function POST(request: Request) {
     relatedArticles = [];
   }
 
+  // --- TAHAP GROUNDING: ambil data faktual terkini ---
+  //
+  // Rencana dibuat DETERMINISTIK dari judul + outline (lihat plan.ts), bukan
+  // lewat panggilan model tambahan: menghemat satu round-trip pada jalur yang
+  // sudah mendekati maxDuration, dan membuat pemilihan tool bisa diuji.
+  // Satu tool dicoba lebih dulu; bila tidak menghasilkan sumber layak, sistem
+  // beralih ke tool lainnya. Seluruh hasil disaring allowlist otoritas.
+  let sources: ToolSource[] = [];
+  let groundingMeta: {
+    enabled: boolean;
+    primary?: string;
+    reason?: string;
+    fallbackUsed?: boolean;
+    attempts?: { tool: string; provider: string | null; kept: number }[];
+    rejected?: number;
+  } = { enabled: groundingEnabled };
+
+  if (groundingEnabled) {
+    try {
+      const plan = planGrounding({ title, outline, topic, category });
+      const grounded = await gatherGroundingSources(plan);
+      sources = grounded.sources;
+      groundingMeta = {
+        enabled: true,
+        primary: plan.primary,
+        reason: plan.reason,
+        fallbackUsed: grounded.fallbackUsed,
+        attempts: grounded.attempts.map((a) => ({
+          tool: a.tool,
+          provider: a.provider,
+          kept: a.kept,
+        })),
+        rejected: grounded.rejectedUrls.length,
+      };
+    } catch (groundingError) {
+      // Grounding bersifat penambah kualitas, bukan syarat. Kegagalannya tidak
+      // boleh menggagalkan penulisan artikel.
+      console.warn(
+        "[api/v2/ai/article] grounding gagal, lanjut tanpa data eksternal:",
+        groundingError instanceof Error ? groundingError.message : groundingError,
+      );
+      groundingMeta = { enabled: true, attempts: [], rejected: 0 };
+    }
+  }
+
   try {
     // --- PASS 1: PENULIS ---
     const result = await runAiTask<string>({
       candidates,
-      messages: buildArticlePrompt(title, outline, targetWords, relatedArticles),
+      messages: buildArticlePrompt(
+        title,
+        outline,
+        targetWords,
+        relatedArticles,
+        sources,
+        topic,
+      ),
       budget: AI_BUDGETS.articleWriter,
       temperature: 0.8,
       maxTokens,
@@ -189,10 +259,20 @@ export async function POST(request: Request) {
         ? `Artikel hanya ~${wordCount} kata dari target ${targetWords}. Anda bisa generate ulang atau melengkapinya manual.`
         : undefined;
 
+    // Validasi kualitas: mendeteksi angka tanpa sumber, tautan eksternal yang
+    // tidak cocok dengan sumber, panjang, dan jumlah heading. Hanya menandai
+    // untuk ditinjau — tidak pernah memblokir hasil.
+    const validation = validateArticleQuality(finalHtml, sources, {
+      minWords: Math.round(targetWords * 0.7),
+      maxWords: Math.round(targetWords * 1.4),
+      // Tanpa sumber, tidak ada kutipan yang bisa diwajibkan.
+      minExternalLinks: sources.length > 0 ? 1 : 0,
+    });
+
     void logAiTask({
       type: "article",
       status: "completed",
-      input: { title, sections: outline.length, targetWords },
+      input: { title, sections: outline.length, targetWords, topic, category },
       output: {
         htmlLength: html.length,
         wordCount,
@@ -201,6 +281,9 @@ export async function POST(request: Request) {
         attempts: result.attempts.length,
         edited,
         editorModel,
+        grounding: groundingMeta,
+        sources: sources.map((s) => s.source_url),
+        needsReview: validation.needsReview,
       },
       userId: guard.user.id,
     });
@@ -213,6 +296,9 @@ export async function POST(request: Request) {
       rotated: result.rotated,
       edited,
       wordCount,
+      sources,
+      grounding: groundingMeta,
+      validation,
       ...(warning ? { warning } : {}),
     });
   } catch (error) {

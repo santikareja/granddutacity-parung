@@ -7,9 +7,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildArticlePrompt,
   buildEditorPrompt,
+  buildOutlinePrompt,
   buildTitlesPrompt,
   type RelatedArticle,
 } from "@/lib/ai/prompts";
+import type { ToolSource } from "@/lib/ai/factual/sources";
 
 const systemOf = (messages: { role: string; content: string }[]): string =>
   messages.find((m) => m.role === "system")?.content ?? "";
@@ -20,10 +22,11 @@ const userOf = (messages: { role: string; content: string }[]): string =>
 describe("buildArticlePrompt — kebijakan tautan internal", () => {
   const outline = [{ heading: "Bagian 1", subheadings: ["Sub"] }];
 
-  it("membatasi maksimal 1 tautan internal dan bukan 3", () => {
+  it("membatasi total 3 tautan internal, maksimal 2 ditulis model", () => {
     const sys = systemOf(buildArticlePrompt("Judul", outline, 1000, []));
-    expect(sys).toContain("MAKSIMAL 1 tautan internal");
-    expect(sys).not.toContain("MAKSIMAL 3 tautan");
+    // Kuota: 1 CTA homepage dari sistem + maksimal 2 dari model = 3.
+    expect(sys).toContain("total maksimal 3 di seluruh artikel, minimal 1");
+    expect(sys).toContain("MAKSIMAL 2 tautan internal");
   });
 
   it("melarang menautkan homepage sendiri (ditangani sistem)", () => {
@@ -44,8 +47,89 @@ describe("buildArticlePrompt — kebijakan tautan internal", () => {
 
   it("saat tidak ada kandidat, memerintahkan menulis tanpa tautan internal", () => {
     const sys = systemOf(buildArticlePrompt("Judul", outline, 1000, []));
-    expect(sys).toContain("TIDAK ADA artikel relevan");
+    expect(sys).toContain("TIDAK ADA artikel internal");
     expect(sys).toMatch(/TANPA tautan internal/i);
+  });
+});
+
+describe("buildArticlePrompt — kebijakan tautan eksternal & grounding", () => {
+  const outline = [{ heading: "Bagian 1", subheadings: ["Sub"] }];
+
+  const source = (url: string, name = "Badan Pusat Statistik"): ToolSource => ({
+    source_name: name,
+    source_url: url,
+    data_summary: "Ringkasan data uji.",
+    tahun_data: "2026",
+    retrieved_at: new Date().toISOString(),
+    provider: "bps",
+  });
+
+  it("tanpa sumber: melarang tautan eksternal & angka statistik", () => {
+    const sys = systemOf(buildArticlePrompt("Judul", outline, 1000, []));
+    expect(sys).toContain("TIDAK ADA data eksternal");
+    expect(sys).toMatch(/TANPA tautan eksternal/i);
+  });
+
+  it("dengan sumber: URL dicantumkan dan dibatasi maksimal 2 tautan", () => {
+    const sys = systemOf(
+      buildArticlePrompt("Judul", outline, 1000, [], [
+        source("https://www.bps.go.id/"),
+      ]),
+    );
+    expect(sys).toContain("https://www.bps.go.id/");
+    expect(sys).toContain("DATA FAKTUAL YANG TERSEDIA");
+    expect(sys).toContain("maksimal 2, dan HANYA ke source_url");
+  });
+
+  it("melarang menautkan pengembang/marketplace properti lain", () => {
+    const sys = systemOf(
+      buildArticlePrompt("Judul", outline, 1000, [], [
+        source("https://www.bps.go.id/"),
+      ]),
+    );
+    expect(sys).toMatch(/situs pengembang properti lain/i);
+    expect(sys).toMatch(/portal jual-beli properti/i);
+  });
+
+  it("judul & outline diikat di pesan user agar artikel tidak melenceng", () => {
+    const msgs = buildArticlePrompt(
+      "Judul Yang Mengikat",
+      [{ heading: "Bagian Unik 987", subheadings: [] }],
+      1000,
+    );
+    const user = userOf(msgs);
+    expect(user).toContain("Judul Yang Mengikat");
+    expect(user).toContain("Bagian Unik 987");
+    expect(user).toMatch(/menuntaskan janji judul/i);
+  });
+
+  it("topik penulis ikut disertakan sebagai konteks bila ada", () => {
+    const msgs = buildArticlePrompt(
+      "Judul",
+      outline,
+      1000,
+      [],
+      [],
+      "brief unik penulis 4242",
+    );
+    expect(userOf(msgs)).toContain("brief unik penulis 4242");
+  });
+});
+
+describe("buildOutlinePrompt — terikat pada judul", () => {
+  it("mewajibkan outline menjadi turunan judul", () => {
+    const sys = systemOf(buildOutlinePrompt("Judul Pilihan"));
+    expect(sys).toContain("KETERIKATAN PADA JUDUL");
+  });
+
+  it("menyertakan topik asli sebagai konteks bila diberikan", () => {
+    const msgs = buildOutlinePrompt("Judul", "topik asli unik 5150");
+    expect(userOf(msgs)).toContain("topik asli unik 5150");
+  });
+
+  it("tanpa topik, pesan user hanya memuat judul", () => {
+    const msgs = buildOutlinePrompt("Judul Saja");
+    expect(userOf(msgs)).toBe("Judul artikel: Judul Saja");
   });
 });
 

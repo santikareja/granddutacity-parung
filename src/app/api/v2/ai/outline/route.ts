@@ -15,12 +15,17 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 
 // POST /api/v2/ai/outline
-// { title, providerId?, model? } → { sections, model, providerName?, rotated }
+// { title, topic?, providerId?, model? } → { sections, model, providerName?, rotated }
 export async function POST(request: Request) {
   const guard = await requireApiUser();
   if (!guard.ok) return guard.response;
 
-  let body: { title?: unknown; providerId?: unknown; model?: unknown };
+  let body: {
+    title?: unknown;
+    topic?: unknown;
+    providerId?: unknown;
+    model?: unknown;
+  };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -29,6 +34,10 @@ export async function POST(request: Request) {
 
   const title = typeof body.title === "string" ? body.title.trim() : "";
   if (!title) return apiError("Judul wajib dipilih terlebih dahulu.");
+
+  // Topik asli penulis ikut dikirim sebagai konteks niat. Tanpa ini, model
+  // hanya melihat judul dan sering melebar dari maksud awal penulis.
+  const topic = typeof body.topic === "string" ? body.topic.trim() : "";
 
   const candidates = await resolveAiCandidates({
     providerId: typeof body.providerId === "number" ? body.providerId : undefined,
@@ -41,7 +50,7 @@ export async function POST(request: Request) {
   try {
     const result = await runAiTask<OutlineSection[]>({
       candidates,
-      messages: buildOutlinePrompt(title),
+      messages: buildOutlinePrompt(title, topic),
       budget: AI_BUDGETS.fast,
       temperature: 0.7,
       responseFormatJson: true,

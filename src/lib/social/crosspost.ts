@@ -38,13 +38,30 @@ const deriveDescription = (
   return normalizeExcerpt(summary);
 };
 
-// Cross-post satu artikel (by id) ke Tumblr. Aman dipanggil fire-and-forget.
+export type CrossPostOutcome = {
+  status: "posted" | "skipped" | "failed";
+  postId?: string;
+  /** Alasan dilewati/gagal, siap ditampilkan ke admin. */
+  message: string;
+  url?: string;
+};
+
+// Cross-post satu artikel (by id) ke Tumblr.
+//
+// Aman dipanggil fire-and-forget (nilai kembali boleh diabaikan) maupun langsung
+// dari endpoint manual yang ingin melaporkan hasilnya ke admin.
 export const crossPostArticleToTumblr = async (
   articleId: number,
   opts: { userId?: number } = {},
-): Promise<void> => {
+): Promise<CrossPostOutcome> => {
   // Disabled state: env belum lengkap → lewati tanpa mengotori log.
-  if (!hasTumblrConfig()) return;
+  if (!hasTumblrConfig()) {
+    return {
+      status: "skipped",
+      message:
+        "Tumblr belum dikonfigurasi. Lengkapi TUMBLR_CONSUMER_KEY, TUMBLR_CONSUMER_SECRET, TUMBLR_TOKEN, TUMBLR_TOKEN_SECRET, dan TUMBLR_BLOG_NAME.",
+    };
+  }
 
   let row:
     | {
@@ -71,12 +88,19 @@ export const crossPostArticleToTumblr = async (
     row = rows[0];
   } catch (error) {
     console.error(`[tumblr] gagal memuat artikel ${articleId}:`, error);
-    return;
+    return { status: "failed", message: "Gagal memuat data artikel." };
   }
 
-  if (!row) return;
+  if (!row) {
+    return { status: "failed", message: "Artikel tidak ditemukan." };
+  }
   // Hanya artikel yang benar-benar published yang layak di-cross-post.
-  if (row.status !== "published") return;
+  if (row.status !== "published") {
+    return {
+      status: "skipped",
+      message: "Artikel belum dipublish. Publish dulu sebelum cross-post.",
+    };
+  }
 
   const title = row.title?.trim();
   if (!title) {
@@ -88,7 +112,7 @@ export const crossPostArticleToTumblr = async (
       error: "Judul kosong; cross-post dilewati.",
       userId: opts.userId,
     });
-    return;
+    return { status: "skipped", message: "Judul artikel kosong." };
   }
 
   const url = buildLiveUrl(row.slug);
@@ -101,7 +125,10 @@ export const crossPostArticleToTumblr = async (
       error: "URL artikel belum live; cross-post dilewati.",
       userId: opts.userId,
     });
-    return;
+    return {
+      status: "skipped",
+      message: "URL artikel belum live (slug kosong atau tidak valid).",
+    };
   }
 
   const description = deriveDescription(row.excerpt, row.content);
@@ -118,7 +145,18 @@ export const crossPostArticleToTumblr = async (
 
   if (result.success) {
     console.info(`[tumblr] artikel ${articleId} → post ${result.postId ?? "?"}`);
-  } else {
-    console.warn(`[tumblr] artikel ${articleId} gagal cross-post: ${result.error}`);
+    return {
+      status: "posted",
+      postId: result.postId,
+      url,
+      message: `Berhasil dipost ke Tumblr${result.postId ? ` (ID ${result.postId})` : ""}.`,
+    };
   }
+
+  console.warn(`[tumblr] artikel ${articleId} gagal cross-post: ${result.error}`);
+  return {
+    status: result.skipped ? "skipped" : "failed",
+    url,
+    message: result.error ?? "Gagal cross-post ke Tumblr.",
+  };
 };

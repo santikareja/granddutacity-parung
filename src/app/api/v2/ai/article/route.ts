@@ -10,11 +10,13 @@ import {
 } from "@/lib/v2-admin/ai-rotation";
 import {
   buildArticlePrompt,
+  buildEditorPrompt,
   DEFAULT_ARTICLE_WORDS,
   MAX_ARTICLE_WORDS,
   MIN_ARTICLE_WORDS,
   type OutlineSection,
 } from "@/lib/ai/prompts";
+import { getInternalLinkCandidates } from "@/lib/v2-admin/article-link-candidates";
 import { htmlToLexicalState } from "@/lib/v2-admin/html-to-lexical";
 import { ensureCta } from "@/lib/v2-admin/lexical";
 import { sanitizeAiHtml } from "@/lib/ai/sanitize-html";
@@ -100,24 +102,31 @@ export async function POST(request: Request) {
   const candidates = await resolveAiCandidates({
     providerId: typeof body.providerId === "number" ? body.providerId : undefined,
     model: typeof body.model === "string" ? body.model : undefined,
-    maxCandidates: AI_BUDGETS.long.maxCandidates,
+    maxCandidates: AI_BUDGETS.articleWriter.maxCandidates,
   });
 
   if (candidates.length === 0) return apiError(AI_NOT_CONFIGURED_MESSAGE, 503);
 
+  // Kandidat tautan internal ke artikel published nyata. Defensif: kegagalan DB
+  // tidak menggagalkan generasi — AI cukup menulis tanpa tautan internal.
+  let relatedArticles: { title: string; path: string }[] = [];
   try {
+    relatedArticles = await getInternalLinkCandidates(8);
+  } catch {
+    relatedArticles = [];
+  }
+
+  try {
+    // --- PASS 1: PENULIS ---
     const result = await runAiTask<string>({
       candidates,
-      messages: buildArticlePrompt(title, outline, targetWords),
-      budget: AI_BUDGETS.long,
+      messages: buildArticlePrompt(title, outline, targetWords, relatedArticles),
+      budget: AI_BUDGETS.articleWriter,
       temperature: 0.8,
       maxTokens,
       taskLabel: "article",
-      // Validasi DISENGAJA minimal dan identik dengan perilaku sebelumnya:
-      // hanya keluaran kosong yang ditolak. Menolak berdasarkan panjang akan
-      // membuang artikel yang sebenarnya masih berguna dan menghabiskan
-      // anggaran waktu rotasi. Kependekan/keterpotongan dilaporkan sebagai
-      // peringatan supaya penulis yang memutuskan, bukan dibuang diam-diam.
+      // Validasi DISENGAJA minimal: hanya keluaran kosong yang ditolak.
+      // Kependekan/keterpotongan dilaporkan sebagai peringatan, bukan dibuang.
       parse: (raw) => {
         const rawHtml = stripCodeFence(raw);
         if (!rawHtml) {
@@ -127,19 +136,51 @@ export async function POST(request: Request) {
       },
     });
 
-    const rawHtml = result.value;
+    const draftHtml = result.value;
+
+    // --- PASS 2: EDITOR (best-effort) ---
+    // Layer kedua merapikan draft dan menghapus pola khas AI. Sengaja dibungkus
+    // try/catch: bila editor gagal/timeout/rotasi habis, kita PAKAI draft
+    // penulis yang sudah valid alih-alih menggagalkan seluruh permintaan.
+    let finalHtml = draftHtml;
+    let edited = false;
+    let editorModel: string | undefined;
+    try {
+      const editorResult = await runAiTask<string>({
+        candidates: candidates.slice(0, AI_BUDGETS.articleEditor.maxCandidates),
+        messages: buildEditorPrompt(title, draftHtml),
+        budget: AI_BUDGETS.articleEditor,
+        temperature: 0.4,
+        maxTokens,
+        taskLabel: "article-editor",
+        parse: (raw) => {
+          const polished = stripCodeFence(raw);
+          if (!polished) {
+            throw new AiRequestError("Editor menghasilkan keluaran kosong.", 502);
+          }
+          return polished;
+        },
+      });
+      finalHtml = editorResult.value;
+      edited = true;
+      editorModel = editorResult.model;
+    } catch (editorError) {
+      console.warn(
+        "[api/v2/ai/article] pass editor dilewati, memakai draft penulis:",
+        editorError instanceof Error ? editorError.message : editorError,
+      );
+    }
 
     // Konversi ke Lexical (sekaligus sanitasi) lalu enforce CTA wajib.
-    // Di-feed dari HTML mentah agar `content` tetap identik.
-    const content = ensureCta(htmlToLexicalState(rawHtml));
+    const content = ensureCta(htmlToLexicalState(finalHtml));
 
     // Sanitasi hanya field `html` yang dikembalikan ke klien untuk pratinjau.
-    const html = sanitizeAiHtml(rawHtml);
+    const html = sanitizeAiHtml(finalHtml);
 
-    const wordCount = countWords(rawHtml);
+    const wordCount = countWords(finalHtml);
     // Keluaran yang tidak diakhiri tag tertutup biasanya terpotong di tengah
     // karena batas token provider.
-    const looksTruncated = !/>\s*$/.test(rawHtml);
+    const looksTruncated = !/>\s*$/.test(finalHtml);
     const tooShort = wordCount < Math.round(targetWords * 0.6);
 
     const warning = looksTruncated
@@ -158,6 +199,8 @@ export async function POST(request: Request) {
         model: result.model,
         rotated: result.rotated,
         attempts: result.attempts.length,
+        edited,
+        editorModel,
       },
       userId: guard.user.id,
     });
@@ -168,6 +211,7 @@ export async function POST(request: Request) {
       model: result.model,
       providerName: result.providerName,
       rotated: result.rotated,
+      edited,
       wordCount,
       ...(warning ? { warning } : {}),
     });

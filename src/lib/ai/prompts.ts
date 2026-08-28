@@ -16,10 +16,14 @@ import {
   AI_PERSONA,
   BRAND_NAME,
   HOUSE_STYLE,
-  INTERNAL_LINKS,
   jsonContract,
 } from "./brand-facts";
 import type { ChatMessage } from "./client";
+
+// Kandidat tautan internal ke artikel lain, disuplai route dari artikel yang
+// benar-benar sudah published. AI TIDAK boleh mengarang slug; ia hanya boleh
+// memakai path dari daftar ini. Kosong = tidak ada tautan artikel.
+export type RelatedArticle = { title: string; path: string };
 
 // Blok dasar yang dipakai hampir semua tugas.
 const FOUNDATION = `${AI_PERSONA}
@@ -50,6 +54,13 @@ KRITERIA SETIAP JUDUL
 - Spesifik pada topik yang diminta, bukan judul umum yang bisa dipakai proyek properti mana pun.
 - Tanpa tanda kutip, tanpa tanda seru, tanpa emoji, tanpa ALL CAPS.
 - Tanpa angka harga/cicilan (topik volatil).
+
+KELAYAKAN GOOGLE DISCOVER (judul yang muncul di feed, bukan hanya hasil pencarian)
+- Bangkitkan rasa ingin tahu yang JUJUR: janjinya harus benar-benar dijawab artikel. Jangan clickbait, jangan melebih-lebihkan, jangan menahan informasi ("Anda tidak akan percaya...").
+- Sentuh sudut yang manusiawi: keputusan, pertimbangan, pengalaman tinggal, atau kesalahan umum yang ingin dihindari pembaca.
+- Lebih baik judul yang terasa seperti ditulis editor manusia daripada judul kaku penuh keyword. Natural mengalahkan kaku.
+- Hindari pola template AI ("Panduan Lengkap X: Semua yang Perlu Anda Tahu"). Buat pembuka yang segar.
+- Boleh memakai sudut lokasi/waktu yang spesifik dan tetap relevan lama (evergreen), bukan yang cepat basi.
 
 WAJIB: variasikan format antar judul. Dari ${count} judul, sertakan minimal:
 - 1 listicle berangka, contoh pola: "7 Hal yang ..." atau "5 Alasan ..."
@@ -126,13 +137,17 @@ export const DEFAULT_ARTICLE_WORDS = 1200;
 export const MIN_ARTICLE_WORDS = 400;
 export const MAX_ARTICLE_WORDS = 3000;
 
-const ALLOWED_LINK_PATHS = INTERNAL_LINKS.map((link) => link.path).join(", ");
-
 export const buildArticlePrompt = (
   title: string,
   outline: OutlineSection[],
   targetWords: number = DEFAULT_ARTICLE_WORDS,
+  relatedArticles: RelatedArticle[] = [],
 ): ChatMessage[] => {
+  // Daftar artikel yang boleh ditautkan (maksimal beberapa agar prompt ringkas).
+  const relatedList = relatedArticles
+    .slice(0, 6)
+    .map((a) => `  ${a.path} — ${a.title}`)
+    .join("\n");
   const outlineText = outline
     .map((section, index) => {
       const subs = (section.subheadings || [])
@@ -177,14 +192,17 @@ ISI
 - Sertakan hal yang perlu dipertimbangkan atau dicek pembaca, bukan hanya sisi positif. Ini yang membedakan artikel kredibel dari brosur.
 - Boleh menyebut karakter kawasan dan nama cluster/tipe yang ada di daftar fakta. Jangan menyebut angka harga, cicilan, luas, atau stok.
 
-TAUTAN INTERNAL (batas ketat)
-- MAKSIMAL 3 tautan internal di seluruh artikel. Lebih sedikit lebih baik.
-- Sisipkan tautan HANYA bila topik kalimatnya benar-benar relevan dengan halaman tujuan. Kalau tidak ada yang relevan, JANGAN memaksakan tautan sama sekali — artikel tanpa tautan internal lebih baik daripada tautan yang dipaksakan.
-- Jangan menautkan halaman yang sama dua kali.
-- Anchor teks harus deskriptif dan menyatu dalam kalimat. Dilarang "klik di sini", "baca di sini", atau menautkan seluruh kalimat.
-- Path yang boleh dipakai HANYA: ${ALLOWED_LINK_PATHS}
-- Jangan menautkan ke domain luar.
-- CATATAN: tautan CTA ke homepage TIDAK termasuk hitungan ini dan BUKAN tugasmu — sistem menambahkannya otomatis di akhir artikel. Jangan menulis tautan ke homepage sendiri.
+TAUTAN INTERNAL (batas sangat ketat)
+- MAKSIMAL 1 tautan internal di seluruh isi artikel, dan itu HANYA boleh menuju salah satu artikel pada daftar di bawah.
+- Sisipkan tautan itu HANYA bila ada artikel yang topiknya benar-benar relevan dengan salah satu kalimatmu. Bila tidak ada yang relevan, JANGAN menautkan apa pun — nol tautan lebih baik daripada tautan yang dipaksakan.
+- Pakai PERSIS path dari daftar. Dilarang mengarang path/slug lain. Dilarang menautkan halaman statis (cluster, pricelist, lokasi, dll.) maupun domain luar.
+- Anchor teks harus deskriptif dan menyatu dalam kalimat. Dilarang "klik di sini", "baca selengkapnya", atau menautkan seluruh kalimat.
+- JANGAN menulis tautan ke homepage/beranda sendiri. Sistem menambahkan satu tautan CTA ke homepage secara otomatis di akhir artikel; menulisnya sendiri membuat tautan ganda.
+${
+  relatedList
+    ? `\nDAFTAR ARTIKEL YANG BOLEH DITAUTKAN (pilih maksimal satu, hanya bila relevan):\n${relatedList}`
+    : "\nTIDAK ADA artikel relevan yang tersedia untuk ditautkan. Tulis artikel TANPA tautan internal di dalam isi."
+}
 
 KONTRAK KELUARAN (WAJIB)
 - Balas HANYA dengan potongan HTML isi artikel. Tanpa penjelasan, tanpa catatan, tanpa code fence, tanpa markdown.
@@ -206,6 +224,57 @@ Target panjang: ${targetWords} kata.`,
     },
   ];
 };
+
+// ---------------------------------------------------------------------------
+// Editor pass (layer kedua)
+// ---------------------------------------------------------------------------
+//
+// Draft dari penulis diberikan ke peran editor untuk dirapikan: membuang pola
+// khas AI, memperbaiki alur, dan menaikkan kualitas TANPA mengubah fakta,
+// struktur heading, atau tautan. Ini yang membuat keluaran akhir terbaca
+// natural meski model penulisnya berganti-ganti karena rotasi.
+
+export const buildEditorPrompt = (
+  title: string,
+  draftHtml: string,
+): ChatMessage[] => [
+  {
+    role: "system",
+    content: `${AI_PERSONA}
+
+${ANTI_HALLUCINATION}
+
+${HOUSE_STYLE}
+
+TUGAS
+Kamu adalah EDITOR. Kamu menerima draft HTML artikel dari penulis. Rapikan dan tingkatkan kualitasnya sampai layak tayang di media properti profesional, lalu kembalikan versi final.
+
+YANG HARUS KAMU LAKUKAN
+- Buang setiap pola khas tulisan mesin sesuai GAYA PENULISAN di atas: frasa klise, pembuka basi, transisi yang ditempel, kalimat rangkuman yang mengulang, panjang paragraf yang seragam.
+- Perkuat kalimat lemah, pangkas kata pengisi, dan variasikan panjang kalimat agar berirama manusiawi.
+- Pastikan setiap bagian benar-benar menjawab headingnya dan mengalir wajar ke bagian berikutnya.
+- Jaga akurasi: JANGAN menambah angka, nama, klaim, atau fakta baru yang tidak ada di draft. Bila draft memuat klaim yang jelas melanggar aturan fakta, hapus klaim itu — jangan menggantinya dengan karangan.
+
+YANG DILARANG DIUBAH
+- JANGAN mengubah, menambah, atau menghapus tautan <a>. Pertahankan setiap atribut href PERSIS seperti di draft, termasuk jumlahnya. Bila draft tidak punya tautan, jangan menambah tautan.
+- JANGAN menambah tautan ke homepage/beranda. Sistem menanganinya otomatis.
+- JANGAN mengubah makna atau urutan bagian. Redaksi heading boleh dihaluskan, tetapi maknanya tetap.
+- JANGAN memperpendek artikel secara drastis. Panjang akhir harus setara draft (toleransi wajar), bukan ringkasan.
+
+KONTRAK KELUARAN (WAJIB)
+- Balas HANYA dengan potongan HTML isi artikel final. Tanpa penjelasan, tanpa catatan, tanpa code fence, tanpa markdown.
+- JANGAN memakai <h1>, <html>, <head>, <body>, <script>, <style>, <iframe>, atau atribut style/class.
+- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a href="/...">, <table>, <thead>, <tbody>, <tr>, <th>, <td>.
+- JANGAN menulis paragraf penutup berisi ajakan ke homepage; sistem menambahkannya otomatis.`,
+  },
+  {
+    role: "user",
+    content: `Judul: ${title}
+
+Draft HTML untuk dirapikan:
+${draftHtml}`,
+  },
+];
 
 // ---------------------------------------------------------------------------
 // SEO

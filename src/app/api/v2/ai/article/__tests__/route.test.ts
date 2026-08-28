@@ -13,6 +13,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildArticleRequest,
   chatCompletionMock,
+  getInternalLinkCandidatesMock,
   mockAiHtml,
   requireApiUserMock,
   resetAiArticleMocks,
@@ -33,6 +34,18 @@ vi.mock("@/lib/v2-admin/ai-rotation", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/lib/v2-admin/ai-rotation")>();
   return { ...actual, resolveAiCandidates: resolveAiCandidatesMock };
+});
+
+// Kandidat tautan internal membaca DB; mock agar test tidak menyentuh Drizzle.
+vi.mock("@/lib/v2-admin/article-link-candidates", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("@/lib/v2-admin/article-link-candidates")
+    >();
+  return {
+    ...actual,
+    getInternalLinkCandidates: getInternalLinkCandidatesMock,
+  };
 });
 
 vi.mock("@/lib/v2-auth/api-guard", async (importOriginal) => {
@@ -61,7 +74,8 @@ describe("infrastruktur pengujian AI Studio (Task 1)", () => {
     const data = (await response.json()) as { html: string; content: unknown };
 
     expect(response.status).toBe(200);
-    expect(chatCompletionMock).toHaveBeenCalledTimes(1);
+    // Dua pass: penulis lalu editor. Keduanya memanggil chatCompletion.
+    expect(chatCompletionMock).toHaveBeenCalledTimes(2);
     expect(data.html).toContain("Halo");
     expect(data.content).toBeTruthy();
   });

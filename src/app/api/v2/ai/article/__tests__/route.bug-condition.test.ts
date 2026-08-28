@@ -22,6 +22,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildArticleRequest,
   chatCompletionMock,
+  getInternalLinkCandidatesMock,
   mockAiHtml,
   requireApiUserMock,
   resetAiArticleMocks,
@@ -42,6 +43,17 @@ vi.mock("@/lib/v2-admin/ai-rotation", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/lib/v2-admin/ai-rotation")>();
   return { ...actual, resolveAiCandidates: resolveAiCandidatesMock };
+});
+
+vi.mock("@/lib/v2-admin/article-link-candidates", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("@/lib/v2-admin/article-link-candidates")
+    >();
+  return {
+    ...actual,
+    getInternalLinkCandidates: getInternalLinkCandidatesMock,
+  };
 });
 
 vi.mock("@/lib/v2-auth/api-guard", async (importOriginal) => {

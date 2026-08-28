@@ -69,6 +69,11 @@ export const resolveAiConfigWithModelMock = vi.fn();
 // logika rotasi `runAiTask` dibiarkan asli agar tetap teruji.
 export const resolveAiCandidatesMock = vi.fn();
 
+// Mock kandidat tautan internal (@/lib/v2-admin/article-link-candidates).
+// Membaca tabel artikel lewat Drizzle, jadi HARUS di-mock agar test tidak
+// menyentuh DB. Default: daftar kosong (artikel ditulis tanpa tautan internal).
+export const getInternalLinkCandidatesMock = vi.fn();
+
 // Fixture: user admin terautentikasi.
 export const FAKE_SESSION_USER: SessionUser = {
   id: 1,
@@ -94,11 +99,14 @@ export const resetAiArticleMocks = (): void => {
   requireApiUserMock.mockReset();
   resolveAiConfigWithModelMock.mockReset();
   resolveAiCandidatesMock.mockReset();
+  getInternalLinkCandidatesMock.mockReset();
 
   requireApiUserMock.mockResolvedValue(FAKE_GUARD_OK);
   resolveAiConfigWithModelMock.mockResolvedValue(FAKE_AI_CONFIG);
-  // Satu kandidat sehat: jalur sukses hanya memanggil chatCompletion sekali.
+  // Satu kandidat sehat.
   resolveAiCandidatesMock.mockResolvedValue([FAKE_AI_CONFIG]);
+  // Default: tidak ada kandidat tautan internal.
+  getInternalLinkCandidatesMock.mockResolvedValue([]);
 };
 
 // Kontrol keluaran HTML mentah dari provider AI untuk sebuah test.

@@ -151,11 +151,20 @@ Larangan struktur:
 - Jangan menutup setiap bagian dengan kalimat rangkuman yang mengulang isi bagian itu.
 - Jangan memakai tanda seru. Jangan memakai HURUF KAPITAL untuk penekanan.
 
+Larangan pola khas mesin (paling sering membocorkan tulisan AI):
+- Jangan memakai pola "bukan hanya X, tetapi juga Y" berulang kali. Maksimal sekali di seluruh artikel.
+- Jangan menyusun segala sesuatu dalam kelompok tiga (rule of three) secara mekanis di banyak kalimat berturut-turut.
+- Jangan mengawali kalimat dengan "Dengan" + kata benda abstrak ("Dengan lokasi strategis, ...") lebih dari sekali.
+- Jangan memakai tanda pisah em (—) sebagai gaya bertele-tele. Pakai titik atau koma biasa.
+- Jangan menutup artikel dengan paragraf rangkuman yang mengulang seluruh isi. Sistem sudah menambahkan CTA sendiri.
+- Jangan memakai kata sifat berlebihan yang kosong makna: "menakjubkan", "luar biasa", "sempurna", "istimewa", "tiada duanya".
+
 Yang HARUS ada:
-- Kalimat pendek yang tegas, disisipkan di antara kalimat panjang.
+- Kalimat pendek yang tegas, disisipkan di antara kalimat panjang. Variasikan panjang kalimat secara nyata (ada yang 4 kata, ada yang 30 kata).
 - Sudut pandang dan pertimbangan untung-rugi, bukan hanya daftar keunggulan. Sebut juga hal yang perlu dipertimbangkan pembaca.
 - Detail praktis yang membantu keputusan: pertanyaan yang perlu ditanyakan ke marketing, hal yang perlu dicek saat survei, urutan proses.
-- Transisi yang muncul dari isi, bukan dari kata penghubung yang ditempel.`;
+- Transisi yang muncul dari isi, bukan dari kata penghubung yang ditempel.
+- Kata benda konkret dan spesifik, bukan istilah pemasaran umum. "Jarak tempuh ke gerbang tol" lebih baik daripada "aksesibilitas yang mumpuni".`;
 
 /**
  * Bangun kontrak keluaran JSON yang ketat.

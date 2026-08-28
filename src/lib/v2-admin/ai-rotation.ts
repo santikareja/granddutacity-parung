@@ -63,8 +63,15 @@ export const AI_BUDGETS = {
   fast: { perAttemptMs: 45_000, totalMs: 170_000, maxCandidates: 4 },
   /** Tugas sangat pendek pada route maxDuration 120: text-tool, image-meta. */
   quick: { perAttemptMs: 28_000, totalMs: 95_000, maxCandidates: 3 },
-  /** Penulisan artikel panjang. Route maxDuration 300. */
+  /** Penulisan artikel panjang satu pass. Route maxDuration 300. */
   long: { perAttemptMs: 130_000, totalMs: 275_000, maxCandidates: 3 },
+  /**
+   * Artikel dua pass (penulis lalu editor) pada route maxDuration 300.
+   * writer.totalMs + editor.totalMs harus < maxDuration agar route sempat
+   * mengembalikan respons. 190 + 95 = 285 < 300.
+   */
+  articleWriter: { perAttemptMs: 120_000, totalMs: 190_000, maxCandidates: 3 },
+  articleEditor: { perAttemptMs: 70_000, totalMs: 95_000, maxCandidates: 2 },
 } as const satisfies Record<string, AiBudget>;
 
 // Sisa waktu minimum yang masih layak untuk mencoba satu model lagi. Di bawah

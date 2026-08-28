@@ -23,10 +23,32 @@ export type LexicalState = {
 };
 
 export const CTA_URL = "https://granddutacitysouthofjakarta.com";
-export const CTA_ANCHOR = "Grand Duta City Parung";
+
+// Variasi anchor CTA homepage. Semuanya menunjuk ke SITE_URL yang sama; yang
+// berbeda hanya teksnya, supaya backlink internal tidak memakai anchor identik
+// di setiap artikel (anchor yang terlalu seragam terbaca tidak natural). Index
+// 0 dipertahankan sebagai default demi kompatibilitas dengan artikel lama.
+export const CTA_ANCHORS = [
+  "Grand Duta City Parung",
+  "Website Resmi",
+  "GDC Parung",
+] as const;
+export const CTA_ANCHOR = CTA_ANCHORS[0];
+
 const CTA_LEAD = "Tertarik memiliki hunian di ";
 const CTA_TAIL =
   "? Jelajahi pilihan cluster, harga terbaru, dan fasilitasnya sekarang.";
+
+// Pemilihan anchor deterministik dari isi artikel. Deterministik penting: alur
+// simpan memanggil ensureCta berkali-kali dan test membandingkan keluaran, jadi
+// input yang sama harus selalu menghasilkan anchor yang sama (bukan acak).
+const pickCtaAnchor = (seedText: string): string => {
+  let hash = 0;
+  for (let i = 0; i < seedText.length; i += 1) {
+    hash = (hash * 31 + seedText.charCodeAt(i)) >>> 0;
+  }
+  return CTA_ANCHORS[hash % CTA_ANCHORS.length];
+};
 
 export const createEmptyState = (): LexicalState => ({
   root: {
@@ -58,7 +80,7 @@ const textNode = (text: string, format = 0): LexNode => ({
   version: 1,
 });
 
-const buildCtaParagraph = (): LexNode => ({
+const buildCtaParagraph = (anchor: string = CTA_ANCHOR): LexNode => ({
   type: "paragraph",
   format: "",
   indent: 0,
@@ -73,7 +95,7 @@ const buildCtaParagraph = (): LexNode => ({
       indent: 0,
       version: 3,
       direction: "ltr",
-      children: [textNode(CTA_ANCHOR)],
+      children: [textNode(anchor)],
     },
     textNode(CTA_TAIL),
   ],
@@ -96,7 +118,8 @@ const containsCtaLink = (node: LexNode | null | undefined): boolean => {
     const url = (node as { fields?: { url?: unknown } }).fields?.url;
     if (typeof url === "string") {
       const normalized = url.replace(/\/+$/, "");
-      if (normalized === CTA_URL && collectText(node).includes(CTA_ANCHOR)) {
+      const text = collectText(node);
+      if (normalized === CTA_URL && CTA_ANCHORS.some((a) => text.includes(a))) {
         return true;
       }
     }
@@ -130,9 +153,14 @@ export const ensureCta = (state: unknown): unknown => {
     return state;
   }
 
+  // Anchor dipilih deterministik dari isi artikel yang sudah ada (sebelum CTA
+  // ditambahkan), sehingga stabil di setiap pemanggilan ulang.
+  const seed = children.map(collectText).join(" ");
+  const anchor = pickCtaAnchor(seed);
+
   return {
     ...(state as Record<string, unknown>),
-    root: { ...root, children: [...children, buildCtaParagraph()] },
+    root: { ...root, children: [...children, buildCtaParagraph(anchor)] },
   };
 };
 

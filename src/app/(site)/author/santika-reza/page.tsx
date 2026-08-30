@@ -12,6 +12,8 @@ import { Footer } from "@/components/layout/footer";
 import { ArticleCard } from "@/components/articles/article-card";
 import { Header } from "@/components/ui/header-2";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
+import { OG_SITE_NAME } from "@/lib/seo";
 import { cloudinaryUrl, originalImage } from "@/lib/cloudinary";
 import {
   getArticlesByAuthor,
@@ -30,10 +32,13 @@ const authorOgImage = cloudinaryUrl(
   "w_400,h_400,c_fill,f_auto,q_auto",
 );
 
+// Title dipendekkan dari 95 -> 42 karakter dan brand tag menggantung dicabut.
+// Description dipendekkan dari 183 dan frasa "Grand Duta City South of Jakarta"
+// (kata kunci kedua homepage) diganti "Grand Duta City Parung".
 export const metadata: Metadata = {
-  title: "Santika Reza - Praktisi & Penulis Marketing Properti | Grand Duta City",
+  title: "Santika Reza — Praktisi Marketing Properti",
   description:
-    "Santika Reza adalah praktisi, penulis, dan spesialis marketing properti di Grand Duta City South of Jakarta. Temukan semua artikel dan panduan properti yang ditulis oleh Santika Reza.",
+    "Profil Santika Reza, praktisi marketing properti di Grand Duta City Parung. Kumpulan artikel dan panduan properti yang ia tulis untuk calon pembeli rumah.",
   robots: {
     index: true,
     follow: true,
@@ -47,12 +52,12 @@ export const metadata: Metadata = {
     canonical: PAGE_URL,
   },
   openGraph: {
-    title: "Santika Reza - Praktisi & Penulis Marketing Properti",
+    title: "Santika Reza — Praktisi Marketing Properti",
     description:
-      "Artikel dan panduan properti oleh Santika Reza, praktisi marketing properti di Grand Duta City South of Jakarta.",
+      "Artikel dan panduan properti oleh Santika Reza, praktisi marketing properti di Grand Duta City Parung.",
     url: PAGE_URL,
     type: "profile",
-    siteName: "Grand Duta City South of Jakarta",
+    siteName: OG_SITE_NAME,
     firstName: "Santika",
     lastName: "Reza",
     images: [
@@ -66,63 +71,66 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Santika Reza - Praktisi & Penulis Marketing Properti",
+    title: "Santika Reza — Praktisi Marketing Properti",
     description:
-      "Artikel properti oleh Santika Reza dari Grand Duta City South of Jakarta.",
+      "Artikel properti oleh Santika Reza dari Grand Duta City Parung.",
     images: [authorOgImage],
   },
 };
 
+/**
+ * Node `Person` KANONIK untuk seluruh situs. Halaman lain (artikel,
+ * /cara-beli-kpr, /lokasi-akses, /update-stok) sekarang hanya merujuk `@id`
+ * ini alih-alih mendefinisikan ulang penulis dengan properti minimal.
+ *
+ * Ini penting untuk E-E-A-T: kredensial penulis (jobTitle, knowsAbout, sameAs
+ * ke LinkedIn/Muckrack) hanya dinyatakan sekali dan berlaku di semua halaman
+ * yang merujuknya, bukan hilang setiap kali halaman lain menulis versi tipis.
+ */
 const authorSchema = {
-  "@context": "https://schema.org",
   "@type": "Person",
   "@id": `${PAGE_URL}#person`,
   name: author.name,
   url: PAGE_URL,
+  mainEntityOfPage: ref(`${PAGE_URL}#webpage`),
   jobTitle: author.role,
   description: author.description,
   image: {
     "@type": "ImageObject",
+    "@id": `${PAGE_URL}#authorimage`,
     url: authorImage,
+    contentUrl: authorImage,
     width: 400,
     height: 400,
   },
-  worksFor: {
-    "@type": "Organization",
-    name: "Grand Duta City South of Jakarta",
-    url: "https://granddutacitysouthofjakarta.com",
-  },
+  // Sebelumnya Organization didefinisikan ulang di sini secara anonim, jadi
+  // Google tidak tahu bahwa penulis ini bekerja untuk entitas yang sama dengan
+  // `#organization` di homepage.
+  worksFor: ref(SCHEMA_ID.organization),
   knowsAbout: author.knowsAbout,
   sameAs: author.sameAs,
 };
 
-const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "@id": `${PAGE_URL}#breadcrumb`,
-  itemListElement: [
-    {
-      "@type": "ListItem",
-      position: 1,
-      name: "Beranda",
-      item: "https://granddutacitysouthofjakarta.com",
-    },
-    {
-      "@type": "ListItem",
-      position: 2,
-      name: "Artikel",
-      item: "https://granddutacitysouthofjakarta.com/artikel",
-    },
-    {
-      "@type": "ListItem",
-      position: 3,
-      name: author.name,
-      item: PAGE_URL,
-    },
-  ],
+const profilePageSchema = {
+  "@type": "ProfilePage",
+  "@id": `${PAGE_URL}#webpage`,
+  url: PAGE_URL,
+  name: `${author.name} — ${author.role}`,
+  inLanguage: "id",
+  isPartOf: ref(SCHEMA_ID.website),
+  breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+  mainEntity: ref(`${PAGE_URL}#person`),
 };
 
-const schemas = [authorSchema, breadcrumbSchema];
+const breadcrumbSchema = breadcrumbNode(
+  [
+    { name: "Artikel", path: "/artikel" },
+    { name: author.name, path: "/author/santika-reza" },
+  ],
+  PAGE_URL,
+);
+
+const schemas = graph([profilePageSchema, authorSchema, breadcrumbSchema]);
 
 const profileLinks = [
   {

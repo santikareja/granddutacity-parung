@@ -152,6 +152,7 @@ export function VideoSection() {
             href={`https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20dengan%20video%20kawasan%20Grand%20Duta%20City%20Parung.%20Mohon%20info%20ketersediaan%20unit%20dan%20adwalkan%20site%20visit.`}
             target="_blank"
             rel="noopener noreferrer"
+            data-wa-placement="video-section"
             className="group relative inline-flex items-center justify-center gap-2 sm:gap-3 px-5 py-3 sm:px-7 sm:py-4 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white text-[10px] sm:text-sm tracking-[0.16em] uppercase font-sans font-bold shadow-[0_10px_30px_rgba(37,211,102,0.4)] active:scale-[0.98] transition-all duration-300"
           >
             <span>Site Visit Sekarang</span>

@@ -87,23 +87,13 @@ export function ClusterFaqKprSection({
       id={sectionId}
       className="relative border-t border-[#0b120c]/5 bg-[#F5F1E8] py-24 text-[#0b120c] scroll-mt-28"
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: faqs.map((faq) => ({
-              "@type": "Question",
-              name: faq.question,
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: faq.answer,
-              },
-            })),
-          }),
-        }}
-      />
+      {/* `FAQPage` DIHAPUS (Fase 5 spec seo-cannibalization-and-pseo).
+          Google membatasi FAQ rich result ke situs pemerintah/kesehatan pada
+          Agustus 2023, lalu menghapus fitur itu sepenuhnya pada 7 Mei 2026.
+          Blok ini nol imbal hasil di SERP, dan ia muncul di DUA halaman cluster
+          sehingga ikut membengkakkan HTML dua kali.
+          Satu `FAQPage` dipertahankan di homepage — bukan untuk SERP, tapi
+          karena masih dibaca LLM dan mesin AI search. */}
 
       <div className="pointer-events-none absolute inset-0 opacity-[0.06] bg-[radial-gradient(#0b120c_1px,transparent_1px)] [background-size:40px_40px]" />
 
@@ -307,6 +297,8 @@ export function ClusterFaqKprSection({
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-wa-placement="cluster-kpr-calculator"
+                  data-wa-value={harga}
                   className="mt-6 flex w-full items-center justify-center rounded-xl border border-[#F5A524] p-4 text-center text-xs font-bold uppercase tracking-[0.2em] text-[#F5A524] transition-all duration-300 hover:bg-[#F5A524] hover:text-[#F5F1E8]"
                 >
                   Konsultasi Simulasi KPR

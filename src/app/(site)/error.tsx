@@ -68,6 +68,7 @@ export default function Error({
           href="https://wa.me/628131742034?text=Halo%2C%20saya%20mengalami%20kesulitan%20mengakses%20halaman%20Grand%20Duta%20City%20Parung.%20Mohon%20bantuan%20informasinya."
           target="_blank"
           rel="noopener noreferrer"
+          data-wa-placement="error-page"
           className="mt-5 inline-flex items-center gap-2 text-[#F8F6F0]/45 hover:text-[#F5A524] text-[11px] tracking-wider font-sans transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5 rotate-180" />

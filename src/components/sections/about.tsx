@@ -142,6 +142,7 @@ export function About() {
                 href="https://wa.me/628131742034?text=Halo%2C%20saya%20mau%20konsultasi%20unit%20Grand%20Duta%20City%20Parung%20%28GDC%20SOJ%29.%20Mohon%20info%20harga%20%26%20promo%20terbaru."
                 target="_blank"
                 rel="noopener noreferrer"
+                data-wa-placement="about-section"
                 className="group relative inline-flex items-center justify-center gap-3 pl-6 pr-2 py-3.5 rounded-full bg-[#C8521A] hover:bg-[#DE5E1E] text-white text-xs sm:text-sm tracking-[0.16em] uppercase font-sans font-bold shadow-[0_8px_24px_rgba(200,82,26,0.35)] active:scale-[0.98] transition-all duration-300 text-center"
               >
                 <span>Konsultasi Sekarang</span>

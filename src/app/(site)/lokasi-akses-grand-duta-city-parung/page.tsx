@@ -6,30 +6,90 @@ import Link from "next/link";
 import { MapPin, Navigation, Car, Train, Clock, Building2, Hospital, ArrowRight, Map, ShoppingBag, GraduationCap, Flag, Ticket } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
+import { OG_SITE_NAME } from "@/lib/seo";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 const PAGE_URL = "https://granddutacitysouthofjakarta.com/lokasi-akses-grand-duta-city-parung";
-const AUTHOR_ID = "https://granddutacitysouthofjakarta.com/author/santika-reza#person";
-const AUTHOR_URL = "https://granddutacitysouthofjakarta.com/author/santika-reza";
+const MAP_IMAGE =
+  "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp";
+
+/**
+ * SATU `@graph` menggantikan empat blok lepas (Fase 5).
+ *
+ * Halaman ini adalah kasus pemecahan entitas yang paling parah di situs:
+ *
+ *  - `RealEstateAgent` di sini diberi `@id` = URL HALAMAN ini
+ *    (".../lokasi-akses-grand-duta-city-parung"), bukan fragment entitas. Jadi
+ *    Google diberi tahu bahwa HALAMAN itu sendiri adalah sebuah agen properti,
+ *    terpisah dari `#salesoffice` di homepage. Dua bisnis, satu kantor.
+ *  - `Place` anonim di sini mengulang alamat proyek tanpa `@id`, jadi ia
+ *    entitas lokasi KETIGA yang bersaing dengan `#project`.
+ *  - Koordinatnya (-6.450274, 106.719312) juga berbeda dari homepage
+ *    (-6.462459, 106.729392) di bawah alamat jalan yang sama.
+ *
+ * Sekarang halaman ini tidak mendefinisikan entitas lokasi apa pun; ia hanya
+ * MERUJUK `#project` dan `#salesoffice`. Google melihat satu tempat, dengan
+ * satu titik peta, yang dibahas oleh beberapa halaman.
+ */
+const pageSchema = graph([
+  breadcrumbNode(
+    [{ name: "Lokasi & Akses", path: "/lokasi-akses-grand-duta-city-parung" }],
+    PAGE_URL,
+  ),
+  {
+    "@type": "ImageObject",
+    "@id": `${PAGE_URL}#primaryimage`,
+    url: MAP_IMAGE,
+    contentUrl: MAP_IMAGE,
+    caption:
+      "Peta lokasi Grand Duta City Parung dan akses ke Bogor, Depok, Jakarta",
+    width: 1200,
+    height: 630,
+  },
+  {
+    "@type": "WebPage",
+    "@id": `${PAGE_URL}#webpage`,
+    name: "Lokasi Grand Duta City Parung | Akses ke Bogor, Depok & Jakarta",
+    description:
+      "Lihat lokasi Grand Duta City Parung beserta akses menuju Bogor, Depok, dan Jakarta, termasuk kedekatan ke fasilitas publik dan titik penting sekitar.",
+    url: PAGE_URL,
+    inLanguage: "id",
+    isPartOf: ref(SCHEMA_ID.website),
+    about: ref(SCHEMA_ID.project),
+    mentions: ref(SCHEMA_ID.salesOffice),
+    breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+    primaryImageOfPage: ref(`${PAGE_URL}#primaryimage`),
+    author: ref(SCHEMA_ID.author),
+    publisher: ref(SCHEMA_ID.organization),
+  },
+]);
+
+const PAGE_TITLE = "Lokasi GDC Parung: 4 Exit Tol ke Jakarta & Depok";
+const PAGE_DESCRIPTION =
+  "Lokasi GDC Parung di Jl. Raya Parung No.47, Bogor: 15 menit ke 4 exit tol Pamulang, Krukut, Sawangan, Bojong Gede, dan 20 menit ke CBD TB Simatupang.";
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const hasParams = Object.keys(resolvedSearchParams).length > 0;
   
   return {
-    title: "Lokasi Grand Duta City Parung | Akses ke Bogor, Depok & Jakarta",
-    description: "Lihat lokasi Grand Duta City Parung beserta akses menuju Bogor, Depok, dan Jakarta, termasuk kedekatan ke fasilitas publik dan titik penting sekitar.",
+    // Title dipendekkan dari 88 -> 48 karakter; brand sebelumnya muncul 2x.
+    // Keyword "akses grand duta city south of jakarta" dicabut karena memuat
+    // frasa target homepage.
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
     keywords: [
-      "lokasi grand duta city parung",
-      "akses grand duta city south of jakarta",
-      "grand duta city bogor",
-      "akses grand duta city ke depok",
-      "akses grand duta city ke jakarta",
+      "lokasi gdc parung",
+      "akses tol gdc parung",
+      "perumahan dekat exit tol desari",
+      "perumahan dekat exit tol sawangan",
       "lokasi perumahan parung bogor",
-      "fasilitas sekitar grand duta city"
+      "rumah dekat tb simatupang",
+      "fasilitas sekitar parung bogor"
     ],
     alternates: {
       canonical: PAGE_URL
@@ -44,128 +104,24 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       }
     },
     openGraph: {
-      title: "Lokasi Grand Duta City Parung | Akses ke Bogor, Depok & Jakarta",
-      description: "Lihat lokasi Grand Duta City Parung beserta akses menuju Bogor, Depok, dan Jakarta, termasuk kedekatan ke fasilitas publik dan titik penting sekitar.",
+      title: PAGE_TITLE,
+      description: PAGE_DESCRIPTION,
       url: PAGE_URL,
-      siteName: "Grand Duta City Parung South of Jakarta",
+      siteName: OG_SITE_NAME,
       locale: "id_ID",
       type: "website",
-      images: [{ url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp", width: 1200, height: 630, alt: "Lokasi Grand Duta City Parung dan akses ke Bogor Depok Jakarta" }],
+      images: [{ url: MAP_IMAGE, width: 1200, height: 630, alt: "Lokasi Grand Duta City Parung dan akses ke Bogor Depok Jakarta" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Lokasi Grand Duta City Parung | Akses ke Bogor, Depok & Jakarta",
-      description: "Lihat lokasi Grand Duta City Parung beserta akses menuju Bogor, Depok, dan Jakarta, termasuk kedekatan ke fasilitas publik dan titik penting sekitar.",
-      images: ["https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp"],
+      title: PAGE_TITLE,
+      description: PAGE_DESCRIPTION,
+      images: [MAP_IMAGE],
     },
   }
 }
 
 export default function LokasiAksesPage() {
-  const jsonLdBreadcrumb = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://granddutacitysouthofjakarta.com"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Lokasi & Akses",
-        "item": PAGE_URL
-      }
-    ]
-  };
-
-  const jsonLdWebPage = {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Lokasi Grand Duta City Parung | Akses ke Bogor, Depok & Jakarta",
-    "description": "Lihat lokasi Grand Duta City Parung beserta akses menuju Bogor, Depok, dan Jakarta, termasuk kedekatan ke fasilitas publik dan titik penting sekitar.",
-    "url": PAGE_URL,
-    "inLanguage": "id",
-    "author": {
-      "@id": AUTHOR_ID,
-      "@type": "Person",
-      "name": "Santika Reza",
-      "url": AUTHOR_URL
-    },
-    "primaryImageOfPage": {
-      "@type": "ImageObject",
-      "url": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp"
-    }
-  };
-
-  const jsonLdLocalBusiness = {
-    "@context": "https://schema.org",
-    "@type": "RealEstateAgent",
-    "name": "Grand Duta City Parung",
-    "image": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp",
-    "@id": PAGE_URL,
-    "url": PAGE_URL,
-    "telephone": "0813-1742-034",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Jl. Raya Parung No.47, Jabon Mekar",
-      "addressLocality": "Parung",
-      "addressRegion": "Jawa Barat",
-      "postalCode": "16330",
-      "addressCountry": "ID"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": -6.450274,
-      "longitude": 106.719312
-    },
-    "openingHoursSpecification": {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday"
-      ],
-      "opens": "09:00",
-      "closes": "18:00"
-    },
-    "sameAs": [
-      "https://maps.app.goo.gl/68zzL5Yg64ZtfdGUA"
-    ]
-  };
-
-  const jsonLdPlace = {
-    "@context": "https://schema.org",
-    "@type": "Place",
-    "name": "Lokasi Grand Duta City Parung",
-    "description": "Lokasi strategis Grand Duta City Parung dengan akses ke Bogor, Depok, dan Jakarta.",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Jl. Raya Parung No.47, Jabon Mekar",
-      "addressLocality": "Parung",
-      "addressRegion": "Jawa Barat",
-      "postalCode": "16330",
-      "addressCountry": "ID"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": -6.450274,
-      "longitude": 106.719312
-    },
-    "image": {
-      "@type": "ImageObject",
-      "url": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp",
-      "width": "1200",
-      "height": "630"
-    }
-  };
-
   const sliderImages = [
     { src: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776541441/Masterplan_svnc3y.webp", alt: "Akses Utama Lokasi Grand Duta City Parung" },
     { src: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775879212/Akses_Tol_Grand_Duta_City_South_of_Jakarta_1_ozzhny.webp", alt: "Akses Tol Dekat Grand Duta City Parung" },
@@ -231,10 +187,7 @@ export default function LokasiAksesPage() {
     <>
       <Header />
       <main className="relative w-full overflow-hidden bg-[#0b120c] font-sans pb-20">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumb) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebPage) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdLocalBusiness) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdPlace) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }} />
 
         {/* Hero Section */}
         <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 px-4 md:px-8 max-w-7xl mx-auto border-b border-[#F5F1E8]/5">
@@ -255,8 +208,10 @@ export default function LokasiAksesPage() {
                 { label: "Lokasi & Akses" }
               ]} />
             </div>
+            {/* H1 diarahkan ke query lokasi/akses (menyebut 3 wilayah tujuan)
+                alih-alih mengulang frasa brand target homepage. */}
             <h1 className="text-4xl md:text-5xl lg:text-5xl font-medium text-[#F5F1E8] mb-6 tracking-wider font-serif leading-tight">
-              Lokasi Grand Duta City Parung dan <span className="text-[#F5A524] italic">Akses Sekitarnya</span>
+              Lokasi &amp; Akses GDC Parung ke <span className="text-[#F5A524] italic">Jakarta, Depok, Bogor</span>
             </h1>
             
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8 max-w-3xl">
@@ -485,7 +440,7 @@ export default function LokasiAksesPage() {
                     <a href="https://maps.app.goo.gl/68zzL5Yg64ZtfdGUA" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[#F5A524] text-[#0b120c] px-8 py-4 rounded-full font-bold hover:bg-brand-light transition-colors w-full sm:w-auto justify-center">
                        <Map className="w-5 h-5" /> Buka Google Maps
                     </a>
-                    <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20mendapatkan%20info%20shareloc%20Grand%20Duta%20City%20Parung." target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-transparent text-[#F5F1E8] border border-[#F5F1E8]/20 hover:bg-brand-light/10 px-8 py-4 rounded-full font-bold transition-colors w-full sm:w-auto justify-center">
+                    <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20mendapatkan%20info%20shareloc%20Grand%20Duta%20City%20Parung." target="_blank" rel="noreferrer" data-wa-placement="lokasi-shareloc-cta" className="flex items-center gap-2 bg-transparent text-[#F5F1E8] border border-[#F5F1E8]/20 hover:bg-brand-light/10 px-8 py-4 rounded-full font-bold transition-colors w-full sm:w-auto justify-center">
                        Minta Shareloc WhatsApp
                     </a>
                 </div>

@@ -1,82 +1,70 @@
-export const propertyTypes = [
-  // Cluster Ladera
-  {
-    id: "tuscan-66",
-    name: "TUSCAN",
-    typeCategory: "Type 66",
-    cluster: "Cluster Ladera",
-    tag: "Cluster Ladera",
-    price: "1.1 Milyar-an",
-    image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Tuscan_drllpk.webp",
-    specs: { bed: 3, bath: 2, carport: 2, lb: 66, lt: 72 },
-    desc: "Tipe hunian elegan di Cluster Ladera, tipe paling populer dengan ruang keluarga luas dan desain tropis modern."
+/**
+ * SHIM KOMPATIBILITAS — jangan tambah data di sini.
+ *
+ * Sebelum Fase 3 spec `seo-cannibalization-and-pseo`, file ini memuat 7 record
+ * `propertyTypes` yang ditulis tangan. Ia menjadi salah satu dari TIGA salinan
+ * data unit yang saling bertentangan (dua lainnya: array lokal di
+ * `tipe-rumah.tsx` dan JSX hardcode di `cluster-ladera/page.tsx`).
+ *
+ * Sumber tunggal sekarang: `src/data/units.ts`.
+ *
+ * File ini dipertahankan sementara sebagai turunan agar konsumen lama
+ * (`cluster-units.tsx`, `cluster-cascada/page.tsx`) tidak perlu diubah dalam
+ * commit yang sama — perubahan besar dalam satu commit menyulitkan rollback
+ * bila peringkat bergerak. Setelah seluruh konsumen beralih ke `units.ts`,
+ * hapus file ini.
+ *
+ * Bentuk objek di bawah SENGAJA meniru struktur lama (`specs.bed` bisa string
+ * "2+1", `soldOut` boolean, `image`, `desc`) supaya `ProductRevealCard` dan
+ * pemakai lain merender persis seperti sebelumnya.
+ */
+
+import {
+  CLUSTER_LABEL,
+  bedroomLabel,
+  catalogUnits,
+  type Unit,
+} from "@/data/units";
+
+export type LegacyPropertyType = {
+  id: string;
+  name: string;
+  typeCategory: string;
+  cluster: string;
+  tag: string;
+  price: string;
+  soldOut?: boolean;
+  image: string;
+  specs: {
+    bed: number | string;
+    bath: number | string;
+    carport: number | string;
+    lb: number | string;
+    lt: number | string;
+  };
+  desc: string;
+};
+
+const toLegacy = (unit: Unit): LegacyPropertyType => ({
+  id: unit.id,
+  name: unit.name,
+  typeCategory: unit.typeCategory,
+  cluster: CLUSTER_LABEL[unit.cluster],
+  tag: CLUSTER_LABEL[unit.cluster],
+  price: unit.priceLabel,
+  // Hanya `sold-out` yang boleh memunculkan badge. `check-siteplan` TIDAK
+  // diterjemahkan menjadi "tersedia" — ketersediaan aktual wajib merujuk
+  // siteplan terbaru, bukan disimpulkan dari ketiadaan penanda.
+  ...(unit.status === "sold-out" ? { soldOut: true } : {}),
+  image: unit.facadeImage,
+  specs: {
+    bed: bedroomLabel(unit),
+    bath: unit.bathrooms ?? "-",
+    carport: unit.carports ?? "-",
+    lb: unit.lb,
+    lt: unit.lt,
   },
-  {
-    id: "malta-47",
-    name: "MALTA",
-    typeCategory: "Type 47",
-    cluster: "Cluster Ladera",
-    tag: "Cluster Ladera",
-    price: "800 Juta-an",
-    image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Malta_tkq7di.webp",
-    specs: { bed: "2+1", bath: 1, carport: 2, lb: 47, lt: 72 },
-    desc: "Tipe praktis dengan ekstra ruang di Cluster Ladera, ideal untuk keluarga muda yang berkembang."
-  },
-  // Cluster Cascada
-  {
-    id: "alexandra-88",
-    name: "ALEXANDRA",
-    typeCategory: "Type 88",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "1.4 Milyar-an",
-    image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Alexandra_hhvq3f.webp",
-    specs: { bed: 3, bath: 2, carport: 2, lb: 88, lt: 105 },
-    desc: "Hunian termewah di Cluster Cascada dengan lahan terluas, mewujudkan kemewahan penuh bagi keluarga Anda."
-  },
-  {
-    id: "victoria-69",
-    name: "VICTORIA",
-    typeCategory: "Type 69",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "1.1 Milyar-an",
-    image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Victoria_scolcc.webp",
-    specs: { bed: 3, bath: 2, carport: 2, lb: 69, lt: 72 },
-    desc: "Perpaduan sempurna antara gaya dan fungsi di Cluster Cascada, ruang ideal untuk gaya hidup modern."
-  },
-  {
-    id: "manoa-58",
-    name: "MANOA",
-    typeCategory: "Type 58",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "800 Juta-an",
-    image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Manoa_j8uvcr.webp",
-    specs: { bed: 2, bath: 2, carport: 1, lb: 58, lt: 60 },
-    desc: "Konsep unik di Cluster Cascada dengan fokus pada privasi dan ruang terbuka yang menenangkan."
-  },
-  {
-    id: "keila-47",
-    name: "KEILA",
-    typeCategory: "Type 47",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "700 Juta",
-    soldOut: true,
-    image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp", // Fallback to Aira for now if missing
-    specs: { bed: "2+1", bath: 1, carport: 1, lb: 47, lt: 72 },
-    desc: "Desain inovatif di Cluster Cascada dengan ruang multifungsi yang menyesuaikan gaya hidup keluarga."
-  },
-  {
-    id: "aira-42",
-    name: "AIRA+",
-    typeCategory: "Type 42",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "800 Juta-an",
-    image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp",
-    specs: { bed: 2, bath: 1, carport: 1, lb: 42, lt: 60 },
-    desc: "Kompak dan efisien di Cluster Cascada, memaksimalkan kenyamanan dalam hunian bergaya minimalis."
-  }
-];
+  desc: unit.description,
+});
+
+export const propertyTypes: LegacyPropertyType[] = catalogUnits.map(toLegacy);

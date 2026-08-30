@@ -3,9 +3,13 @@ import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { AboutDeveloper } from "@/components/sections/about-developer";
 
+// Halaman ini menyasar query DEVELOPER ("duta putra land", "developer properti
+// sejak 1983"), bukan query PROYEK. Brand proyek dicabut dari title dan frasa
+// "Grand Duta City South of Jakarta" dicabut dari description (Fase 1).
 export const metadata: Metadata = {
-  title: "About Developer - Duta Putra Land | Grand Duta City",
-  description: "Duta Putra Land - Perusahaan Developer Real Estate Indonesia yang telah berdiri sejak 1983. Pengembang dari Grand Duta City South of Jakarta.",
+  title: "Duta Putra Land: Developer Properti Sejak 1983",
+  description:
+    "Profil Duta Putra Land, pengembang real estate Indonesia sejak 1983: rekam jejak, filosofi Best Living For Generations, dan proyek kota mandiri di Parung.",
   alternates: {
     canonical: "https://granddutacitysouthofjakarta.com/about",
   },

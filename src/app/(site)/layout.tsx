@@ -5,6 +5,8 @@ import { SmoothScrollProvider } from "@/components/providers/smooth-scroll";
 import { BackToTop } from "@/components/ui/back-to-top";
 import { PromoPopup } from "@/components/ui/promo-popup";
 import { WhatsAppButton } from "@/components/ui/whatsapp-button";
+import { WhatsAppTracker } from "@/components/providers/whatsapp-tracker";
+import { OG_SITE_NAME } from "@/lib/seo";
 import "../globals.css";
 
 // Keduanya variable font di Google Fonts. Tanpa array `weight`, next/font
@@ -28,10 +30,25 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
- title: {
-    default: "Grand Duta City Parung — Hunian Premium South of Jakarta",
-    template: "%s | Grand Duta City Parung",
-  },
+ // `title.template` DIHAPUS (Fase 1 spec seo-cannibalization-and-pseo).
+  //
+  // Sebelumnya: { default: "...", template: "%s | Grand Duta City Parung" }.
+  // Next 16 tidak menerapkan template ke `title` di page.js pada segmen yang
+  // SAMA, jadi homepage lolos sementara 13 route anak mendapat suffix brand —
+  // padahal title mereka SUDAH memuat brand. Hasilnya frasa target homepage
+  // muncul dua kali di 6 title (terpanjang /artikel = 102 karakter) dan
+  // halaman-halaman itu bersaing dengan homepage di kata kunci yang sama.
+  //
+  // Ditulis sebagai string biasa, bukan `{ default }`: tipe `TemplateString`
+  // Next mewajibkan `default` berpasangan dengan `template`. String biasa
+  // berperilaku sama sebagai fallback — halaman yang punya title sendiri
+  // menimpanya, halaman tanpa title (mis. error.tsx, sebuah client component)
+  // mewarisinya.
+  //
+  // Konsekuensi: setiap halaman WAJIB menulis title-nya sendiri secara utuh.
+  // Guard test G12 di src/app/(site)/__tests__/seo-invariants.test.ts gagal
+  // bila template dikembalikan.
+  title: "Grand Duta City Parung — Hunian Premium South of Jakarta",
   description:
     "Kawasan hunian Grand Duta City Parung di Parung, Bogor. Info Cluster Ladera & Cascada, harga, lokasi, siteplan, dan stok terbaru. Hunian premium South of Jakarta dengan akses strategis.",
   metadataBase: new URL("https://granddutacitysouthofjakarta.com"),
@@ -45,7 +62,7 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   openGraph: {
-    siteName: "Grand Duta City Parung",
+    siteName: OG_SITE_NAME,
     locale: "id_ID",
     type: "website",
   },
@@ -78,6 +95,10 @@ const jsonLdOrganization = {
   "@type": "Organization",
   "@id": `${SITE_URL}/#organization`,
   name: "Duta Putra Land",
+  // Nama legal dipindahkan ke sini dari /pricelist, yang sebelumnya
+  // mendefinisikan Organization anonim "PT. Duta Putra Mahkota" dengan `url`
+  // yang sama. Satu entitas, satu node.
+  legalName: "PT. Duta Putra Mahkota",
   alternateName: "Grand Duta City Parung South of Jakarta",
   url: SITE_URL,
   logo: {
@@ -184,7 +205,13 @@ export default function RootLayout({
         <WhatsAppButton />
       </body>
       {gaId && gaId !== "G-XXXXXXXXXX" ? (
-        <DeferredAnalytics gaId={gaId} />
+        <>
+          <DeferredAnalytics gaId={gaId} />
+          {/* Satu listener terdelegasi melacak SELURUH CTA WhatsApp di situs.
+              Hanya dipasang bila GA aktif, jadi tidak ada beban JS sia-sia di
+              environment tanpa GA_ID. */}
+          <WhatsAppTracker />
+        </>
       ) : null}
     </html>
   );

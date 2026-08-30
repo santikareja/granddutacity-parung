@@ -58,7 +58,7 @@ export function ProductRevealCard({
   const [isFavorite, setIsFavorite] = useState(false);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   // Hover/tap interaksi kartu dianimasikan murni dengan CSS (group-hover +
-  // transition) â€” menggantikan varian spring framer-motion yang membebani
+  // transition) — menggantikan varian spring framer-motion yang membebani
   // evaluasi JS di main thread.
   const isTouchDevice = useSyncExternalStore(subscribeTouch, getTouch, () => false);
   const reduceMotion = useSyncExternalStore(subscribeReduce, getReduce, () => false);
@@ -227,7 +227,7 @@ export function ProductRevealCard({
             <div className="p-3.5 rounded-xl bg-white/5 border border-white/8 space-y-2">
               <div className="flex justify-between text-xs text-[#F8F6F0]/90">
                 <span className="text-white/50">Luas Bangunan/Tanah:</span>
-                <span className="font-semibold">{specs.lb} mÂ² / {specs.lt} mÂ²</span>
+                <span className="font-semibold">{specs.lb} m² / {specs.lt} m²</span>
               </div>
               <div className="flex justify-between text-xs text-[#F8F6F0]/90">
                 <span className="text-white/50">Kamar Tidur:</span>

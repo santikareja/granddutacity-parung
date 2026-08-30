@@ -126,10 +126,13 @@ export const articleCategoryDefinitions: Record<
       "Panduan properti lengkap untuk pembeli rumah: cara membeli rumah, KPR, investasi, dan desain hunian.",
     intro:
       "Membeli rumah adalah keputusan finansial terbesar dalam hidup. Namun banyak calon pembeli yang masih bingung soal proses KPR, kelengkapan dokumen, hingga memilih lokasi yang tepat. Di sini kami mengumpulkan panduan properti lengkap yang ditulis untuk membantu Anda memahami setiap tahap, dari riset awal, proses pembiayaan, hingga serah terima kunci. Semua artikel dikurasi tim Grand Duta City berdasarkan pengalaman nyata di lapangan dan pertanyaan paling umum dari calon pembeli.",
+    // Brand tag menggantung dicabut (68 -> 50 karakter) dan frasa
+    // "Grand Duta City South of Jakarta" diganti agar tidak bersaing dengan
+    // homepage. metaDescription dipendekkan dari 193 ke rentang 120-160.
     metaTitle:
-      "Panduan Properti: Tips Beli Rumah, KPR & Investasi | Grand Duta City",
+      "Panduan Properti: Tips Beli Rumah, KPR & Investasi",
     metaDescription:
-      "Panduan properti lengkap untuk pembeli rumah di Indonesia: cara membeli rumah pertama, tips KPR, strategi investasi, dan desain hunian. Artikel terpercaya dari Grand Duta City South of Jakarta.",
+      "Panduan properti untuk pembeli rumah pertama: langkah membeli, tips lolos KPR, membaca dokumen, strategi investasi, dan pertimbangan desain hunian keluarga.",
     openGraphTitle: "Panduan Properti: Tips Beli Rumah, KPR & Investasi",
     openGraphDescription:
       "Panduan properti lengkap: cara beli rumah, KPR, investasi, dan desain hunian dari Grand Duta City.",
@@ -169,10 +172,12 @@ export const articleCategoryDefinitions: Record<
       "Ulasan kawasan perumahan di area Parung, Bogor Selatan, dan sekitarnya: akses, infrastruktur, dan fasilitas.",
     intro:
       "Lokasi adalah faktor paling menentukan dalam memilih properti. Bukan hanya soal jarak ke pusat kota, tapi juga soal kemudahan akses, fasilitas sekitar, risiko banjir, dan potensi pertumbuhan kawasan ke depan. Artikel di kategori ini membahas kawasan-kawasan properti yang sedang berkembang di area Parung, Bogor Selatan, dan sekitarnya, termasuk ulasan infrastruktur, akses tol, ketersediaan sekolah dan rumah sakit, serta tren harga tanah per kawasan. Cocok dibaca sebelum Anda memutuskan di mana akan membeli hunian.",
+    // Brand tag menggantung dicabut (75 -> 50 karakter).
+    // metaDescription dipendekkan dari 180 ke rentang 120-160.
     metaTitle:
-      "Kawasan Properti — Ulasan Area Parung, Bogor & Sekitarnya | Grand Duta City",
+      "Ulasan Kawasan Properti Parung, Bogor & Sekitarnya",
     metaDescription:
-      "Ulasan kawasan perumahan di area Parung, Bogor Selatan, dan sekitarnya. Informasi akses jalan, infrastruktur, fasilitas umum, dan perkembangan kawasan untuk calon pembeli properti.",
+      "Ulasan kawasan perumahan di Parung dan Bogor Selatan: akses jalan, exit tol terdekat, infrastruktur, fasilitas umum, dan arah perkembangan kawasan ke depan.",
     openGraphTitle: "Kawasan Properti — Ulasan Area Parung & Bogor",
     openGraphDescription:
       "Ulasan kawasan, akses, dan perkembangan infrastruktur di Parung, Bogor Selatan dan sekitarnya.",
@@ -197,8 +202,15 @@ export const articleCategoryDefinitions: Record<
     },
     ctaPlacement: "middle",
     relatedCategories: ["panduan-properti", "seputar-gdc"],
+    // Sebelumnya `"@type": "Place"` TANPA `@id` tapi MEMBAWA alamat. Node
+    // lokasi anonim beralamat adalah cara paling mudah memecah entitas: Google
+    // melihat sebuah tempat di Parung yang tidak pernah dihubungkan ke
+    // `#project`, dan tidak jelas apakah maksudnya kawasan proyek atau
+    // kecamatannya. Kini eksplisit: ini WILAYAH ADMINISTRATIF Parung, entitas
+    // yang memang berbeda dari kawasan proyek, dan punya `@id` sendiri.
     about: {
-      "@type": "Place",
+      "@type": "AdministrativeArea",
+      "@id": `${SITE_URL}/#area-parung`,
       name: "Parung, Bogor, Jawa Barat",
       address: {
         "@type": "PostalAddress",
@@ -218,10 +230,13 @@ export const articleCategoryDefinitions: Record<
       "Informasi terbaru seputar Grand Duta City Parung: update stok unit, fasilitas, cluster Cascada dan Ladera.",
     intro:
       "Grand Duta City adalah perumahan premium di Parung, Bogor Selatan, yang dirancang untuk keluarga modern yang menginginkan hunian asri dengan fasilitas lengkap dan akses mudah ke Jakarta. Di sini kami mengumpulkan informasi terbaru seputar GDC: dari update ketersediaan unit, progres pembangunan cluster Cascada dan Ladera, fasilitas The Beach GDC, hingga panduan pembelian dan skema KPR yang tersedia. Semua informasi diperbarui langsung dari tim pemasaran Grand Duta City.",
+    // Frasa "Grand Duta City Parung" dicabut dari metaTitle (63 -> 45
+    // karakter) karena di sini ia hanya brand tag tanpa modifier pembeda.
+    // metaDescription dipendekkan dari 164 ke rentang 120-160.
     metaTitle:
-      "Seputar GDC — Informasi & Update Grand Duta City Parung Terbaru",
+      "Seputar GDC: Update Stok, Fasilitas & Cluster",
     metaDescription:
-      "Kumpulan informasi seputar Grand Duta City: update stok unit, fasilitas perumahan, cluster Cascada & Ladera, dan berita terbaru proyek GDC di Parung, Bogor Selatan.",
+      "Informasi terbaru seputar proyek GDC di Parung, Bogor Selatan: update stok unit per blok, fasilitas kawasan, serta progres Cluster Cascada dan Cluster Ladera.",
     openGraphTitle:
       "Seputar GDC — Informasi & Update Grand Duta City Terbaru",
     openGraphDescription:

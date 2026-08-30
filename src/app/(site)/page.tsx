@@ -4,7 +4,18 @@ import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
 import dynamic from "next/dynamic";
 
-// Video section for YouTube embed
+import {
+  SCHEMA_ID,
+  clusterNodes,
+  faqNode,
+  graph,
+  primaryImageNode,
+  projectPlaceNode,
+  ref,
+  salesOfficeNode,
+  websiteNode,
+} from "@/lib/schema";
+
 const VideoSection = dynamic(() => import("@/components/sections/video-section").then((mod) => ({ default: mod.VideoSection })));
 const WhyGdc = dynamic(() => import("@/components/sections/why-gdc").then((mod) => ({ default: mod.WhyGdc })));
 const BankPartners = dynamic(() => import("@/components/sections/bank-partners").then((mod) => ({ default: mod.BankPartners })));
@@ -29,8 +40,18 @@ const FALLBACK_IMAGE_ALT = "Suasana kawasan perumahan modern Grand Duta City Par
 export const metadata: Metadata = {
   metadataBase: new URL("https://granddutacitysouthofjakarta.com"),
   title: "Grand Duta City Parung | Promo Hunian South of Jakarta",
+  // PENGECUALIAN R1 YANG DIDEKLARASIKAN (Fase 3).
+  //
+  // R1 melarang perubahan metadata homepage sebelum Fase 8. Satu kata diubah di
+  // sini — "8 bank" menjadi "7 bank" — karena jumlah bank mitra yang benar
+  // adalah 7 (dikonfirmasi pemilik) dan membiarkan klaim yang salah di
+  // description halaman utama adalah masalah kepercayaan, bukan gaya penulisan.
+  //
+  // Mengapa ini aman: panjang description TIDAK berubah (148 karakter, tetap di
+  // dalam rentang guard G7), tidak ada kata kunci yang bergeser, dan `title`,
+  // `alternates.canonical`, `robots`, serta `<h1>` sama sekali tidak disentuh.
   description:
-    "Grand Duta City Parung — hunian premium di South of Jakarta. Mulai Rp 700 jutaan, Promo Tanpa DP, KPR 8 bank, 20 menit ke CBD Jaksel via tol Desari.",
+    "Grand Duta City Parung — hunian premium di South of Jakarta. Mulai Rp 700 jutaan, Promo Tanpa DP, KPR 7 bank, 20 menit ke CBD Jaksel via tol Desari.",
   keywords: [
     // Primary Keywords - Front loaded untuk SEO
     "grand duta city parung",
@@ -98,44 +119,14 @@ export const metadata: Metadata = {
   },
 };
 
-const SITE_NAME = "Grand Duta City Parung South of Jakarta";
-const SITE_NAME_ALT = "GDC SOJ Parung";
-const PHONE = "+628131742034";
-const ADDRESS = {
-  streetAddress: "Jl. Raya Parung No.47, Jabon Mekar",
-  addressLocality: "Parung",
-  addressRegion: "Jawa Barat",
-  postalCode: "16330",
-  addressCountry: "ID",
-};
 
-const jsonLdWebSite = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: SITE_NAME,
-  alternateName: SITE_NAME_ALT,
-  url: SITE_URL,
-  description:
-    "Kawasan hunian Grand Duta City South of Jakarta di Parung, Bogor. Info Cluster Ladera & Cascada, harga, lokasi, siteplan, dan stok terbaru.",
-  inLanguage: "id",
-  image: {
-    "@type": "ImageObject",
-    url: FALLBACK_IMAGE,
-    width: 1200,
-    height: 1200,
-    caption: FALLBACK_IMAGE_ALT,
-  },
-  potentialAction: {
-    "@type": "SearchAction",
-    target: {
-      "@type": "EntryPoint",
-      urlTemplate: `${SITE_URL}/?s={search_term_string}`,
-    },
-    "query-input": "required name=search_term_string",
-  },
-};
 
-const schemaImages = [
+
+
+
+// Gambar unit untuk `ImageObject` di graf. Caption deskriptif dipertahankan
+// karena itulah yang membuat gambar punya peluang muncul sebagai hasil gambar.
+const unitImageNodes = [
   {
     "@type": "ImageObject",
     url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Malta_qnowfx.webp",
@@ -158,341 +149,116 @@ const schemaImages = [
   },
 ];
 
-const jsonLdAgent = {
-  "@context": "https://schema.org",
-  "@type": "RealEstateAgent",
-  name: SITE_NAME,
-  alternateName: SITE_NAME_ALT,
+/**
+ * Video tur kawasan di YouTube (channel Marketing Grand Duta City Parung).
+ * Judul diambil dari oEmbed resmi YouTube, bukan ditulis ulang.
+ */
+const TOUR_VIDEO_ID = "AZLiHEyd9Yo";
+const TOUR_VIDEO_TITLE =
+  "Grand Duta City Parung South of Jakarta Progress Terbaru | 0813-1742-034";
+
+/**
+ * Tanggal unggah dan durasi video, DIAMBIL DARI YOUTUBE, bukan ditebak.
+ *
+ * `uploadDate` adalah field WAJIB untuk video rich result, dan oEmbed YouTube
+ * tidak mengeksposnya — itu sebabnya node ini sempat dinonaktifkan. Tapi halaman
+ * tontonan YouTube sendiri menerbitkan datanya sebagai structured data:
+ * `<meta itemprop="datePublished">` dan `<meta itemprop="duration">`. Nilai di
+ * bawah dibaca langsung dari sana, jadi ia data YouTube, bukan karangan kita.
+ *
+ * Diverifikasi 30 Agustus 2026 terhadap
+ * https://www.youtube.com/watch?v=AZLiHEyd9Yo
+ *   datePublished : 2026-07-20T19:28:37-07:00
+ *   duration      : PT3M41S (221 detik)
+ *
+ * Offset -07:00 adalah cara YouTube merender instan tersebut; instan yang sama
+ * dalam WIB adalah 2026-07-21T09:28:37+07:00. Disimpan apa adanya supaya bisa
+ * dicocokkan ulang dengan sumbernya.
+ */
+const TOUR_VIDEO_UPLOAD_DATE = "2026-07-20T19:28:37-07:00";
+const TOUR_VIDEO_DURATION = "PT3M41S";
+
+const tourVideoNode = {
+  "@type": "VideoObject",
+  "@id": SCHEMA_ID.video,
+  name: TOUR_VIDEO_TITLE,
+  description:
+    "Tur kawasan Grand Duta City Parung South of Jakarta: gerbang cluster, boulevard utama, The Beach Lagoon, Central Park, dan progres pembangunan terbaru.",
+  thumbnailUrl: [`https://i.ytimg.com/vi/${TOUR_VIDEO_ID}/hqdefault.jpg`],
+  uploadDate: TOUR_VIDEO_UPLOAD_DATE,
+  duration: TOUR_VIDEO_DURATION,
+  embedUrl: `https://www.youtube-nocookie.com/embed/${TOUR_VIDEO_ID}`,
+  contentUrl: `https://www.youtube.com/watch?v=${TOUR_VIDEO_ID}`,
+  inLanguage: "id-ID",
+  isPartOf: ref(SCHEMA_ID.website),
+  about: ref(SCHEMA_ID.project),
+  publisher: ref(SCHEMA_ID.organization),
+};
+
+/**
+ * `WebPage` homepage — menggantikan `CollectionPage`.
+ *
+ * `CollectionPage` menandakan halaman arsip/listing; homepage bukan itu.
+ * `mainEntity` menunjuk entitas proyek, sehingga Google tahu halaman INI adalah
+ * halaman kanonik untuk entitas tersebut — inilah tautan yang menopang klaim
+ * kedua kata kunci target milik homepage.
+ */
+const homepageNode = {
+  "@type": "WebPage",
+  "@id": SCHEMA_ID.homepage,
   url: SITE_URL,
-  logo: "https://granddutacitysouthofjakarta.com/logo.svg",
-  image: schemaImages,
-  telephone: PHONE,
-  email: "contact@granddutacitysouthofjakarta.com",
-  address: {
-    "@type": "PostalAddress",
-    ...ADDRESS,
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: -6.462459,
-    longitude: 106.729392,
-  },
-  hasMap: "https://maps.app.goo.gl/hCasFSyKPXv5nwY5A",
-  sameAs: [
-    "https://www.instagram.com/granddutacityparungsoj/",
-    "https://www.facebook.com/granddutacityparungsoj",
-    "https://www.youtube.com/@marketinggdcparung",
-    "https://dutaputraland.com/main/public/",
-  ],
-  areaServed: {
-    "@type": "City",
-    name: "Parung, Bogor",
-  },
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-      opens: "09:00",
-      closes: "18:00",
-    },
-  ],
-  priceRange: "Rp 700.000.000 - Rp 1.600.000.000",
-};
-
-// Shared helpers for Merchant Listing compliance
-const MERCHANT_SELLER = { "@type": "Organization", name: "Grand Duta City South of Jakarta", url: SITE_URL };
-const PRICE_VALID_UNTIL = `${new Date().getFullYear()}-12-31`;
-const NO_SHIPPING = {
-  "@type": "OfferShippingDetails",
-  shippingRate: { "@type": "MonetaryAmount", value: "0", currency: "IDR" },
-  shippingDestination: { "@type": "DefinedRegion", addressCountry: "ID" },
-  deliveryTime: {
-    "@type": "ShippingDeliveryTime",
-    handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
-    transitTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 0, unitCode: "DAY" },
-  },
-};
-const NO_RETURN_POLICY = {
-  "@type": "MerchantReturnPolicy",
-  applicableCountry: "ID",
-  returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
-};
-
-const jsonLdProductList = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "Tipe Rumah Grand Duta City South of Jakarta",
-  description: "Pilihan unit hunian di Cluster Ladera dan Cascada, Grand Duta City Parung South of Jakarta.",
-  url: SITE_URL,
-  numberOfItems: 6,
-  itemListElement: [
-    {
-      "@type": "ListItem",
-      position: 1,
-      item: {
-        "@type": "Product",
-        name: "Cluster Ladera – Tipe Malta 47/72",
-        category: "Rumah Tapak",
-        description: "Hunian 2+1 kamar tidur, Type 47, luas tanah 72 m². Cluster Ladera Grand Duta City Parung.",
-        image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Malta_qnowfx.webp",
-        brand: { "@type": "Brand", name: "Duta Putra Land" },
-        offers: {
-          "@type": "Offer",
-          price: "800000000",
-          priceCurrency: "IDR",
-          priceValidUntil: PRICE_VALID_UNTIL,
-          availability: "https://schema.org/InStock",
-          url: `${SITE_URL}/cluster-ladera`,
-          seller: MERCHANT_SELLER,
-          shippingDetails: NO_SHIPPING,
-          hasMerchantReturnPolicy: NO_RETURN_POLICY,
-        },
-      },
-    },
-    {
-      "@type": "ListItem",
-      position: 2,
-      item: {
-        "@type": "Product",
-        name: "Cluster Ladera – Tipe Tuscan 66/72",
-        category: "Rumah Tapak",
-        description: "Hunian 3 kamar tidur, Type 66, luas tanah 72 m². Cluster Ladera Grand Duta City Parung.",
-        image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Tuscan_drllpk.webp",
-        brand: { "@type": "Brand", name: "Duta Putra Land" },
-        offers: {
-          "@type": "Offer",
-          price: "1100000000",
-          priceCurrency: "IDR",
-          priceValidUntil: PRICE_VALID_UNTIL,
-          availability: "https://schema.org/InStock",
-          url: `${SITE_URL}/cluster-ladera`,
-          seller: MERCHANT_SELLER,
-          shippingDetails: NO_SHIPPING,
-          hasMerchantReturnPolicy: NO_RETURN_POLICY,
-        },
-      },
-    },
-    {
-      "@type": "ListItem",
-      position: 3,
-      item: {
-        "@type": "Product",
-        name: "Cluster Cascada – Tipe Aira+ 42/60",
-        category: "Rumah Tapak",
-        description: "Hunian 2 kamar tidur, Type 42, luas tanah 60 m². Cluster Cascada Grand Duta City Parung.",
-        image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800277/Tipe_Aira_ah9nsa.webp",
-        brand: { "@type": "Brand", name: "Duta Putra Land" },
-        offers: {
-          "@type": "Offer",
-          price: "800000000",
-          priceCurrency: "IDR",
-          priceValidUntil: PRICE_VALID_UNTIL,
-          availability: "https://schema.org/InStock",
-          url: `${SITE_URL}/cluster-cascada`,
-          seller: MERCHANT_SELLER,
-          shippingDetails: NO_SHIPPING,
-          hasMerchantReturnPolicy: NO_RETURN_POLICY,
-        },
-      },
-    },
-    {
-      "@type": "ListItem",
-      position: 4,
-      item: {
-        "@type": "Product",
-        name: "Cluster Cascada – Tipe Manoa 58/60",
-        category: "Rumah Tapak",
-        description: "Hunian 1 kamar tidur, Type 58, luas tanah 60 m². Cluster Cascada Grand Duta City Parung.",
-        image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Manoa_j8uvcr.webp",
-        brand: { "@type": "Brand", name: "Duta Putra Land" },
-        offers: {
-          "@type": "Offer",
-          price: "800000000",
-          priceCurrency: "IDR",
-          priceValidUntil: PRICE_VALID_UNTIL,
-          availability: "https://schema.org/InStock",
-          url: `${SITE_URL}/cluster-cascada`,
-          seller: MERCHANT_SELLER,
-          shippingDetails: NO_SHIPPING,
-          hasMerchantReturnPolicy: NO_RETURN_POLICY,
-        },
-      },
-    },
-    {
-      "@type": "ListItem",
-      position: 5,
-      item: {
-        "@type": "Product",
-        name: "Cluster Cascada – Tipe Victoria 69/72",
-        category: "Rumah Tapak",
-        description: "Hunian 3 kamar tidur, Type 69, luas tanah 72 m². Cluster Cascada Grand Duta City Parung.",
-        image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Victoria_-_Tuscan_gj1kcd.webp",
-        brand: { "@type": "Brand", name: "Duta Putra Land" },
-        offers: {
-          "@type": "Offer",
-          price: "1100000000",
-          priceCurrency: "IDR",
-          priceValidUntil: PRICE_VALID_UNTIL,
-          availability: "https://schema.org/InStock",
-          url: `${SITE_URL}/cluster-cascada`,
-          seller: MERCHANT_SELLER,
-          shippingDetails: NO_SHIPPING,
-          hasMerchantReturnPolicy: NO_RETURN_POLICY,
-        },
-      },
-    },
-    {
-      "@type": "ListItem",
-      position: 6,
-      item: {
-        "@type": "Product",
-        name: "Cluster Cascada – Tipe Alexandra 88/105",
-        category: "Rumah Tapak",
-        description: "Hunian 3 kamar tidur, Type 88, luas tanah 105 m². Cluster Cascada Grand Duta City Parung.",
-        image: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Alexandra_mtw8xh.webp",
-        brand: { "@type": "Brand", name: "Duta Putra Land" },
-        offers: {
-          "@type": "Offer",
-          price: "1400000000",
-          priceCurrency: "IDR",
-          priceValidUntil: PRICE_VALID_UNTIL,
-          availability: "https://schema.org/InStock",
-          url: `${SITE_URL}/cluster-cascada`,
-          seller: MERCHANT_SELLER,
-          shippingDetails: NO_SHIPPING,
-          hasMerchantReturnPolicy: NO_RETURN_POLICY,
-        },
-      },
-    },
-  ],
-};
-
-const jsonLdPage = {
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
   name: "Grand Duta City Parung South of Jakarta | Promo Tanpa DP, Mulai 700 Jt",
   description:
-    "Grand Duta City Parung South of Jakarta (GDC SOJ) — kota mandiri 200 Ha by Duta Putra Land. Hunian mulai Rp 700 jutaan, Promo Tanpa DP, KPR 8 bank, 20 menit ke CBD Jaksel via tol.",
-  url: SITE_URL,
-  image: schemaImages,
-  inLanguage: "id",
-  isPartOf: { "@type": "WebSite", url: SITE_URL, name: SITE_NAME },
-  about: {
-    "@type": "RealEstateListing",
-    name: "Grand Duta City Parung South of Jakarta",
-    address: {
-      "@type": "PostalAddress",
-      ...ADDRESS,
-    },
-  },
-  hasPart: [
-    { "@type": "WebPage", name: "Cluster Ladera", url: `${SITE_URL}/cluster-ladera` },
-    { "@type": "WebPage", name: "Cluster Cascada", url: `${SITE_URL}/cluster-cascada` },
-    { "@type": "WebPage", name: "Galeri", url: `${SITE_URL}/galeri` },
-  ],
-  breadcrumb: {
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-    ],
-  },
-  primaryImageOfPage: {
-    "@type": "ImageObject",
-    url: FALLBACK_IMAGE,
-    width: 1200,
-    height: 1200,
-    description: FALLBACK_IMAGE_ALT,
-  },
-};
-
-// FAQ content (source of truth for FAQPage schema, mirroring the FaqKpr section)
-const FAQ_CONTENT = [
-  {
-    q: "Berapa harga rumah di Grand Duta City Parung South of Jakarta?",
-    a: "Harga rumah di Grand Duta City Parung mulai dari Rp 700 jutaan untuk Cluster Ladera (Tipe Malta 47/72) hingga Rp 1,6 Milyar-an untuk unit premium di Cluster Cascada (Tipe Alexandra 88/105). Cicilan KPR mulai sekitar Rp 4 jutaan per bulan dengan tenor hingga 25 tahun. Hubungi marketing untuk pricelist terbaru dan ketersediaan unit promo.",
-  },
-  {
-    q: "Apa saja syarat dan keuntungan Promo Tanpa DP bulan ini?",
-    a: "Program Promo Tanpa DP berlaku untuk pemesanan unit baru di Cluster Ladera dan Cascada bulan berjalan, dengan proses KPR melalui 8 bank mitra (BCA, Mandiri, BTN, BRI, BNI, dll). Cukup siapkan dokumen pribadi (KTP, KK, slip gaji/SPT), dan tim marketing kami akan bantu pre-approval gratis. Konsultasi via WhatsApp untuk simulasi cicilan & bocoran promo aktif.",
-  },
-  {
-    q: "Di mana lokasi Grand Duta City Parung dan bagaimana akses tolnya?",
-    a: "Berlokasi di Jl. Raya Parung No.47, Jabon Mekar, Kec. Parung, Kabupaten Bogor — hanya 20 menit ke TB Simatupang & Antasari Jakarta Selatan, dan kurang dari 15 menit ke 4 exit tol utama: Pamulang, Krukut, Sawangan, dan Bojong Gede. Akses ke Tol Desari, Tol Andara, Tol Pamulang, dan Tol BORR membuat hunian ini sangat strategis untuk komuter Jakarta-Depok-Bogor-BSD.",
-  },
-  {
-    q: "Fasilitas eksklusif apa saja di kawasan Grand Duta City SOJ?",
-    a: "Penghuni menikmati fasilitas kelas premium: The Beach (kolam tematik), Cluster Private Pool, Central Park, Ruang Terbuka Hijau 80 Ha, Playground, Pusat Kuliner FnB, Garden Cafe, Boulevard utama, Keamanan 24/7 dengan CCTV, One Gate System, serta jaringan kabel bawah tanah untuk estetika kawasan yang rapi modern.",
-  },
-  {
-    q: "Apakah kawasan Grand Duta City Parung aman dari banjir?",
-    a: "Ya. Kawasan dirancang dengan polder system terpadu berskala kota mandiri dan elevasi tanah optimal di dataran tinggi Parung Bogor. Drainase induk dan area resapan dirancang untuk menjamin lingkungan bebas banjir bahkan saat curah hujan tinggi.",
-  },
-  {
-    q: "Bagaimana prospek investasi properti di Grand Duta City Parung?",
-    a: "Sangat menjanjikan. Kawasan ini dilewati jalur rencana Tol JORR 3 yang akan mendongkrak capital gain signifikan, menjadikannya sunrise property terbaik di koridor selatan Jakarta. Kombinasi 200 Ha kota mandiri, infrastruktur lengkap, dan posisi strategis 20 menit dari CBD Jakarta Selatan menempatkan GDC SOJ sebagai pilihan investasi properti Bogor dengan potensi apresiasi tinggi 5–10 tahun ke depan.",
-  },
-];
-
-const jsonLdFaq = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  name: "FAQ Grand Duta City Parung South of Jakarta",
-  url: SITE_URL,
-  inLanguage: "id",
-  mainEntity: FAQ_CONTENT.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: f.a,
-    },
-  })),
-};
-
-// SiteNavigationElement — membantu Google memahami struktur situs untuk kandidat sitelinks
-const jsonLdSiteNavigation = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "Navigasi Utama Grand Duta City Parung",
-  itemListElement: [
-    { "@type": "SiteNavigationElement", position: 1, name: "Cluster Ladera", description: "Tipe rumah, denah, dan harga Cluster Ladera Grand Duta City Parung.", url: `${SITE_URL}/cluster-ladera` },
-    { "@type": "SiteNavigationElement", position: 2, name: "Cluster Cascada", description: "Tipe rumah, denah, dan harga Cluster Cascada Grand Duta City Parung.", url: `${SITE_URL}/cluster-cascada` },
-    { "@type": "SiteNavigationElement", position: 3, name: "Pricelist", description: "Daftar harga dan simulasi cicilan Grand Duta City Parung.", url: `${SITE_URL}/pricelist-grand-duta-city` },
-    { "@type": "SiteNavigationElement", position: 4, name: "Update Stok & Siteplan", description: "Ketersediaan unit dan siteplan terbaru Grand Duta City Parung.", url: `${SITE_URL}/update-stok-siteplan-grand-duta-city-parung` },
-    { "@type": "SiteNavigationElement", position: 5, name: "Lokasi & Akses", description: "Lokasi, peta, dan akses tol Grand Duta City Parung South of Jakarta.", url: `${SITE_URL}/lokasi-akses-grand-duta-city-parung` },
-    { "@type": "SiteNavigationElement", position: 6, name: "Cara Beli & KPR", description: "Panduan cara beli dan KPR Grand Duta City Parung.", url: `${SITE_URL}/cara-beli-kpr` },
-    { "@type": "SiteNavigationElement", position: 7, name: "Galeri", description: "Galeri foto dan video kawasan Grand Duta City Parung.", url: `${SITE_URL}/galeri` },
-    { "@type": "SiteNavigationElement", position: 8, name: "Kontak", description: "Hubungi marketing Grand Duta City Parung South of Jakarta.", url: `${SITE_URL}/kontak` },
+    "Grand Duta City Parung South of Jakarta (GDC SOJ) — kota mandiri 200 Ha by Duta Putra Land. Hunian mulai Rp 700 jutaan, Promo Tanpa DP, KPR 7 bank, 20 menit ke CBD Jaksel via tol.",
+  inLanguage: "id-ID",
+  isPartOf: ref(SCHEMA_ID.website),
+  about: ref(SCHEMA_ID.project),
+  mainEntity: ref(SCHEMA_ID.project),
+  primaryImageOfPage: ref(SCHEMA_ID.primaryImage),
+  image: unitImageNodes,
+  video: ref(SCHEMA_ID.video),
+  // Breadcrumb 1-item yang lama dihapus: Google tidak pernah merender
+  // breadcrumb satu level, jadi ia hanya menambah byte.
+  significantLink: [
+    `${SITE_URL}/cluster-ladera`,
+    `${SITE_URL}/cluster-cascada`,
+    `${SITE_URL}/pricelist-grand-duta-city`,
+    `${SITE_URL}/lokasi-akses-grand-duta-city-parung`,
+    `${SITE_URL}/update-stok-siteplan-grand-duta-city-parung`,
+    `${SITE_URL}/cara-beli-kpr`,
+    `${SITE_URL}/galeri`,
+    `${SITE_URL}/kontak`,
   ],
 };
+
+/**
+ * SATU dokumen `@graph` menggantikan enam blok `<script>` terpisah.
+ *
+ * Selain memperbaiki graf yang terputus, ini juga memperkecil HTML: Next
+ * menduplikasi JSON-LD ke dalam RSC flight payload, jadi setiap byte schema
+ * terhitung DUA KALI pada halaman ini.
+ *
+ * `Organization` tidak diikutkan di sini — ia sudah diemit global di
+ * `(site)/layout.tsx` dengan `@id` yang sama, dan node di bawah merujuknya.
+ */
+const jsonLdGraph = graph([
+  websiteNode(),
+  projectPlaceNode(),
+  ...clusterNodes(),
+  salesOfficeNode(),
+  primaryImageNode(FALLBACK_IMAGE, FALLBACK_IMAGE_ALT),
+  homepageNode,
+  faqNode(),
+  tourVideoNode,
+]);
 
 export default function Home() {
   return (
     <>
-      {/* JSON-LD Structured Data */}
+      {/* Satu blok JSON-LD berisi seluruh graf (lihat src/lib/schema.ts). */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdAgent) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdPage) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdProductList) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSiteNavigation) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
       />
       <Header />
       <main className="relative w-full overflow-hidden">

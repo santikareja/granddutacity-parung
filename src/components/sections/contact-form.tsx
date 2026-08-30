@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
+import { trackWhatsAppClick } from '@/lib/analytics';
 
 export function ContactForm() {
   const [formData, setFormData] = useState({
@@ -21,6 +22,15 @@ export function ContactForm() {
     
     // WhatsApp URL
     const whatsappUrl = `https://wa.me/628131742034?text=${encodeURIComponent(message)}`;
+
+    // Lead dengan intent tertinggi: pengunjung sudah mengisi nama, nomor, dan
+    // kebutuhan. `needs` dikirim sebagai `unit` supaya GA4 bisa memecah
+    // konversi per jenis kebutuhan yang dipilih.
+    trackWhatsAppClick({
+      page: window.location.pathname,
+      placement: "contact-form-submit",
+      unit: formData.needs || undefined,
+    });
 
     // Simulate small delay for better UX
     setTimeout(() => {
@@ -117,6 +127,7 @@ export function ContactForm() {
             href={`https://wa.me/628131742034?text=${encodeURIComponent(`Halo Marketing Grand Duta City Parung, saya *${formData.name}*. Saya ingin info *${formData.needs}*.`)}`}
             target="_blank"
             rel="noopener noreferrer"
+            data-wa-placement="contact-form-success"
             className="bg-[#F5F1E8]/10 hover:bg-[#F5F1E8]/20 text-[#F5F1E8] px-8 py-4 rounded-xl transition-all text-xs uppercase tracking-widest font-bold border border-[#F5F1E8]/10"
           >
             Buka WhatsApp Manual

@@ -26,8 +26,8 @@ export function Header() {
 			label: 'Cluster', 
 			href: '#',
 			submenu: [
-				{ label: 'Cluster Ladera', href: '/cluster-ladera', desc: 'American Classic Modern Â· Mulai 800 Jt' },
-				{ label: 'Cluster Cascada', href: '/cluster-cascada', desc: 'Modern Tropical Resort Â· Mulai 800 Jt' }
+				{ label: 'Cluster Ladera', href: '/cluster-ladera', desc: 'American Classic Modern · Mulai 800 Jt' },
+				{ label: 'Cluster Cascada', href: '/cluster-cascada', desc: 'Modern Tropical Resort · Mulai 800 Jt' }
 			]
 		},
 		{ 
@@ -44,7 +44,7 @@ export function Header() {
 			submenu: [
 				{ label: 'Tentang Developer', href: '/about', desc: 'Duta Putra Land sejak 1983' },
 				{ label: 'Lokasi & Akses', href: '/lokasi-akses-grand-duta-city-parung', desc: 'Akses 4 exit tol & TOD' },
-				{ label: 'Cara Beli & KPR', href: '/cara-beli-kpr', desc: 'Promo Tanpa DP & 8 Bank Mitra' },
+				{ label: 'Cara Beli & KPR', href: '/cara-beli-kpr', desc: 'Promo Tanpa DP & 7 Bank Mitra' },
 				{ label: 'Galeri Foto & Video', href: '/galeri', desc: 'Dokumentasi kawasan & fasilitas' },
 				{ label: 'Blog Properti', href: '/artikel', desc: 'Tips investasi properti Bogor' }
 			]
@@ -77,7 +77,7 @@ export function Header() {
 					'mx-auto transition-all duration-500',
 					// Opaque below lg: this bar is position:fixed, so a backdrop-filter
 					// forces the blur to be recomputed against whatever scrolls beneath
-					// it on every frame â€” the single most expensive effect on the page
+					// it on every frame — the single most expensive effect on the page
 					// during a mobile scroll.
 					scrolled
 						? 'max-w-6xl rounded-full border border-white/12 bg-[#0B120C] lg:bg-[#090D0A]/90 lg:backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-4 sm:px-6 py-2'
@@ -161,6 +161,7 @@ export function Header() {
 							href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20dengan%20Grand%20Duta%20City%20South%20of%20Jakarta.%20Boleh%20minta%20info%20promo%20terbaru%3F"
 							target="_blank"
 							rel="noopener noreferrer"
+							data-wa-placement="header-desktop"
 							className="group relative inline-flex items-center gap-2.5 pl-4 pr-1.5 py-1.5 rounded-full bg-[#C8521A] hover:bg-[#DE5E1E] text-white text-[11px] tracking-[0.16em] font-sans font-bold uppercase shadow-[0_4px_20px_rgba(200,82,26,0.35)] hover:shadow-[0_6px_28px_rgba(200,82,26,0.5)] active:scale-[0.98] transition-all duration-300"
 						>
 							<span>Konsultasi</span>
@@ -176,6 +177,7 @@ export function Header() {
 							href="https://wa.me/628131742034"
 							target="_blank"
 							rel="noopener noreferrer"
+							data-wa-placement="header-mobile-icon"
 							aria-label="WhatsApp Marketing"
 							className="w-9 h-9 rounded-full bg-[#C8521A] text-white flex items-center justify-center shadow-md active:scale-95 transition-transform"
 						>
@@ -265,6 +267,7 @@ export function Header() {
 									href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20dengan%20Promo%20Grand%20Duta%20City%20South%20of%20Jakarta."
 									target="_blank"
 									rel="noopener noreferrer"
+									data-wa-placement="header-mobile-drawer"
 									className="flex items-center justify-center gap-3 w-full py-3.5 px-6 rounded-full bg-[#C8521A] text-white font-sans font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-[#C8521A]/30 active:scale-98 transition-all"
 								>
 									<span>Konsultasi WhatsApp</span>

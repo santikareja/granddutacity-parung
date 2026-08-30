@@ -239,6 +239,7 @@ export function Hero() {
         </span>
         <a
           href="https://wa.me/628131742034"
+          data-wa-placement="hero-side-rail"
           className="text-[#D49A3D] hover:text-[#F5A524] text-[11px] tracking-[0.18em] font-sans font-semibold transition-colors duration-300"
           style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
@@ -329,6 +330,7 @@ export function Hero() {
               href="https://wa.me/628131742034?text=Halo%2C%20saya%20mau%20ambil%20promo%20spesial%20di%20Grand%20Duta%20City%20Parung%20South%20of%20Jakarta.%20Mohon%20info%20selengkapnya."
               target="_blank"
               rel="noopener noreferrer"
+              data-wa-placement="hero-primary"
               className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2.5 pl-5 pr-1.5 py-2.5 sm:pl-6 sm:pr-2 sm:py-3.5 rounded-full bg-[#C8521A] hover:bg-[#DE5E1E] text-white text-[11px] sm:text-xs tracking-[0.12em] sm:tracking-[0.14em] uppercase font-sans font-bold shadow-[0_12px_36px_rgba(200,82,26,0.5)] hover:shadow-[0_16px_45px_rgba(200,82,26,0.65)] active:scale-[0.98] transition-all duration-300"
             >
               <span>Saya Mau Promo</span>
@@ -358,7 +360,7 @@ export function Hero() {
             <span className="w-1 h-1 rounded-full bg-white/30 hidden sm:inline-block" />
             <div className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#D49A3D]" />
-              <span>KPR 8 Bank Mitra</span>
+              <span>KPR 7 Bank Mitra</span>
             </div>
             <span className="w-1 h-1 rounded-full bg-white/30 hidden sm:inline-block" />
             <div className="flex items-center gap-1.5">

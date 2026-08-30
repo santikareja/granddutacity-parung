@@ -8,91 +8,71 @@ import Image from "next/image";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { AmbientVideo } from "@/components/ui/ambient-video";
 import { ArrowRight, ShieldCheck, TreePine, Bike, Footprints, Recycle, MapPin, Maximize, BedDouble, Bath, CarFront } from "lucide-react";
+import {
+  SCHEMA_ID,
+  breadcrumbNode,
+  clusterOfferCatalogNode,
+  graph,
+  ref,
+} from "@/lib/schema";
+import { SITE_URL } from "@/lib/seo";
 
+const PAGE_URL = `${SITE_URL}/cluster-ladera`;
+
+// Title dipendekkan dari 88 -> 50 karakter dan brand tag menggantung dicabut.
+// Description sebelumnya BYTE-IDENTICAL dengan /cluster-cascada; sekarang
+// dibedakan lewat tema arsitektur dan nama tipe unit yang khas Ladera.
 export const metadata: Metadata = {
-  title: "Cluster Ladera Grand Duta City Parung | Ladera South of Jakarta",
-  description: "Informasi Cluster Ladera Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
+  title: "Cluster Ladera GDC Parung: Tipe, Harga & Stok Unit",
+  description:
+    "Cluster Ladera bertema American Classic Modern di GDC Parung. Tipe Verona 39/60, Malta 47/72, dan Tuscan 66/72 — lengkap denah, harga KPR, dan blok tersedia.",
   robots: {
     index: true,
     follow: true,
     "max-image-preview": "large",
   },
   alternates: {
-    canonical: "https://granddutacitysouthofjakarta.com/cluster-ladera",
+    canonical: PAGE_URL,
   },
 };
 
-const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Beranda",
-      "item": "https://granddutacitysouthofjakarta.com"
-    },
-    {
-      "@type": "ListItem",
-      "position": 2,
-      "name": "Cluster Ladera",
-      "item": "https://granddutacitysouthofjakarta.com/cluster-ladera"
-    }
-  ]
-};
+const HERO_IMAGE =
+  "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp";
+const HERO_ALT = "Gerbang Cluster Ladera GDC Parung";
 
-const webpageSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Cluster Ladera Grand Duta City Parung",
-  "description": "Informasi Cluster Ladera Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
-  "url": "https://granddutacitysouthofjakarta.com/cluster-ladera",
-  "primaryImageOfPage": {
+/**
+ * SATU `@graph` menggantikan tiga blok JSON-LD terpisah tanpa `@id`.
+ *
+ * Sebelum Fase 5 halaman ini mengemit `BreadcrumbList`, `WebPage`, dan
+ * `OfferCatalog` sebagai tiga dokumen yang tidak saling kenal, sehingga Google
+ * tidak bisa menyimpulkan bahwa unit-unit itu berada di dalam kawasan yang sama
+ * dengan entitas `Place` di homepage. `OfferCatalog`-nya juga hardcode dan
+ * sudah menyimpang dari pricelist resmi; kini dibangun dari `src/data/units.ts`.
+ */
+const pageSchema = graph([
+  breadcrumbNode([{ name: "Cluster Ladera", path: "/cluster-ladera" }], PAGE_URL),
+  {
     "@type": "ImageObject",
-    "url": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp",
-    "description": "Gerbang Cluster Ladera GDC Parung"
-  }
-};
-
-const offerCatalogSchema = {
-  "@context": "https://schema.org",
-  "@type": "OfferCatalog",
-  "name": "Tipe Unit Cluster Ladera",
-  "itemListElement": [
-    {
-      "@type": "Offer",
-      "itemOffered": {
-        "@type": "SingleFamilyResidence",
-        "name": "Tuscan Type 66/72",
-        "numberOfRooms": 3,
-        "floorSize": {
-          "@type": "QuantitativeValue",
-          "value": 66,
-          "unitCode": "MTK"
-        },
-        "image": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775884121/tipe-tuscan-66-gdc-parung-bogor_p6zgu8.webp"
-      },
-      "price": "1100000000",
-      "priceCurrency": "IDR"
-    },
-    {
-      "@type": "Offer",
-      "itemOffered": {
-        "@type": "SingleFamilyResidence",
-        "name": "Malta Type 47/72",
-        "numberOfRooms": 2,
-        "floorSize": {
-          "@type": "QuantitativeValue",
-          "value": 47,
-          "unitCode": "MTK"
-        },
-        "image": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775884121/tipe-malta-47-gdc-parung-bogor_fgttjy.webp"
-      },
-      "price": "900000000",
-      "priceCurrency": "IDR"
-    }
-  ]
-};
+    "@id": `${PAGE_URL}#primaryimage`,
+    url: HERO_IMAGE,
+    contentUrl: HERO_IMAGE,
+    caption: HERO_ALT,
+  },
+  {
+    "@type": "WebPage",
+    "@id": `${PAGE_URL}#webpage`,
+    url: PAGE_URL,
+    name: "Cluster Ladera Grand Duta City Parung",
+    description:
+      "Informasi Cluster Ladera Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
+    isPartOf: ref(SCHEMA_ID.website),
+    about: ref(SCHEMA_ID.clusterLadera),
+    breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+    primaryImageOfPage: ref(`${PAGE_URL}#primaryimage`),
+    inLanguage: "id",
+  },
+  clusterOfferCatalogNode("ladera", PAGE_URL),
+]);
 
 const faqData = [
   {
@@ -101,7 +81,7 @@ const faqData = [
   },
   {
     question: "Berapa harga rumah di Cluster Ladera?",
-    answer: "Harga mulai dari 900 Jutaan untuk Tipe Malta, dan 1,1M untuk Tipe Tuscan. Harga dapat berubah sewaktu-waktu, hubungi marketing kami untuk pricelist terbaru."
+    answer: "Harga tunai keras mulai dari Rp 800 jutaan untuk Tipe Malta 47/72 dan Rp 1,1 Miliar untuk Tipe Tuscan 66/72. Harga KPR lebih tinggi dari harga tunai. Harga dapat berubah sewaktu-waktu, hubungi marketing kami untuk pricelist terbaru."
   },
   {
     question: "Bagaimana cara menuju Grand Duta City Parung?",
@@ -114,16 +94,16 @@ export default function ClusterLaderaPage() {
     <>
       <Header />
       <main className="relative w-full overflow-hidden bg-brand-light">
-        {/* Schemas */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webpageSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerCatalogSchema) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }}
+        />
 
         {/* Hero Section */}
         <div className="relative w-full h-[70vh] lg:h-[100dvh] min-h-[600px] overflow-hidden bg-[#0b120c] flex items-center justify-center">
           <Image 
-            src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp"
-            alt="Gerbang Cluster Ladera GDC Parung"
+            src={HERO_IMAGE}
+            alt={HERO_ALT}
             fill
             priority
             sizes="100vw"
@@ -140,8 +120,12 @@ export default function ClusterLaderaPage() {
             <p className="text-[#F5A524] text-xs md:text-sm tracking-[0.4em] uppercase font-sans font-semibold mb-6 drop-shadow-md">
               Best Living For Generations
             </p>
+            {/* H1 sebelumnya "Cluster Ladera Grand Duta City Parung" — persis
+                mengulang frasa target homepage. Diganti dengan nama tipe unit
+                supaya halaman ini menang di query tipe, bukan query brand.
+                Frasa brand tetap hadir di paragraf bawah sebagai anchor ke "/". */}
             <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#F5F1E8] mb-6 drop-shadow-xl">
-              Cluster Ladera Grand Duta City Parung
+              Cluster Ladera — Verona, Malta &amp; Tuscan
             </h1>
             <div className="w-16 h-1 bg-[#F5A524] mx-auto rounded-full mb-8" />
             <p className="text-[#F5F1E8]/90 text-lg md:text-xl font-sans max-w-3xl mx-auto leading-relaxed">
@@ -249,7 +233,7 @@ export default function ClusterLaderaPage() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <a href="https://wa.me/628131742034?text=Halo%20saya%20tertarik%20dengan%20Tipe%20Tuscan%20di%20Cluster%20Ladera" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center items-center gap-2 bg-[#F5A524] text-[#F5F1E8] px-8 py-3 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#0b120c] transition-colors">
+                    <a href="https://wa.me/628131742034?text=Halo%20saya%20tertarik%20dengan%20Tipe%20Tuscan%20di%20Cluster%20Ladera" data-wa-placement="ladera-tipe-tuscan" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center items-center gap-2 bg-[#F5A524] text-[#F5F1E8] px-8 py-3 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#0b120c] transition-colors">
                       Tanya Marketing
                     </a>
                   </div>
@@ -289,7 +273,11 @@ export default function ClusterLaderaPage() {
                 <div className="w-full lg:w-1/2">
                   <div className="inline-block px-4 py-1.5 bg-[#0b120c]/10 text-[#0b120c] font-bold tracking-widest text-xs uppercase rounded-full mb-4">Tipe 47/72</div>
                   <h3 className="font-serif text-4xl font-bold text-[#0b120c] mb-4">Malta</h3>
-                  <p className="text-2xl text-[#0b120c] font-medium mb-6">Rp 900 Juta-an</p>
+                  {/* DIKOREKSI (Fase 3): sebelumnya "Rp 900 Juta-an". Angka itu
+                      menyesatkan karena justru mendekati harga KPR
+                      (Rp 971.403.600 - Rp 1.021.929.900), bukan harga tunai.
+                      Tunai keras terendah Malta 47/72 adalah Rp 845.550.000. */}
+                  <p className="text-2xl text-[#0b120c] font-medium mb-6">Rp 800 Juta-an</p>
                   
                   <div className="flex flex-wrap gap-6 mb-8 border-y border-[#0b120c]/10 py-6">
                     <div className="flex items-center gap-2"><BedDouble className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">2+1 K.Tidur</span></div>
@@ -303,7 +291,7 @@ export default function ClusterLaderaPage() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <a href="https://wa.me/628131742034?text=Halo%20saya%20tertarik%20dengan%20Tipe%20Malta%20di%20Cluster%20Ladera" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center items-center gap-2 bg-[#F5A524] text-[#F5F1E8] px-8 py-3 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#0b120c] transition-colors">
+                    <a href="https://wa.me/628131742034?text=Halo%20saya%20tertarik%20dengan%20Tipe%20Malta%20di%20Cluster%20Ladera" data-wa-placement="ladera-tipe-malta" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center items-center gap-2 bg-[#F5A524] text-[#F5F1E8] px-8 py-3 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#0b120c] transition-colors">
                       Tanya Marketing
                     </a>
                   </div>

@@ -16,6 +16,8 @@ import {
   articleCategorySlugs,
   getCategoryPath,
 } from "@/lib/articles";
+import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
+import { OG_SITE_NAME } from "@/lib/seo";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const PAGE_URL = `${SITE_URL}/artikel`;
@@ -38,25 +40,30 @@ export async function generateMetadata({
   const hasUnexpectedParams = paramKeys.some((key) => key !== "page");
   const shouldIndex = isFirstPage && !hasUnexpectedParams;
 
+  // Title sebelumnya 102 karakter — terpanjang di situs, terpotong berat di
+  // SERP, dan memuat frasa target homepage dua kali. Halaman arsip blog tidak
+  // perlu membawa brand: query yang dikejar adalah topik ("panduan beli rumah
+  // parung bogor"), bukan brand.
   const pageTitle = isFirstPage
-    ? "Artikel Properti Grand Duta City Parung 2026 | Panduan Beli Rumah & Investasi"
-    : `Artikel Properti Grand Duta City Parung – Halaman ${pageNumber} | Panduan Beli Rumah & Investasi`;
+    ? "Blog Properti Parung Bogor: Panduan Beli Rumah 2026"
+    : `Blog Properti Parung Bogor – Halaman ${pageNumber}`;
+
+  const pageDescription =
+    "Artikel dan panduan properti untuk calon pembeli rumah di Parung dan Bogor Selatan: proses KPR, dokumen, pilihan kawasan, dan tips menilai lokasi hunian.";
 
   // Konsolidasi canonical ke halaman 1 (PAGE_URL) untuk semua varian paginasi/spam.
   const canonicalUrl = PAGE_URL;
 
   return {
     title: pageTitle,
-    description:
-      "Kumpulan artikel edukasi properti tentang cara beli rumah, KPR, lokasi, dan tips memilih agen di Grand Duta City Parung dan sekitarnya. Update 2026.",
+    description: pageDescription,
     keywords: [
-      "artikel properti",
-      "artikel grand duta city parung",
+      "blog properti parung",
       "panduan beli rumah parung",
-      "cara beli rumah",
-      "kpr",
-      "investasi properti",
-      "informasi lokasi grand duta city",
+      "artikel properti bogor",
+      "tips kpr rumah",
+      "investasi properti bogor",
+      "kawasan hunian parung",
     ],
     alternates: {
       canonical: canonicalUrl,
@@ -72,10 +79,9 @@ export async function generateMetadata({
     },
     openGraph: {
       title: pageTitle,
-      description:
-        "Kumpulan artikel edukasi properti tentang cara beli rumah, KPR, lokasi, dan tips memilih agen di Grand Duta City Parung dan sekitarnya. Update 2026.",
+      description: pageDescription,
       url: canonicalUrl,
-      siteName: "Grand Duta City Parung South of Jakarta",
+      siteName: OG_SITE_NAME,
       locale: "id_ID",
       type: "website",
       images: [
@@ -90,35 +96,30 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: pageTitle,
-      description:
-        "Kumpulan artikel edukasi properti tentang cara beli rumah, KPR, lokasi, dan tips memilih agen di Grand Duta City Parung dan sekitarnya. Update 2026.",
+      description: pageDescription,
       images: [OG_IMAGE],
     },
   };
 }
 
-const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "@id": `${PAGE_URL}#breadcrumb`,
-  itemListElement: [
-    {
-      "@type": "ListItem",
-      position: 1,
-      name: "Beranda",
-      item: SITE_URL,
-    },
-    {
-      "@type": "ListItem",
-      position: 2,
-      name: "Artikel",
-      item: PAGE_URL,
-    },
-  ],
-};
+const breadcrumbSchema = breadcrumbNode(
+  [{ name: "Artikel", path: "/artikel" }],
+  PAGE_URL,
+);
 
+/**
+ * SATU definisi `#itemlist`.
+ *
+ * SEBELUMNYA `@id` ini dideklarasikan DUA KALI di halaman yang sama: sekali
+ * sebagai blok `ItemList` berisi `ListItem`, sekali lagi sebagai `mainEntity`
+ * di dalam `CollectionPage` berisi `BlogPosting`. Dua isi berbeda dengan satu
+ * `@id` memaksa Google memilih salah satu secara sewenang-wenang, dan itulah
+ * pola yang persis dilarang oleh restrukturisasi Fase 5.
+ *
+ * `ListItem` yang membungkus `BlogPosting` adalah bentuk yang benar: posisi
+ * ada di `ListItem`, entitas artikel ada di `item`.
+ */
 const getItemListSchema = (articles: ArticleArchiveEntry[]) => ({
-  "@context": "https://schema.org",
   "@type": "ItemList",
   "@id": `${PAGE_URL}#itemlist`,
   name: "Daftar artikel seputar Grand Duta City Parung dan properti",
@@ -129,14 +130,17 @@ const getItemListSchema = (articles: ArticleArchiveEntry[]) => ({
     position: index + 1,
     url: `${SITE_URL}${article.href}`,
     name: article.title,
+    item: {
+      "@type": "BlogPosting",
+      "@id": `${SITE_URL}${article.href}#article`,
+      headline: article.title,
+      url: `${SITE_URL}${article.href}`,
+      image: article.coverImage ? [article.coverImage] : undefined,
+    },
   })),
 });
 
-const getCollectionPageSchema = (
-  articles: ArticleArchiveEntry[],
-  canonicalUrl: string,
-) => ({
-  "@context": "https://schema.org",
+const getCollectionPageSchema = (canonicalUrl: string) => ({
   "@type": "CollectionPage",
   "@id": `${canonicalUrl}#webpage`,
   url: canonicalUrl,
@@ -144,33 +148,20 @@ const getCollectionPageSchema = (
   description:
     "Kumpulan artikel edukasi properti tentang cara beli rumah, KPR, lokasi, dan tips investasi di Grand Duta City Parung.",
   inLanguage: "id-ID",
-  isPartOf: {
-    "@type": "WebSite",
-    "@id": `${SITE_URL}#website`,
-    url: SITE_URL,
-    name: "Grand Duta City Parung",
-  },
-  breadcrumb: {
-    "@id": `${PAGE_URL}#breadcrumb`,
-  },
-  mainEntity: {
-    "@type": "ItemList",
-    "@id": `${canonicalUrl}#itemlist`,
-    itemListElement: articles.map((article, index) => ({
-      "@type": "BlogPosting",
-      headline: article.title,
-      url: `${SITE_URL}${article.href}`,
-      position: index + 1,
-      image: article.coverImage ? [article.coverImage] : undefined,
-    })),
-  },
+  // Referensi murni. `${SITE_URL}#website` (tanpa garis miring) sebelumnya
+  // membuat node WebSite kedua yang terpisah dari milik homepage.
+  isPartOf: ref(SCHEMA_ID.website),
+  breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+  mainEntity: ref(`${PAGE_URL}#itemlist`),
   about: articleCategories.map((category) => ({
     "@type": "Thing",
     name: category,
   })),
   primaryImageOfPage: {
     "@type": "ImageObject",
+    "@id": `${PAGE_URL}#primaryimage`,
     url: OG_IMAGE,
+    contentUrl: OG_IMAGE,
     description: "Hero visual halaman artikel properti Grand Duta City Parung",
   },
 });
@@ -316,16 +307,14 @@ export default async function ArtikelPage({
   <main className="relative w-full overflow-hidden bg-brand-light">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(getItemListSchema(allArticles)) }}
-        />
-        <script
-          type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(getCollectionPageSchema(allArticles, canonicalUrl)),
+            __html: JSON.stringify(
+              graph([
+                getCollectionPageSchema(canonicalUrl),
+                breadcrumbSchema,
+                getItemListSchema(allArticles),
+              ]),
+            ),
           }}
         />
 
@@ -344,8 +333,10 @@ export default async function ArtikelPage({
               <p className="text-[10px] uppercase tracking-[0.45em] text-[#F5A524]">
                 Journal / Artikel
               </p>
+              {/* H1 diarahkan ke topik + wilayah, bukan brand. Frasa brand
+                  tetap hadir di paragraf bawah sebagai anchor ke "/". */}
               <h1 className="mt-5 max-w-4xl font-serif text-5xl leading-[0.98] text-[#F5F1E8] md:text-6xl lg:text-7xl">
-                Artikel & Panduan Properti Grand Duta City Parung
+                Blog &amp; Panduan Properti Parung Bogor
               </h1>
               <p className="mt-6 max-w-3xl text-base leading-8 text-[#F5F1E8]/72 md:text-lg">
                 Temukan section editorial yang membantu Anda membaca{" "}

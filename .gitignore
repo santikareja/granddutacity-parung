@@ -122,6 +122,20 @@ ehthumbs.db
 .kilo/
 
 # ──────────────────────────────────────────────────────────
+# CERMIN SKILL MILIK KIRO
+#
+# .kiro/skills/ adalah salinan BYTE-IDENTIK dari .claude/skills/ (diverifikasi
+# via sha256 per berkas). Melacak keduanya berarti menyimpan isi skill yang
+# sama dua kali di repo.
+#
+# Alasannya sama dengan .agents/ di atas: ini pustaka prompt AI-assistant,
+# bukan kode aplikasi, dan bisa dipasang ulang lewat skills-lock.json.
+# Salinan yang DILACAK adalah .claude/skills/ karena di situlah 12 skill
+# lainnya sudah berada sejak sebelum ini.
+# ──────────────────────────────────────────────────────────
+.kiro/skills/
+
+# ──────────────────────────────────────────────────────────
 # KONFIGURASI MCP — MEMUAT RAHASIA
 #
 # .kiro/settings/mcp.json menyimpan API key server MCP (mis. SEMRUSH_API_KEY)

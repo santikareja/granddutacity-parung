@@ -21,6 +21,7 @@ import type { Metadata } from "next";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import {
   HOMEPAGE_PRIMARY,
+  HOMEPAGE_SECONDARY,
   duplicatePrimaries,
   ownershipOf,
   reservedPhraseViolations,
@@ -496,5 +497,108 @@ describe("konsistensi klaim harga terendah", () => {
     expect(nominals.length).toBeGreaterThan(0);
 
     expect(Number(claim![1])).toBe(Math.min(...nominals));
+  });
+});
+
+// ===========================================================================
+// G19 — H1 pada 9 halaman kanibalisasi (data Semrush, 31 Agustus 2026)
+//
+// SCOPE SENGAJA DIPERSEMPIT ke sembilan halaman yang secara nyata terbukti
+// bersaing dengan homepage untuk kata kunci yang sama, bukan "semua route
+// non-homepage". Guard yang terlalu general di sini akan mahal dirawat dan
+// rentan false positive untuk halaman yang H1-nya memang tidak menyentuh
+// topik brand sama sekali (mis. /galeri, /about).
+//
+// Sembilan halaman itu:
+//   1. /lokasi-akses-grand-duta-city-parung  5. /pricelist-grand-duta-city
+//   2. /disclaimer                            6. /cluster-ladera
+//   3. /kontak                                7. /cluster-cascada
+//   4. /artikel                               8. /cara-beli-kpr
+//   9. /perumahan-eksklusif-di-parung-bogor-dengan-fasilitas-lengkap
+//      -> DIREDIRECT 301 ke "/" (next.config.ts). Bukan lagi halaman hidup,
+//      jadi tidak punya H1 untuk diuji — dikeluarkan dari daftar di bawah.
+//      Sebelum redirect, H1-nya-lah yang paling parah melanggar guard ini:
+//      membuka dengan "Grand Duta City Parung South of Jakarta" (primary +
+//      secondary sekaligus). Dicatat di sini sebagai jejak keputusan, BUKAN
+//      untuk diuji lagi — mengimpor H1 dari artikel yang sudah tidak hidup
+//      tidak menguji apa pun yang nyata.
+//
+// PENGECUALIAN: homepage boleh melanggar aturan ini — frasa brand itu memang
+// primary keyword-nya (dikunci G1/G13 di atas).
+// ===========================================================================
+
+describe("G19 — H1 sembilan halaman kanibalisasi tidak dibuka dengan frasa brand", () => {
+  it("delapan halaman H1-nya tidak diawali frasa primary/secondary homepage", async () => {
+    const [
+      { PAGE_H1: lokasiAksesH1 },
+      { PAGE_H1: disclaimerH1 },
+      { PAGE_H1: kontakH1 },
+      { PAGE_H1: artikelH1 },
+      { PAGE_H1: pricelistH1 },
+      { PAGE_H1: clusterLaderaH1 },
+      { PAGE_H1: clusterCascadaH1 },
+      { PAGE_H1: caraBeliKprH1 },
+    ] = await Promise.all([
+      import("../lokasi-akses-grand-duta-city-parung/page"),
+      import("../disclaimer/page"),
+      import("../kontak/page"),
+      import("../artikel/page"),
+      import("@/components/sections/pricelist-content"),
+      import("../cluster-ladera/page"),
+      import("../cluster-cascada/page"),
+      import("../cara-beli-kpr/page"),
+    ]);
+
+    const h1sByPath: Record<string, string> = {
+      "/lokasi-akses-grand-duta-city-parung": lokasiAksesH1,
+      "/disclaimer": disclaimerH1,
+      "/kontak": kontakH1,
+      "/artikel": artikelH1,
+      "/pricelist-grand-duta-city": pricelistH1,
+      "/cluster-ladera": clusterLaderaH1,
+      "/cluster-cascada": clusterCascadaH1,
+      "/cara-beli-kpr": caraBeliKprH1,
+    };
+
+    const offenders = Object.entries(h1sByPath)
+      .map(([path, h1]) => ({ path, h1, normalized: h1.toLowerCase().trim() }))
+      .filter(
+        ({ normalized }) =>
+          normalized.startsWith(HOMEPAGE_PRIMARY) ||
+          normalized.startsWith(HOMEPAGE_SECONDARY),
+      );
+
+    expect(
+      offenders,
+      `H1 halaman ini dibuka dengan frasa brand homepage: ${offenders
+        .map((o) => `${o.path} ("${o.h1}")`)
+        .join("; ")}`,
+    ).toEqual([]);
+
+    // Sanity check kedua: pastikan kesembilan konstanta benar-benar terisi,
+    // bukan string kosong yang lolos startsWith() secara kebetulan.
+    for (const [path, h1] of Object.entries(h1sByPath)) {
+      expect(h1.length, `PAGE_H1 kosong untuk ${path}`).toBeGreaterThan(0);
+    }
+  });
+
+  it("halaman kanibalisasi ke-9 sudah di-redirect, bukan dibiarkan hidup dengan H1 yang melanggar", async () => {
+    // Diverifikasi lewat next.config.ts, bukan HTTP live: test unit tidak
+    // menjalankan server. Ini menjaga niatnya tidak diam-diam dihapus dari
+    // konfigurasi redirect di masa depan tanpa ada yang sadar.
+    const config = (await import("../../../../next.config")).default;
+    const redirects = await config.redirects?.();
+    const target = redirects?.find(
+      (r: { source: string }) =>
+        r.source ===
+        "/perumahan-eksklusif-di-parung-bogor-dengan-fasilitas-lengkap",
+    );
+
+    expect(
+      target,
+      "Redirect untuk /perumahan-eksklusif-di-parung-bogor-dengan-fasilitas-lengkap hilang dari next.config.ts — halaman ini akan hidup kembali dengan H1 yang melanggar G19.",
+    ).toBeDefined();
+    expect(target?.destination).toBe("/");
+    expect(target?.permanent).toBe(true);
   });
 });

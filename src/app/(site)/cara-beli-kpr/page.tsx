@@ -16,6 +16,15 @@ type Props = {
 const PAGE_URL = "https://granddutacitysouthofjakarta.com/cara-beli-kpr";
 const OG_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775877869/cara-beli-kpr-grand-duta-city-parung_cf7tep.webp";
 
+/**
+ * H1 dipecah tiga bagian karena bagian tengah diberi warna aksen (span
+ * italic). `PAGE_H1` menggabungnya untuk guard G19 (seo-invariants.test.ts).
+ */
+const PAGE_H1_LEAD = "Cara Beli Rumah dan";
+const PAGE_H1_MID = "Proses KPR";
+const PAGE_H1_TAIL = "di GDC Parung";
+export const PAGE_H1 = `${PAGE_H1_LEAD} ${PAGE_H1_MID} ${PAGE_H1_TAIL}`;
+
 const PAGE_TITLE = "Cara Beli Rumah GDC Parung: Alur KPR & Dokumen";
 const PAGE_DESCRIPTION =
   "Panduan lengkap beli rumah di GDC Parung: booking fee Rp 5 juta, skema DP, tunai keras, cash bertahap 12 bulan, dokumen KPR, sampai tahapan akad kredit.";
@@ -234,7 +243,7 @@ export default function CaraBeliKPRPage() {
                 mengulang frasa target homepage di H1; versi penuhnya tetap ada
                 di paragraf bawah sebagai anchor internal ke "/". */}
             <h1 className="text-4xl md:text-5xl lg:text-5xl font-medium text-[#F5F1E8] mb-6 uppercase tracking-wider font-serif leading-tight">
-              Cara Beli Rumah dan <span className="text-[#F5A524] italic">Proses KPR</span> di GDC Parung
+              {PAGE_H1_LEAD} <span className="text-[#F5A524] italic">{PAGE_H1_MID}</span> {PAGE_H1_TAIL}
             </h1>
             
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8 max-w-3xl">

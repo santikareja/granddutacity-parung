@@ -18,6 +18,17 @@ import {
   Wallet,
   TrendingUp,
 } from "lucide-react";
+
+/**
+ * H1 dipecah dua bagian karena baris kedua diberi tata letak italic terpisah
+ * (lihat JSX H1 di bawah, dan catatan soal `<br/>` tidak menyumbang spasi ke
+ * textContent). `PAGE_H1` menggabungnya untuk guard G19
+ * (seo-invariants.test.ts) supaya string yang diuji sama dengan yang dibaca
+ * mesin pencari.
+ */
+const PAGE_H1_LEAD = "Pricelist Resmi 2026";
+const PAGE_H1_TAIL = "Cluster Ladera & Cascada";
+export const PAGE_H1 = `${PAGE_H1_LEAD} ${PAGE_H1_TAIL}`;
 import { cn } from "@/lib/utils";
 import { BankSlider } from "@/components/ui/bank-slider";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -710,8 +721,8 @@ export default function PricelistPage() {
                   reader) walau tampilan visualnya tetap benar berkat baris
                   baru. Spasi di akhir baris ini diabaikan browser saat
                   merender, tapi tetap ada di teks mentah. */}
-              Pricelist Resmi 2026 <br />
-              <span className="block mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl italic font-normal text-[#F5A524]">Cluster Ladera &amp; Cascada</span>
+              {PAGE_H1_LEAD} <br />
+              <span className="block mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl italic font-normal text-[#F5A524]">{PAGE_H1_TAIL}</span>
             </h1>
             <p className="text-[#F5F1E8]/80 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed">
               Pricelist{" "}

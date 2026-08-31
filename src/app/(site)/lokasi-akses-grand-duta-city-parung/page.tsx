@@ -18,6 +18,14 @@ const MAP_IMAGE =
   "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp";
 
 /**
+ * H1 dipecah jadi dua bagian karena bagian kedua diberi warna aksen (span
+ * italic). `PAGE_H1` menggabungnya untuk guard G19 (seo-invariants.test.ts).
+ */
+const PAGE_H1_LEAD = "Lokasi & Akses GDC Parung ke";
+const PAGE_H1_TAIL = "Jakarta, Depok, Bogor";
+export const PAGE_H1 = `${PAGE_H1_LEAD} ${PAGE_H1_TAIL}`;
+
+/**
  * SATU `@graph` menggantikan empat blok lepas (Fase 5).
  *
  * Halaman ini adalah kasus pemecahan entitas yang paling parah di situs:
@@ -211,7 +219,7 @@ export default function LokasiAksesPage() {
             {/* H1 diarahkan ke query lokasi/akses (menyebut 3 wilayah tujuan)
                 alih-alih mengulang frasa brand target homepage. */}
             <h1 className="text-4xl md:text-5xl lg:text-5xl font-medium text-[#F5F1E8] mb-6 tracking-wider font-serif leading-tight">
-              Lokasi &amp; Akses GDC Parung ke <span className="text-[#F5A524] italic">Jakarta, Depok, Bogor</span>
+              {PAGE_H1_LEAD} <span className="text-[#F5A524] italic">{PAGE_H1_TAIL}</span>
             </h1>
             
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8 max-w-3xl">

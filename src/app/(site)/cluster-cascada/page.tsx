@@ -39,6 +39,9 @@ const VIDEO_URL = "https://res.cloudinary.com/dxgoshyei/video/upload/v1780901924
 const SITEPLAN_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818893/Cascada_Update_Stock_9_Maret_2026-1_vcrnzw.webp";
 const ALT_TEXT = "Cluster Cascada Grand Duta City Parung South of Jakarta";
 
+/** Diekspor untuk guard G19 (seo-invariants.test.ts). */
+export const PAGE_H1 = "Cluster Cascada — Aira, Manoa, Victoria & Alexandra";
+
 const cascadaUnits = propertyTypes.filter((unit) => unit.cluster === "Cluster Cascada");
 const getUnit = (id: string) => cascadaUnits.find((unit) => unit.id === id)!;
 
@@ -178,7 +181,7 @@ export default function ClusterCascadaPage() {
                 Jakarta"). Diganti nama tipe unit supaya halaman ini menang di
                 query tipe. Frasa brand tetap ada sebagai anchor ke "/". */}
             <h1 className="max-w-5xl font-serif text-5xl font-bold leading-[0.95] text-[#F5F1E8] md:text-7xl lg:text-8xl">
-              Cluster Cascada — Aira, Manoa, Victoria &amp; Alexandra
+              {PAGE_H1}
             </h1>
             <p className="mt-8 max-w-3xl text-base leading-relaxed text-[#F5F1E8]/82 md:text-xl">
               Cluster Cascada di kawasan{" "}

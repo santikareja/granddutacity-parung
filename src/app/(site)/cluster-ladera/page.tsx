@@ -31,6 +31,9 @@ import {
 
 const PAGE_URL = `${SITE_URL}/cluster-ladera`;
 
+/** Diekspor untuk guard G19 (seo-invariants.test.ts). */
+export const PAGE_H1 = "Cluster Ladera — Verona, Malta, Tuscan & Frontera";
+
 // Title dipendekkan dari 88 -> 50 karakter dan brand tag menggantung dicabut.
 // Description sebelumnya BYTE-IDENTICAL dengan /cluster-cascada; sekarang
 // dibedakan lewat tema arsitektur dan nama tipe unit yang khas Ladera.
@@ -282,7 +285,7 @@ export default function ClusterLaderaPage() {
                 supaya halaman ini menang di query tipe, bukan query brand.
                 Frasa brand tetap hadir di paragraf bawah sebagai anchor ke "/". */}
             <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[#F5F1E8] mb-6 drop-shadow-xl">
-              Cluster Ladera — Verona, Malta, Tuscan &amp; Frontera
+              {PAGE_H1}
             </h1>
             <div className="w-16 h-1 bg-[#F5A524] mx-auto rounded-full mb-8" />
             <p className="text-[#F5F1E8]/90 text-lg md:text-xl font-sans max-w-3xl mx-auto leading-relaxed">

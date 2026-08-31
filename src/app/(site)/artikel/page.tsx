@@ -24,6 +24,9 @@ const PAGE_URL = `${SITE_URL}/artikel`;
 const OG_IMAGE =
   "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775877869/cara-beli-kpr-grand-duta-city-parung_cf7tep.webp";
 
+/** Diekspor untuk guard G19 (seo-invariants.test.ts). */
+export const PAGE_H1 = "Blog & Panduan Properti Parung Bogor";
+
 export async function generateMetadata({
   searchParams,
 }: {
@@ -336,7 +339,7 @@ export default async function ArtikelPage({
               {/* H1 diarahkan ke topik + wilayah, bukan brand. Frasa brand
                   tetap hadir di paragraf bawah sebagai anchor ke "/". */}
               <h1 className="mt-5 max-w-4xl font-serif text-5xl leading-[0.98] text-[#F5F1E8] md:text-6xl lg:text-7xl">
-                Blog &amp; Panduan Properti Parung Bogor
+                {PAGE_H1}
               </h1>
               <p className="mt-6 max-w-3xl text-base leading-8 text-[#F5F1E8]/72 md:text-lg">
                 Temukan section editorial yang membantu Anda membaca{" "}

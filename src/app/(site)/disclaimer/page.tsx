@@ -10,6 +10,14 @@ import { OG_SITE_NAME } from "@/lib/seo";
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const PAGE_URL = `${SITE_URL}/disclaimer`;
 
+/**
+ * Diekspor untuk guard G19 (seo-invariants.test.ts): memastikan H1 halaman
+ * ini tidak pernah dibuka dengan frasa brand milik homepage. Ini SATU-SATUNYA
+ * sumber teks H1 — JSX di bawah merender konstanta ini, bukan literal
+ * terpisah, jadi tidak ada risiko keduanya menyimpang.
+ */
+export const PAGE_H1 = "Disclaimer";
+
 export const metadata: Metadata = {
   title: { absolute: "Disclaimer | Informasi Penting Situs" },
   description: "Penjelasan batasan informasi, harga, stok, visual, spesifikasi, dan penggunaan konten pada situs Grand Duta City Parung.",
@@ -68,7 +76,7 @@ export default function DisclaimerPage() {
               ]} />
             </div>
             <h1 className="font-serif text-4xl font-bold tracking-tight text-[#F5A524] md:text-5xl lg:text-6xl">
-              Disclaimer
+              {PAGE_H1}
             </h1>
             <p className="mt-6 text-base text-[#F5F1E8]/80">
               Terakhir diperbarui: 12 April 2026

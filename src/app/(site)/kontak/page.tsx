@@ -23,6 +23,17 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 const PAGE_URL = "https://granddutacitysouthofjakarta.com/kontak";
 const IMAGE_URL = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775884994/kontak-marketing-grand-duta-city-south-of-jakarta-parung_m4csyj.webp";
 
+/**
+ * H1 dipecah jadi dua bagian karena tata letaknya butuh <br/> + span italic
+ * (lihat JSX di bawah). `PAGE_H1` menggabungnya jadi satu string untuk guard
+ * G19 (seo-invariants.test.ts) — JSX WAJIB merender kedua konstanta ini, bukan
+ * literal terpisah, supaya tidak ada risiko teks yang diuji menyimpang dari
+ * yang benar-benar tayang.
+ */
+const PAGE_H1_LEAD = "Kontak Marketing";
+const PAGE_H1_TAIL = "GDC Parung";
+export const PAGE_H1 = `${PAGE_H1_LEAD} ${PAGE_H1_TAIL}`;
+
 // Title dipendekkan dari 85 -> 48 karakter (brand muncul dua kali sebelumnya).
 // Keyword "marketing grand duta city parung south of jakarta" dicabut karena
 // memuat frasa target homepage.
@@ -137,8 +148,8 @@ export default function ContactPage() {
                 Parung"; frasa penuhnya tetap ada di paragraf bawah sebagai
                 anchor internal ke "/". */}
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#F5F1E8] mb-6 leading-tight animate-in fade-in slide-in-from-bottom-6 duration-1000">
-              Kontak Marketing <br />
-              <span className="text-[#F5A524] italic">GDC Parung</span>
+              {PAGE_H1_LEAD} <br />
+              <span className="text-[#F5A524] italic">{PAGE_H1_TAIL}</span>
             </h1>
             <p className="text-[#F5F1E8]/70 text-sm sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
               Hubungi tim marketing{" "}

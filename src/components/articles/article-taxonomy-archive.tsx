@@ -23,9 +23,14 @@ import {
   type ArticleSortKey,
   type ArticleTagDefinition,
 } from "@/lib/articles";
+import { SCHEMA_ID, ref } from "@/lib/schema";
+import { OG_SITE_NAME } from "@/lib/seo";
 import { ArticleCard } from "./article-card";
 
-const SITE_NAME = "Grand Duta City Parung South of Jakarta";
+// Sebelumnya literal "Grand Duta City Parung South of Jakarta" — varian kedua
+// dari tiga nilai siteName yang beredar di situs. Kini mengacu ke satu sumber
+// agar entitas brand tidak terpecah (guard G11).
+const SITE_NAME = OG_SITE_NAME;
 
 type PaginationMeta = {
   pageNumber: number;
@@ -245,7 +250,9 @@ export function buildCategoryArchiveMetadata({
           url: og,
           width: 1200,
           height: 630,
-          alt: `${category.name} - Grand Duta City South of Jakarta`,
+          // Frasa "Grand Duta City South of Jakarta" dicabut: alt OG image di 3
+          // halaman kategori sebelumnya mengulang kata kunci kedua homepage.
+          alt: `${category.name} - Grand Duta City Parung`,
         },
       ],
     },
@@ -349,12 +356,14 @@ export function renderCategoryArchiveJsonLd({
           "@type": "ImageObject",
           url: originalImage(category.imagePublicId),
         },
-        isPartOf: {
-          "@type": "WebSite",
-          "@id": `${toAbsoluteUrl("/")}#website`,
-          name: SITE_NAME,
-          url: toAbsoluteUrl("/"),
-        },
+        // Referensi MURNI ke node WebSite tunggal, bukan mendefinisikan ulang.
+        //
+        // Sebelumnya di sini ada `"@id": ${toAbsoluteUrl("/")}#website` yang
+        // menghasilkan "https://...com#website" TANPA garis miring, sementara
+        // homepage memakai "https://...com/#website" DENGAN garis miring. Dua
+        // string berbeda = dua entitas WebSite berbeda di mata Google, yang
+        // persis kebalikan dari tujuan konsolidasi entitas.
+        isPartOf: ref(SCHEMA_ID.website),
         about: category.about,
         breadcrumb: {
           "@id": breadcrumbId,

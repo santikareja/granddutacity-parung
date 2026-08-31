@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * DEAD CODE — tidak diimpor satu file pun (diverifikasi: nol match untuk
+ * `from "@/components/layout/header"` di seluruh src). Header yang benar-benar
+ * dipakai seluruh halaman adalah `src/components/ui/header-2.tsx`.
+ *
+ * Karena itu 2 CTA WhatsApp di file ini SENGAJA tidak diberi
+ * `data-wa-placement` pada Fase 2 — menandainya justru menyesatkan, seolah ia
+ * live. File dijadwalkan dihapus di Fase 6.3 spec seo-cannibalization-and-pseo.
+ */
+
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";

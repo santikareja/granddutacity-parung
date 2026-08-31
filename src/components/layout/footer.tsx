@@ -26,6 +26,7 @@ export function Footer() {
             href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20dengan%20Promo%20Grand%20Duta%20City%20South%20of%20Jakarta.%20Mohon%20info%20ketersediaan%20unit%20%26%20jadwal%20survey%20lokasi."
             target="_blank"
             rel="noopener noreferrer"
+            data-wa-placement="footer-cta"
             className="group relative inline-flex items-center justify-center gap-3.5 pl-6 sm:pl-8 pr-2 sm:pr-2.5 py-3 sm:py-4 rounded-full bg-[#C8521A] hover:bg-[#DE5E1E] text-white text-xs sm:text-sm tracking-[0.16em] sm:tracking-[0.18em] uppercase font-sans font-bold shadow-[0_12px_36px_rgba(200,82,26,0.5)] active:scale-[0.98] transition-all duration-300 w-full sm:w-auto shrink-0"
           >
             <span>Klaim Promo Tanpa DP</span>
@@ -132,6 +133,7 @@ export function Footer() {
                 href="https://wa.me/628131742034" 
                 target="_blank" 
                 rel="noopener noreferrer"
+                data-wa-placement="footer-phone"
                 className="text-[#F8F6F0]/80 hover:text-[#F5A524] text-xs sm:text-sm font-semibold transition-colors duration-200"
               >
                 +62 813‑1742‑034 (Official)

@@ -127,6 +127,7 @@ export function PromoPopup() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setIsOpen(false)}
+                  data-wa-placement="promo-popup"
                   className="group flex items-center justify-center gap-3 w-full rounded-full bg-[#C8521A] hover:bg-[#DE5E1E] px-6 py-3.5 text-xs font-sans font-bold uppercase tracking-[0.16em] text-white shadow-lg shadow-[#C8521A]/30 active:scale-[0.98] transition-all"
                 >
                   <span>Klaim Promo Sekarang</span>

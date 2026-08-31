@@ -2,6 +2,7 @@
 
 import { ProductRevealCard } from "@/components/ui/product-reveal-card";
 import { Reveal } from "@/components/ui/reveal";
+import { trackWhatsAppClick } from "@/lib/analytics";
 import { propertyTypes } from "@/lib/data";
 
 interface PricingProps {
@@ -18,7 +19,14 @@ interface ClusterUnitsProps {
 export function ClusterUnits({ clusterName, pricing, sectionId }: ClusterUnitsProps) {
   const units = propertyTypes.filter((p) => p.cluster === clusterName);
 
+  // Sama seperti tipe-rumah.tsx: CTA kartu unit memakai window.open, jadi
+  // pelacaknya dipanggil langsung alih-alih lewat atribut data.
   const handleWhatsApp = (unitName: string) => {
+    trackWhatsAppClick({
+      page: window.location.pathname,
+      placement: "cluster-unit-card",
+      unit: unitName,
+    });
     const message = encodeURIComponent(`Halo, saya tertarik dengan unit ${unitName} di ${clusterName}. Boleh minta info lebih detail?`);
     window.open(`https://wa.me/628131742034?text=${message}`, "_blank");
   };

@@ -4,7 +4,9 @@ import { useEffect, useState, useMemo } from "react";
 import { ArrowLeft, ArrowRight, Sparkles, ArrowUpRight } from "lucide-react";
 
 import { ProductRevealCard } from "@/components/ui/product-reveal-card";
+import { trackWhatsAppClick } from "@/lib/analytics";
 import { clImg } from "@/lib/cloudinary";
+import { CLUSTER_LABEL, bedroomLabel, catalogUnits } from "@/data/units";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import {
@@ -14,76 +16,34 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 
-const propertyTypes = [
-  // Cluster Ladera
-  {
-    id: "tuscan-66",
-    name: "TUSCAN",
-    typeCategory: "Type 66",
-    cluster: "Cluster Ladera",
-    tag: "Cluster Ladera",
-    price: "1.1 Milyar-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Tuscan_drllpk.webp", { w: 480, h: 480, q: 55 }),
-    specs: { bed: 3, bath: 2, carport: 2, lb: 66, lt: 72 },
-    desc: "Tipe hunian 2 lantai elegan di Cluster Ladera, tipe terfavorit dengan ruang keluarga luas bergaya Modern American Classic."
-  },
-  {
-    id: "malta-47",
-    name: "MALTA",
-    typeCategory: "Type 47",
-    cluster: "Cluster Ladera",
-    tag: "Cluster Ladera",
-    price: "800 Juta-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Malta_tkq7di.webp", { w: 480, h: 480, q: 55 }),
-    specs: { bed: "2+1", bath: 1, carport: 2, lb: 47, lt: 72 },
-    desc: "Tipe praktis dengan ekstra ruang fleksibel di Cluster Ladera, sangat ideal untuk keluarga muda yang mengutamakan efisiensi."
-  },
-  // Cluster Cascada
-  {
-    id: "alexandra-88",
-    name: "ALEXANDRA",
-    typeCategory: "Type 88",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "1.4 Milyar-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Alexandra_hhvq3f.webp", { w: 480, h: 480, q: 55 }),
-    specs: { bed: 3, bath: 2, carport: 2, lb: 88, lt: 105 },
-    desc: "Hunian termewah di Cluster Cascada dengan kavling tanah terluas (105 m²), menghadirkan kenyamanan penuh bagi keluarga mapan."
-  },
-  {
-    id: "air-plus-42",
-    name: "AIRA+",
-    typeCategory: "Type 42",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "800 Juta-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Aira_no2g1u.webp", { w: 480, h: 480, q: 55 }),
-    specs: { bed: 2, bath: 1, carport: 1, lb: 42, lt: 60 },
-    desc: "Desain tropis minimalis di Cluster Cascada, memaksimalkan pencahayaan dan sirkulasi alami dalam hunian kompak bernilai tinggi."
-  },
-  {
-    id: "manoa-58",
-    name: "MANOA",
-    typeCategory: "Type 58",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "800 Juta-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Manoa_j8uvcr.webp", { w: 480, h: 480, q: 55 }),
-    specs: { bed: 1, bath: 2, carport: 1, lb: 58, lt: 60 },
-    desc: "Konsep hunian resort modern di Cluster Cascada dengan fokus pada privasi, ruang terbuka menenangkan, dan high ceiling."
-  },
-  {
-    id: "victoria-69",
-    name: "VICTORIA",
-    typeCategory: "Type 69",
-    cluster: "Cluster Cascada",
-    tag: "Cluster Cascada",
-    price: "1.1 Milyar-an",
-    image: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577163/Type_Victoria_scolcc.webp", { w: 480, h: 480, q: 55 }),
-    specs: { bed: 3, bath: 2, carport: 2, lb: 69, lt: 72 },
-    desc: "Perpaduan sempurna antara estetika dan fungsionalitas di Cluster Cascada, menyediakan ruang tumbuh terbaik untuk keluarga."
-  },
-];
+// Diturunkan dari SUMBER TUNGGAL src/data/units.ts (Fase 3 spec
+// seo-cannibalization-and-pseo). Sebelumnya ada array 6 record di sini yang
+// sudah DRIFT dari katalog bersama — antara lain menulis Manoa T-58 sebagai
+// 1 kamar tidur padahal denah resmi 2 KT, dan memakai id `air-plus-42`
+// sementara katalog memakai `aira-42`.
+//
+// Dua perilaku lama dipertahankan dengan sengaja:
+//   - `clImg` 480x480 q55: menekan bandwidth carousel, penting untuk LCP mobile.
+//   - kartu sold-out disembunyikan: carousel homepage untuk menarik minat,
+//     bukan arsip. Unit sold-out tetap tampil di halaman cluster masing-masing.
+const propertyTypes = catalogUnits
+  .filter((unit) => unit.status !== "sold-out")
+  .map((unit) => ({
+    id: unit.id,
+    name: unit.name,
+    typeCategory: unit.typeCategory,
+    cluster: CLUSTER_LABEL[unit.cluster],
+    price: unit.priceLabel,
+    image: clImg(unit.facadeImage, { w: 480, h: 480, q: 55 }),
+    specs: {
+      bed: bedroomLabel(unit),
+      bath: unit.bathrooms ?? "-",
+      carport: unit.carports ?? "-",
+      lb: unit.lb,
+      lt: unit.lt,
+    },
+    desc: unit.description,
+  }));
 
 const clusterTabs = [
   { id: "all", label: "Semua Unit" },
@@ -117,7 +77,15 @@ export function TipeRumah() {
     };
   }, [carouselApi]);
 
+  // CTA per kartu unit memakai window.open, bukan anchor, jadi tidak bisa
+  // ditandai `data-wa-placement` tanpa merambatkan prop ke dalam kartu.
+  // Karena komponen ini sudah client component, pelacaknya dipanggil langsung.
   const handleWhatsApp = (unitName: string) => {
+    trackWhatsAppClick({
+      page: window.location.pathname,
+      placement: "tipe-rumah-card",
+      unit: unitName,
+    });
     const message = encodeURIComponent(`Halo, saya tertarik dengan unit Tipe ${unitName} di Grand Duta City South of Jakarta. Boleh minta info promo & simulasi cicilan terbaru?`);
     window.open(`https://wa.me/628131742034?text=${message}`, "_blank");
   };
@@ -256,12 +224,13 @@ export function TipeRumah() {
               Ingin tahu tipe unit yang paling pas untuk anggaran Anda?
             </p>
             <p className="text-xs sm:text-sm text-[#090D0A]/70 mb-7 max-w-lg mx-auto font-normal">
-              Dapatkan konsultasi gratis, simulasi cicilan resmi KPR 8 bank rekanan, dan promo tanpa DP langsung dari marketing in-house.
+              Dapatkan konsultasi gratis, simulasi cicilan resmi KPR 7 bank rekanan, dan promo tanpa DP langsung dari marketing in-house.
             </p>
             <a 
               href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20dengan%20unit%20di%20Grand%20Duta%20City%20Parung%20South%20of%20Jakarta.%20Mohon%20info%20ketersediaan%20unit%20%26%20harga%20promo%20bulan%20ini."
               target="_blank"
               rel="noopener noreferrer"
+              data-wa-placement="tipe-rumah-section-cta"
               className="group relative inline-flex items-center justify-center gap-2 sm:gap-3 pl-5 pr-2 sm:pl-7 sm:pr-2.5 py-3 sm:py-4 rounded-full bg-[#C8521A] hover:bg-[#DE5E1E] text-white text-[10px] sm:text-xs tracking-[0.1em] sm:tracking-[0.16em] uppercase font-sans font-bold shadow-[0_10px_30px_rgba(200,82,26,0.4)] active:scale-[0.98] transition-all duration-300"
             >
               <span>Konsultasi Gratis</span>

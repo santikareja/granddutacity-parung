@@ -636,10 +636,17 @@ function KprSimulator({ activeTab }: { activeTab: ClusterKey }) {
             dan suku bunga mengikuti hasil analisa bank saat proses KPR.
           </div>
 
+          {/* Lead paling berkualitas di halaman ini: user sudah memilih unit
+              spesifik dari pricelist dan menghitung cicilannya. `unit` dan
+              `value` diisi agar GA4 bisa melaporkan tipe mana yang menghasilkan
+              chat paling banyak beserta nilai konversinya. */}
           <a
             href={`https://wa.me/628131742034?text=${whatsappText}`}
             target="_blank"
             rel="noopener noreferrer"
+            data-wa-placement="pricelist-kpr-simulator"
+            data-wa-unit={selectedOption.row.type}
+            data-wa-value={selectedOption.row.kpr}
             className="mt-6 inline-flex w-full items-center justify-center gap-3 rounded-full bg-[#F5F1E8] px-6 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#0b120c] transition hover:bg-[#F5A524]"
           >
             Konsultasikan simulasi ini
@@ -678,13 +685,19 @@ export default function PricelistPage() {
                 { label: "Pricelist Harga" }
               ]} />
             </div>
+            {/* Eyebrow sebelumnya "Grand Duta City Parung · South of Jakarta"
+                — memuat kedua kata kunci target homepage dalam satu baris.
+                Diganti label harga karena eyebrow bukan sinyal peringkat. */}
             <p className="text-[#F5A524] text-[10px] md:text-xs tracking-[0.5em] uppercase font-sans font-semibold mb-5 drop-shadow-md">
-              Grand Duta City Parung · South of Jakarta
+              Harga Resmi Developer
             </p>
-            {/* H1 — unique, no cannibalisation with homepage/cluster pages */}
+            {/* H1 — menyasar query "pricelist grand duta city parung" yang
+                memang berbeda dari query brand homepage. Frasa brand DIBIARKAN
+                di sini karena dipasangkan modifier kuat ("Pricelist" + tahun),
+                sesuai aturan kata kunci di requirements.md keputusan 2. */}
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#F5F1E8] mb-5 drop-shadow-xl">
-              Pricelist Grand Duta City SOJ Parung Bogor<br />
-              <span className="block mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl italic font-normal text-[#F5A524]">| Harga Ladera & Cascada Terbaru.</span>
+              Pricelist Resmi 2026<br />
+              <span className="block mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl italic font-normal text-[#F5A524]">Cluster Ladera &amp; Cascada</span>
             </h1>
             <p className="text-[#F5F1E8]/80 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed">
               Pricelist{" "}
@@ -1067,6 +1080,7 @@ export default function PricelistPage() {
               href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20bertanya%20seputar%20pricelist%20Grand%20Duta%20City%20Parung."
               target="_blank"
               rel="noopener noreferrer"
+              data-wa-placement="pricelist-faq"
               className="inline-flex items-center gap-3 bg-[#F5A524] hover:bg-[#2a5530] text-[#F5F1E8] px-12 py-4 text-[10px] tracking-[0.4em] uppercase font-bold transition-all duration-500 shadow-lg hover:shadow-xl rounded-full"
             >
               <Phone className="w-4 h-4" />
@@ -1081,7 +1095,7 @@ export default function PricelistPage() {
                <Link href="/cluster-ladera" className="px-5 py-2.5 rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8] hover:bg-[#F5F1E8] text-[#0b120c]/70 hover:text-[#F5A524] hover:border-[#F5A524]/30 transition-all text-xs font-semibold uppercase tracking-wider">lihat detail Cluster Ladera</Link>
                <Link href="/cluster-cascada" className="px-5 py-2.5 rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8] hover:bg-[#F5F1E8] text-[#0b120c]/70 hover:text-[#F5A524] hover:border-[#F5A524]/30 transition-all text-xs font-semibold uppercase tracking-wider">lihat detail Cluster Cascada</Link>
                <Link href="/update-stok-siteplan-grand-duta-city-parung" className="px-5 py-2.5 rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8] hover:bg-[#F5F1E8] text-[#0b120c]/70 hover:text-[#F5A524] hover:border-[#F5A524]/30 transition-all text-xs font-semibold uppercase tracking-wider">cek stok dan siteplan terbaru</Link>
-               <a href="https://wa.me/628131742034" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8] hover:bg-[#F5F1E8] text-[#0b120c]/70 hover:text-[#F5A524] hover:border-[#F5A524]/30 transition-all text-xs font-semibold uppercase tracking-wider">hubungi marketing untuk harga terbaru</a>
+               <a href="https://wa.me/628131742034" target="_blank" rel="noopener noreferrer" data-wa-placement="pricelist-footnote" className="px-5 py-2.5 rounded-xl border border-[#0b120c]/10 bg-[#F5F1E8] hover:bg-[#F5F1E8] text-[#0b120c]/70 hover:text-[#F5A524] hover:border-[#F5A524]/30 transition-all text-xs font-semibold uppercase tracking-wider">hubungi marketing untuk harga terbaru</a>
             </div>
           </div>
 

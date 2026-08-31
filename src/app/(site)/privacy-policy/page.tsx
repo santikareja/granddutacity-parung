@@ -5,12 +5,17 @@ import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { OG_SITE_NAME } from "@/lib/seo";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const PAGE_URL = `${SITE_URL}/privacy-policy`;
 
+// Halaman legal tidak punya alasan bisnis untuk membawa frasa kata kunci utama
+// di title — ia hanya bersaing dengan homepage tanpa imbalan. Brand dicabut
+// dari title; description dibiarkan karena konteksnya faktual dan panjangnya
+// sudah di dalam rentang.
 export const metadata: Metadata = {
-  title: { absolute: "Kebijakan Privasi Grand Duta City Parung" },
+  title: { absolute: "Kebijakan Privasi" },
   description: "Penjelasan tentang pengumpulan, penggunaan, penyimpanan, dan perlindungan data pribadi pada situs Grand Duta City Parung.",
   alternates: { canonical: PAGE_URL },
   robots: {
@@ -18,10 +23,10 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Kebijakan Privasi Grand Duta City Parung",
+    title: "Kebijakan Privasi",
     description: "Penjelasan tentang pengumpulan, penggunaan, penyimpanan, dan perlindungan data pribadi pada situs Grand Duta City Parung.",
     url: PAGE_URL,
-    siteName: "Grand Duta City Parung South of Jakarta",
+    siteName: OG_SITE_NAME,
     locale: "id_ID",
     type: "website",
   },
@@ -227,7 +232,7 @@ export default function PrivacyPolicyPage() {
               
               <ul className="list-none !pl-0">
                 <li><span className="font-semibold text-[#0b120c]">Melalui Email:</span> <a href="mailto:contact@granddutacitysouthofjakarta.com">contact@granddutacitysouthofjakarta.com</a></li>
-                <li><span className="font-semibold text-[#0b120c]">Melalui WhatsApp:</span> <a href="https://wa.me/628131742034" target="_blank" rel="noopener noreferrer">0813-1742-034</a></li>
+                <li><span className="font-semibold text-[#0b120c]">Melalui WhatsApp:</span> <a href="https://wa.me/628131742034" data-wa-placement="legal-contact-list" target="_blank" rel="noopener noreferrer">0813-1742-034</a></li>
                 <li><span className="font-semibold text-[#0b120c]">Berkunjung Langsung:</span> Jl. Boulevard GDC, Kec. Parung, Bogor, Jawa Barat 16330</li>
               </ul>
 
@@ -237,7 +242,7 @@ export default function PrivacyPolicyPage() {
                 Kec. Parung, Bogor,<br />
                 Jawa Barat 16330<br /><br />
                 Email: <a href="mailto:contact@granddutacitysouthofjakarta.com">contact@granddutacitysouthofjakarta.com</a><br />
-                WhatsApp: <a href="https://wa.me/628131742034" target="_blank" rel="noopener noreferrer">0813-1742-034</a>
+                WhatsApp: <a href="https://wa.me/628131742034" data-wa-placement="legal-contact-address" target="_blank" rel="noopener noreferrer">0813-1742-034</a>
               </address>
               
             </article>

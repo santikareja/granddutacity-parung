@@ -84,7 +84,7 @@ Arsitektur elegan bergaya *American Classic* berpadu *modern minimalist* dengan 
 
 - Rentang harga rumah tapak: mulai Rp 700 jutaan hingga sekitar Rp 1,6 miliar.
 - Indikasi harga per tipe (dapat berubah, cek halaman Pricelist): Malta 47/72 sekitar Rp 800 juta; Tuscan 66/72 sekitar Rp 1,1 miliar; Aira+ 42/60 sekitar Rp 800 juta; Manoa 58/60 sekitar Rp 800 juta; Victoria 69/72 sekitar Rp 1,1 miliar; Alexandra 88/105 sekitar Rp 1,4 miliar.
-- Simulasi cicilan KPR mulai sekitar Rp 4 jutaan per bulan dengan tenor hingga 25 tahun melalui 8 bank mitra (BCA, Mandiri, BTN, BRI, BNI, dan lainnya).
+- Simulasi cicilan KPR mulai sekitar Rp 4 jutaan per bulan dengan tenor hingga 25 tahun melalui 7 bank mitra: BTN, BCA, BSN, Danamon, OCBC NISP, Mandiri, dan BRI.
 - Program promosi berlangsung seperti Promo Tanpa DP untuk pemesanan unit baru bulan berjalan.
 
 ## Spesifikasi Bangunan Rumah Grand Duta City

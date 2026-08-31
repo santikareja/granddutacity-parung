@@ -19,6 +19,7 @@ import {
   getPublishedArticleBySlug,
   getPublishedArticleSummaries,
 } from "@/lib/public/queries";
+import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
 import type { PublicArticle, PublicMedia, PublicTag } from "@/types/content";
 
 // ISR: render sekali lalu sajikan dari cache selama 5 menit. Pembukaan artikel
@@ -296,37 +297,65 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
   const datePublished = new Date(article.publishedAt || article.createdAt).toISOString();
   const dateModified = new Date(article.updatedAt || article.publishedAt || article.createdAt).toISOString();
 
-  const blogPostingSchema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: article.title,
-    description: article.seo?.metaDescription || article.excerpt || "Artikel Grand Duta City Parung",
-    image: [schemaImage],
-    datePublished,
-    dateModified,
-    author: {
-      "@type": "Person",
-      name: authorName,
+  // SATU sumber untuk breadcrumb visual DAN JSON-LD. Sebelumnya halaman ini
+  // merender breadcrumb yang terlihat tetapi TIDAK mengemit `BreadcrumbList`
+  // sama sekali — padahal breadcrumb adalah rich result yang masih aktif dan
+  // tampil di SERP. Ini berlaku untuk SELURUH 32 halaman artikel.
+  const breadcrumbEntries = [
+    { name: "Artikel", path: "/artikel" },
+    { name: article.title, path: `/${article.slug}` },
+  ];
+
+  const articleGraph = graph([
+    {
+      "@type": "BlogPosting",
+      "@id": `${canonicalUrl}#article`,
+      headline: article.title,
+      description:
+        article.seo?.metaDescription || article.excerpt || "Artikel Grand Duta City Parung",
+      image: [schemaImage],
+      datePublished,
+      dateModified,
+      inLanguage: "id-ID",
+      // `author` kini menunjuk halaman penulis yang memang ada dan punya schema
+      // `Person` sendiri. Sebelumnya hanya nama tanpa `url`, sehingga sinyal
+      // E-E-A-T terbuang padahal halamannya sudah dibuat.
+      author: authorHref
+        ? {
+            "@type": "Person",
+            "@id": `${SITE_URL}${authorHref}#person`,
+            name: authorName,
+            url: `${SITE_URL}${authorHref}`,
+          }
+        : { "@type": "Person", name: authorName },
+      // Merujuk `@id` Organization global di layout, bukan mendeklarasikan
+      // penerbit baru bernama "Grand Duta City Parung" yang membuat Google
+      // melihat dua entitas berbeda.
+      publisher: ref(SCHEMA_ID.organization),
+      isPartOf: ref(SCHEMA_ID.website),
+      mainEntityOfPage: { "@id": `${canonicalUrl}#webpage` },
     },
-    publisher: {
-      "@type": "Organization",
-      name: "Grand Duta City Parung",
-      logo: {
+    {
+      "@type": "WebPage",
+      "@id": `${canonicalUrl}#webpage`,
+      url: canonicalUrl,
+      name: article.title,
+      inLanguage: "id-ID",
+      isPartOf: ref(SCHEMA_ID.website),
+      breadcrumb: { "@id": `${canonicalUrl}#breadcrumb` },
+      primaryImageOfPage: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/logo.svg`,
+        url: schemaImage,
       },
     },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": canonicalUrl,
-    },
-  };
+    breadcrumbNode(breadcrumbEntries, canonicalUrl),
+  ]);
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleGraph) }}
       />
       <Header />
       {/* overflow-x-clip, BUKAN overflow-hidden: keduanya mencegah scroll
@@ -338,11 +367,14 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
         <section className="relative overflow-hidden bg-[#0B120C] pt-28 pb-16 md:pt-36 md:pb-20">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,165,36,0.16),transparent_28%),linear-gradient(180deg,rgba(11,18,12,0.94),rgba(11,18,12,1))]" />
           <div className="relative mx-auto max-w-4xl px-6 md:px-10">
+            {/* Dibangun dari `breadcrumbEntries` yang SAMA dengan JSON-LD di
+                atas, jadi keduanya tidak bisa menyimpang. Item terakhir tanpa
+                href supaya dirender sebagai aria-current="page". */}
             <Breadcrumb
-              items={[
-                { label: "Artikel", href: "/artikel" },
-                { label: article.title },
-              ]}
+              items={breadcrumbEntries.map((entry, index) => ({
+                label: entry.name,
+                href: index < breadcrumbEntries.length - 1 ? entry.path : undefined,
+              }))}
             />
             <h1 className="mt-6 font-serif text-4xl leading-tight text-[#F5F1E8] md:text-5xl">{article.title}</h1>
             <p className="mt-4 text-[11px] uppercase tracking-[0.16em] text-[#F5F1E8]/60 md:text-sm md:tracking-[0.2em]">

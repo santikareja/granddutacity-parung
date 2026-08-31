@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { OG_SITE_NAME } from "@/lib/seo";
 import {
   ArrowLeft,
   ArrowRight,
@@ -27,6 +28,7 @@ import { InlineVideoCard } from "@/components/ui/inline-video-card";
 import { Header } from "@/components/ui/header-2";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { propertyTypes } from "@/lib/data";
+import { SCHEMA_ID, clusterOfferCatalogNode, ref } from "@/lib/schema";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const PAGE_URL = `${SITE_URL}/cluster-cascada`;
@@ -70,17 +72,25 @@ const cascadaFaqs = [
   },
 ];
 
+// Title dipendekkan dari 65 -> 51 karakter dan frasa "South of Jakarta"
+// dicabut. Description sebelumnya BYTE-IDENTICAL dengan /cluster-ladera;
+// sekarang dibedakan lewat tema resort tropis dan nama tipe unit Cascada.
+// Keyword yang memuat frasa target homepage juga dicabut (Fase 1).
+const PAGE_TITLE = "Cluster Cascada GDC Parung: Tipe, Harga & Stok Unit";
+const PAGE_DESCRIPTION =
+  "Cluster Cascada bertema Modern Tropical Resort di GDC Parung. Tipe Aira 42, Manoa 58, Victoria 69, dan Alexandra 88 — denah, harga KPR, dan blok tersedia.";
+
 export const metadata: Metadata = {
-  title: { absolute: "Cluster Cascada Grand Duta City Parung | Cascada South of Jakarta" },
-  description: "Informasi Cluster Cascada Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
+  title: { absolute: PAGE_TITLE },
+  description: PAGE_DESCRIPTION,
   keywords: [
-    "cluster cascada grand duta city parung",
-    "cascada grand duta city south of jakarta",
     "cluster cascada parung",
-    "cascada grand duta city bogor",
-    "harga cluster cascada grand duta city",
+    "cluster cascada gdc",
+    "harga cluster cascada",
     "denah cluster cascada",
     "tipe rumah cluster cascada",
+    "tipe alexandra 88",
+    "tipe victoria 69",
   ],
   alternates: { canonical: PAGE_URL },
   robots: {
@@ -89,18 +99,18 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   openGraph: {
-    title: "Cluster Cascada Grand Duta City Parung | Cascada South of Jakarta",
-    description: "Informasi Cluster Cascada Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
     url: PAGE_URL,
-    siteName: "Grand Duta City Parung South of Jakarta",
+    siteName: OG_SITE_NAME,
     locale: "id_ID",
     type: "website",
     images: [{ url: FEATURED_IMAGE, width: 1200, height: 630, alt: ALT_TEXT }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cluster Cascada Grand Duta City Parung | Cascada South of Jakarta",
-    description: "Informasi Cluster Cascada Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
     images: [FEATURED_IMAGE],
   },
 };
@@ -136,27 +146,17 @@ export default function ClusterCascadaPage() {
                 name: "Cluster Cascada Grand Duta City Parung | Cascada South of Jakarta",
                 description:
                   "Informasi Cluster Cascada Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
-                breadcrumb: { "@id": `${PAGE_URL}#breadcrumb` },
-                primaryImageOfPage: { "@id": `${PAGE_URL}#primaryimage` },
+                isPartOf: ref(SCHEMA_ID.website),
+                about: ref(SCHEMA_ID.clusterCascada),
+                breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+                primaryImageOfPage: ref(`${PAGE_URL}#primaryimage`),
                 inLanguage: "id",
               },
-              {
-                "@type": "OfferCatalog",
-                name: "Tipe Rumah Cluster Cascada Grand Duta City Parung",
-                url: PAGE_URL,
-                itemListElement: cascadaUnits.map((unit) => ({
-                  "@type": "Offer",
-                  name: `${unit.name} ${unit.typeCategory} Cluster Cascada`,
-                  availability: unit.soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-                  description: `${unit.name} ${unit.typeCategory} di Cluster Cascada Grand Duta City Parung dengan kisaran harga ${unit.price}.`,
-                  itemOffered: {
-                    "@type": "SingleFamilyResidence",
-                    name: `${unit.name} ${unit.typeCategory}`,
-                    image: unit.image,
-                    description: unit.desc,
-                  },
-                })),
-              },
+              // Sebelumnya katalog ini disusun inline dan menyatakan `InStock`
+              // untuk setiap unit yang tidak ditandai sold out. Pemilik
+              // menegaskan hardcode itu tidak akurat, jadi builder bersama
+              // memetakan status `check-siteplan` ke `LimitedAvailability`.
+              clusterOfferCatalogNode("cascada", PAGE_URL),
             ],
           }),
         }}
@@ -172,14 +172,19 @@ export default function ClusterCascadaPage() {
                 { label: "Cluster Cascada" }
               ]} />
             </div>
-            <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#F5A524]">Cascada South of Jakarta</p>
+            <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#F5A524]">Modern Tropical Resort</p>
+            {/* H1 dan eyebrow sebelumnya mengulang frasa target homepage
+                ("Cluster Cascada Grand Duta City Parung" + "Cascada South of
+                Jakarta"). Diganti nama tipe unit supaya halaman ini menang di
+                query tipe. Frasa brand tetap ada sebagai anchor ke "/". */}
             <h1 className="max-w-5xl font-serif text-5xl font-bold leading-[0.95] text-[#F5F1E8] md:text-7xl lg:text-8xl">
-              Cluster Cascada Grand Duta City Parung
+              Cluster Cascada — Aira, Manoa, Victoria &amp; Alexandra
             </h1>
             <p className="mt-8 max-w-3xl text-base leading-relaxed text-[#F5F1E8]/82 md:text-xl">
-              Cluster Cascada di Grand Duta City South of Jakarta menghadirkan hunian modern minimalis
-              tropis dengan fitur smart home, akses strategis dekat tol, fasilitas kawasan lengkap, dan
-              harga mulai Rp800 jutaan.
+              Cluster Cascada di kawasan{" "}
+              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
+              menghadirkan hunian modern minimalis tropis dengan fitur smart home, akses strategis
+              dekat tol, fasilitas kawasan lengkap, dan harga mulai Rp800 jutaan.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
               <Link href="/pricelist-grand-duta-city" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5A524] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#0b120c] hover:bg-brand-light">
@@ -317,7 +322,14 @@ export default function ClusterCascadaPage() {
                       ))}
                     </div>
                     <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                      <a href={`https://wa.me/628131742034?text=${encodeURIComponent(`Halo, saya tertarik dengan ${item.unit.name} di Cluster Cascada Grand Duta City Parung. Mohon info harga, denah, dan jadwal survey.`)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5A524] px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#F5F1E8] hover:bg-[#0b120c]">
+                      <a
+                        href={`https://wa.me/628131742034?text=${encodeURIComponent(`Halo, saya tertarik dengan ${item.unit.name} di Cluster Cascada Grand Duta City Parung. Mohon info harga, denah, dan jadwal survey.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-wa-placement="cascada-unit-card"
+                        data-wa-unit={item.unit.id}
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5A524] px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#F5F1E8] hover:bg-[#0b120c]"
+                      >
                         Tanya {item.unit.name}
                       </a>
                       <Link href="/pricelist-grand-duta-city" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#0b120c]/10 px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#0b120c] hover:border-[#F5A524] hover:text-[#F5A524]">
@@ -364,7 +376,7 @@ export default function ClusterCascadaPage() {
               <Link href="/pricelist-grand-duta-city" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0b120c] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#F5F1E8] hover:bg-[#F5A524]">
                 Cek harga Cluster Cascada <ArrowRight className="h-4 w-4" />
               </Link>
-              <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20tanya%20harga%20Cluster%20Cascada%20Grand%20Duta%20City%20Parung." target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#F5A524]/20 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#F5A524] hover:border-[#F5A524] hover:bg-[#F5A524] hover:text-[#F5F1E8]">
+              <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20tanya%20harga%20Cluster%20Cascada%20Grand%20Duta%20City%20Parung." data-wa-placement="cascada-harga-cta" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#F5A524]/20 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#F5A524] hover:border-[#F5A524] hover:bg-[#F5A524] hover:text-[#F5F1E8]">
                 <Wallet className="h-4 w-4" /> Hubungi marketing
               </a>
             </div>
@@ -415,7 +427,7 @@ export default function ClusterCascadaPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20cek%20ketersediaan%20unit%20di%20Cluster%20Cascada." target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#F5A524] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#F5F1E8] hover:bg-[#0b120c]">
+                  <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20cek%20ketersediaan%20unit%20di%20Cluster%20Cascada." data-wa-placement="cascada-cek-stok" target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#F5A524] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#F5F1E8] hover:bg-[#0b120c]">
                     <Phone className="h-4 w-4" /> Cek ketersediaan Cascada
                   </a>
                   <Link href="/lokasi-akses-grand-duta-city-parung" className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#0b120c]/10 px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#0b120c] hover:border-[#F5A524] hover:text-[#F5A524]">
@@ -489,7 +501,7 @@ export default function ClusterCascadaPage() {
                     {label}
                   </Link>
                 ))}
-                <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20jadwal%20survey%20Cluster%20Cascada%20Grand%20Duta%20City%20Parung." target="_blank" rel="noopener noreferrer" className="rounded-2xl border border-[#F5A524]/50 bg-[#F5A524]/10 px-5 py-4 text-sm font-semibold text-[#F5A524] hover:bg-[#F5A524] hover:text-[#0b120c]">
+                <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20jadwal%20survey%20Cluster%20Cascada%20Grand%20Duta%20City%20Parung." data-wa-placement="cascada-jadwal-survey" target="_blank" rel="noopener noreferrer" className="rounded-2xl border border-[#F5A524]/50 bg-[#F5A524]/10 px-5 py-4 text-sm font-semibold text-[#F5A524] hover:bg-[#F5A524] hover:text-[#0b120c]">
                   Hubungi marketing untuk survey
                 </a>
               </div>

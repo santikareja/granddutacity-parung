@@ -93,6 +93,7 @@ export function WhatsAppButton() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setOpen(false)}
+                  data-wa-placement="floating-widget"
                   className="group flex items-center justify-center gap-2.5 w-full bg-[#25D366] hover:bg-[#20BD5A] text-[#090D0A] font-sans font-bold text-xs tracking-[0.16em] uppercase py-3.5 rounded-full transition-all duration-300 shadow-lg shadow-[#25D366]/30 active:scale-[0.98]"
                 >
                   <span>Mulai Konsultasi</span>

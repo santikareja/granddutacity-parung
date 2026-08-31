@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { TreePine, Shield, Waves, Coffee, Wifi, Smile, MapPin, Sparkles, ArrowUpRight } from "lucide-react";
+import { facilities, type FacilityIconKey } from "@/data/facilities";
 import { cn } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { Reveal } from "@/components/ui/reveal";
@@ -59,16 +60,19 @@ function FacilityImage({ src, alt, title, className }: { src: string; alt: strin
   );
 }
 
-const facilities = [
-  { title: "Area Hijau 80 Ha", icon: <TreePine className="w-4 h-4" /> },
-  { title: "Cluster Private Pool", icon: <Waves className="w-4 h-4" /> },
-  { title: "Children Playground", icon: <Smile className="w-4 h-4" /> },
-  { title: "Keamanan 24/7 & CCTV", icon: <Shield className="w-4 h-4" /> },
-  { title: "The Beach & Lagoon", icon: <Waves className="w-4 h-4" /> },
-  { title: "Pusat Kuliner & FnB", icon: <Coffee className="w-4 h-4" /> },
-  { title: "Co-Working Space", icon: <Wifi className="w-4 h-4" /> },
-  { title: "Main Boulevard Row 30m", icon: <MapPin className="w-4 h-4" /> },
-];
+// Daftar fasilitas kini berasal dari src/data/facilities.ts (Fase 5) supaya
+// kartu yang dilihat pengunjung dan `amenityFeature` pada schema `Place` di
+// homepage memakai SATU sumber. Array lama menyimpan elemen JSX langsung,
+// sehingga tidak bisa diimpor server component untuk keperluan schema.
+const FACILITY_ICONS: Record<FacilityIconKey, ReactNode> = {
+  tree: <TreePine className="w-4 h-4" />,
+  waves: <Waves className="w-4 h-4" />,
+  smile: <Smile className="w-4 h-4" />,
+  shield: <Shield className="w-4 h-4" />,
+  coffee: <Coffee className="w-4 h-4" />,
+  wifi: <Wifi className="w-4 h-4" />,
+  "map-pin": <MapPin className="w-4 h-4" />,
+};
 
 export function Fasilitas() {
   return (
@@ -111,7 +115,7 @@ export function Fasilitas() {
                   className="group flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-xl bg-white border border-[#090D0A]/5 hover:border-[#D49A3D]/40 transition-colors shadow-xs"
                 >
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#090D0A]/5 group-hover:bg-[#C8521A] text-[#B45309] group-hover:text-white flex items-center justify-center transition-colors duration-300 shrink-0">
-                    {fac.icon}
+                    {FACILITY_ICONS[fac.icon]}
                   </div>
                   <span className="text-[#090D0A]/80 text-[11px] sm:text-sm font-medium group-hover:text-[#090D0A] transition-colors leading-snug">
                     {fac.title}
@@ -126,6 +130,7 @@ export function Fasilitas() {
                 href="https://wa.me/628131742034?text=Halo%2C%20saya%20mau%20tanya%20detail%20fasilitas%20%26%20kawasan%20Grand%20Duta%20City%20Parung%20South%20of%20Jakarta."
                 target="_blank"
                 rel="noopener noreferrer"
+                data-wa-placement="fasilitas"
                 className="group relative inline-flex items-center justify-center gap-3 pl-6 pr-2 py-3.5 rounded-full bg-[#C8521A] hover:bg-[#DE5E1E] text-white text-xs sm:text-sm tracking-[0.16em] uppercase font-sans font-bold shadow-[0_8px_24px_rgba(200,82,26,0.35)] active:scale-[0.98] transition-all duration-300 text-center"
               >
                 <span>Tanya Fasilitas</span>

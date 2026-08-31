@@ -15,11 +15,14 @@ import {
   getLatestArticles,
   toAbsoluteUrl,
 } from "@/lib/articles";
+import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
 
 const PAGE_URL = "https://granddutacitysouthofjakarta.com/category";
-const PAGE_TITLE = "Topik Artikel Properti — Semua Kategori | Grand Duta City";
+// Brand tag menggantung dicabut (title 57 -> 39). Description diperpanjang dari
+// 116 ke dalam rentang 120-160.
+const PAGE_TITLE = "Topik Artikel Properti — Semua Kategori";
 const PAGE_DESCRIPTION =
-  "Jelajahi semua kategori artikel Grand Duta City: panduan properti, ulasan kawasan, dan informasi seputar GDC Parung.";
+  "Jelajahi tiga topik editorial properti: panduan beli rumah dan KPR, ulasan kawasan Parung serta Bogor Selatan, dan informasi terbaru seputar proyek GDC Parung.";
 const OG_IMAGE = ogImage(
   articleCategoryDefinitions["panduan-properti"].imagePublicId,
 );
@@ -65,51 +68,33 @@ export const metadata: Metadata = {
 
 const latestArticles = getLatestArticles(6);
 
-const schemas = [
+const schemas = graph([
   {
-    "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "@id": PAGE_URL,
+    // `@id` sebelumnya PERSIS `PAGE_URL` tanpa fragment, sementara
+    // /category/[slug] memakai `#collection`. Dua konvensi untuk peran node
+    // yang sama membuat graf sulit ditelusuri; kini keduanya seragam.
+    "@id": `${PAGE_URL}#collection`,
     url: PAGE_URL,
     name: "Semua Kategori Artikel",
     description: "Daftar kategori artikel properti dari Grand Duta City South of Jakarta.",
     inLanguage: "id-ID",
-    isPartOf: {
-      "@type": "WebSite",
-      "@id": "https://granddutacitysouthofjakarta.com/#website",
-    },
-    breadcrumb: {
-      "@id": "https://granddutacitysouthofjakarta.com/category#breadcrumb",
-    },
+    // Referensi murni: `@type` dihapus supaya node ini tidak dianggap
+    // mendefinisikan ulang WebSite milik homepage.
+    isPartOf: ref(SCHEMA_ID.website),
+    breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+    mainEntity: ref(`${PAGE_URL}#itemlist`),
   },
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "@id": "https://granddutacitysouthofjakarta.com/category#breadcrumb",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Beranda",
-        item: "https://granddutacitysouthofjakarta.com",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Artikel",
-        item: "https://granddutacitysouthofjakarta.com/artikel",
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: "Semua Kategori",
-        item: PAGE_URL,
-      },
+  breadcrumbNode(
+    [
+      { name: "Artikel", path: "/artikel" },
+      { name: "Semua Kategori", path: "/category" },
     ],
-  },
+    PAGE_URL,
+  ),
   {
-    "@context": "https://schema.org",
     "@type": "ItemList",
+    "@id": `${PAGE_URL}#itemlist`,
     name: "Kategori Artikel Grand Duta City",
     url: PAGE_URL,
     numberOfItems: articleCategorySlugs.length,
@@ -120,7 +105,7 @@ const schemas = [
       url: toAbsoluteUrl(getCategoryPath(slug)),
       })),
   },
-];
+]);
 
 export default function CategoryHubPage() {
   return (

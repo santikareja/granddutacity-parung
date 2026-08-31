@@ -3,33 +3,9 @@
 import { useState } from "react";
 import { ChevronDown, Calculator, ArrowUpRight, HelpCircle } from "lucide-react";
 import Image from "next/image";
+import { trackWhatsAppClick } from "@/lib/analytics";
+import { homepageFaqs as faqs } from "@/data/faq-homepage";
 
-const faqs = [
-  {
-    q: "Berapa harga rumah di Grand Duta City Parung South of Jakarta?",
-    a: "Harga rumah di Grand Duta City Parung mulai dari Rp 700 jutaan untuk Cluster Ladera (Tipe Malta 47/72) hingga Rp 1,6 Milyar-an untuk unit premium di Cluster Cascada (Tipe Alexandra 88/105). Cicilan KPR mulai sekitar Rp 4 jutaan per bulan dengan tenor hingga 25 tahun. Hubungi marketing untuk pricelist terbaru dan ketersediaan unit promo."
-  },
-  {
-    q: "Apa saja syarat dan keuntungan Promo Tanpa DP bulan ini?",
-    a: "Program Promo Tanpa DP berlaku untuk pemesanan unit baru di Cluster Ladera dan Cascada bulan berjalan, dengan proses KPR melalui 8 bank mitra (BCA, Mandiri, BTN, BRI, BNI, dll). Cukup siapkan dokumen pribadi (KTP, KK, slip gaji/SPT), dan tim marketing kami akan bantu pre-approval gratis. Konsultasi via WhatsApp untuk simulasi cicilan & bocoran promo aktif."
-  },
-  {
-    q: "Di mana lokasi Grand Duta City Parung dan bagaimana akses tolnya?",
-    a: "Berlokasi di Jl. Raya Parung No.47, Jabon Mekar, Kec. Parung, Kabupaten Bogor â€” hanya 20 menit ke TB Simatupang & Antasari Jakarta Selatan, dan kurang dari 15 menit ke 4 exit tol utama: Pamulang, Krukut, Sawangan, dan Bojong Gede. Akses ke Tol Desari, Tol Andara, Tol Pamulang, dan Tol BORR membuat hunian ini sangat strategis untuk komuter Jakarta-Depok-Bogor-BSD."
-  },
-  {
-    q: "Fasilitas eksklusif apa saja di kawasan Grand Duta City SOJ?",
-    a: "Penghuni menikmati fasilitas kelas premium: The Beach (kolam tematik), Cluster Private Pool, Central Park, Ruang Terbuka Hijau 80 Ha, Playground, Pusat Kuliner FnB, Garden Cafe, Boulevard utama, Keamanan 24/7 dengan CCTV, One Gate System, serta jaringan kabel bawah tanah untuk estetika kawasan yang rapi modern."
-  },
-  {
-    q: "Apakah kawasan Grand Duta City Parung aman dari banjir?",
-    a: "Ya. Kawasan dirancang dengan polder system terpadu berskala kota mandiri dan elevasi tanah optimal di dataran tinggi Parung Bogor. Drainase induk dan area resapan dirancang untuk menjamin lingkungan bebas banjir bahkan saat curah hujan tinggi."
-  },
-  {
-    q: "Bagaimana prospek investasi properti di Grand Duta City Parung?",
-    a: "Sangat menjanjikan. Kawasan ini dilewati jalur rencana Tol JORR 3 yang akan mendongkrak capital gain signifikan, menjadikannya sunrise property terbaik di koridor selatan Jakarta. Kombinasi 200 Ha kota mandiri, infrastruktur lengkap, dan posisi strategis 20 menit dari CBD Jakarta Selatan menempatkan GDC SOJ sebagai pilihan investasi properti Bogor dengan potensi apresiasi tinggi 5â€“10 tahun ke depan."
-  }
-];
 
 export function FaqKpr() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -39,6 +15,28 @@ export function FaqKpr() {
   const [dpPercent, setDpPercent] = useState<number>(10);
   const [bunga, setBunga] = useState<number>(4.75);
   const [tenor, setTenor] = useState<number>(15);
+
+  // Clamp input (Fase 3 spec seo-cannibalization-and-pseo).
+  //
+  // Sebelumnya kedua <input type="number"> di bawah TIDAK punya min/max dan
+  // langsung `setX(Number(e.target.value))`, sehingga kalkulator menerima DP
+  // 500% atau bunga negatif dan menampilkan cicilan yang mustahil. Pada
+  // halaman yang menyangkut keputusan finansial, itu merusak kepercayaan.
+  //
+  // Batas disamakan dengan dua kalkulator lain yang sudah benar
+  // (cluster-faq-kpr-section.tsx: dp 0-90, bunga 0-25; pricelist-content.tsx).
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max);
+
+  const handleDpChange = (nextValue: string) => {
+    const parsed = Number(nextValue);
+    setDpPercent(Number.isFinite(parsed) ? clamp(parsed, 0, 90) : 10);
+  };
+
+  const handleBungaChange = (nextValue: string) => {
+    const parsed = Number(nextValue);
+    setBunga(Number.isFinite(parsed) ? clamp(parsed, 0, 25) : 4.75);
+  };
 
   // KPR Calculation Logic
   const dpAmount = harga * (dpPercent / 100);
@@ -184,8 +182,11 @@ export function FaqKpr() {
                         <input 
                           type="number" 
                           aria-label="Persentase Uang Muka"
+                          min={0}
+                          max={90}
+                          step={1}
                           value={dpPercent}
-                          onChange={(e) => setDpPercent(Number(e.target.value))}
+                          onChange={(e) => handleDpChange(e.target.value)}
                           className="w-full bg-[#F8F6F0] border border-[#090D0A]/10 rounded-xl py-2 px-3 text-xs sm:text-sm font-semibold text-[#090D0A] focus:outline-none focus:border-[#C8521A] transition-colors"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#090D0A]/40 text-xs pointer-events-none">%</span>
@@ -201,9 +202,11 @@ export function FaqKpr() {
                         <input 
                           type="number" 
                           aria-label="Suku Bunga Persen"
+                          min={0}
+                          max={25}
                           step="0.01"
                           value={bunga}
-                          onChange={(e) => setBunga(Number(e.target.value))}
+                          onChange={(e) => handleBungaChange(e.target.value)}
                           className="w-full bg-[#F8F6F0] border border-[#090D0A]/10 rounded-xl py-2 px-3 text-xs sm:text-sm font-semibold text-[#090D0A] focus:outline-none focus:border-[#C8521A] transition-colors"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#090D0A]/40 text-xs pointer-events-none">%</span>
@@ -252,6 +255,14 @@ export function FaqKpr() {
                     href="https://wa.me/628131742034"
                     onClick={(e) => {
                       e.preventDefault();
+                      // `value` diisi harga yang sedang disimulasikan user —
+                      // ini lead paling berkualitas di situs (sudah menghitung
+                      // cicilan), jadi nilai konversinya layak dilaporkan.
+                      trackWhatsAppClick({
+                        page: window.location.pathname,
+                        placement: "kpr-calculator",
+                        value: harga,
+                      });
                       const msg = `Halo, saya tertarik dengan Promo Tanpa DP di Grand Duta City South of Jakarta. Dari kalkulator KPR saya cek estimasi cicilan ${formatRp(cicilanPerBulan)}/bln (harga ${formatRp(harga)}, DP ${dpPercent}%, tenor ${tenor} thn). Mohon info promo & ketersediaan unit terbaru.`;
                       window.open(`https://wa.me/628131742034?text=${encodeURIComponent(msg)}`, '_blank');
                     }}

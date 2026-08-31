@@ -16,20 +16,29 @@ import {
   CalendarDays
 } from "lucide-react";
 import { ContactForm } from "@/components/sections/contact-form";
+import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
+import { OG_SITE_NAME } from "@/lib/seo";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 const PAGE_URL = "https://granddutacitysouthofjakarta.com/kontak";
 const IMAGE_URL = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775884994/kontak-marketing-grand-duta-city-south-of-jakarta-parung_m4csyj.webp";
 
+// Title dipendekkan dari 85 -> 48 karakter (brand muncul dua kali sebelumnya).
+// Keyword "marketing grand duta city parung south of jakarta" dicabut karena
+// memuat frasa target homepage.
+const PAGE_TITLE = "Kontak Marketing GDC Parung | Jadwal Survey Unit";
+const PAGE_DESCRIPTION =
+  "Hubungi tim marketing GDC Parung via WhatsApp untuk jadwal survey lokasi, cek stok unit terbaru, pricelist resmi, simulasi KPR, dan proses booking unit.";
+
 export const metadata: Metadata = {
-  title: "Kontak Marketing Grand Duta City Parung | Survey & Informasi",
-  description: "Hubungi tim marketing Grand Duta City Parung untuk jadwal survey, informasi cluster, pricelist terbaru, siteplan, dan proses pembelian.",
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
   keywords: [
-    "kontak grand duta city parung",
-    "marketing grand duta city parung south of jakarta",
-    "nomor marketing grand duta city",
-    "survey grand duta city parung",
-    "whatsapp grand duta city parung"
+    "kontak marketing gdc parung",
+    "nomor marketing gdc parung",
+    "whatsapp marketing gdc parung",
+    "jadwal survey gdc parung",
+    "marketing gallery parung bogor",
   ],
   alternates: {
     canonical: PAGE_URL,
@@ -44,87 +53,64 @@ export const metadata: Metadata = {
     }
   },
   openGraph: {
-    title: "Kontak Marketing Grand Duta City Parung | Survey & Informasi",
-    description: "Hubungi tim marketing Grand Duta City Parung untuk jadwal survey, informasi cluster, pricelist terbaru, siteplan, dan proses pembelian.",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
     url: PAGE_URL,
-    siteName: "Grand Duta City Parung South of Jakarta",
+    siteName: OG_SITE_NAME,
     locale: "id_ID",
     type: "website",
     images: [{ url: IMAGE_URL, width: 1200, height: 630, alt: "Kontak Marketing Grand Duta City Parung" }],
   },
 };
 
-export default function ContactPage() {
-  const jsonLdSchema = [
-    {
-      "@context": "https://schema.org",
-      "@type": "ContactPage",
-      "name": "Kontak Marketing Grand Duta City Parung",
-      "description": "Halaman kontak resmi untuk informasi dan marketing Grand Duta City Parung South of Jakarta.",
-      "url": PAGE_URL,
-      "mainEntity": {
-        "@type": "ContactPoint",
-        "telephone": "+62-813-1742-034",
-        "contactType": "sales",
-        "areaServed": "ID",
-        "availableLanguage": "Indonesian"
-      }
+/**
+ * SATU `@graph` menggantikan empat blok lepas (Fase 5).
+ *
+ * DUA konflik nyata dibereskan di sini:
+ *
+ *  1. Halaman ini MENDEFINISIKAN ULANG `#organization` dengan versi tipis
+ *     (hanya name/url/logo/contactPoint). Karena `@id`-nya sama dengan node
+ *     lengkap di homepage, Google menerima dua deskripsi berbeda untuk satu
+ *     entitas dan bebas memilih yang mana pun — termasuk yang tipis. Sekarang
+ *     halaman ini hanya MERUJUK.
+ *
+ *  2. `RealEstateAgent` di sini anonim (tanpa `@id`) dan memuat koordinat
+ *     -6.450274, 106.719312 — BERBEDA dari kantor pemasaran di homepage
+ *     (-6.462459, 106.729392) padahal alamat jalannya identik. Satu alamat
+ *     dengan dua titik peta adalah data yang saling meniadakan, dan sinyal
+ *     lokasi adalah salah satu yang paling menentukan untuk query lokal.
+ *     Sekarang keduanya satu node: `#salesoffice`.
+ */
+const pageSchema = graph([
+  breadcrumbNode([{ name: "Kontak", path: "/kontak" }], PAGE_URL),
+  {
+    "@type": "ContactPage",
+    "@id": `${PAGE_URL}#webpage`,
+    name: "Kontak Marketing Grand Duta City Parung",
+    description:
+      "Halaman kontak resmi untuk informasi dan marketing Grand Duta City Parung South of Jakarta.",
+    url: PAGE_URL,
+    inLanguage: "id",
+    isPartOf: ref(SCHEMA_ID.website),
+    about: ref(SCHEMA_ID.project),
+    breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+    mainEntity: ref(SCHEMA_ID.salesOffice),
+    primaryImageOfPage: {
+      "@type": "ImageObject",
+      "@id": `${PAGE_URL}#primaryimage`,
+      url: IMAGE_URL,
+      contentUrl: IMAGE_URL,
+      caption: "Kontak Marketing Grand Duta City Parung",
     },
-    {
-      "@context": "https://schema.org",
-      "@id": "https://granddutacitysouthofjakarta.com/#organization",
-      "@type": "Organization",
-      "name": "Grand Duta City Parung South of Jakarta",
-      "url": "https://granddutacitysouthofjakarta.com",
-      "logo": "https://granddutacitysouthofjakarta.com/logo.svg",
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "telephone": "+62-813-1742-034",
-        "contactType": "customer service"
-      }
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "RealEstateAgent",
-      "name": "Marketing Gallery Grand Duta City Parung",
-      "image": IMAGE_URL,
-      "telephone": "0813-1742-034",
-      "url": PAGE_URL,
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Jl. Raya Parung No.47, Jabon Mekar",
-        "addressLocality": "Parung",
-        "addressRegion": "Jawa Barat",
-        "postalCode": "16330",
-        "addressCountry": "ID"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": -6.450274,
-        "longitude": 106.719312
-      },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        "opens": "09:00",
-        "closes": "18:00"
-      }
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Beranda", "item": "https://granddutacitysouthofjakarta.com" },
-        { "@type": "ListItem", "position": 2, "name": "Kontak", "item": PAGE_URL }
-      ]
-    }
-  ];
+  },
+]);
 
+export default function ContactPage() {
   return (
     <>
       <Header />
       <main className="relative w-full overflow-hidden bg-[#0b120c] font-sans pb-20">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }} />
 
         {/* Hero Section */}
         <section className="relative min-h-[480px] sm:min-h-[550px] md:h-[65vh] flex items-center justify-center pt-24 pb-16">
@@ -146,9 +132,13 @@ export default function ContactPage() {
             <span className="text-[#F5A524] text-xs md:text-sm tracking-[0.4em] uppercase font-bold mb-4 block animate-in fade-in slide-in-from-bottom-4 duration-700">
                Informasi & Reservasi
             </span>
+            {/* H1 sebelumnya membaca "Kontak Marketing Grand Duta City Parung"
+                — persis mengulang frasa target homepage. Diringkas ke "GDC
+                Parung"; frasa penuhnya tetap ada di paragraf bawah sebagai
+                anchor internal ke "/". */}
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#F5F1E8] mb-6 leading-tight animate-in fade-in slide-in-from-bottom-6 duration-1000">
               Kontak Marketing <br />
-              <span className="text-[#F5A524] italic">Grand Duta City Parung</span>
+              <span className="text-[#F5A524] italic">GDC Parung</span>
             </h1>
             <p className="text-[#F5F1E8]/70 text-sm sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
               Hubungi tim marketing{" "}
@@ -174,7 +164,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="text-[10px] uppercase tracking-widest text-[#F5F1E8]/40 mb-1">WhatsApp Fast Response</p>
-                      <a href="https://wa.me/628131742034" className="text-lg sm:text-xl text-[#F5F1E8] hover:text-[#F5A524] transition-colors font-medium">0813 1742 034</a>
+                      <a href="https://wa.me/628131742034" data-wa-placement="kontak-phone-number" className="text-lg sm:text-xl text-[#F5F1E8] hover:text-[#F5A524] transition-colors font-medium">0813 1742 034</a>
                     </div>
                   </div>
 

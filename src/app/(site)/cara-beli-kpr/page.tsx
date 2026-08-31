@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ArrowRight, Phone, CheckCircle2, FileText, Calculator, HelpCircle, Building2, Banknote, ShieldCheck, Home } from "lucide-react";
 import { BankSlider } from "@/components/ui/bank-slider";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
+import { OG_SITE_NAME } from "@/lib/seo";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -13,24 +15,27 @@ type Props = {
 
 const PAGE_URL = "https://granddutacitysouthofjakarta.com/cara-beli-kpr";
 const OG_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775877869/cara-beli-kpr-grand-duta-city-parung_cf7tep.webp";
-const AUTHOR_ID = "https://granddutacitysouthofjakarta.com/author/santika-reza#person";
-const AUTHOR_URL = "https://granddutacitysouthofjakarta.com/author/santika-reza";
+
+const PAGE_TITLE = "Cara Beli Rumah GDC Parung: Alur KPR & Dokumen";
+const PAGE_DESCRIPTION =
+  "Panduan lengkap beli rumah di GDC Parung: booking fee Rp 5 juta, skema DP, tunai keras, cash bertahap 12 bulan, dokumen KPR, sampai tahapan akad kredit.";
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const hasParams = Object.keys(resolvedSearchParams).length > 0;
   
   return {
-    title: "Cara Beli Rumah di Grand Duta City Parung | KPR & Tahapan",
-    description: "Panduan cara beli rumah di Grand Duta City Parung, mulai dari booking, DP, proses KPR, dokumen yang dibutuhkan, hingga tahapan akad.",
+    // Title dipendekkan dari 82 -> 46 karakter; brand sebelumnya muncul 2x.
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
     keywords: [
-      "cara beli rumah grand duta city parung",
-      "kpr grand duta city parung",
-      "proses pembelian rumah grand duta city",
-      "simulasi kpr grand duta city",
-      "booking fee grand duta city",
+      "cara beli rumah gdc parung",
+      "kpr gdc parung",
+      "proses pembelian rumah gdc",
+      "booking fee gdc parung",
       "syarat kpr rumah parung",
-      "tahapan akad rumah"
+      "dokumen kpr rumah",
+      "tahapan akad kredit rumah"
     ],
     alternates: {
       canonical: PAGE_URL
@@ -45,74 +50,64 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       }
     },
     openGraph: {
-      title: "Cara Beli Rumah di Grand Duta City Parung | KPR & Tahapan",
-      description: "Panduan cara beli rumah di Grand Duta City Parung, mulai dari booking, DP, proses KPR, dokumen yang dibutuhkan, hingga tahapan akad.",
+      title: PAGE_TITLE,
+      description: PAGE_DESCRIPTION,
       url: PAGE_URL,
-      siteName: "Grand Duta City Parung South of Jakarta",
+      siteName: OG_SITE_NAME,
       locale: "id_ID",
       type: "website",
       images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Cara Beli dan Proses KPR di Grand Duta City Parung" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Cara Beli Rumah di Grand Duta City Parung | KPR & Tahapan",
-      description: "Panduan cara beli rumah di Grand Duta City Parung, mulai dari booking, DP, proses KPR, dokumen yang dibutuhkan, hingga tahapan akad.",
+      title: PAGE_TITLE,
+      description: PAGE_DESCRIPTION,
       images: [OG_IMAGE],
     },
   }
 }
 
 export default function CaraBeliKPRPage() {
-  const jsonLdBreadcrumb = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://granddutacitysouthofjakarta.com"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Cara Beli & KPR",
-        "item": PAGE_URL
-      }
-    ]
-  };
+  const jsonLdBreadcrumb = breadcrumbNode(
+    [{ name: "Cara Beli & KPR", path: "/cara-beli-kpr" }],
+    PAGE_URL,
+  );
 
   const jsonLdWebPage = {
-    "@context": "https://schema.org",
     "@type": "WebPage",
+    "@id": `${PAGE_URL}#webpage`,
     "name": "Cara Beli Rumah di Grand Duta City Parung | KPR & Tahapan",
     "description": "Panduan cara beli rumah di Grand Duta City Parung, mulai dari booking, DP, proses KPR, dokumen yang dibutuhkan, hingga tahapan akad.",
     "url": PAGE_URL,
     "inLanguage": "id",
-    "author": {
-      "@id": AUTHOR_ID,
-      "@type": "Person",
-      "name": "Santika Reza",
-      "url": AUTHOR_URL
-    },
+    "isPartOf": ref(SCHEMA_ID.website),
+    "about": ref(SCHEMA_ID.project),
+    "breadcrumb": ref(`${PAGE_URL}#breadcrumb`),
+    // Node Person lengkap ada di /author/santika-reza. Sebelumnya halaman ini
+    // (dan HowTo di bawah) mendefinisikan ulang Person dengan `@id` yang sama
+    // tapi properti minimal — dua deskripsi untuk satu penulis.
+    "author": ref(SCHEMA_ID.author),
+    "publisher": ref(SCHEMA_ID.organization),
     "primaryImageOfPage": {
       "@type": "ImageObject",
-      "url": OG_IMAGE
+      "@id": `${PAGE_URL}#primaryimage`,
+      "url": OG_IMAGE,
+      "contentUrl": OG_IMAGE,
     }
   };
 
+  /**
+   * `HowTo` dipertahankan meski Google mencabut HowTo rich result. Alasannya
+   * sama dengan `FAQPage` di homepage: markup ini masih dibaca LLM dan mesin
+   * AI search, dan langkah-langkahnya persis alur yang ditanyakan calon pembeli.
+   */
   const jsonLdHowTo = {
-    "@context": "https://schema.org",
     "@type": "HowTo",
+    "@id": `${PAGE_URL}#howto`,
     "name": "Cara Membeli Rumah di Grand Duta City Parung Menggunakan KPR",
     "description": "Panduan langkah demi langkah cara membeli rumah dan proses pengajuan KPR di Grand Duta City Parung.",
-    "image": OG_IMAGE,
-    "author": {
-      "@id": AUTHOR_ID,
-      "@type": "Person",
-      "name": "Santika Reza",
-      "url": AUTHOR_URL
-    },
+    "image": ref(`${PAGE_URL}#primaryimage`),
+    "author": ref(SCHEMA_ID.author),
     "totalTime": "P30D",
     "step": [
       {
@@ -207,9 +202,14 @@ export default function CaraBeliKPRPage() {
     <>
       <Header />
       <main className="relative w-full overflow-hidden bg-[#0b120c] font-sans pb-20">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumb) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebPage) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdHowTo) }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              graph([jsonLdBreadcrumb, jsonLdWebPage, jsonLdHowTo]),
+            ),
+          }}
+        />
 
         {/* Hero Section */}
         <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 px-4 md:px-8 max-w-7xl mx-auto border-b border-[#F5F1E8]/5">
@@ -230,8 +230,11 @@ export default function CaraBeliKPRPage() {
                 { label: "Cara Beli & KPR" }
               ]} />
             </div>
+            {/* Frasa brand penuh diringkas ke "GDC Parung" agar tidak
+                mengulang frasa target homepage di H1; versi penuhnya tetap ada
+                di paragraf bawah sebagai anchor internal ke "/". */}
             <h1 className="text-4xl md:text-5xl lg:text-5xl font-medium text-[#F5F1E8] mb-6 uppercase tracking-wider font-serif leading-tight">
-              Cara Beli Rumah dan <span className="text-[#F5A524] italic">Proses KPR</span> di Grand Duta City Parung
+              Cara Beli Rumah dan <span className="text-[#F5A524] italic">Proses KPR</span> di GDC Parung
             </h1>
             
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8 max-w-3xl">
@@ -433,7 +436,7 @@ export default function CaraBeliKPRPage() {
                     Hubungi marketing kami untuk simulasi KPR gratis, dan jadwalkan kunjungan Anda ke Grand Duta City Parung hari ini!
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20pilih%20rumah%20di%20Grand%20Duta%20City%20dan%20ingin%20dibantu%20simulasi%20KPR." target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[#25D366] text-[#F5F1E8] px-8 py-4 rounded-full font-bold hover:bg-[#1ebd5b] transition-colors w-full sm:w-auto justify-center">
+                    <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20pilih%20rumah%20di%20Grand%20Duta%20City%20dan%20ingin%20dibantu%20simulasi%20KPR." target="_blank" rel="noreferrer" data-wa-placement="cara-beli-kpr-bottom-cta" className="flex items-center gap-2 bg-[#25D366] text-[#F5F1E8] px-8 py-4 rounded-full font-bold hover:bg-[#1ebd5b] transition-colors w-full sm:w-auto justify-center">
                        <Phone className="w-5 h-5" /> Hubungi Marketing
                     </a>
                 </div>

@@ -6,6 +6,7 @@ import { ArrowRight, Phone, Download, Clock, Info } from "lucide-react";
 import { BankSlider } from "@/components/ui/bank-slider";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ClickableSiteplanImage } from "@/components/ui/clickable-siteplan-image";
+import { SCHEMA_ID, ref } from "@/lib/schema";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -16,8 +17,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const hasParams = Object.keys(resolvedSearchParams).length > 0;
 
   return {
-    title: "Update Stok & Siteplan Grand Duta City",
-    description: "Halaman ini menampilkan siteplan kawasan dan update stok unit Grand Duta City Parung untuk Cluster Ladera dan Cascada.",
+    // Title sebelumnya mendapat suffix brand dari template layout sehingga
+    // "Grand Duta City" muncul dua kali (63 karakter). Description diperpanjang
+    // dari 118 ke dalam rentang 120-160 dan diisi detail konkret.
+    title: "Update Stok Unit & Siteplan GDC Parung 2026",
+    description:
+      "Cek ketersediaan unit terbaru GDC Parung per blok: siteplan kawasan, status tersedia, reservasi, dan sold untuk Cluster Ladera dan Cluster Cascada.",
     alternates: {
       canonical: "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung"
     },
@@ -33,10 +38,41 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   }
 }
 
-const LAST_UPDATED_VISUAL = "17 Agustus 2026";
-const LAST_UPDATED_ISO = "2026-08-17T00:00:00+07:00";
-const AUTHOR_ID = "https://granddutacitysouthofjakarta.com/author/santika-reza#person";
-const AUTHOR_URL = "https://granddutacitysouthofjakarta.com/author/santika-reza";
+/**
+ * Tanggal update stok — SATU sumber (Fase 3 spec seo-cannibalization-and-pseo).
+ *
+ * Sebelumnya tanggal ini ditulis DUA KALI sebagai string terpisah
+ * ("17 Agustus 2026" dan "2026-08-17T00:00:00+07:00"), jadi memperbarui satu
+ * tanpa yang lain membuat tanggal yang dilihat pengunjung berbeda dari yang
+ * dibaca Google. Sekarang keduanya diturunkan dari satu nilai.
+ *
+ * CARA MEMPERBARUI: ganti HANYA baris `STOCK_UPDATED_AT` di bawah setiap kali
+ * siteplan baru diunggah.
+ */
+const STOCK_UPDATED_AT = new Date("2026-08-17T00:00:00+07:00");
+
+const LAST_UPDATED_ISO = STOCK_UPDATED_AT.toISOString();
+const LAST_UPDATED_VISUAL = STOCK_UPDATED_AT.toLocaleDateString("id-ID", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Asia/Jakarta",
+});
+
+/**
+ * Umur data stok dalam hari.
+ *
+ * Halaman yang menjanjikan "update stok" kehilangan gunanya begitu tanggalnya
+ * membeku — dan sebelumnya tidak ada apa pun yang memberi tahu bahwa itu
+ * terjadi. Ambang 45 hari dipilih karena pricelist dan siteplan proyek ini
+ * diperbarui bulanan; lewat satu setengah siklus, angka di halaman ini patut
+ * diragukan dan lebih baik pengunjung diarahkan mengonfirmasi ke marketing.
+ */
+const STOCK_STALE_AFTER_DAYS = 45;
+const stockAgeDays = Math.floor(
+  (Date.now() - STOCK_UPDATED_AT.getTime()) / (1000 * 60 * 60 * 24),
+);
+const isStockStale = stockAgeDays > STOCK_STALE_AFTER_DAYS;
 
 export default function UpdateStokSiteplanPage() {
   const jsonLd = {
@@ -50,15 +86,16 @@ export default function UpdateStokSiteplanPage() {
         "description": "Halaman ini menampilkan siteplan kawasan dan update stok unit Grand Duta City Parung untuk Cluster Ladera dan Cascada.",
         "datePublished": LAST_UPDATED_ISO,
         "dateModified": LAST_UPDATED_ISO,
-        "author": {
-          "@id": AUTHOR_ID,
-          "@type": "Person",
-          "name": "Santika Reza",
-          "url": AUTHOR_URL
-        },
-        "primaryImageOfPage": {
-          "@id": "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung#primaryimage"
-        }
+        "inLanguage": "id",
+        "isPartOf": ref(SCHEMA_ID.website),
+        "about": ref(SCHEMA_ID.project),
+        "breadcrumb": ref("https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung#breadcrumb"),
+        // Referensi murni. Node Person lengkap ada di /author/santika-reza;
+        // sebelumnya halaman ini mendefinisikan ulang `@id` yang sama dengan
+        // properti minimal.
+        "author": ref(SCHEMA_ID.author),
+        "publisher": ref(SCHEMA_ID.organization),
+        "primaryImageOfPage": ref("https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung#primaryimage")
       },
       {
         "@type": "ImageObject",
@@ -111,8 +148,25 @@ export default function UpdateStokSiteplanPage() {
               Terakhir diperbarui: {LAST_UPDATED_VISUAL}
             </div>
 
+            {/* Peringatan jujur ketika data stok sudah tua. Lebih baik mengakui
+                data berumur dan mengarahkan pengunjung mengonfirmasi, daripada
+                menampilkan siteplan lama seolah masih berlaku. */}
+            {isStockStale ? (
+              <div className="mb-6 inline-flex max-w-2xl items-start gap-2 rounded-2xl border border-[#F5F1E8]/20 bg-[#F5F1E8]/5 px-4 py-3 text-left text-xs leading-relaxed text-[#F5F1E8]/70">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#F5A524]" />
+                <span>
+                  Siteplan di halaman ini berumur {stockAgeDays} hari. Ketersediaan
+                  unit bergerak cepat, jadi mohon konfirmasi status terbaru ke tim
+                  marketing sebelum mengambil keputusan.
+                </span>
+              </div>
+            ) : null}
+
+            {/* H1 sebelumnya hanya "Update Stok & Siteplan" — terlalu generik
+                dan tidak menyebut lokasi. Ditambah "GDC Parung" (bukan frasa
+                brand penuh) agar spesifik tanpa mengulang target homepage. */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-[#F5F1E8] mb-6 uppercase tracking-wider font-serif">
-              Update Stok & <span className="text-[#F5A524] italic">Siteplan</span>
+              Update Stok Unit &amp; <span className="text-[#F5A524] italic">Siteplan</span> GDC Parung
             </h1>
 
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8">
@@ -260,7 +314,7 @@ export default function UpdateStokSiteplanPage() {
                 </div>
               </div>
 
-              <a href="https://wa.me/628131742034" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#F5A524] text-[#0b120c] font-semibold tracking-wider text-sm hover:bg-brand-light transition-all shadow-[0_0_20px_rgba(245,165,36,0.3)]">
+              <a href="https://wa.me/628131742034" data-wa-placement="stok-ladera-cta" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#F5A524] text-[#0b120c] font-semibold tracking-wider text-sm hover:bg-brand-light transition-all shadow-[0_0_20px_rgba(245,165,36,0.3)]">
                 <Phone className="w-4 h-4" />
                 Cek Ketersediaan Ladera
               </a>
@@ -312,7 +366,7 @@ export default function UpdateStokSiteplanPage() {
                 </ul>
               </div>
 
-              <a href="https://wa.me/628131742034" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#F5A524] text-[#0b120c] font-semibold tracking-wider text-sm hover:bg-brand-light transition-all shadow-[0_0_20px_rgba(245,165,36,0.3)]">
+              <a href="https://wa.me/628131742034" data-wa-placement="stok-cascada-cta" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#F5A524] text-[#0b120c] font-semibold tracking-wider text-sm hover:bg-brand-light transition-all shadow-[0_0_20px_rgba(245,165,36,0.3)]">
                 <Phone className="w-4 h-4" />
                 Cek Ketersediaan Cascada
               </a>
@@ -353,10 +407,10 @@ export default function UpdateStokSiteplanPage() {
                 Ketersediaan stok unit berubah dengan cepat. Hubungi kami sekarang untuk mendapatkan file siteplan resolusi tinggi, pricelist terbaru, maupun simulasi KPR.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="https://wa.me/628131742034" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[#25D366] text-[#F5F1E8] px-8 py-4 rounded-full font-bold hover:bg-[#1ebd5b] transition-colors w-full sm:w-auto justify-center">
+                <a href="https://wa.me/628131742034" data-wa-placement="stok-hubungi-marketing" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[#25D366] text-[#F5F1E8] px-8 py-4 rounded-full font-bold hover:bg-[#1ebd5b] transition-colors w-full sm:w-auto justify-center">
                   <Phone className="w-5 h-5" /> Hubungi via WhatsApp
                 </a>
-                <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20dengan%20Grand%20Duta%20City%20dan%20ingin%20meminta%20Siteplan%20HD%20serta%20Pricelist%20terbaru." target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-transparent text-[#F5F1E8] border-2 border-[#F5F1E8]/30 px-8 py-4 rounded-full font-bold hover:bg-brand-light hover:text-[#0b120c] transition-colors w-full sm:w-auto justify-center">
+                <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20dengan%20Grand%20Duta%20City%20dan%20ingin%20meminta%20Siteplan%20HD%20serta%20Pricelist%20terbaru." data-wa-placement="stok-minta-siteplan-hd" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-transparent text-[#F5F1E8] border-2 border-[#F5F1E8]/30 px-8 py-4 rounded-full font-bold hover:bg-brand-light hover:text-[#0b120c] transition-colors w-full sm:w-auto justify-center">
                   <Download className="w-5 h-5" /> Minta Siteplan HD & Harga
                 </a>
               </div>

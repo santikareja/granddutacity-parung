@@ -16,6 +16,7 @@
  */
 
 import { units as unitRegistry } from "@/data/units";
+import { CLUSTER_SITEPLAN, getUnitContent } from "@/data/unit-content";
 
 export type SiteImage = {
   url: string;
@@ -643,11 +644,13 @@ const clusterCascadaSeeds: readonly ImageSeed[] = [
 const unitTypePageImages: SiteImage[] = unitRegistry.flatMap((unit) => {
   const page = `/tipe-rumah/${unit.id}`;
   const label = `Tipe ${unit.typeCategory} ${unit.name}`;
+  const clusterLabel =
+    unit.cluster === "ladera" ? "Cluster Ladera" : "Cluster Cascada";
   const entries: SiteImage[] = [
     {
       url: unit.facadeImage,
       title: toSeoTitle(`Fasad ${label}`),
-      caption: `Fasad ${label} di ${unit.cluster === "ladera" ? "Cluster Ladera" : "Cluster Cascada"} Grand Duta City Parung South of Jakarta.`,
+      caption: `Fasad ${label} di ${clusterLabel} Grand Duta City Parung South of Jakarta.`,
       page,
       priority: true,
     },
@@ -656,10 +659,35 @@ const unitTypePageImages: SiteImage[] = unitRegistry.flatMap((unit) => {
     entries.push({
       url: unit.floorPlanImage,
       title: toSeoTitle(`Denah ${label}`),
-      caption: `Denah lantai ${label} di ${unit.cluster === "ladera" ? "Cluster Ladera" : "Cluster Cascada"} Grand Duta City Parung South of Jakarta.`,
+      caption: `Denah lantai ${label} di ${clusterLabel} Grand Duta City Parung South of Jakarta.`,
       page,
     });
   }
+
+  // Galeri per tipe (src/data/unit-content.ts). Masih kosong untuk semua tipe —
+  // begitu pemilik menambahkan URL di sana, gambarnya OTOMATIS terdaftar di
+  // image sitemap tanpa perlu menyentuh berkas ini. Itulah alasan galeri
+  // dibangkitkan, bukan ditulis ulang sebagai literal.
+  for (const image of getUnitContent(unit.id).gallery) {
+    entries.push({
+      url: image.url,
+      title: toSeoTitle(image.alt),
+      caption:
+        image.caption ??
+        `${image.alt} di ${clusterLabel} Grand Duta City Parung South of Jakarta.`,
+      page,
+    });
+  }
+
+  // Siteplan cluster ikut tampil di halaman tipe, jadi asosiasinya dicatat.
+  const siteplan = CLUSTER_SITEPLAN[unit.cluster];
+  entries.push({
+    url: siteplan.url,
+    title: toSeoTitle(siteplan.alt),
+    caption: `${siteplan.alt} yang memuat posisi kavling ${label}.`,
+    page,
+  });
+
   return entries;
 });
 

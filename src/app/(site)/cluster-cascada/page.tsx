@@ -351,19 +351,31 @@ export default function ClusterCascadaPage() {
               <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.38em] text-[#F5A524]">Harga Cluster Cascada Grand Duta City</p>
               <h2 className="font-serif text-4xl font-semibold text-[#0b120c] md:text-5xl">Kisaran harga dan jalur konsultasi yang paling cepat</h2>
             </div>
+            {/* Kartu harga kini DITURUNKAN dari `cascadaUnits` (yang berakar di
+                src/data/units.ts) dan setiap kartu MENAUT halaman tipenya.
+                Sebelumnya array ini hardcode 4 baris nama+ukuran+harga — salinan
+                keempat data unit yang bisa menyimpang dari pricelist, sekaligus
+                jalan buntu bagi pengunjung yang ingin melihat detail tipe. */}
             <div className="mt-14 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {[
-                ["AIRA+", "Type 42 / 60", "Mulai 800 Juta-an"],
-                ["MANOA", "Type 58 / 60", "Mulai 800 Juta-an"],
-                ["VICTORIA", "Type 69 / 72", "Mulai 1.1 Milyar-an"],
-                ["ALEXANDRA", "Type 88 / 105", "Mulai 1.4 Milyar-an"],
-              ].map(([name, type, price]) => (
-                <div key={name} className="rounded-[28px] border border-[#0b120c]/8 bg-brand-light p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-[#F5A524]">{type}</p>
-                  <h3 className="mt-4 font-serif text-3xl text-[#0b120c]">{name}</h3>
-                  <p className="mt-3 text-lg font-semibold text-[#F5A524]">{price}</p>
-                </div>
-              ))}
+              {cascadaUnits
+                .filter((unit) => !unit.soldOut)
+                .map((unit) => (
+                  <Link
+                    key={unit.id}
+                    href={unit.href}
+                    className="group rounded-[28px] border border-[#0b120c]/8 bg-brand-light p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-[#F5A524]/40 hover:shadow-md"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-[#F5A524]">
+                      {unit.typeCategory} / {unit.specs.lt}
+                    </p>
+                    <h3 className="mt-4 font-serif text-3xl text-[#0b120c]">{unit.name}</h3>
+                    <p className="mt-3 text-lg font-semibold text-[#F5A524]">Mulai {unit.price}</p>
+                    <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#0b120c]/60 transition-colors group-hover:text-[#A85D16]">
+                      Lihat detail &amp; denah
+                      <ArrowRight className="size-3.5" aria-hidden="true" />
+                    </span>
+                  </Link>
+                ))}
             </div>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               {["Cash Keras", "Cash Bertahap", "KPR"].map((method) => (

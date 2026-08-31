@@ -1,19 +1,52 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Bath, BedDouble, CarFront, Layers, Maximize, Ruler } from "lucide-react";
+import {
+  ArrowRight,
+  Bath,
+  BedDouble,
+  CarFront,
+  Check,
+  Coffee,
+  Layers,
+  MapPin,
+  Maximize,
+  Ruler,
+  ScrollText,
+  ShieldCheck,
+  Smile,
+  TreePine,
+  Waves,
+  Wifi,
+  Zap,
+} from "lucide-react";
 
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { ClickableSiteplanImage } from "@/components/ui/clickable-siteplan-image";
 import { Header } from "@/components/ui/header-2";
+import { UnitGallery } from "@/components/ui/unit-gallery";
+import { VideoEmbed } from "@/components/ui/video-embed";
+import { facilities, type FacilityIconKey } from "@/data/facilities";
+import {
+  ACCESS_SUMMARY,
+  CLUSTER_SITEPLAN,
+  CLUSTER_THEME,
+  getUnitContent,
+  resolveUnitGallery,
+  resolveUnitOverview,
+  resolveUnitVideo,
+} from "@/data/unit-content";
 import {
   CLUSTER_LABEL,
+  PROJECT_ELECTRICAL,
+  PROJECT_LEGALITY,
   bathroomLabel,
   bedroomLabel,
   getSiblingUnits,
   getUnitById,
   unitDisplayName,
+  unitFacadeAlt,
   unitPagePath,
   unitSizeLabel,
   unitSpecSentence,
@@ -57,10 +90,37 @@ import { OG_SITE_NAME, SITE_URL } from "@/lib/seo";
  * yang mengklaim frasa brand homepage.
  *
  * BUKAN DOORWAY PAGE: keunikan tiap halaman berasal dari data nyata yang
- * berbeda (spesifikasi, harga, denah, dan tabel banding terhadap tetangga
- * cluster yang berbeda), bukan nama tipe yang ditukar pada template yang sama.
- * Spesifikasi bangunan yang berlaku project-wide SENGAJA hanya DITAUT ke
- * /cluster-*, tidak diduplikasi di 10 halaman.
+ * berbeda (spesifikasi, harga, denah, galeri, deskripsi per tipe, dan tabel
+ * banding terhadap tetangga cluster yang berbeda), bukan nama tipe yang
+ * ditukar pada template yang sama.
+ *
+ * ------------------------------------------------------------------------
+ * TATA LETAK GAYA LISTING MARKETPLACE (30 Agustus 2026)
+ * ------------------------------------------------------------------------
+ * Permintaan pemilik: halaman ini harus terasa seperti halaman produk di
+ * marketplace properti, mudah dinavigasi, dan menaikkan konversi.
+ *
+ * Yang berubah dan alasannya:
+ *   - Hero full-bleed 62vh DIGANTI dua kolom: galeri foto di kiri, kartu
+ *     ringkasan harga + CTA yang STICKY di kanan. Hero lama memaksa
+ *     pengunjung menggulir sebelum melihat harga; sekarang harga dan tombol
+ *     WhatsApp selalu terlihat selama membaca di desktop.
+ *   - Di layar kecil kartu itu tidak bisa sticky (memakan tinggi layar), jadi
+ *     ada BAR CTA melekat di bawah viewport. Ia hanya muncul di bawah `lg`.
+ *   - NAVIGASI ANCHOR di bawah hero. Halaman ini jadi panjang, dan pembeli
+ *     biasanya mencari satu hal spesifik (denah, harga, siteplan).
+ *   - Seksi FASILITAS dan AKSES hanya RINGKASAN + tautan ke halaman
+ *     pemiliknya. Menyalin blok panjang yang identik ke 10 halaman akan
+ *     mengubahnya menjadi doorway page sekaligus berebut query lokasi dengan
+ *     `/lokasi-akses-grand-duta-city-parung`. Lihat catatan di
+ *     `src/data/unit-content.ts`.
+ *   - SITEPLAN diambil per cluster, bukan satu gambar untuk semua, sehingga
+ *     ia menambah pembeda alih-alih duplikasi.
+ *
+ * Aset yang belum ada (galeri foto per tipe, video Cascada) memakai slot
+ * placeholder di `src/data/unit-content.ts`. Halaman TIDAK merender kotak
+ * kosong: bila galeri belum diisi ia memakai render fasad, dan bila video
+ * belum ada seksinya tidak dirender sama sekali.
  */
 
 const SLASH = "\u2014";
@@ -171,6 +231,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Bagian tampilan
+// ---------------------------------------------------------------------------
+
+/** Ikon fasilitas disimpan sebagai KUNCI di data; pemetaan ke JSX ada di sini. */
+const FACILITY_ICON: Record<FacilityIconKey, typeof TreePine> = {
+  tree: TreePine,
+  waves: Waves,
+  smile: Smile,
+  shield: ShieldCheck,
+  coffee: Coffee,
+  wifi: Wifi,
+  "map-pin": MapPin,
+};
+
 function SpecItem({
   icon: Icon,
   label,
@@ -193,6 +268,33 @@ function SpecItem({
   );
 }
 
+/** Judul seksi + `scroll-mt` agar navigasi anchor tidak tertutup header. */
+function SectionHeading({
+  id,
+  title,
+  intro,
+}: {
+  id: string;
+  title: string;
+  intro?: string;
+}) {
+  return (
+    <>
+      <h2
+        id={`${id}-title`}
+        className="font-serif text-2xl font-semibold text-[#0b120c] sm:text-3xl md:text-4xl"
+      >
+        {title}
+      </h2>
+      {intro ? (
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#0b120c]/65 sm:text-base">
+          {intro}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 export default async function TipeRumahDetailPage({ params }: Props) {
   const { slug } = await params;
   const unit = getUnitById(slug);
@@ -205,9 +307,58 @@ export default async function TipeRumahDetailPage({ params }: Props) {
   const pageUrl = `${SITE_URL}${unitPagePath(unit)}`;
   const siblings = getSiblingUnits(unit);
 
+  const content = getUnitContent(unit.id);
+  const gallery = resolveUnitGallery(unit, unitFacadeAlt(unit));
+  const video = resolveUnitVideo(unit);
+  const overview = resolveUnitOverview(unit);
+  const siteplan = CLUSTER_SITEPLAN[unit.cluster];
+  const soldOut = unit.status === "sold-out";
+
+  const priceDisplay =
+    unit.status === "coming-soon" ? unit.priceLabel : `Rp ${unit.priceLabel}`;
+
+  const availabilityLabel = soldOut
+    ? "Sold out"
+    : unit.status === "coming-soon"
+      ? "Segera hadir"
+      : "Cek siteplan terbaru";
+
   const waText = encodeURIComponent(
     `Halo, saya tertarik dengan Tipe ${name} ${size} di ${clusterLabel} Grand Duta City Parung. Boleh minta pricelist dan ketersediaan unitnya?`,
   );
+  const waHref = `https://wa.me/628131742034?text=${waText}`;
+
+  // Navigasi anchor dibangun dari seksi yang BENAR-BENAR dirender, supaya tidak
+  // ada tautan yang menggantung ke seksi yang disembunyikan (mis. video atau
+  // denah yang asetnya belum ada).
+  const navItems: { href: string; label: string }[] = [
+    { href: "#deskripsi", label: "Deskripsi" },
+    { href: "#spesifikasi", label: "Spesifikasi" },
+    ...(unit.floorPlanImage ? [{ href: "#denah", label: "Denah" }] : []),
+    ...(video ? [{ href: "#video", label: "Video" }] : []),
+    { href: "#fasilitas", label: "Fasilitas" },
+    { href: "#lokasi", label: "Akses" },
+    { href: "#siteplan", label: "Siteplan" },
+    ...(siblings.length > 0 ? [{ href: "#banding", label: "Banding tipe" }] : []),
+  ];
+
+  // Ringkasan spesifikasi untuk kartu harga: hanya field yang datanya ada.
+  const quickSpecs: { label: string; value: string }[] = [
+    { label: "Luas bangunan", value: `${unit.lb} m²` },
+    { label: "Luas tanah", value: `${unit.lt} m²` },
+    ...(unit.bedrooms !== null
+      ? [{ label: "Kamar tidur", value: bedroomLabel(unit) }]
+      : []),
+    ...(unit.bathrooms !== null
+      ? [{ label: "Kamar mandi", value: bathroomLabel(unit) }]
+      : []),
+    ...(unit.carports !== null
+      ? [{ label: "Carport", value: `${unit.carports} mobil` }]
+      : []),
+    ...(unit.floors !== null
+      ? [{ label: "Jumlah lantai", value: `${unit.floors} lantai` }]
+      : []),
+  ];
 
   // Node hunian dipakai ULANG dari builder bersama, jadi @id di halaman ini
   // IDENTIK dengan yang dirujuk /cluster-* dan /pricelist. Inilah yang membuat
@@ -261,77 +412,223 @@ export default async function TipeRumahDetailPage({ params }: Props) {
       />
       <Header />
 
-      <main className="relative w-full overflow-hidden bg-brand-light">
-        <section className="relative flex min-h-[62vh] items-end overflow-hidden bg-[#0b120c]">
-          <Image
-            src={unit.facadeImage}
-            alt={`Fasad tipe ${name} ${size} GDC Parung`}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-55"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,18,12,0.3)_0%,rgba(11,18,12,0.5)_45%,rgba(11,18,12,0.94)_100%)]" />
+      {/* `pb-24 lg:pb-0` memberi ruang untuk bar CTA melekat di ponsel supaya ia
+          tidak menutupi konten terakhir. */}
+      <main className="relative w-full overflow-hidden bg-brand-light pb-24 lg:pb-0">
+        {/* ── Kepala listing: galeri + kartu harga sticky ── */}
+        <section className="border-b border-[#0b120c]/10 pt-24 md:pt-28">
+          <div className="mx-auto max-w-screen-xl px-4 pb-10 sm:px-6 md:px-14">
+            <Breadcrumb
+              items={[{ label: "Tipe Rumah", href: "/tipe-rumah" }, { label: `Tipe ${name} ${size}` }]}
+            />
 
-          <div className="relative z-10 mx-auto w-full max-w-screen-xl px-6 pb-16 pt-28 md:px-14">
-            <div className="mb-6">
-              <Breadcrumb
-                items={[{ label: "Tipe Rumah", href: "/tipe-rumah" }, { label: `Tipe ${name} ${size}` }]}
-              />
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <Link
+                href={clusterPath}
+                className="rounded-full bg-[#0b120c] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#F5F1E8] transition-colors hover:bg-[#A85D16]"
+              >
+                {clusterLabel}
+              </Link>
+              <span className="rounded-full bg-[#F5A524] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0b120c]">
+                {unit.typeCategory}
+              </span>
+              {unit.isHook ? (
+                <span className="rounded-full border border-[#0b120c]/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0b120c]/70">
+                  Kavling hook
+                </span>
+              ) : null}
+              {soldOut ? (
+                <span className="rounded-full bg-red-600/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-red-700">
+                  Sold out
+                </span>
+              ) : null}
             </div>
 
-            <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#F5A524]">
-              {clusterLabel}
-            </p>
-
             {/* H1 menyebut tipe + ukuran, TIDAK frasa brand penuh — itu milik
-                homepage. Frasa penuhnya hadir di paragraf bawah sebagai anchor
-                internal ke "/". */}
-            <h1 className="max-w-4xl font-serif text-4xl font-bold leading-[1.02] text-[#F5F1E8] md:text-6xl">
+                homepage. Frasa penuhnya hadir di paragraf deskripsi sebagai
+                anchor internal ke "/". */}
+            <h1 className="mt-4 font-serif text-3xl font-bold leading-[1.08] text-[#0b120c] sm:text-4xl md:text-5xl">
               Tipe {name} {size}
             </h1>
-
-            <p className="mt-7 max-w-3xl text-base leading-relaxed text-[#F5F1E8]/82 md:text-lg">
-              {unit.description} Bagian dari kawasan{" "}
-              <Link href="/" className="font-medium text-[#F5A524] hover:underline">
-                Grand Duta City Parung
-              </Link>{" "}
-              di Parung, Bogor.
+            <p className="mt-3 text-sm text-[#0b120c]/60 sm:text-base">
+              {CLUSTER_THEME[unit.cluster]} {SLASH} Parung, Kabupaten Bogor
             </p>
 
-            <div className="mt-9 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-              <a
-                href={`https://wa.me/628131742034?text=${waText}`}
-                data-wa-placement="tipe-rumah-hero"
-                data-wa-unit={`${name} ${size}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5A524] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#0b120c] transition-colors hover:bg-brand-light"
-              >
-                Tanya ketersediaan unit <ArrowRight className="h-4 w-4" />
-              </a>
-              <Link
-                href="/pricelist-grand-duta-city"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#F5F1E8]/25 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#F5F1E8] transition-colors hover:bg-[#F5F1E8]/10"
-              >
-                Simulasi KPR &amp; pricelist
-              </Link>
+            <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
+              {/* Galeri */}
+              <div className="lg:col-span-7 xl:col-span-8">
+                <UnitGallery images={gallery} priority />
+              </div>
+
+              {/* Kartu ringkasan — sticky di desktop */}
+              <aside className="lg:col-span-5 xl:col-span-4">
+                <div className="rounded-3xl border border-[#0b120c]/10 bg-white/70 p-6 shadow-sm lg:sticky lg:top-24">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#0b120c]/50">
+                    Harga mulai
+                  </div>
+                  <div className="mt-1.5 font-serif text-3xl font-bold text-[#A85D16]">
+                    {priceDisplay}
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed text-[#0b120c]/60">
+                    Mewakili harga tunai keras terendah. Harga KPR berbeda dan bervariasi per
+                    kavling.
+                  </p>
+
+                  <dl className="mt-5 divide-y divide-[#0b120c]/8 border-y border-[#0b120c]/8">
+                    {quickSpecs.map((spec) => (
+                      <div key={spec.label} className="flex items-center justify-between py-2.5">
+                        <dt className="text-xs text-[#0b120c]/55">{spec.label}</dt>
+                        <dd className="text-sm font-semibold text-[#0b120c]">{spec.value}</dd>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-between py-2.5">
+                      <dt className="text-xs text-[#0b120c]/55">Ketersediaan</dt>
+                      <dd className="text-sm font-semibold text-[#0b120c]">{availabilityLabel}</dd>
+                    </div>
+                  </dl>
+
+                  <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-[#0b120c]/55">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Zap className="size-3.5" aria-hidden="true" /> Listrik {PROJECT_ELECTRICAL}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <ScrollText className="size-3.5" aria-hidden="true" /> Legalitas {PROJECT_LEGALITY}
+                    </span>
+                  </p>
+
+                  <div className="mt-6 space-y-2.5">
+                    <a
+                      href={waHref}
+                      data-wa-placement="tipe-rumah-sidebar"
+                      data-wa-unit={`${name} ${size}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-[#C8521A] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#DE5E1E]"
+                    >
+                      Tanya ketersediaan <ArrowRight className="size-4" />
+                    </a>
+                    <Link
+                      href="/pricelist-grand-duta-city"
+                      className="flex w-full items-center justify-center rounded-full border border-[#0b120c]/20 px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-[#0b120c] transition-colors hover:border-[#A85D16] hover:text-[#A85D16]"
+                    >
+                      Simulasi KPR &amp; pricelist
+                    </Link>
+                  </div>
+                </div>
+              </aside>
             </div>
           </div>
         </section>
 
-        {/* Spesifikasi — sumber keunikan utama tiap halaman */}
-        <section className="border-b border-[#0b120c]/10 py-16 md:py-20">
-          <div className="mx-auto max-w-screen-xl px-6 md:px-14">
-            <h2 className="mb-2 font-serif text-3xl font-semibold text-[#0b120c] md:text-4xl">
-              Spesifikasi Tipe {name}
-            </h2>
-            <p className="mb-9 max-w-2xl text-[#0b120c]/65">
-              Angka di bawah mengikuti pricelist dan denah resmi. Ketersediaan unit per blok
-              berubah cepat {SLASH} konfirmasi ke marketing sebelum memutuskan.
-            </p>
+        {/* ── Navigasi anchor ── */}
+        <nav
+          aria-label="Navigasi bagian halaman"
+          className="border-b border-[#0b120c]/10 bg-brand-light/95 backdrop-blur-sm"
+        >
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+            <ul className="no-scrollbar flex list-none gap-1 overflow-x-auto py-3">
+              {navItems.map((item) => (
+                <li key={item.href} className="shrink-0">
+                  <a
+                    href={item.href}
+                    className="block rounded-full px-4 py-2 text-xs font-semibold text-[#0b120c]/65 transition-colors hover:bg-[#0b120c]/5 hover:text-[#0b120c]"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* ── Deskripsi ── */}
+        <section
+          id="deskripsi"
+          aria-labelledby="deskripsi-title"
+          className="scroll-mt-24 border-b border-[#0b120c]/10 py-14 md:py-20"
+        >
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+            <SectionHeading id="deskripsi" title={`Tentang Tipe ${name}`} />
+
+            <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-12">
+              <div className="lg:col-span-7">
+                {overview.map((paragraph) => (
+                  <p
+                    key={paragraph.slice(0, 40)}
+                    className="mb-4 leading-relaxed text-[#0b120c]/75 last:mb-0"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+
+                <p className="mt-5 text-sm leading-relaxed text-[#0b120c]/65">
+                  Tipe ini berada di {clusterLabel}, bagian dari kawasan{" "}
+                  <Link href="/" className="font-medium text-[#A85D16] hover:underline">
+                    Grand Duta City Parung
+                  </Link>{" "}
+                  South of Jakarta.
+                </p>
+              </div>
+
+              {content.highlights.length > 0 || content.suitedFor.length > 0 ? (
+                <div className="lg:col-span-5">
+                  {content.highlights.length > 0 ? (
+                    <div className="rounded-2xl border border-[#0b120c]/10 bg-white/60 p-6">
+                      <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#A85D16]">
+                        Keunggulan tipe ini
+                      </h3>
+                      <ul className="mt-4 space-y-2.5">
+                        {content.highlights.map((item) => (
+                          <li key={item} className="flex gap-2.5 text-sm text-[#0b120c]/75">
+                            <Check
+                              className="mt-0.5 size-4 shrink-0 text-[#F5A524]"
+                              aria-hidden="true"
+                            />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {content.suitedFor.length > 0 ? (
+                    <div className="mt-4 rounded-2xl border border-[#0b120c]/10 bg-white/60 p-6">
+                      <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#A85D16]">
+                        Cocok untuk
+                      </h3>
+                      <ul className="mt-4 space-y-2.5">
+                        {content.suitedFor.map((item) => (
+                          <li key={item} className="flex gap-2.5 text-sm text-[#0b120c]/75">
+                            <Check
+                              className="mt-0.5 size-4 shrink-0 text-[#F5A524]"
+                              aria-hidden="true"
+                            />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Spesifikasi — sumber keunikan utama tiap halaman ── */}
+        <section
+          id="spesifikasi"
+          aria-labelledby="spesifikasi-title"
+          className="scroll-mt-24 border-b border-[#0b120c]/10 py-14 md:py-20"
+        >
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+            <SectionHeading
+              id="spesifikasi"
+              title={`Spesifikasi Tipe ${name}`}
+              intro={`Angka di bawah mengikuti pricelist dan denah resmi. Ketersediaan unit per blok berubah cepat ${SLASH} konfirmasi ke marketing sebelum memutuskan.`}
+            />
+
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <SpecItem icon={Maximize} label="Luas bangunan" value={`${unit.lb} m²`} />
               <SpecItem icon={Ruler} label="Luas tanah" value={`${unit.lt} m²`} />
               {unit.bedrooms !== null ? (
@@ -346,87 +643,198 @@ export default async function TipeRumahDetailPage({ params }: Props) {
               {unit.floors !== null ? (
                 <SpecItem icon={Layers} label="Jumlah lantai" value={`${unit.floors} lantai`} />
               ) : null}
+              <SpecItem icon={Zap} label="Daya listrik" value={PROJECT_ELECTRICAL} />
+              <SpecItem icon={ScrollText} label="Legalitas" value={PROJECT_LEGALITY} />
             </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-[#0b120c]/10 bg-white/60 p-6">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#0b120c]/50">
-                  Harga mulai
-                </div>
-                <div className="mt-2 font-serif text-2xl font-semibold text-[#0b120c]">
-                  {unit.status === "coming-soon" ? unit.priceLabel : `Rp ${unit.priceLabel}`}
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-[#0b120c]/62">
-                  Mewakili harga tunai keras terendah untuk tipe ini. Harga KPR berbeda dan
-                  bervariasi per kavling {SLASH} lihat{" "}
-                  <Link href="/pricelist-grand-duta-city" className="font-medium text-[#A85D16] hover:underline">
-                    pricelist resmi
-                  </Link>
-                  .
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[#0b120c]/10 bg-white/60 p-6">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#0b120c]/50">
-                  Ketersediaan
-                </div>
-                <div className="mt-2 font-serif text-2xl font-semibold text-[#0b120c]">
-                  {unit.status === "sold-out"
-                    ? "Sold out"
-                    : unit.status === "coming-soon"
-                      ? "Segera hadir"
-                      : "Cek siteplan terbaru"}
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-[#0b120c]/62">
-                  {unit.status === "sold-out"
-                    ? "Tipe ini sudah terjual habis. Marketing dapat menunjukkan tipe lain dengan ukuran dan harga terdekat."
-                    : "Stok berubah cepat dan wajib merujuk siteplan terbaru, bukan angka statis di halaman ini."}{" "}
-                  <Link
-                    href="/update-stok-siteplan-grand-duta-city-parung"
-                    className="font-medium text-[#A85D16] hover:underline"
-                  >
-                    Lihat update stok &amp; siteplan
-                  </Link>
-                  .
-                </p>
-              </div>
-            </div>
+            <p className="mt-6 text-sm leading-relaxed text-[#0b120c]/62">
+              Stok berubah cepat dan wajib merujuk siteplan terbaru, bukan angka statis di
+              halaman ini.{" "}
+              <Link
+                href="/update-stok-siteplan-grand-duta-city-parung"
+                className="font-medium text-[#A85D16] hover:underline"
+              >
+                Lihat update stok &amp; siteplan
+              </Link>
+              . Spesifikasi bangunan yang berlaku untuk seluruh kawasan (pondasi, struktur,
+              dinding, sanitair) ada di{" "}
+              <Link href={clusterPath} className="font-medium text-[#A85D16] hover:underline">
+                halaman {clusterLabel}
+              </Link>
+              .
+            </p>
           </div>
         </section>
 
-        {/* Denah — hanya bila asetnya benar-benar ada */}
+        {/* ── Denah — hanya bila asetnya benar-benar ada ── */}
         {unit.floorPlanImage ? (
-          <section className="border-b border-[#0b120c]/10 py-16 md:py-20">
-            <div className="mx-auto max-w-screen-xl px-6 md:px-14">
-              <h2 className="mb-6 font-serif text-3xl font-semibold text-[#0b120c] md:text-4xl">
-                Denah Tipe {name}
-              </h2>
-              <div className="relative h-96 overflow-hidden rounded-2xl border border-[#0b120c]/10 bg-white md:h-[620px]">
-                <Image
+          <section
+            id="denah"
+            aria-labelledby="denah-title"
+            className="scroll-mt-24 border-b border-[#0b120c]/10 py-14 md:py-20"
+          >
+            <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+              <SectionHeading
+                id="denah"
+                title={`Denah Tipe ${name}`}
+                intro="Klik gambar untuk memperbesar dan melihat pembagian ruang lebih detail."
+              />
+              <div className="relative mt-8 h-80 overflow-hidden rounded-2xl border border-[#0b120c]/10 bg-white sm:h-96 md:h-[620px]">
+                <ClickableSiteplanImage
                   src={unit.floorPlanImage}
                   alt={`Denah tipe ${name} ${size} ${clusterLabel} GDC Parung`}
                   fill
                   sizes="(max-width: 768px) 100vw, 1100px"
                   className="object-contain p-4"
+                  title={`Denah Tipe ${name} ${size}`}
                 />
               </div>
             </div>
           </section>
         ) : null}
 
-        {/* Tabel banding terhadap tetangga cluster — berbeda di setiap halaman */}
-        {siblings.length > 0 ? (
-          <section className="border-b border-[#0b120c]/10 py-16 md:py-20">
-            <div className="mx-auto max-w-screen-xl px-6 md:px-14">
-              <h2 className="mb-3 font-serif text-3xl font-semibold text-[#0b120c] md:text-4xl">
-                Banding dengan Tipe Lain di {clusterLabel}
-              </h2>
-              <p className="mb-8 max-w-2xl text-[#0b120c]/65">
-                Kalau ukuran atau harga tipe {name} belum pas, tipe di bawah berada di cluster
-                yang sama dengan fasilitas dan akses yang identik.
-              </p>
+        {/* ── Video — disembunyikan bila belum ada asetnya ── */}
+        {video ? (
+          <section
+            id="video"
+            aria-labelledby="video-title"
+            className="scroll-mt-24 border-b border-[#0b120c]/10 py-14 md:py-20"
+          >
+            <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+              <SectionHeading
+                id="video"
+                title={`Video ${clusterLabel}`}
+                intro="Suasana kawasan dan lingkungan cluster tempat tipe ini berada."
+              />
+              <div className="mt-8 max-w-4xl">
+                <VideoEmbed
+                  url={video.url}
+                  poster={video.poster ?? unit.facadeImage}
+                  title={video.title}
+                />
+              </div>
+            </div>
+          </section>
+        ) : null}
 
-              <div className="overflow-x-auto rounded-2xl border border-[#0b120c]/10">
+        {/* ── Fasilitas kawasan — RINGKASAN, uraiannya milik halaman lain ── */}
+        <section
+          id="fasilitas"
+          aria-labelledby="fasilitas-title"
+          className="scroll-mt-24 border-b border-[#0b120c]/10 py-14 md:py-20"
+        >
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+            <SectionHeading
+              id="fasilitas"
+              title="Fasilitas Kawasan"
+              intro="Fasilitas berikut berlaku untuk seluruh penghuni kawasan, termasuk pemilik tipe ini."
+            />
+
+            <ul className="mt-8 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4">
+              {facilities.map((facility) => {
+                const Icon = FACILITY_ICON[facility.icon];
+                return (
+                  <li
+                    key={facility.title}
+                    className="flex items-center gap-3 rounded-2xl border border-[#0b120c]/10 bg-white/60 p-4"
+                  >
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#F5A524]/15 text-[#A85D16]">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                    <span className="text-xs font-medium leading-snug text-[#0b120c]/80 sm:text-sm">
+                      {facility.title}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <p className="mt-6 text-sm text-[#0b120c]/62">
+              Foto fasilitas selengkapnya ada di{" "}
+              <Link href="/galeri" className="font-medium text-[#A85D16] hover:underline">
+                galeri kawasan
+              </Link>
+              .
+            </p>
+          </div>
+        </section>
+
+        {/* ── Aksesibilitas — RINGKASAN, uraiannya milik /lokasi-akses-* ── */}
+        <section
+          id="lokasi"
+          aria-labelledby="lokasi-title"
+          className="scroll-mt-24 border-b border-[#0b120c]/10 py-14 md:py-20"
+        >
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+            <SectionHeading
+              id="lokasi"
+              title="Aksesibilitas"
+              intro="Ringkasan akses dari kawasan. Peta, rincian jarak per exit tol, dan rute alternatif dibahas lengkap di halaman lokasi."
+            />
+
+            <dl className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {ACCESS_SUMMARY.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-[#0b120c]/10 bg-white/60 p-5"
+                >
+                  <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#0b120c]/50">
+                    {item.label}
+                  </dt>
+                  <dd className="mt-2 text-sm font-medium text-[#0b120c]">{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <Link
+              href="/lokasi-akses-grand-duta-city-parung"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#A85D16] hover:underline"
+            >
+              Lihat peta dan rincian akses <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </section>
+
+        {/* ── Siteplan cluster — berbeda per cluster ── */}
+        <section
+          id="siteplan"
+          aria-labelledby="siteplan-title"
+          className="scroll-mt-24 border-b border-[#0b120c]/10 py-14 md:py-20"
+        >
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+            <SectionHeading
+              id="siteplan"
+              title={`Siteplan ${clusterLabel}`}
+              intro={`Posisi blok dan kavling di ${clusterLabel}. Klik untuk memperbesar. Ketersediaan per kavling berubah cepat, jadi selalu konfirmasi ke marketing.`}
+            />
+            <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-2xl border border-[#0b120c]/10 bg-white">
+              <ClickableSiteplanImage
+                src={siteplan.url}
+                alt={siteplan.alt}
+                fill
+                sizes="(max-width: 768px) 100vw, 1100px"
+                className="object-contain p-2"
+                title={siteplan.alt}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Tabel banding terhadap tetangga cluster — beda di setiap halaman ── */}
+        {siblings.length > 0 ? (
+          <section
+            id="banding"
+            aria-labelledby="banding-title"
+            className="scroll-mt-24 border-b border-[#0b120c]/10 py-14 md:py-20"
+          >
+            <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+              <SectionHeading
+                id="banding"
+                title={`Banding dengan Tipe Lain di ${clusterLabel}`}
+                intro={`Kalau ukuran atau harga tipe ${name} belum pas, tipe di bawah berada di cluster yang sama dengan fasilitas dan akses yang identik.`}
+              />
+
+              <div className="mt-8 overflow-x-auto rounded-2xl border border-[#0b120c]/10">
                 <table className="w-full min-w-[620px] border-collapse bg-white/60 text-left text-sm">
                   <caption className="sr-only">
                     Perbandingan spesifikasi tipe {name} dengan tipe lain di {clusterLabel}
@@ -450,9 +858,7 @@ export default async function TipeRumahDetailPage({ params }: Props) {
                         {bedroomLabel(unit)} / {bathroomLabel(unit)}
                       </td>
                       <td className="px-5 py-4">{unit.floors !== null ? unit.floors : "-"}</td>
-                      <td className="px-5 py-4">
-                        {unit.status === "coming-soon" ? unit.priceLabel : `Rp ${unit.priceLabel}`}
-                      </td>
+                      <td className="px-5 py-4">{priceDisplay}</td>
                     </tr>
                     {siblings.map((sibling) => {
                       const sName = unitDisplayName(sibling);
@@ -491,12 +897,7 @@ export default async function TipeRumahDetailPage({ params }: Props) {
               </div>
 
               <p className="mt-6 text-sm text-[#0b120c]/62">
-                Spesifikasi bangunan yang berlaku untuk seluruh kawasan (pondasi, struktur,
-                dinding, sanitair, daya listrik) tidak diulang di sini {SLASH} lihat lengkapnya di{" "}
-                <Link href={clusterPath} className="font-medium text-[#A85D16] hover:underline">
-                  halaman {clusterLabel}
-                </Link>
-                . Daftar seluruh tipe ada di{" "}
+                Daftar seluruh tipe ada di{" "}
                 <Link href="/tipe-rumah" className="font-medium text-[#A85D16] hover:underline">
                   hub tipe rumah
                 </Link>
@@ -506,30 +907,31 @@ export default async function TipeRumahDetailPage({ params }: Props) {
           </section>
         ) : null}
 
-        <section className="py-16 md:py-20">
-          <div className="mx-auto max-w-screen-xl px-6 md:px-14">
-            <div className="rounded-3xl bg-[#0b120c] px-8 py-12 text-center md:px-14">
-              <h2 className="font-serif text-3xl font-semibold text-[#F5F1E8] md:text-4xl">
+        {/* ── CTA penutup ── */}
+        <section className="py-14 md:py-20">
+          <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
+            <div className="rounded-3xl bg-[#0b120c] px-6 py-12 text-center sm:px-10 md:px-14">
+              <h2 className="font-serif text-2xl font-semibold text-[#F5F1E8] sm:text-3xl md:text-4xl">
                 Minat dengan Tipe {name}?
               </h2>
-              <p className="mx-auto mt-5 max-w-2xl text-[#F5F1E8]/72">
+              <p className="mx-auto mt-5 max-w-2xl text-sm text-[#F5F1E8]/72 sm:text-base">
                 Marketing dapat mengirim pricelist terbaru, denah resolusi tinggi, dan
                 simulasi KPR sesuai kemampuan cicilan Anda.
               </p>
               <div className="mt-9 flex flex-col justify-center gap-4 sm:flex-row">
                 <a
-                  href={`https://wa.me/628131742034?text=${waText}`}
+                  href={waHref}
                   data-wa-placement="tipe-rumah-bottom-cta"
                   data-wa-unit={`${name} ${size}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5A524] px-8 py-4 text-xs font-bold uppercase tracking-[0.24em] text-[#0b120c] transition-colors hover:bg-brand-light"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5A524] px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-[#0b120c] transition-colors hover:bg-brand-light"
                 >
                   Chat marketing sekarang <ArrowRight className="h-4 w-4" />
                 </a>
                 <Link
                   href="/tipe-rumah"
-                  className="inline-flex items-center justify-center rounded-full border border-[#F5F1E8]/25 px-8 py-4 text-xs font-bold uppercase tracking-[0.24em] text-[#F5F1E8] transition-colors hover:bg-[#F5F1E8]/10"
+                  className="inline-flex items-center justify-center rounded-full border border-[#F5F1E8]/25 px-8 py-4 text-xs font-bold uppercase tracking-[0.2em] text-[#F5F1E8] transition-colors hover:bg-[#F5F1E8]/10"
                 >
                   Lihat semua tipe
                 </Link>
@@ -538,6 +940,33 @@ export default async function TipeRumahDetailPage({ params }: Props) {
           </div>
         </section>
       </main>
+
+      {/* ── Bar CTA melekat, HANYA di bawah lg ──
+          Di desktop tugas ini sudah dipegang kartu ringkasan yang sticky. Di
+          ponsel kartu itu ikut tergulir hilang, dan harga plus tombol adalah dua
+          hal yang paling sering dicari pengunjung. */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#0b120c]/10 bg-brand-light/95 px-4 py-3 backdrop-blur-sm lg:hidden">
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[10px] uppercase tracking-wider text-[#0b120c]/50">
+              Tipe {name} {size}
+            </div>
+            <div className="truncate font-serif text-base font-bold text-[#A85D16]">
+              {priceDisplay}
+            </div>
+          </div>
+          <a
+            href={waHref}
+            data-wa-placement="tipe-rumah-sticky-mobile"
+            data-wa-unit={`${name} ${size}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-full bg-[#C8521A] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white"
+          >
+            Tanya unit
+          </a>
+        </div>
+      </div>
 
       <Footer />
     </>

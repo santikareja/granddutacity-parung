@@ -120,3 +120,16 @@ ehthumbs.db
 .vercel
 .env*
 .kilo/
+
+# ──────────────────────────────────────────────────────────
+# KONFIGURASI MCP — MEMUAT RAHASIA
+#
+# .kiro/settings/mcp.json menyimpan API key server MCP (mis. SEMRUSH_API_KEY)
+# dalam teks terbuka di blok `env`. Repo ini publik, jadi file itu TIDAK BOLEH
+# ikut ter-commit. Sempat berstatus untracked dan hanya berjarak satu
+# `git add -A` dari terkirim ke GitHub.
+#
+# Spesifikasi spec (.kiro/specs/) dan skill (.kiro/skills/) TETAP dilacak —
+# hanya settings/ yang dikecualikan, karena di situlah kredensial berada.
+# ──────────────────────────────────────────────────────────
+.kiro/settings/mcp.json

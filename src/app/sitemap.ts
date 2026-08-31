@@ -9,13 +9,17 @@ const BASE_URL = "https://granddutacitysouthofjakarta.com";
 /**
  * Halaman tipe unit (Fase 7).
  *
- * `frontera-89` DIKELUARKAN karena halaman itu `noindex` selama pricelist
- * resminya belum dirilis. Memasukkan URL noindex ke sitemap adalah sinyal yang
- * saling bertentangan: sitemap berarti "tolong indeks ini", meta robots berarti
- * "jangan". Daftar pengecualian ini WAJIB sinkron dengan `NOINDEX_UNITS` di
+ * Memasukkan URL noindex ke sitemap adalah sinyal yang saling bertentangan:
+ * sitemap berarti "tolong indeks ini", meta robots berarti "jangan". Karena itu
+ * daftar pengecualian ini WAJIB sinkron dengan `NOINDEX_UNITS` di
  * app/(site)/tipe-rumah/[slug]/page.tsx.
+ *
+ * KOSONG sejak 30 Agustus 2026: `frontera-89` dikeluarkan dari daftar ini
+ * bersamaan dengan dibukanya noindex halaman tersebut, setelah pemilik
+ * mengirim harga dan spesifikasi penuhnya. Kesepuluh halaman tipe kini masuk
+ * sitemap.
  */
-const NOINDEX_UNIT_IDS = new Set(["frontera-89"]);
+const NOINDEX_UNIT_IDS = new Set<string>([]);
 
 function getUnitTypeSitemapEntries(): MetadataRoute.Sitemap {
   return units

@@ -110,13 +110,31 @@ const homeSeeds: readonly ImageSeed[] = [
     "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/GDC_Parung_lbfaw3.webp",
     "Fasilitas Grand Duta City",
   ],
+  // ── Fasad kartu tipe rumah di beranda ──────────────────────────────────
+  // Render fasad per tipe yang dikirim pemilik 30 Agustus 2026. Empat tipe
+  // Ladera ini yang tampil paling depan di carousel beranda, jadi label-nya
+  // memuat kode ukuran (39/60 dst.) — itulah yang benar-benar diketik orang
+  // saat mencari, dan ia membuat tiap alt berbeda satu sama lain.
+  //
+  // URL render Tuscan dan Malta yang lama (Type_Tuscan_drllpk / Type_Malta_tkq7di)
+  // DICABUT dari daftar beranda karena memang tidak lagi dirender di sini.
+  // Keduanya masih terdaftar di `pricelistSeeds` selama halaman pricelist
+  // memakainya.
   [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Tuscan_drllpk.webp",
-    "Rumah Tipe Tuscan",
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1788194325/Tipe_Verona_39_60.webp",
+    "Fasad Rumah Tipe Verona 39/60 Cluster Ladera",
   ],
   [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Malta_tkq7di.webp",
-    "Rumah Tipe Malta",
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1788194325/Tipe_Malta_47_72.webp",
+    "Fasad Rumah Tipe Malta 47/72 Cluster Ladera",
+  ],
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1788194324/Tipe_Tuscan_66_72.webp",
+    "Fasad Rumah Tipe Tuscan 66/72 Cluster Ladera",
+  ],
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1788194324/Type_Frontera_89_90.webp",
+    "Fasad Rumah Tipe Frontera 89/90 Cluster Ladera",
   ],
   [
     "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775577152/Type_Alexandra_hhvq3f.webp",
@@ -506,28 +524,34 @@ const kontakSeeds: readonly ImageSeed[] = [
   ],
 ];
 
+// Fasad + denah keempat tipe Ladera DIBANGKITKAN dari units.ts, bukan ditulis
+// tangan. Halaman /cluster-ladera merender `unit.facadeImage` dan
+// `unit.floorPlanImage` langsung dari sumber data itu, jadi menyalin URL-nya ke
+// sini sebagai literal akan melahirkan salinan yang bisa menyimpang persis saat
+// aset diperbarui (seperti pergantian render + denah 30 Agustus 2026 ini).
+const laderaTypeSeeds: readonly ImageSeed[] = unitRegistry
+  .filter((unit) => unit.cluster === "ladera" && unit.showInCatalog)
+  .flatMap((unit): ImageSeed[] => {
+    const label = `Tipe ${unit.name} ${unit.lb}/${unit.lt}`;
+    const seeds: ImageSeed[] = [
+      [unit.facadeImage, `Fasad Rumah ${label} Cluster Ladera`],
+    ];
+    if (unit.floorPlanImage) {
+      seeds.push([
+        unit.floorPlanImage,
+        `Denah Lantai ${label} Cluster Ladera`,
+      ]);
+    }
+    return seeds;
+  });
+
 const clusterLaderaSeeds: readonly ImageSeed[] = [
   [
     "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp",
     "Gerbang Cluster Ladera",
     true,
   ],
-  [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775884121/tipe-tuscan-66-gdc-parung-bogor_p6zgu8.webp",
-    "Rumah Tipe Tuscan Cluster Ladera",
-  ],
-  [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775884121/tipe-malta-47-gdc-parung-bogor_fgttjy.webp",
-    "Rumah Tipe Malta Cluster Ladera",
-  ],
-  [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775883012/denah-lantai-tipe-tuscan-cluster-ladera-grand-duta-city-south-of-jakarta_muqubx.webp",
-    "Denah Tipe Tuscan Cluster Ladera",
-  ],
-  [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775883012/denah-lantai-tipe-malta-cluster-ladera-grand-duta-city-south-of-jakarta_ru5oze.webp",
-    "Denah Tipe Malta Cluster Ladera",
-  ],
+  ...laderaTypeSeeds,
   [
     "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763617/0047-1-1024x576_z9e3f1.webp",
     "Siteplan Cluster Ladera",

@@ -460,3 +460,41 @@ describe("R3 — kepemilikan kata kunci eksklusif", () => {
     ).toEqual([]);
   });
 });
+
+// ===========================================================================
+// Konsistensi klaim harga
+//
+// Ditambahkan 30 Agustus 2026. Latar belakangnya nyata: pemilik menurunkan harga
+// Verona 39/60 dari "700 Juta-an" ke "600 Juta-an", dan seketika itu klaim
+// "Mulai Rp 700 jutaan" di description homepage berubah dari benar menjadi
+// SALAH — mengiklankan harga lebih TINGGI daripada yang sebenarnya ditawarkan.
+// Tidak ada satu pun mekanisme yang menghubungkan kedua angka itu, jadi
+// pergeseran seperti ini tidak akan memunculkan error apa pun.
+// ===========================================================================
+
+describe("konsistensi klaim harga terendah", () => {
+  it("G18: klaim harga di description homepage cocok dengan unit termurah", async () => {
+    const { catalogUnits } = await import("@/data/units");
+
+    const claim = descriptionOf(home().metadata).match(
+      /Mulai Rp (\d+) jutaan/i,
+    );
+    expect(
+      claim,
+      'Description homepage tidak lagi memuat klaim berpola "Mulai Rp <n> jutaan". Bila polanya memang diubah, perbarui asersi ini — jangan hapus.',
+    ).not.toBeNull();
+
+    // Unit termurah diambil dari data, BUKAN dihardcode, supaya test ini tetap
+    // sahih saat urutan harga bergeser.
+    // Unit sold-out dikecualikan: mengiklankan "mulai dari" memakai harga unit
+    // yang sudah habis adalah klaim yang tidak bisa ditepati.
+    const nominals = catalogUnits
+      .filter((unit) => unit.status !== "sold-out")
+      .map((unit) => unit.priceLabel.match(/^(\d+) Juta/))
+      .filter((match): match is RegExpMatchArray => match !== null)
+      .map((match) => Number(match[1]));
+    expect(nominals.length).toBeGreaterThan(0);
+
+    expect(Number(claim![1])).toBe(Math.min(...nominals));
+  });
+});

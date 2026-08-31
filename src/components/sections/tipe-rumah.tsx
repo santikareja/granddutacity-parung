@@ -7,7 +7,17 @@ import { ArrowLeft, ArrowRight, Sparkles, ArrowUpRight } from "lucide-react";
 import { ProductRevealCard } from "@/components/ui/product-reveal-card";
 import { trackWhatsAppClick } from "@/lib/analytics";
 import { clImg } from "@/lib/cloudinary";
-import { CLUSTER_LABEL, bedroomLabel, catalogUnits } from "@/data/units";
+import {
+  CLUSTER_LABEL,
+  PROJECT_ELECTRICAL,
+  PROJECT_LEGALITY,
+  bathroomLabel,
+  bedroomLabel,
+  catalogUnits,
+  unitFacadeAlt,
+  unitPagePath,
+  unitSizeLabel,
+} from "@/data/units";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";
 import {
@@ -24,21 +34,31 @@ import {
 // sementara katalog memakai `aira-42`.
 //
 // Dua perilaku lama dipertahankan dengan sengaja:
-//   - `clImg` 480x480 q55: menekan bandwidth carousel, penting untuk LCP mobile.
+//   - anggaran byte gambar: sebelumnya `clImg` 480x480 (230k piksel) untuk
+//     menekan bandwidth carousel. Sekarang 560x420 = 235k piksel — praktis SAMA,
+//     tapi rasionya 4:3 sesuai area gambar kartu yang baru, jadi tidak ada
+//     piksel yang diunduh lalu dibuang oleh crop. Anggaran yang dijaga keputusan
+//     lama tetap utuh; yang berubah hanya bentuknya.
 //   - kartu sold-out disembunyikan: carousel homepage untuk menarik minat,
 //     bukan arsip. Unit sold-out tetap tampil di halaman cluster masing-masing.
+//
+// URUTAN kartu ditentukan `catalogUnits`, yang menaruh CATALOG_LEAD_IDS
+// (Verona, Malta, Tuscan, Frontera) di depan sesuai permintaan pemilik.
 const propertyTypes = catalogUnits
   .filter((unit) => unit.status !== "sold-out")
   .map((unit) => ({
     id: unit.id,
     name: unit.name,
+    sizeLabel: unitSizeLabel(unit),
+    href: unitPagePath(unit),
     typeCategory: unit.typeCategory,
     cluster: CLUSTER_LABEL[unit.cluster],
     price: unit.priceLabel,
-    image: clImg(unit.facadeImage, { w: 480, h: 480, q: 55 }),
+    image: clImg(unit.facadeImage, { w: 560, h: 420, q: 55 }),
+    alt: unitFacadeAlt(unit),
     specs: {
       bed: bedroomLabel(unit),
-      bath: unit.bathrooms ?? "-",
+      bath: bathroomLabel(unit),
       carport: unit.carports ?? "-",
       lb: unit.lb,
       lt: unit.lt,
@@ -183,11 +203,16 @@ export function TipeRumah() {
                 >
                   <ProductRevealCard
                     name={unit.name}
+                    sizeLabel={unit.sizeLabel}
+                    href={unit.href}
                     typeCategory={unit.typeCategory}
                     cluster={unit.cluster}
                     price={unit.price}
                     image={unit.image}
+                    alt={unit.alt}
                     description={unit.desc}
+                    electrical={PROJECT_ELECTRICAL}
+                    legality={PROJECT_LEGALITY}
                     specs={unit.specs}
                     onAdd={() => handleWhatsApp(unit.name)}
                   />
@@ -240,12 +265,14 @@ export function TipeRumah() {
               </span>
             </a>
 
-            {/* Satu tautan teks ke hub /tipe-rumah (Fase 7).
-                Kartu di carousel SENGAJA tidak diubah: komponen ini client
-                component dengan carousel yang ikut menentukan LCP homepage, dan
-                menyisipkan <Link> ke tiap kartu berisiko pada metrik yang sudah
-                susah didapat. Satu tautan di sini sudah cukup membuat kesepuluh
-                halaman tipe berjarak dua klik dari homepage. */}
+            {/* Tautan ke hub /tipe-rumah.
+                Sejak 30 Agustus 2026 tiap KARTU juga menaut halaman tipenya
+                langsung (lihat product-reveal-card.tsx). Kekhawatiran lama —
+                bahwa menyisipkan <Link> per kartu membebani metrik homepage —
+                dijawab dengan `prefetch={false}`, bukan dengan meniadakan
+                tautannya. Tautan hub di sini tetap dipertahankan karena ia
+                menjangkau juga tipe yang TIDAK muncul di carousel (unit
+                sold-out disaring dari kartu). */}
             <p className="mt-6 text-xs sm:text-sm text-[#090D0A]/60 font-normal">
               Ingin membandingkan spesifikasi dan denah per tipe?{" "}
               <Link

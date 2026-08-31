@@ -8,6 +8,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Header } from "@/components/ui/header-2";
 import {
   CLUSTER_LABEL,
+  bathroomLabel,
   bedroomLabel,
   getUnitsByCluster,
   unitDisplayName,
@@ -38,7 +39,7 @@ const DASH = "\u2014";
 
 const PAGE_TITLE = "Tipe Rumah GDC Parung: 10 Pilihan, Harga & Denah";
 const PAGE_DESCRIPTION =
-  "Daftar lengkap 10 tipe rumah di GDC Parung, Bogor: luas bangunan 39-89 m², 1-2 lantai, harga mulai Rp 700 juta-an. Bandingkan spesifikasi dan denah per tipe.";
+  "Daftar lengkap 10 tipe rumah di GDC Parung, Bogor: luas bangunan 39-89 m², 1-2 lantai, harga mulai Rp 600 juta-an. Bandingkan spesifikasi dan denah per tipe.";
 
 const HERO_IMAGE =
   "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775922661/cluster-cascada-gdc-parung_qgy4jc.webp";
@@ -179,7 +180,7 @@ function ClusterGroup({ cluster }: { cluster: ClusterKey }) {
                     {unit.bathrooms !== null ? (
                       <div className="flex gap-1.5">
                         <dt>KM</dt>
-                        <dd className="font-medium text-[#0b120c]">{unit.bathrooms}</dd>
+                        <dd className="font-medium text-[#0b120c]">{bathroomLabel(unit)}</dd>
                       </div>
                     ) : null}
                     {unit.floors !== null ? (

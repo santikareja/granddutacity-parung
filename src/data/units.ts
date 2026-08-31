@@ -21,12 +21,28 @@
  *   - Jumlah lantai: ditambahkan sebagai field. Sebelumnya hanya tersirat di
  *     prosa `desc` sehingga tidak bisa dipakai schema maupun filter.
  *
+ * PEMBARUAN DATA PEMILIK (30 Agustus 2026) — Verona 39 dan Frontera 89:
+ *   Pemilik mengirim spesifikasi lengkap kedua tipe beserta render fasad
+ *   masing-masing. Konsekuensinya:
+ *     - Verona 39 turun harga tampil dari "700 Juta-an" ke "600 Juta-an".
+ *       Ini MENGUBAH harga terendah proyek, sehingga klaim "mulai Rp 700
+ *       jutaan" yang tersebar di meta description, FAQ, `priceRange` schema,
+ *       dan llms.txt ikut dikoreksi ke 600. Lihat catatan di masing-masing
+ *       berkas.
+ *     - Frontera 89 TIDAK lagi "coming-soon": ia punya harga (1,6 Milyar-an)
+ *       dan spesifikasi penuh, jadi statusnya jadi `check-siteplan` dan
+ *       halaman /tipe-rumah/frontera-89 dibuka dari noindex.
+ *     - Keduanya kini `showInCatalog: true` atas permintaan pemilik, dan
+ *       keduanya berhenti memakai render tipe lain sebagai placeholder.
+ *
+ * PEMBARUAN DENAH (30 Agustus 2026): pemilik mengirim floor plan resmi untuk
+ * keempat tipe Ladera (Verona, Malta, Tuscan, Frontera). URL denah Malta dan
+ * Tuscan yang LAMA (denah-lantai-tipe-*-cluster-ladera-...) diganti aset baru
+ * ini, dan Verona serta Frontera yang tadinya `null` kini terisi.
+ *
  * MASIH MENUNGGU DATA PEMILIK (sengaja `null`, JANGAN ditebak):
- *   - `bedrooms`/`bathrooms`/`carports` untuk Verona 39, Frontera 89, dan T-62.
- *   - `floors` untuk T-62.
- *   - `floorPlanImage` untuk Verona 39, Frontera 89, Keila 47, dan T-62.
- *     (Malta 47 dan Tuscan 66 sudah terisi dari aset yang memang sudah tayang
- *     di /cluster-ladera.)
+ *   - `bedrooms`/`bathrooms`/`carports`/`floors` untuk T-62.
+ *   - `floorPlanImage` untuk Keila 47 dan T-62.
  *   - `status` per tipe: pemilik menegaskan ketersediaan WAJIB merujuk siteplan
  *     terbaru, bukan hardcode. Karena itu nilai default `"check-siteplan"`
  *     dipakai alih-alih mengarang "tersedia".
@@ -66,6 +82,14 @@ export type Unit = {
   /** true bila denah punya ruang ekstra ("2+1"). */
   extraRoom: boolean;
   bathrooms: number | null;
+  /**
+   * true bila denah punya kamar mandi pembantu terpisah ("3+1"), analog
+   * `extraRoom`. Dipisah dari `bathrooms` dan BUKAN dijadikan `bathrooms: 4`
+   * karena structured data (`numberOfBathroomsTotal`) sebaiknya menghitung
+   * kamar mandi utama; "+1" adalah kamar mandi servis, bukan fasilitas yang
+   * setara. Konvensi ini sama dengan yang sudah dipakai `extraRoom` pada Malta.
+   */
+  extraBathroom: boolean;
   carports: number | null;
   /** Jumlah lantai menurut denah arsitektur Product Knowledge. */
   floors: number | null;
@@ -91,6 +115,20 @@ export type Unit = {
 
 const CLOUDINARY = "https://res.cloudinary.com/dzhvfbuks/image/upload";
 
+/**
+ * Spesifikasi yang berlaku SERAGAM untuk seluruh tipe rumah tapak.
+ *
+ * Pemilik mengirim "Listrik 2200 VA" dan "Legalitas SHM" sebagai bagian dari
+ * detail keempat tipe Ladera, dan nilainya identik di keempatnya (juga cocok
+ * dengan Product Knowledge yang menyebut PLN 2.200 VA untuk kawasan). Karena
+ * itu ia disimpan sebagai konstanta project-wide, BUKAN field per unit:
+ * menyalin nilai yang sama ke 10 record hanya menciptakan 10 tempat yang bisa
+ * menyimpang, dan menampilkannya berulang di tiap kartu justru mengencerkan
+ * pembeda antar tipe.
+ */
+export const PROJECT_ELECTRICAL = "2200 VA";
+export const PROJECT_LEGALITY = "SHM";
+
 export const units: readonly Unit[] = [
   // ── CLUSTER LADERA ────────────────────────────────────────────────────────
   {
@@ -101,20 +139,25 @@ export const units: readonly Unit[] = [
     cluster: "ladera",
     lb: 39,
     lt: 60,
-    bedrooms: null,
+    // Dikonfirmasi pemilik 30 Agustus 2026: 2 KT, 1 KM, 1 carport.
+    bedrooms: 2,
     extraRoom: false,
-    bathrooms: null,
-    carports: null,
+    bathrooms: 1,
+    extraBathroom: false,
+    carports: 1,
     floors: 1,
         isHook: false,
         status: "check-siteplan",
-    priceLabel: "700 Juta-an",
-    facadeImage: `${CLOUDINARY}/v1775577163/Type_Aira_no2g1u.webp`,
-    floorPlanImage: null,
+    // Dikoreksi pemilik dari "700 Juta-an". Verona kini HARGA TERENDAH proyek,
+    // jadi angka ini yang dirujuk klaim "mulai Rp 600 jutaan" di seluruh situs.
+    priceLabel: "600 Juta-an",
+    // Render fasad Verona sendiri. Sebelumnya memakai render Aira sebagai
+    // placeholder — placeholder itu kini HILANG, bukan cuma tertimpa.
+    facadeImage: `${CLOUDINARY}/v1788194325/Tipe_Verona_39_60.webp`,
+    floorPlanImage: `${CLOUDINARY}/v1788198743/Floor_Plan_Tipe_Verona_Grand_Duta_City_Bogor_1.webp`,
     description:
-      "Tipe kompak satu lantai di Cluster Ladera, pilihan paling terjangkau untuk keluarga muda yang ingin masuk kawasan lebih awal.",
-    // Belum pernah dirender sebagai kartu; hanya ada di pricelist dan halaman stok.
-    showInCatalog: false,
+      "Tipe kompak satu lantai di Cluster Ladera dengan 2 kamar tidur, pilihan paling terjangkau untuk keluarga muda yang ingin masuk kawasan lebih awal.",
+    showInCatalog: true,
   },
   {
     id: "malta-47",
@@ -127,17 +170,17 @@ export const units: readonly Unit[] = [
     bedrooms: 2,
     extraRoom: true,
     bathrooms: 1,
+    extraBathroom: false,
     carports: 2,
     floors: 1,
         isHook: false,
         status: "check-siteplan",
     // Dikonfirmasi pemilik: mewakili Tunai Keras terendah Rp 845.550.000.
     priceLabel: "800 Juta-an",
-    facadeImage: `${CLOUDINARY}/v1775577152/Type_Malta_tkq7di.webp`,
-    // Aset denah ini SUDAH tayang di /cluster-ladera sejak sebelum Fase 3,
-    // hanya belum pernah terdaftar di sumber data sehingga tidak bisa dipakai
-    // schema. Bukan aset baru.
-    floorPlanImage: `${CLOUDINARY}/v1775883012/denah-lantai-tipe-malta-cluster-ladera-grand-duta-city-south-of-jakarta_ru5oze.webp`,
+    // Render fasad diperbarui pemilik 30 Agustus 2026 (aset bernama per tipe).
+    facadeImage: `${CLOUDINARY}/v1788194325/Tipe_Malta_47_72.webp`,
+    // Denah resmi baru dari pemilik (30 Agustus 2026).
+    floorPlanImage: `${CLOUDINARY}/v1788198743/Floor_Plan_Tipe_Malta_Grand_Duta_City_Parung_Bogor.webp`,
     description:
       "Tipe praktis dengan ekstra ruang fleksibel di Cluster Ladera, sangat ideal untuk keluarga muda yang mengutamakan efisiensi.",
     showInCatalog: true,
@@ -153,14 +196,16 @@ export const units: readonly Unit[] = [
     bedrooms: 3,
     extraRoom: false,
     bathrooms: 2,
+    extraBathroom: false,
     carports: 2,
     floors: 2,
         isHook: false,
         status: "check-siteplan",
     priceLabel: "1.1 Milyar-an",
-    facadeImage: `${CLOUDINARY}/v1775577152/Type_Tuscan_drllpk.webp`,
-    // Idem Malta: aset sudah tayang di /cluster-ladera, kini terdaftar.
-    floorPlanImage: `${CLOUDINARY}/v1775883012/denah-lantai-tipe-tuscan-cluster-ladera-grand-duta-city-south-of-jakarta_muqubx.webp`,
+    // Render fasad diperbarui pemilik 30 Agustus 2026 (aset bernama per tipe).
+    facadeImage: `${CLOUDINARY}/v1788194324/Tipe_Tuscan_66_72.webp`,
+    // Denah resmi baru dari pemilik (30 Agustus 2026).
+    floorPlanImage: `${CLOUDINARY}/v1788198744/Floor_Plan_Tipe_Tuscan_Grand_Duta_City_South_of_Jakarta.webp`,
     description:
       "Tipe hunian 2 lantai elegan di Cluster Ladera, tipe terfavorit dengan ruang keluarga luas bergaya Modern American Classic.",
     showInCatalog: true,
@@ -173,20 +218,25 @@ export const units: readonly Unit[] = [
     cluster: "ladera",
     lb: 89,
     lt: 90,
-    bedrooms: null,
-    extraRoom: false,
-    bathrooms: null,
-    carports: null,
+    // Dikonfirmasi pemilik 30 Agustus 2026: 4+1 KT, 3+1 KM, 2 carport.
+    bedrooms: 4,
+    extraRoom: true,
+    bathrooms: 3,
+    extraBathroom: true,
+    carports: 2,
     floors: 2,
-    // Pricelist resmi menyebut "Segera Hadir" — belum dirilis.
+    // TIDAK lagi "coming-soon": pemilik sudah merilis harga dan spesifikasi
+    // penuh, jadi ketersediaannya kembali ke aturan umum — rujuk siteplan.
         isHook: false,
-        status: "coming-soon",
-    priceLabel: "Segera Hadir",
-    facadeImage: `${CLOUDINARY}/v1775577152/Type_Tuscan_drllpk.webp`,
-    floorPlanImage: null,
+        status: "check-siteplan",
+    priceLabel: "1.6 Milyar-an",
+    // Render fasad Frontera sendiri. Sebelumnya memakai render Tuscan sebagai
+    // placeholder — placeholder itu kini HILANG.
+    facadeImage: `${CLOUDINARY}/v1788194324/Type_Frontera_89_90.webp`,
+    floorPlanImage: `${CLOUDINARY}/v1788198744/Floor_Plan_Tipe_Frontera_Grand_Duta_City_South_of_Jakarta.webp`,
     description:
-      "Tipe terbesar di Cluster Ladera. Pricelist resmi belum dirilis; hubungi marketing untuk indikasi harga dan jadwal peluncuran.",
-    showInCatalog: false,
+      "Tipe terbesar di Cluster Ladera, 2 lantai dengan 4+1 kamar tidur dan 3+1 kamar mandi untuk keluarga besar yang butuh ruang tumbuh maksimal.",
+    showInCatalog: true,
   },
 
   // ── CLUSTER CASCADA ───────────────────────────────────────────────────────
@@ -201,6 +251,7 @@ export const units: readonly Unit[] = [
     bedrooms: 2,
     extraRoom: false,
     bathrooms: 1,
+    extraBathroom: false,
     carports: 1,
     floors: 1,
         isHook: false,
@@ -223,6 +274,7 @@ export const units: readonly Unit[] = [
     bedrooms: 2,
     extraRoom: true,
     bathrooms: 1,
+    extraBathroom: false,
     carports: 1,
     floors: 1,
         isHook: false,
@@ -248,6 +300,7 @@ export const units: readonly Unit[] = [
     bedrooms: 2,
     extraRoom: false,
     bathrooms: 2,
+    extraBathroom: false,
     carports: 1,
     floors: 2,
         isHook: false,
@@ -270,6 +323,7 @@ export const units: readonly Unit[] = [
     bedrooms: null,
     extraRoom: false,
     bathrooms: null,
+    extraBathroom: false,
     carports: null,
     floors: null,
         isHook: true,
@@ -296,6 +350,7 @@ export const units: readonly Unit[] = [
     bedrooms: 3,
     extraRoom: false,
     bathrooms: 2,
+    extraBathroom: false,
     carports: 2,
     floors: 2,
         isHook: false,
@@ -318,6 +373,7 @@ export const units: readonly Unit[] = [
     bedrooms: 3,
     extraRoom: false,
     bathrooms: 2,
+    extraBathroom: false,
     carports: 2,
     floors: 2,
         isHook: false,
@@ -368,6 +424,21 @@ export const unitDisplayName = (unit: Unit): string => {
 export const unitSizeLabel = (unit: Unit): string => `${unit.lb}/${unit.lt}`;
 
 /**
+ * Alt gambar fasad. SATU tempat, karena foto yang sama tampil di kartu beranda
+ * dan grid halaman cluster — dua alt berbeda untuk gambar yang sama adalah
+ * sinyal yang membingungkan sekaligus pekerjaan ganda saat datanya berubah.
+ *
+ * Isinya menggambarkan apa yang BENAR-BENAR terlihat (fasad, jumlah lantai)
+ * ditambah identitas unit, bukan tumpukan kata kunci. Kode ukuran ikut masuk
+ * karena "tipe tuscan 66" memang bentuk yang diketik orang saat mencari, dan ia
+ * sekaligus membuat setiap alt berbeda satu sama lain.
+ */
+export const unitFacadeAlt = (unit: Unit): string => {
+  const floorBit = unit.floors !== null ? ` ${unit.floors} lantai` : "";
+  return `Fasad rumah Tipe ${unitDisplayName(unit)} ${unitSizeLabel(unit)}${floorBit} di ${CLUSTER_LABEL[unit.cluster]} Grand Duta City Parung`;
+};
+
+/**
  * Tipe lain di cluster yang sama, untuk tabel banding di halaman tipe.
  * Inilah sumber keunikan per halaman yang membuat 10 halaman ini BUKAN
  * doorway page: setiap halaman membandingkan dirinya dengan tetangga yang
@@ -379,10 +450,39 @@ export const getSiblingUnits = (unit: Unit): Unit[] =>
 export const getUnitsByCluster = (cluster: ClusterKey): Unit[] =>
   units.filter((unit) => unit.cluster === cluster);
 
-/** Unit yang dirender sebagai kartu katalog. */
-export const catalogUnits: readonly Unit[] = units.filter(
-  (unit) => unit.showInCatalog,
-);
+/**
+ * Empat tipe yang WAJIB tampil lebih dulu di kartu katalog, atas permintaan
+ * eksplisit pemilik (30 Agustus 2026).
+ *
+ * Dinyatakan eksplisit, bukan mengandalkan urutan `units` yang kebetulan sudah
+ * benar, karena urutan array itu disusun untuk keterbacaan (dikelompokkan per
+ * cluster) dan bukan janji apa pun. Menyusun ulang `units` suatu hari nanti
+ * tidak boleh membatalkan keputusan pemasaran secara diam-diam. Dijaga test.
+ */
+export const CATALOG_LEAD_IDS: readonly string[] = [
+  "verona-39",
+  "malta-47",
+  "tuscan-66",
+  "frontera-89",
+];
+
+/**
+ * Unit yang dirender sebagai kartu katalog, empat tipe unggulan di depan lalu
+ * sisanya mengikuti urutan `units`.
+ */
+export const catalogUnits: readonly Unit[] = units
+  .filter((unit) => unit.showInCatalog)
+  .slice()
+  .sort((a, b) => {
+    const rank = (unit: Unit) => {
+      const lead = CATALOG_LEAD_IDS.indexOf(unit.id);
+      return lead === -1 ? CATALOG_LEAD_IDS.length : lead;
+    };
+    const delta = rank(a) - rank(b);
+    // Selisih 0 berarti keduanya di luar daftar unggulan; kembalikan ke urutan
+    // `units` supaya sort-nya stabil dan tidak bergantung implementasi engine.
+    return delta !== 0 ? delta : units.indexOf(a) - units.indexOf(b);
+  });
 
 /**
  * Rangkuman kamar untuk tampilan, mis. "2+1" atau "3".
@@ -394,11 +494,22 @@ export const bedroomLabel = (unit: Unit): string => {
   return unit.extraRoom ? `${unit.bedrooms}+1` : String(unit.bedrooms);
 };
 
+/**
+ * Rangkuman kamar mandi untuk tampilan, mis. "3+1" atau "2". Kembar
+ * `bedroomLabel`, dipisah karena "+1" kamar mandi (servis) dan "+1" kamar tidur
+ * (ruang fleksibel) datang dari field yang berbeda dan bisa muncul sendiri-sendiri:
+ * Malta punya ruang ekstra tanpa kamar mandi ekstra, Frontera punya keduanya.
+ */
+export const bathroomLabel = (unit: Unit): string => {
+  if (unit.bathrooms === null) return "-";
+  return unit.extraBathroom ? `${unit.bathrooms}+1` : String(unit.bathrooms);
+};
+
 /** Deskripsi ringkas untuk structured data dan meta description. */
 export const unitSpecSentence = (unit: Unit): string => {
   const parts: string[] = [];
   if (unit.bedrooms !== null) parts.push(`${bedroomLabel(unit)} kamar tidur`);
-  if (unit.bathrooms !== null) parts.push(`${unit.bathrooms} kamar mandi`);
+  if (unit.bathrooms !== null) parts.push(`${bathroomLabel(unit)} kamar mandi`);
   if (unit.floors !== null) parts.push(`${unit.floors} lantai`);
   const spec = parts.length > 0 ? `${parts.join(", ")}. ` : "";
   return `${spec}Luas bangunan ${unit.lb} m2, luas tanah ${unit.lt} m2. ${CLUSTER_LABEL[unit.cluster]} Grand Duta City Parung.`;

@@ -106,7 +106,7 @@ const reasons = [
   {
     icon: Wallet,
     tag: "Finansial",
-    title: "Mulai 700 Jutaan",
+    title: "Mulai 600 Jutaan",
     desc: "Cicilan KPR mulai Rp 4 jutaan/bulan dengan Promo Tanpa DP* dan pre-approval 7 bank rekanan.",
     colSpan: "lg:col-span-4",
   },

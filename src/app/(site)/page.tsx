@@ -40,18 +40,25 @@ const FALLBACK_IMAGE_ALT = "Suasana kawasan perumahan modern Grand Duta City Par
 export const metadata: Metadata = {
   metadataBase: new URL("https://granddutacitysouthofjakarta.com"),
   title: "Grand Duta City Parung | Promo Hunian South of Jakarta",
-  // PENGECUALIAN R1 YANG DIDEKLARASIKAN (Fase 3).
+  // PENGECUALIAN R1 YANG DIDEKLARASIKAN (Fase 3, diperluas 30 Agustus 2026).
   //
-  // R1 melarang perubahan metadata homepage sebelum Fase 8. Satu kata diubah di
-  // sini — "8 bank" menjadi "7 bank" — karena jumlah bank mitra yang benar
-  // adalah 7 (dikonfirmasi pemilik) dan membiarkan klaim yang salah di
-  // description halaman utama adalah masalah kepercayaan, bukan gaya penulisan.
+  // R1 melarang perubahan metadata homepage sebelum Fase 8. DUA koreksi fakta
+  // dilakukan di sini, keduanya sekelas — angka yang salah, bukan gaya:
+  //
+  //   1. "8 bank" menjadi "7 bank" (Fase 3): jumlah bank mitra yang benar
+  //      adalah 7, dikonfirmasi pemilik.
+  //   2. "Rp 700 jutaan" menjadi "Rp 600 jutaan" (30 Agustus 2026): pemilik
+  //      merilis harga Verona 39/60 di 600 juta-an, sehingga ia menjadi harga
+  //      TERENDAH proyek. Membiarkan "mulai Rp 700 jutaan" berarti situs
+  //      mengiklankan harga LEBIH TINGGI dari yang sebenarnya ditawarkan —
+  //      merugikan konversi sekaligus tidak akurat.
   //
   // Mengapa ini aman: panjang description TIDAK berubah (148 karakter, tetap di
-  // dalam rentang guard G7), tidak ada kata kunci yang bergeser, dan `title`,
-  // `alternates.canonical`, `robots`, serta `<h1>` sama sekali tidak disentuh.
+  // dalam rentang guard G7 — "600" dan "700" sama-sama tiga karakter), tidak ada
+  // kata kunci yang bergeser, dan `title`, `alternates.canonical`, `robots`,
+  // serta `<h1>` sama sekali tidak disentuh.
   description:
-    "Grand Duta City Parung — hunian premium di South of Jakarta. Mulai Rp 700 jutaan, Promo Tanpa DP, KPR 7 bank, 20 menit ke CBD Jaksel via tol Desari.",
+    "Grand Duta City Parung — hunian premium di South of Jakarta. Mulai Rp 600 jutaan, Promo Tanpa DP, KPR 7 bank, 20 menit ke CBD Jaksel via tol Desari.",
   keywords: [
     // Primary Keywords - Front loaded untuk SEO
     "grand duta city parung",
@@ -87,7 +94,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Grand Duta City Parung — Hunian Premium South of Jakarta | Promo Tanpa DP",
     description:
-      "Kota mandiri 200 Ha di Parung, South of Jakarta by Duta Putra Land. Hunian mulai Rp 700 jutaan, Promo Tanpa DP, 20 menit ke CBD Jaksel via tol. Cluster Ladera & Cascada tersedia.",
+      "Kota mandiri 200 Ha di Parung, South of Jakarta by Duta Putra Land. Hunian mulai Rp 600 jutaan, Promo Tanpa DP, 20 menit ke CBD Jaksel via tol. Cluster Ladera & Cascada tersedia.",
     url: SITE_URL,
     siteName: "Grand Duta City Parung",
     locale: "id_ID",
@@ -107,7 +114,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Grand Duta City Parung — Hunian Premium South of Jakarta | Promo Tanpa DP",
     description:
-      "Kota mandiri 200 Ha di Parung, South of Jakarta by Duta Putra Land. Hunian mulai Rp 700 jutaan, Promo Tanpa DP, 20 menit ke CBD Jaksel via tol.",
+      "Kota mandiri 200 Ha di Parung, South of Jakarta by Duta Putra Land. Hunian mulai Rp 600 jutaan, Promo Tanpa DP, 20 menit ke CBD Jaksel via tol.",
     images: [
       {
         url: OG_IMAGE,
@@ -207,9 +214,9 @@ const homepageNode = {
   "@type": "WebPage",
   "@id": SCHEMA_ID.homepage,
   url: SITE_URL,
-  name: "Grand Duta City Parung South of Jakarta | Promo Tanpa DP, Mulai 700 Jt",
+  name: "Grand Duta City Parung South of Jakarta | Promo Tanpa DP, Mulai 600 Jt",
   description:
-    "Grand Duta City Parung South of Jakarta (GDC SOJ) — kota mandiri 200 Ha by Duta Putra Land. Hunian mulai Rp 700 jutaan, Promo Tanpa DP, KPR 7 bank, 20 menit ke CBD Jaksel via tol.",
+    "Grand Duta City Parung South of Jakarta (GDC SOJ) — kota mandiri 200 Ha by Duta Putra Land. Hunian mulai Rp 600 jutaan, Promo Tanpa DP, KPR 7 bank, 20 menit ke CBD Jaksel via tol.",
   inLanguage: "id-ID",
   isPartOf: ref(SCHEMA_ID.website),
   about: ref(SCHEMA_ID.project),

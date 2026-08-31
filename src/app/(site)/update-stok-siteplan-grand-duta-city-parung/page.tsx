@@ -254,7 +254,10 @@ export default function UpdateStokSiteplanPage() {
           <div className="mb-12 flex flex-col md:flex-row md:justify-between md:items-end gap-6 border-b border-[#F5F1E8]/10 pb-6">
             <div>
               <h2 className="text-3xl md:text-4xl font-serif text-[#F5F1E8] mb-3">Stok Cluster Ladera</h2>
-              <p className="text-[#F5F1E8]/60">Tipe Verona (39/60), Malta (47/72), Tuscan (66/72) & Frontera (90/89)</p>
+              {/* Frontera dikoreksi dari "(90/89)" menjadi "(89/90)": ketiga tipe
+                  lain di baris ini memakai urutan bangunan/tanah, dan Frontera
+                  memang LB 89 m² di atas tanah 90 m². */}
+              <p className="text-[#F5F1E8]/60">Tipe Verona (39/60), Malta (47/72), Tuscan (66/72) & Frontera (89/90)</p>
             </div>
             <div className="flex gap-4">
               <Link href="/cluster-ladera" className="px-6 py-2.5 rounded-full bg-brand-light/5 border border-[#F5F1E8]/10 text-[#F5F1E8] text-xs uppercase tracking-widest hover:bg-brand-light/10 transition-colors">
@@ -306,7 +309,8 @@ export default function UpdateStokSiteplanPage() {
                   </div>
                   <div className="">
                     <div className="text-[#F5F1E8] font-medium text-lg mb-1">Tipe Frontera</div>
-                    <div className="text-[#F5F1E8]/50 text-sm mb-2">Luas Bangunan: 90 m² | Luas Tanah: 89 m²</div>
+                    {/* Angkanya sempat TERTUKAR di sini (LB 90 / LT 89). */}
+                    <div className="text-[#F5F1E8]/50 text-sm mb-2">Luas Bangunan: 89 m² | Luas Tanah: 90 m²</div>
                     <div className="text-[#F5F1E8]/80 text-sm leading-relaxed">
                       Unit dengan tata ruang premium yang lega dan maksimal.
                     </div>

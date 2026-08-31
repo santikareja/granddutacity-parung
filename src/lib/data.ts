@@ -21,10 +21,15 @@
 
 import {
   CLUSTER_LABEL,
+  bathroomLabel,
   bedroomLabel,
   catalogUnits,
+  unitFacadeAlt,
+  unitPagePath,
+  unitSizeLabel,
   type Unit,
 } from "@/data/units";
+import { clImg } from "@/lib/cloudinary";
 
 export type LegacyPropertyType = {
   id: string;
@@ -35,6 +40,12 @@ export type LegacyPropertyType = {
   price: string;
   soldOut?: boolean;
   image: string;
+  /** Alt deskriptif per unit, dipakai langsung sebagai atribut alt gambar. */
+  alt: string;
+  /** Label ukuran ringkas "47/72", ikut di judul kartu. */
+  sizeLabel: string;
+  /** Halaman detail tipe. */
+  href: string;
   specs: {
     bed: number | string;
     bath: number | string;
@@ -56,10 +67,19 @@ const toLegacy = (unit: Unit): LegacyPropertyType => ({
   // diterjemahkan menjadi "tersedia" — ketersediaan aktual wajib merujuk
   // siteplan terbaru, bukan disimpulkan dari ketiadaan penanda.
   ...(unit.status === "sold-out" ? { soldOut: true } : {}),
-  image: unit.facadeImage,
+  // Sebelumnya URL Cloudinary ASLI dikirim apa adanya ke kartu, jadi halaman
+  // cluster mengunduh render ukuran penuh untuk kotak selebar ~380px. Ukurannya
+  // diseragamkan dengan carousel beranda: 560x420 (4:3, sama dengan rasio area
+  // gambar kartu) sehingga tidak ada piksel yang diunduh lalu dibuang crop.
+  image: clImg(unit.facadeImage, { w: 560, h: 420, q: 55 }),
+  alt: unitFacadeAlt(unit),
+  sizeLabel: unitSizeLabel(unit),
+  href: unitPagePath(unit),
   specs: {
     bed: bedroomLabel(unit),
-    bath: unit.bathrooms ?? "-",
+    // bathroomLabel sudah mengembalikan "-" untuk data yang belum ada, jadi
+    // `?? "-"` di sini akan mati sia-sia.
+    bath: bathroomLabel(unit),
     carport: unit.carports ?? "-",
     lb: unit.lb,
     lt: unit.lt,

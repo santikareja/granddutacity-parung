@@ -88,6 +88,11 @@ export const keywordOwnership: readonly KeywordOwnership[] = [
       "gdc soj",
       "gdc parung",
       "perumahan parung bogor",
+      // "rumah 600 juta parung" ditambahkan 30 Agustus 2026: sejak Verona 39/60
+      // dirilis di 600 juta-an, itulah titik harga masuk yang kini diklaim di
+      // seluruh situs. "700 juta" DIPERTAHANKAN — masih dicari orang dan masih
+      // relevan dengan rentang unit T-39/T-42 Cascada.
+      "rumah 600 juta parung",
       "rumah 700 juta parung",
     ],
     note: "Satu-satunya halaman yang boleh menargetkan frasa brand tanpa modifier.",

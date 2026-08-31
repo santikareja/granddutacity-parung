@@ -107,10 +107,18 @@ const laderaTuscanHook: HookSummary = {
   landRange: "98,48 – 124,14 m²",
 };
 
+// Diperbarui 30 Agustus 2026: pemilik merilis spesifikasi dan harga indikatif
+// Frontera, jadi "Segera Hadir" sudah tidak benar lagi. Rincian per kavling
+// (tunai keras, plafond KPR) BELUM diberikan, karena itu blok ini tetap
+// menampilkan harga indikatif dan mengarahkan ke marketing — bukan mengarang
+// tabel angka seperti tipe lain.
 const laderaFrontera = {
   type: "Frontera 89/90",
-  status: "Segera Hadir",
-  description: "Pricelist resmi belum dirilis.",
+  status: "Unit Terbatas",
+  priceLabel: "Mulai Rp 1,6 Milyar-an",
+  specs: "4+1 kamar tidur - 3+1 kamar mandi - 2 carport - 2 lantai",
+  description:
+    "Tipe terbesar di Cluster Ladera. Rincian harga per kavling mengikuti luas tanah dan posisi unit, hubungi marketing untuk pricelist terbaru.",
 };
 
 // --- CASCADA DATA ----------------------------------------------------------
@@ -882,6 +890,8 @@ export default function PricelistPage() {
                   <div className="rounded-2xl border border-dashed border-[#F5A524]/50 bg-[#F5A524]/10 p-6 text-center sm:p-8">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#b86d0e]">{laderaFrontera.status}</p>
                     <h4 className="mt-3 font-serif text-2xl font-semibold text-[#0b120c]">{laderaFrontera.type}</h4>
+                    <p className="mt-2 font-sans text-xl font-bold text-[#b86d0e]">{laderaFrontera.priceLabel}</p>
+                    <p className="mt-2 text-xs text-[#0b120c]/70">{laderaFrontera.specs}</p>
                     <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#0b120c]/65">{laderaFrontera.description}</p>
                   </div>
                 </div>

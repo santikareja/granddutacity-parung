@@ -229,7 +229,10 @@ export const salesOfficeNode = () => ({
     { "@type": "City", name: "Jakarta Selatan" },
   ],
   openingHoursSpecification: OPENING_HOURS,
-  priceRange: "Rp 700.000.000 - Rp 1.900.000.000",
+  // Batas bawah mengikuti Verona 39/60 (600 juta-an, tipe termurah sejak
+  // 30 Agustus 2026), batas atas mengikuti Ruko SOJ. Angka ini WAJIB dijaga
+  // konsisten dengan `priceLabel` terendah di src/data/units.ts.
+  priceRange: "Rp 600.000.000 - Rp 1.900.000.000",
   currenciesAccepted: "IDR",
   parentOrganization: ref(SCHEMA_ID.organization),
   // Menjual proyek ini — inilah tautan yang mengikat kantor pemasaran ke entitas

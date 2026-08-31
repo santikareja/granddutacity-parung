@@ -3,6 +3,7 @@
 import { ProductRevealCard } from "@/components/ui/product-reveal-card";
 import { Reveal } from "@/components/ui/reveal";
 import { trackWhatsAppClick } from "@/lib/analytics";
+import { PROJECT_ELECTRICAL, PROJECT_LEGALITY } from "@/data/units";
 import { propertyTypes } from "@/lib/data";
 
 interface PricingProps {
@@ -50,12 +51,17 @@ export function ClusterUnits({ clusterName, pricing, sectionId }: ClusterUnitsPr
             <Reveal key={unit.id} delay={90 * idx}>
               <ProductRevealCard
                 name={unit.name}
+                sizeLabel={unit.sizeLabel}
                 typeCategory={unit.typeCategory}
                 cluster={unit.cluster}
                 price={unit.price}
                 image={unit.image}
+                alt={unit.alt}
+                href={unit.href}
                 description={unit.desc}
                 soldOut={unit.soldOut}
+                electrical={PROJECT_ELECTRICAL}
+                legality={PROJECT_LEGALITY}
                 specs={unit.specs}
                 onAdd={() => handleWhatsApp(unit.name)}
               />

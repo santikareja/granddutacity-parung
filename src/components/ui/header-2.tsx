@@ -40,7 +40,7 @@ export function Header() {
 			href: '/tipe-rumah',
 			submenu: [
 				{ label: 'Semua Tipe Rumah', href: '/tipe-rumah', desc: '10 tipe · Harga, denah & spesifikasi' },
-				{ label: 'Cluster Ladera', href: '/cluster-ladera', desc: 'American Classic Modern · Mulai 800 Jt' },
+				{ label: 'Cluster Ladera', href: '/cluster-ladera', desc: 'American Classic Modern · Mulai 600 Jt' },
 				{ label: 'Cluster Cascada', href: '/cluster-cascada', desc: 'Modern Tropical Resort · Mulai 800 Jt' }
 			]
 		},

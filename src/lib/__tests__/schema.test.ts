@@ -247,20 +247,45 @@ describe("node unit rumah", () => {
     expect(unitAvailability(getUnitById("keila-47")!)).toBe(
       "https://schema.org/SoldOut",
     );
-    expect(unitAvailability(getUnitById("frontera-89")!)).toBe(
-      "https://schema.org/PreOrder",
-    );
+    // Sejak 30 Agustus 2026 TIDAK ADA unit berstatus `coming-soon` (Frontera 89
+    // yang dulu satu-satunya sudah dirilis). Pemetaannya tetap diuji lewat unit
+    // sintetis, bukan dihapus: kasus ini akan hidup lagi saat tipe berikutnya
+    // diumumkan sebelum pricelistnya siap, dan yang diuji di sini adalah
+    // fungsinya, bukan kebetulan isi data hari ini.
+    expect(units.some((unit) => unit.status === "coming-soon")).toBe(false);
+    expect(
+      unitAvailability({ ...getUnitById("frontera-89")!, status: "coming-soon" }),
+    ).toBe("https://schema.org/PreOrder");
   });
 
   it("tidak mengemit jumlah kamar yang belum dikonfirmasi pemilik", () => {
-    // Verona 39, Frontera 89, dan T-62 sengaja `null` di units.ts. Structured
-    // data dibaca mesin sebagai fakta, jadi angka tebakan = spesifikasi palsu.
-    for (const id of ["verona-39", "frontera-89", "t-62"]) {
+    // T-62 sengaja `null` di units.ts. Structured data dibaca mesin sebagai
+    // fakta, jadi angka tebakan = spesifikasi palsu.
+    //
+    // Verona 39 dan Frontera 89 SUDAH KELUAR dari daftar ini: pemilik mengirim
+    // spesifikasi lengkap keduanya pada 30 Agustus 2026, dan angkanya cocok
+    // dengan tabel tipe di public/llms.txt.
+    for (const id of ["t-62"]) {
       const node = JSON.parse(JSON.stringify(residenceNode(getUnitById(id)!)));
       expect(node, id).not.toHaveProperty("numberOfRooms");
       expect(node, id).not.toHaveProperty("numberOfBedrooms");
       expect(node, id).not.toHaveProperty("numberOfBathroomsTotal");
     }
+  });
+
+  it("mengemit spesifikasi Verona 39 dan Frontera 89 yang baru dikonfirmasi", () => {
+    // Kebalikan dari test di atas: begitu datanya ada, ia HARUS ikut terbit.
+    // Tanpa test ini, `null` yang tertinggal tidak akan pernah tertangkap —
+    // schema hanya akan diam-diam kehilangan spesifikasinya.
+    const verona = residenceNode(getUnitById("verona-39")!);
+    expect(verona.numberOfBedrooms).toBe(2);
+    expect(verona.numberOfBathroomsTotal).toBe(1);
+
+    const frontera = residenceNode(getUnitById("frontera-89")!);
+    expect(frontera.numberOfBedrooms).toBe(4);
+    // 3, BUKAN 4: "+1" kamar mandi servis disimpan di `extraBathroom` dan
+    // sengaja tidak dijumlahkan ke klaim numerik yang dibaca mesin.
+    expect(frontera.numberOfBathroomsTotal).toBe(3);
   });
 
   it("memakai data Manoa T-58 yang sudah dikoreksi pemilik (2 KT, 2 KM)", () => {

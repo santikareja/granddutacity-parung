@@ -30,7 +30,14 @@ export type HomepageFaq = {
 export const homepageFaqs: readonly HomepageFaq[] = [
   {
     q: "Berapa harga rumah di Grand Duta City Parung South of Jakarta?",
-    a: "Harga rumah di Grand Duta City Parung mulai dari Rp 700 jutaan untuk Cluster Ladera (Tipe Malta 47/72) hingga Rp 1,6 Milyar-an untuk unit premium di Cluster Cascada (Tipe Alexandra 88/105). Cicilan KPR mulai sekitar Rp 4 jutaan per bulan dengan tenor hingga 25 tahun. Hubungi marketing untuk pricelist terbaru dan ketersediaan unit promo.",
+    // Dikoreksi 30 Agustus 2026. Jawaban lama salah di DUA titik, dan karena
+    // berkas ini mengisi FAQPage schema, keduanya terbaca mesin sebagai fakta:
+    //   - "mulai Rp 700 jutaan (Tipe Malta 47/72)": tipe termurah adalah Verona
+    //     39/60, dan sejak pemilik merilis harganya angkanya 600 juta-an.
+    //   - "Rp 1,6 Milyar-an ... Cluster Cascada (Tipe Alexandra 88/105)":
+    //     Alexandra harganya 1,4 Milyar-an, dan 1,6 Milyar-an itu justru Tipe
+    //     Frontera 89/90 yang ada di Cluster LADERA, bukan Cascada.
+    a: "Harga rumah di Grand Duta City Parung mulai dari Rp 600 jutaan untuk Tipe Verona 39/60 di Cluster Ladera hingga Rp 1,6 Milyar-an untuk Tipe Frontera 89/90, unit terbesar di cluster yang sama. Di Cluster Cascada, tipe terluas adalah Alexandra 88/105 sekitar Rp 1,4 Milyar-an. Cicilan KPR mulai sekitar Rp 4 jutaan per bulan dengan tenor hingga 25 tahun. Hubungi marketing untuk pricelist terbaru dan ketersediaan unit promo.",
   },
   {
     q: "Apa saja syarat dan keuntungan Promo Tanpa DP bulan ini?",

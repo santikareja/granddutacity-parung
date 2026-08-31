@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { AmbientVideo } from "@/components/ui/ambient-video";
-import { ArrowRight, ShieldCheck, TreePine, Bike, Footprints, Recycle, MapPin, Maximize, BedDouble, Bath, CarFront } from "lucide-react";
+import { ArrowRight, ShieldCheck, TreePine, Bike, Footprints, Recycle, MapPin, Maximize, BedDouble, Bath, CarFront, Layers, Zap, ScrollText } from "lucide-react";
 import {
   SCHEMA_ID,
   breadcrumbNode,
@@ -16,6 +16,18 @@ import {
   ref,
 } from "@/lib/schema";
 import { SITE_URL } from "@/lib/seo";
+import {
+  PROJECT_ELECTRICAL,
+  PROJECT_LEGALITY,
+  bathroomLabel,
+  bedroomLabel,
+  getUnitsByCluster,
+  unitDisplayName,
+  unitFacadeAlt,
+  unitPagePath,
+  unitSizeLabel,
+  type Unit,
+} from "@/data/units";
 
 const PAGE_URL = `${SITE_URL}/cluster-ladera`;
 
@@ -25,7 +37,7 @@ const PAGE_URL = `${SITE_URL}/cluster-ladera`;
 export const metadata: Metadata = {
   title: "Cluster Ladera GDC Parung: Tipe, Harga & Stok Unit",
   description:
-    "Cluster Ladera bertema American Classic Modern di GDC Parung. Tipe Verona 39/60, Malta 47/72, dan Tuscan 66/72 — lengkap denah, harga KPR, dan blok tersedia.",
+    "Cluster Ladera American Classic di GDC Parung: tipe Verona, Malta, Tuscan & Frontera (39-89 m²) mulai Rp 600 jutaan. Lihat denah, spesifikasi & harga KPR.",
   robots: {
     index: true,
     follow: true,
@@ -77,17 +89,162 @@ const pageSchema = graph([
 const faqData = [
   {
     question: "Apa saja tipe unit yang tersedia di Cluster Ladera?",
-    answer: "Cluster Ladera menawarkan 2 tipe unit utama: Tipe Tuscan 66/72 dan Tipe Malta 47/72, dengan desain American Classic Modern."
+    answer: "Cluster Ladera menawarkan 4 tipe rumah bertema American Classic Modern: Verona 39/60, Malta 47/72, Tuscan 66/72, dan Frontera 89/90."
   },
   {
     question: "Berapa harga rumah di Cluster Ladera?",
-    answer: "Harga tunai keras mulai dari Rp 800 jutaan untuk Tipe Malta 47/72 dan Rp 1,1 Miliar untuk Tipe Tuscan 66/72. Harga KPR lebih tinggi dari harga tunai. Harga dapat berubah sewaktu-waktu, hubungi marketing kami untuk pricelist terbaru."
+    answer: "Harga tunai keras mulai dari Rp 600 jutaan untuk Tipe Verona 39/60, Rp 800 jutaan untuk Malta 47/72, Rp 1,1 Miliar untuk Tuscan 66/72, hingga Rp 1,6 Miliar untuk Frontera 89/90. Harga KPR lebih tinggi dari harga tunai dan dapat berubah sewaktu-waktu, hubungi marketing kami untuk pricelist terbaru."
   },
   {
     question: "Bagaimana cara menuju Grand Duta City Parung?",
     answer: "Grand Duta City Parung berlokasi strategis di Selatan Jakarta, mudah diakses melalui Tol Pamulang (Desari) maupun Tol Kayu Manis (BORR)."
   }
 ];
+
+// Tipe Ladera diambil dari SUMBER TUNGGAL units.ts, bukan dihardcode. Sebelum
+// ini halaman menuliskan Tuscan dan Malta sebagai ~60 baris JSX per tipe —
+// salinan keempat dari data unit yang persis dibereskan Fase 3. Menambah Verona
+// dan Frontera dengan cara lama berarti menggandakan lagi kesempatan angka
+// menyimpang. Urutannya mengikuti units.ts: Verona, Malta, Tuscan, Frontera.
+const laderaUnits = getUnitsByCluster("ladera").filter((unit) => unit.showInCatalog);
+
+const waHref = (unit: Unit) => {
+  const msg = `Halo, saya tertarik dengan Tipe ${unitDisplayName(unit)} ${unitSizeLabel(unit)} di Cluster Ladera Grand Duta City Parung. Boleh minta info harga, denah, dan ketersediaan unitnya?`;
+  return `https://wa.me/628131742034?text=${encodeURIComponent(msg)}`;
+};
+
+/** Satu sel spesifikasi dengan ikon dekoratif; makna dibawa teks. */
+function SpecPill({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: typeof BedDouble;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border border-[#0b120c]/8 bg-white/60 px-3 py-2.5">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#F5A524]/15 text-[#b86d0e]">
+        <Icon className="size-4" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 leading-tight">
+        <span className="block text-sm font-semibold text-[#0b120c]">{value}</span>
+        <span className="block text-[10px] uppercase tracking-wider text-[#0b120c]/50">{label}</span>
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Blok satu tipe rumah: fasad + spesifikasi + CTA, lalu denah lantai di bawah.
+ * Selang-seling kiri/kanan pada desktop (index genap/ganjil) memberi ritme
+ * visual; di mobile selalu menumpuk dengan gambar lebih dulu.
+ */
+function TypeShowcase({ unit, index }: { unit: Unit; index: number }) {
+  const name = unitDisplayName(unit);
+  const size = unitSizeLabel(unit);
+  const detailPath = unitPagePath(unit);
+  const facadeReversed = index % 2 === 1;
+
+  return (
+    <article className="mb-16 sm:mb-20 last:mb-0">
+      <div
+        className={`flex flex-col gap-8 lg:items-stretch ${
+          facadeReversed ? "lg:flex-row-reverse" : "lg:flex-row"
+        }`}
+      >
+        {/* Fasad */}
+        <div className="w-full lg:w-1/2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-lg">
+            <Image
+              src={unit.facadeImage}
+              alt={unitFacadeAlt(unit)}
+              fill
+              sizes="(max-width: 1024px) 100vw, 560px"
+              className="object-cover"
+            />
+            <div className="absolute left-4 top-4 rounded-full bg-[#0b120c]/80 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5F1E8] backdrop-blur-sm">
+              Tipe {size}
+            </div>
+          </div>
+        </div>
+
+        {/* Detail */}
+        <div className="flex w-full flex-col lg:w-1/2">
+          <h3 className="font-serif text-3xl font-bold text-[#0b120c] sm:text-4xl">
+            Tipe {name}
+          </h3>
+          <p className="mt-2 text-2xl font-semibold text-[#b86d0e]">Rp {unit.priceLabel}</p>
+
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <SpecPill icon={Maximize} value={`${unit.lb} / ${unit.lt} m²`} label="LB / LT" />
+            <SpecPill icon={BedDouble} value={`${bedroomLabel(unit)}`} label="Kamar Tidur" />
+            <SpecPill icon={Bath} value={`${bathroomLabel(unit)}`} label="Kamar Mandi" />
+            {unit.carports !== null && (
+              <SpecPill icon={CarFront} value={`${unit.carports}`} label="Carport" />
+            )}
+            {unit.floors !== null && (
+              <SpecPill icon={Layers} value={`${unit.floors}`} label="Lantai" />
+            )}
+          </div>
+
+          <p className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-[#0b120c]/60">
+            <span className="inline-flex items-center gap-1.5">
+              <Zap className="size-3.5" aria-hidden="true" /> Listrik {PROJECT_ELECTRICAL}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <ScrollText className="size-3.5" aria-hidden="true" /> Legalitas {PROJECT_LEGALITY}
+            </span>
+          </p>
+
+          <p className="mt-5 font-sans leading-relaxed text-[#0b120c]/75">{unit.description}</p>
+
+          <div className="mt-auto flex flex-col gap-3 pt-8 sm:flex-row">
+            <a
+              href={waHref(unit)}
+              data-wa-placement={`ladera-tipe-${unit.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[#F5A524] px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-[#0b120c] transition-colors hover:bg-[#0b120c] hover:text-[#F5F1E8]"
+            >
+              Tanya Promo Tipe {name}
+            </a>
+            <Link
+              href={detailPath}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-[#0b120c]/20 px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-[#0b120c] transition-colors hover:border-[#F5A524] hover:text-[#b86d0e]"
+            >
+              Denah &amp; Detail <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Denah lantai */}
+      {unit.floorPlanImage && (
+        <div className="mt-8 flex flex-col gap-6 rounded-3xl border border-[#0b120c]/10 bg-white/50 p-6 sm:p-8 xl:flex-row xl:items-center">
+          <div className="xl:w-1/3">
+            <h4 className="font-serif text-xl font-bold text-[#0b120c] sm:text-2xl">
+              Denah Lantai Tipe {name}
+            </h4>
+            <p className="mt-3 text-sm leading-relaxed text-[#0b120c]/65">
+              Tata ruang {bedroomLabel(unit)} kamar tidur{unit.floors ? ` ${unit.floors} lantai` : ""} yang efisien, dengan sirkulasi udara dan cahaya alami yang maksimal.
+            </p>
+          </div>
+          <div className="relative h-80 w-full overflow-hidden rounded-2xl border border-[#0b120c]/10 bg-white sm:h-96 md:h-[520px] xl:w-2/3">
+            <Image
+              src={unit.floorPlanImage}
+              alt={`Denah lantai Tipe ${name} ${size} Cluster Ladera Grand Duta City Parung`}
+              fill
+              sizes="(max-width: 1280px) 100vw, 760px"
+              className="object-contain p-4"
+            />
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}
 
 export default function ClusterLaderaPage() {
   return (
@@ -124,8 +281,8 @@ export default function ClusterLaderaPage() {
                 mengulang frasa target homepage. Diganti dengan nama tipe unit
                 supaya halaman ini menang di query tipe, bukan query brand.
                 Frasa brand tetap hadir di paragraf bawah sebagai anchor ke "/". */}
-            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#F5F1E8] mb-6 drop-shadow-xl">
-              Cluster Ladera — Verona, Malta &amp; Tuscan
+            <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[#F5F1E8] mb-6 drop-shadow-xl">
+              Cluster Ladera — Verona, Malta, Tuscan &amp; Frontera
             </h1>
             <div className="w-16 h-1 bg-[#F5A524] mx-auto rounded-full mb-8" />
             <p className="text-[#F5F1E8]/90 text-lg md:text-xl font-sans max-w-3xl mx-auto leading-relaxed">
@@ -197,123 +354,14 @@ export default function ClusterLaderaPage() {
         {/* Tipe Unit & Denah Section */}
         <section className="py-24 bg-brand-light border-t border-[#0b120c]/10">
           <div className="max-w-screen-xl mx-auto px-6 md:px-14">
-            <div className="text-center mb-20">
+            <div className="text-center mb-16 sm:mb-20">
               <h2 className="font-serif text-3xl md:text-5xl font-semibold text-[#0b120c] mb-6">Tipe Rumah Cluster Ladera</h2>
-              <p className="text-[#0b120c]/70 font-sans max-w-2xl mx-auto">Pilih tipe hunian yang paling sesuai dengan kebutuhan gaya hidup dan ukuran keluarga Anda.</p>
+              <p className="text-[#0b120c]/70 font-sans max-w-2xl mx-auto">Empat tipe hunian American Classic Modern, dari Verona yang paling terjangkau hingga Frontera untuk keluarga besar. Lengkap dengan denah lantai resmi tiap tipe.</p>
             </div>
 
-            {/* Tipe Tuscan */}
-            <div className="mb-24">
-              <div className="flex flex-col lg:flex-row gap-12 items-center">
-                <div className="w-full lg:w-1/2 max-w-md mx-auto">
-                  <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
-                    <Image 
-                      src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775884121/tipe-tuscan-66-gdc-parung-bogor_p6zgu8.webp" 
-                      alt="Tipe Tuscan 66 Cluster Ladera" 
-                      fill 
-                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 420px"
-                      className="object-cover" 
-                    />
-                  </div>
-                </div>
-                <div className="w-full lg:w-1/2">
-                  <div className="inline-block px-4 py-1.5 bg-[#0b120c]/10 text-[#0b120c] font-bold tracking-widest text-xs uppercase rounded-full mb-4">Tipe 66/72</div>
-                  <h3 className="font-serif text-4xl font-bold text-[#0b120c] mb-4">Tuscan</h3>
-                  <p className="text-2xl text-[#0b120c] font-medium mb-6">Rp 1,1 Miliar-an</p>
-                  
-                  <div className="flex flex-wrap gap-6 mb-8 border-y border-[#0b120c]/10 py-6">
-                    <div className="flex items-center gap-2"><BedDouble className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">3 K.Tidur</span></div>
-                    <div className="flex items-center gap-2"><Bath className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">2 K.Mandi</span></div>
-                    <div className="flex items-center gap-2"><CarFront className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">2 Carport</span></div>
-                    <div className="flex items-center gap-2"><Maximize className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">LB 66 / LT 72</span></div>
-                  </div>
-
-                  <p className="text-[#0b120c]/70 font-sans mb-8">
-                    Hunian American Classic 2 lantai yang elegan, memberikan ruang fleksibel untuk anggota keluarga. Tampilan mewah namun mengedepankan fungsi ruang yang optimal.
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <a href="https://wa.me/628131742034?text=Halo%20saya%20tertarik%20dengan%20Tipe%20Tuscan%20di%20Cluster%20Ladera" data-wa-placement="ladera-tipe-tuscan" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center items-center gap-2 bg-[#F5A524] text-[#F5F1E8] px-8 py-3 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#0b120c] transition-colors">
-                      Tanya Marketing
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-12 bg-brand-light p-8 rounded-2xl flex flex-col xl:flex-row gap-8 items-center">
-                <div className="w-full xl:w-1/3">
-                  <h4 className="font-serif text-2xl font-bold text-[#0b120c] mb-4">Denah Lantai Tipe Tuscan</h4>
-                  <p className="text-[#0b120c]/70 text-sm">Desain tata ruang maksimal dengan sirkulasi udara yang baik.</p>
-                </div>
-                <div className="w-full xl:w-2/3 relative h-96 md:h-[600px] rounded-xl overflow-hidden border border-[#0b120c]/10 bg-brand-light">
-                  <Image 
-                    src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775883012/denah-lantai-tipe-tuscan-cluster-ladera-grand-duta-city-south-of-jakarta_muqubx.webp" 
-                    alt="Denah Lantai Tipe Tuscan Ladera" 
-                    fill 
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 66vw, 760px"
-                    className="object-contain p-4" 
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Tipe Malta */}
-            <div className="mb-10">
-              <div className="flex flex-col lg:flex-row-reverse gap-12 items-center">
-                <div className="w-full lg:w-1/2 max-w-md mx-auto">
-                  <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
-                    <Image 
-                      src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775884121/tipe-malta-47-gdc-parung-bogor_fgttjy.webp" 
-                      alt="Tipe Malta 47 Cluster Ladera" 
-                      fill 
-                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 420px"
-                      className="object-cover" 
-                    />
-                  </div>
-                </div>
-                <div className="w-full lg:w-1/2">
-                  <div className="inline-block px-4 py-1.5 bg-[#0b120c]/10 text-[#0b120c] font-bold tracking-widest text-xs uppercase rounded-full mb-4">Tipe 47/72</div>
-                  <h3 className="font-serif text-4xl font-bold text-[#0b120c] mb-4">Malta</h3>
-                  {/* DIKOREKSI (Fase 3): sebelumnya "Rp 900 Juta-an". Angka itu
-                      menyesatkan karena justru mendekati harga KPR
-                      (Rp 971.403.600 - Rp 1.021.929.900), bukan harga tunai.
-                      Tunai keras terendah Malta 47/72 adalah Rp 845.550.000. */}
-                  <p className="text-2xl text-[#0b120c] font-medium mb-6">Rp 800 Juta-an</p>
-                  
-                  <div className="flex flex-wrap gap-6 mb-8 border-y border-[#0b120c]/10 py-6">
-                    <div className="flex items-center gap-2"><BedDouble className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">2+1 K.Tidur</span></div>
-                    <div className="flex items-center gap-2"><Bath className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">1 K.Mandi</span></div>
-                    <div className="flex items-center gap-2"><CarFront className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">2 Carport</span></div>
-                    <div className="flex items-center gap-2"><Maximize className="w-5 h-5 text-[#0b120c]"/> <span className="font-medium text-[#0b120c]">LB 47 / LT 72</span></div>
-                  </div>
-
-                  <p className="text-[#0b120c]/70 font-sans mb-8">
-                    Solusi pintar untuk keluarga muda. Tipe 1 lantai yang mengusung compact living tanpa mengorbankan kenyamanan, dilengkapi ekstra ruang fleksibel.
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <a href="https://wa.me/628131742034?text=Halo%20saya%20tertarik%20dengan%20Tipe%20Malta%20di%20Cluster%20Ladera" data-wa-placement="ladera-tipe-malta" target="_blank" rel="noopener noreferrer" className="inline-flex justify-center items-center gap-2 bg-[#F5A524] text-[#F5F1E8] px-8 py-3 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#0b120c] transition-colors">
-                      Tanya Marketing
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-12 bg-brand-light p-8 rounded-2xl flex flex-col xl:flex-row gap-8 items-center">
-                <div className="w-full xl:w-1/3">
-                  <h4 className="font-serif text-2xl font-bold text-[#0b120c] mb-4">Denah Lantai Tipe Malta</h4>
-                  <p className="text-[#0b120c]/70 text-sm">Tata ruang cerdas yang memaksimalkan sirkulasi cahaya alami.</p>
-                </div>
-                <div className="w-full xl:w-2/3 relative h-96 md:h-[600px] rounded-xl overflow-hidden border border-[#0b120c]/10 bg-brand-light">
-                  <Image 
-                    src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775883012/denah-lantai-tipe-malta-cluster-ladera-grand-duta-city-south-of-jakarta_ru5oze.webp" 
-                    alt="Denah Lantai Tipe Malta Ladera" 
-                    fill 
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 66vw, 760px"
-                    loading="eager"
-                    className="object-contain p-4" 
-                  />
-                </div>
-              </div>
-            </div>
+            {laderaUnits.map((unit, index) => (
+              <TypeShowcase key={unit.id} unit={unit} index={index} />
+            ))}
 
           </div>
         </section>
@@ -371,8 +419,8 @@ export default function ClusterLaderaPage() {
           title="FAQ Cluster Ladera dan estimasi cicilan KPR"
           faqs={faqData}
           clusterName="Cluster Ladera"
-          initialPrice={900000000}
-          minPrice={900000000}
+          initialPrice={800000000}
+          minPrice={600000000}
           maxPrice={1600000000}
           whatsappText="Halo, saya ingin konsultasi simulasi KPR dan jadwal survey untuk Cluster Ladera Grand Duta City Parung."
         />

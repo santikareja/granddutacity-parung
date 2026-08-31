@@ -9,6 +9,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Header } from "@/components/ui/header-2";
 import {
   CLUSTER_LABEL,
+  bathroomLabel,
   bedroomLabel,
   getSiblingUnits,
   getUnitById,
@@ -74,13 +75,19 @@ type Props = { params: Promise<{ slug: string }> };
 /**
  * Unit yang TIDAK diindeks.
  *
- * Frontera 89 berstatus "Segera Hadir": pricelist resminya belum dirilis dan
- * jumlah kamarnya belum dikonfirmasi pemilik. Halaman tanpa harga dan tanpa
- * spesifikasi tidak punya apa pun untuk dimenangkan di pencarian, dan
- * mengindeksnya hanya menambah halaman tipis. Ia tetap dibangun supaya
- * `Offer.url` dan `@id` miliknya resolve, lalu dibuka kembali begitu datanya ada.
+ * KOSONG sejak 30 Agustus 2026. Sebelumnya berisi `frontera-89`, yang saat itu
+ * berstatus "Segera Hadir" tanpa harga maupun jumlah kamar — halaman seperti itu
+ * tidak punya apa pun untuk dimenangkan di pencarian, jadi ia dibangun (supaya
+ * `Offer.url` dan `@id` miliknya resolve) tapi tidak diindeks. Syarat "dibuka
+ * kembali begitu datanya ada" kini TERPENUHI: pemilik sudah mengirim harga
+ * (1,6 Milyar-an) dan spesifikasi penuh.
+ *
+ * Himpunan ini SENGAJA dipertahankan meski kosong, bukan dihapus: mekanismenya
+ * akan dibutuhkan lagi saat tipe baru diumumkan sebelum pricelistnya siap.
+ *
+ * WAJIB SINKRON dengan `NOINDEX_UNIT_IDS` di src/app/sitemap.ts.
  */
-const NOINDEX_UNITS = new Set(["frontera-89"]);
+const NOINDEX_UNITS = new Set<string>([]);
 
 const isIndexable = (unit: Unit) => !NOINDEX_UNITS.has(unit.id);
 
@@ -114,7 +121,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // masuk batas. Guard G7 yang menangkap masalah ini, bukan tebakan.
   const specBits: string[] = [];
   if (unit.bedrooms !== null) specBits.push(`${bedroomLabel(unit)} KT`);
-  if (unit.bathrooms !== null) specBits.push(`${unit.bathrooms} KM`);
+  if (unit.bathrooms !== null) specBits.push(`${bathroomLabel(unit)} KM`);
   if (unit.carports !== null) specBits.push(`${unit.carports} carport`);
   if (unit.floors !== null) specBits.push(`${unit.floors} lantai`);
   const spec = specBits.length > 0 ? `${specBits.join(", ")}. ` : "";
@@ -331,7 +338,7 @@ export default async function TipeRumahDetailPage({ params }: Props) {
                 <SpecItem icon={BedDouble} label="Kamar tidur" value={`${bedroomLabel(unit)} kamar`} />
               ) : null}
               {unit.bathrooms !== null ? (
-                <SpecItem icon={Bath} label="Kamar mandi" value={`${unit.bathrooms} kamar`} />
+                <SpecItem icon={Bath} label="Kamar mandi" value={`${bathroomLabel(unit)} kamar`} />
               ) : null}
               {unit.carports !== null ? (
                 <SpecItem icon={CarFront} label="Carport" value={`${unit.carports} mobil`} />
@@ -440,8 +447,7 @@ export default async function TipeRumahDetailPage({ params }: Props) {
                       </th>
                       <td className="px-5 py-4">{unit.lb} / {unit.lt} m²</td>
                       <td className="px-5 py-4">
-                        {unit.bedrooms !== null ? bedroomLabel(unit) : "-"} /{" "}
-                        {unit.bathrooms !== null ? unit.bathrooms : "-"}
+                        {bedroomLabel(unit)} / {bathroomLabel(unit)}
                       </td>
                       <td className="px-5 py-4">{unit.floors !== null ? unit.floors : "-"}</td>
                       <td className="px-5 py-4">
@@ -467,8 +473,7 @@ export default async function TipeRumahDetailPage({ params }: Props) {
                           </th>
                           <td className="px-5 py-4">{sibling.lb} / {sibling.lt} m²</td>
                           <td className="px-5 py-4">
-                            {sibling.bedrooms !== null ? bedroomLabel(sibling) : "-"} /{" "}
-                            {sibling.bathrooms !== null ? sibling.bathrooms : "-"}
+                            {bedroomLabel(sibling)} / {bathroomLabel(sibling)}
                           </td>
                           <td className="px-5 py-4">
                             {sibling.floors !== null ? sibling.floors : "-"}

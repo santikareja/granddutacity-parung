@@ -402,7 +402,7 @@ export default function UpdateStokSiteplanPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#0b120c]/80 to-transparent"></div>
 
             <div className="relative z-10">
-              <h3 className="text-3xl md:text-5xl font-serif text-[#F5F1E8] mb-6">Konsultasi dengan<br />Marketing Kami</h3>
+              <h3 className="text-3xl md:text-5xl font-serif text-[#F5F1E8] mb-6">Konsultasi dengan <br />Marketing Kami</h3>
               <p className="text-[#F5F1E8]/80 text-lg mb-10 max-w-2xl mx-auto">
                 Ketersediaan stok unit berubah dengan cepat. Hubungi kami sekarang untuk mendapatkan file siteplan resolusi tinggi, pricelist terbaru, maupun simulasi KPR.
               </p>

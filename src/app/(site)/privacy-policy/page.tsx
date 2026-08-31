@@ -237,11 +237,11 @@ export default function PrivacyPolicyPage() {
               </ul>
 
               <address className="not-italic mt-6 p-6 bg-brand-light rounded-2xl border border-[#0b120c]/10 text-sm">
-                <strong>Santika Reza</strong><br />
-                Jl. Boulevard GDC,<br />
-                Kec. Parung, Bogor,<br />
-                Jawa Barat 16330<br /><br />
-                Email: <a href="mailto:contact@granddutacitysouthofjakarta.com">contact@granddutacitysouthofjakarta.com</a><br />
+                <strong>Santika Reza</strong> <br />
+                Jl. Boulevard GDC, <br />
+                Kec. Parung, Bogor, <br />
+                Jawa Barat 16330 <br /><br />
+                Email: <a href="mailto:contact@granddutacitysouthofjakarta.com">contact@granddutacitysouthofjakarta.com</a> <br />
                 WhatsApp: <a href="https://wa.me/628131742034" data-wa-placement="legal-contact-address" target="_blank" rel="noopener noreferrer">0813-1742-034</a>
               </address>
               

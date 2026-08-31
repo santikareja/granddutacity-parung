@@ -696,7 +696,13 @@ export default function PricelistPage() {
                 di sini karena dipasangkan modifier kuat ("Pricelist" + tahun),
                 sesuai aturan kata kunci di requirements.md keputusan 2. */}
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#F5F1E8] mb-5 drop-shadow-xl">
-              Pricelist Resmi 2026<br />
+              {/* `<br />` TIDAK menyumbang karakter ke textContent, jadi tanpa
+                  spasi eksplisit di sini "2026" dan "Cluster" menyatu jadi
+                  "2026Cluster" pada teks yang dibaca mesin (Google, screen
+                  reader) walau tampilan visualnya tetap benar berkat baris
+                  baru. Spasi di akhir baris ini diabaikan browser saat
+                  merender, tapi tetap ada di teks mentah. */}
+              Pricelist Resmi 2026 <br />
               <span className="block mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl italic font-normal text-[#F5A524]">Cluster Ladera &amp; Cascada</span>
             </h1>
             <p className="text-[#F5F1E8]/80 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed">
@@ -741,7 +747,7 @@ export default function PricelistPage() {
             </p>
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold text-[#0b120c] leading-tight">
-                Pilih Cluster<br />
+                Pilih Cluster <br />
                 <span className="italic font-normal text-[#0b120c]/50">untuk melihat detail harga</span>
               </h2>
               <p className="text-[#0b120c]/60 text-sm font-light max-w-sm leading-relaxed">
@@ -793,7 +799,7 @@ export default function PricelistPage() {
                 </div>
                 <div className="flex flex-col justify-center gap-4 lg:col-span-3">
                   <h3 className="font-serif text-2xl font-semibold text-[#0b120c] md:text-3xl">
-                    Pilihan hunian Ladera<br />
+                    Pilihan hunian Ladera <br />
                     <span className="font-normal italic text-[#0b120c]/50">per tipe, harga, dan posisi unit</span>
                   </h3>
                   <p className="text-sm font-light leading-relaxed text-[#0b120c]/70">
@@ -908,7 +914,7 @@ export default function PricelistPage() {
                   </div>
                   <div className="lg:col-span-3 flex flex-col justify-center gap-4">
                     <h3 className="font-serif text-2xl md:text-3xl font-semibold text-[#0b120c]">
-                      Pilihan Lengkap<br />
+                      Pilihan Lengkap <br />
                       <span className="italic font-normal text-[#0b120c]/50">T-39 hingga T-88</span>
                     </h3>
                     <p className="text-[#0b120c]/70 text-sm leading-relaxed font-light">
@@ -999,7 +1005,7 @@ export default function PricelistPage() {
             </p>
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <h2 className="font-serif text-3xl md:text-4xl font-semibold text-[#0b120c] leading-tight">
-                Untung Lebih<br />
+                Untung Lebih <br />
                 <span className="italic font-normal text-[#0b120c]/50">saat beli sekarang</span>
               </h2>
               <p className="text-[#0b120c]/60 text-sm font-light max-w-sm leading-relaxed">

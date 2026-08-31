@@ -61,7 +61,7 @@ export function Keunggulan() {
               Nilai Tambah
             </p>
             <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight text-[#0b120c]">
-              Keunggulan<br />
+              Keunggulan <br />
               <span className="italic font-normal text-[#0b120c]/60">Grand Duta City</span>
             </h2>
           </div>

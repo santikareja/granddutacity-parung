@@ -292,7 +292,7 @@ export default function CaraBeliKPRPage() {
         {/* Tahapan Pembelian */}
         <section id="tahapan" className="py-20 px-4 md:px-8 bg-[#060a07] border-y border-[#F5F1E8]/5 scroll-m-20">
            <div className="max-w-7xl mx-auto">
-             <h2 className="text-3xl md:text-4xl font-serif text-[#F5F1E8] mb-16 text-center">6 Langkah Mudah<br/><span className="text-[#F5A524]">Memiliki Rumah</span></h2>
+             <h2 className="text-3xl md:text-4xl font-serif text-[#F5F1E8] mb-16 text-center">6 Langkah Mudah <br/><span className="text-[#F5A524]">Memiliki Rumah</span></h2>
              
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {steps.map((step, index) => (
@@ -321,7 +321,7 @@ export default function CaraBeliKPRPage() {
                  <div className="absolute top-0 right-0 p-8 opacity-5">
                     <FileText className="w-48 h-48 text-[#F5F1E8]" />
                  </div>
-                 <h3 className="text-2xl md:text-3xl font-serif text-[#F5F1E8] mb-4 relative z-10">Daftar Dokumen<br/><span className="text-[#F5A524]">Yang Dibutuhkan</span></h3>
+                 <h3 className="text-2xl md:text-3xl font-serif text-[#F5F1E8] mb-4 relative z-10">Daftar Dokumen <br/><span className="text-[#F5A524]">Yang Dibutuhkan</span></h3>
                  <p className="text-[#F5F1E8]/60 mb-8 relative z-10">Siapkan dokumen-dokumen utama ini untuk mempercepat proses persetujuan kredit Anda.</p>
                  
                  <ul className="space-y-4 relative z-10">

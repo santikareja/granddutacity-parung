@@ -183,6 +183,27 @@ beforeAll(async () => {
     routes.push({ path: `/category/${slug}`, metadata, indexable: isIndexable(metadata) });
   }
 
+  // --- hub + 10 halaman tipe unit (Fase 7) --------------------------------
+  // Didaftarkan LENGKAP, bukan sampel: justru di sinilah risiko kanibalisasi
+  // paling besar karena sepuluh halaman lahir sekaligus dari satu template.
+  const tipeHub = await import("../tipe-rumah/page");
+  routes.push({
+    path: "/tipe-rumah",
+    metadata: tipeHub.metadata,
+    indexable: isIndexable(tipeHub.metadata),
+  });
+
+  const tipeMod = await import("../tipe-rumah/[slug]/page");
+  const { units: allUnits } = await import("@/data/units");
+  for (const unit of allUnits) {
+    const metadata = (await tipeMod.generateMetadata(withParams(unit.id))) as Metadata;
+    routes.push({
+      path: `/tipe-rumah/${unit.id}`,
+      metadata,
+      indexable: isIndexable(metadata),
+    });
+  }
+
   // --- arsip tag (sengaja noindex, ikut diuji untuk G10/G11) --------------
   const tagMod = await import("../tag/[slug]/page");
   for (const slug of ["kpr-rumah", "lokasi-parung"]) {

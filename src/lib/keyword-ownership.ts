@@ -179,6 +179,80 @@ export const keywordOwnership: readonly KeywordOwnership[] = [
     supporting: ["update fasilitas gdc", "kabar gdc parung"],
   },
 
+  // --- hub + 10 halaman tipe unit (Fase 7) ---------------------------------
+  //
+  // Setiap tipe memegang nama tipenya sendiri. Tidak ada satu pun yang
+  // menargetkan "cluster ladera"/"cluster cascada" (sudah dimiliki halaman
+  // cluster) maupun frasa brand homepage. Hub menargetkan istilah generik
+  // "tipe rumah gdc parung" yang tidak dimiliki halaman lain.
+  //
+  // Volume keyword-nya kecil (riset Semrush: "rumah tipe 42" 260/bln, sisanya
+  // 0-30/bln) dan itu diterima sadar: halaman ini ada terutama untuk membuat
+  // `Offer.url` serta `@id` di schema resolve, dan untuk menangkap pencarian
+  // tahap akhir yang konversinya tinggi.
+  {
+    path: "/tipe-rumah",
+    primary: "tipe rumah gdc parung",
+    supporting: ["pilihan tipe rumah parung", "daftar tipe rumah gdc"],
+  },
+  {
+    path: "/tipe-rumah/verona-39",
+    primary: "tipe verona 39",
+    supporting: ["rumah tipe 39", "verona ladera"],
+  },
+  {
+    path: "/tipe-rumah/malta-47",
+    primary: "tipe malta 47",
+    supporting: ["rumah tipe 47", "denah malta 47"],
+  },
+  {
+    path: "/tipe-rumah/tuscan-66",
+    primary: "tipe tuscan 66",
+    supporting: ["rumah tipe 66", "denah tuscan 66"],
+  },
+  {
+    path: "/tipe-rumah/frontera-89",
+    primary: "tipe frontera 89",
+    supporting: ["rumah tipe 89"],
+    note:
+      "NOINDEX sementara: pricelist resmi belum dirilis dan jumlah kamar belum " +
+      "dikonfirmasi pemilik, jadi tidak ada yang bisa dimenangkan di pencarian. " +
+      "Halaman tetap dibangun agar Offer.url dan @id miliknya resolve.",
+  },
+  {
+    path: "/tipe-rumah/aira-42",
+    primary: "tipe aira 42",
+    supporting: ["rumah tipe 42", "denah aira 42"],
+  },
+  {
+    path: "/tipe-rumah/keila-47",
+    primary: "tipe keila 47",
+    supporting: ["keila cascada"],
+    note:
+      "Sold out, tapi TETAP diindeks: pencarian nama tipe ini masih terjadi dan " +
+      "halamannya mengarahkan minat ke tipe lain yang ukurannya terdekat.",
+  },
+  {
+    path: "/tipe-rumah/manoa-58",
+    primary: "tipe manoa 58",
+    supporting: ["rumah tipe 58", "denah manoa 58"],
+  },
+  {
+    path: "/tipe-rumah/t-62",
+    primary: "tipe 62 hook",
+    supporting: ["rumah hook cascada", "unit hook gdc parung"],
+  },
+  {
+    path: "/tipe-rumah/victoria-69",
+    primary: "tipe victoria 69",
+    supporting: ["rumah tipe 69", "denah victoria 69"],
+  },
+  {
+    path: "/tipe-rumah/alexandra-88",
+    primary: "tipe alexandra 88",
+    supporting: ["rumah tipe 88", "denah alexandra 88"],
+  },
+
   // --- halaman legal: tidak menargetkan query komersial --------------------
   {
     path: "/disclaimer",

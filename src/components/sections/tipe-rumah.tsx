@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, Sparkles, ArrowUpRight } from "lucide-react";
 
 import { ProductRevealCard } from "@/components/ui/product-reveal-card";
@@ -238,6 +239,22 @@ export function TipeRumah() {
                 <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" />
               </span>
             </a>
+
+            {/* Satu tautan teks ke hub /tipe-rumah (Fase 7).
+                Kartu di carousel SENGAJA tidak diubah: komponen ini client
+                component dengan carousel yang ikut menentukan LCP homepage, dan
+                menyisipkan <Link> ke tiap kartu berisiko pada metrik yang sudah
+                susah didapat. Satu tautan di sini sudah cukup membuat kesepuluh
+                halaman tipe berjarak dua klik dari homepage. */}
+            <p className="mt-6 text-xs sm:text-sm text-[#090D0A]/60 font-normal">
+              Ingin membandingkan spesifikasi dan denah per tipe?{" "}
+              <Link
+                href="/tipe-rumah"
+                className="font-semibold text-[#B45309] underline decoration-[#B45309]/30 underline-offset-2 hover:decoration-[#B45309]"
+              >
+                Lihat 10 tipe rumah GDC Parung
+              </Link>
+            </p>
           </div>
         </Reveal>
 

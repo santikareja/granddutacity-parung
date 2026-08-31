@@ -15,6 +15,8 @@
  * ============================================================
  */
 
+import { units as unitRegistry } from "@/data/units";
+
 export type SiteImage = {
   url: string;
   title: string;
@@ -599,6 +601,44 @@ const clusterCascadaSeeds: readonly ImageSeed[] = [
   ...bankPartnerSeeds,
 ];
 
+/**
+ * Gambar halaman tipe unit (Fase 7) — DIBANGKITKAN dari `src/data/units.ts`,
+ * tidak ditulis manual.
+ *
+ * Alasannya: URL fasad dan denah sudah tercatat di sumber data unit. Menyalinnya
+ * ke sini sebagai literal akan melahirkan salinan keempat yang bisa menyimpang —
+ * masalah yang persis dibereskan Fase 3 ketika tiga salinan data unit
+ * direkonsiliasi jadi satu. Judul dan caption tetap Bahasa Indonesia dan memuat
+ * kata kunci, sesuai kontrak di kepala berkas ini.
+ *
+ * URL-nya memang SAMA dengan yang terdaftar di halaman cluster. Itu disengaja:
+ * kolom `page` menyatakan gambar ini tampil di halaman MANA, dan satu gambar
+ * yang tayang di dua halaman memang perlu dua asosiasi supaya image sitemap
+ * mencerminkan kenyataan.
+ */
+const unitTypePageImages: SiteImage[] = unitRegistry.flatMap((unit) => {
+  const page = `/tipe-rumah/${unit.id}`;
+  const label = `Tipe ${unit.typeCategory} ${unit.name}`;
+  const entries: SiteImage[] = [
+    {
+      url: unit.facadeImage,
+      title: toSeoTitle(`Fasad ${label}`),
+      caption: `Fasad ${label} di ${unit.cluster === "ladera" ? "Cluster Ladera" : "Cluster Cascada"} Grand Duta City Parung South of Jakarta.`,
+      page,
+      priority: true,
+    },
+  ];
+  if (unit.floorPlanImage) {
+    entries.push({
+      url: unit.floorPlanImage,
+      title: toSeoTitle(`Denah ${label}`),
+      caption: `Denah lantai ${label} di ${unit.cluster === "ladera" ? "Cluster Ladera" : "Cluster Cascada"} Grand Duta City Parung South of Jakarta.`,
+      page,
+    });
+  }
+  return entries;
+});
+
 export const siteImages: SiteImage[] = [
   // ── BERANDA (/) ──────────────────────────────────────────────────────────
   ...createPageImages("/", "halaman beranda", homeSeeds),
@@ -656,4 +696,6 @@ export const siteImages: SiteImage[] = [
 
   // ── KONTAK (/kontak) ────────────────────────────────────────────────────
   ...createPageImages("/kontak", "halaman kontak marketing", kontakSeeds),
+  // ── TIPE RUMAH (/tipe-rumah dan /tipe-rumah/*) ──────────────────────────
+  ...unitTypePageImages,
 ];

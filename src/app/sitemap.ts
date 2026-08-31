@@ -1,8 +1,33 @@
 import type { MetadataRoute } from "next";
 import { getCategorySitemapEntries } from "@/lib/articles";
 import { getArticleSitemapEntries } from "@/lib/public/queries";
+import { unitPagePath, units } from "@/data/units";
 
 const BASE_URL = "https://granddutacitysouthofjakarta.com";
+
+/**
+ * Halaman tipe unit (Fase 7).
+ *
+ * `frontera-89` DIKELUARKAN karena halaman itu `noindex` selama pricelist
+ * resminya belum dirilis. Memasukkan URL noindex ke sitemap adalah sinyal yang
+ * saling bertentangan: sitemap berarti "tolong indeks ini", meta robots berarti
+ * "jangan". Daftar pengecualian ini WAJIB sinkron dengan `NOINDEX_UNITS` di
+ * app/(site)/tipe-rumah/[slug]/page.tsx.
+ */
+const NOINDEX_UNIT_IDS = new Set(["frontera-89"]);
+
+function getUnitTypeSitemapEntries(): MetadataRoute.Sitemap {
+  return units
+    .filter((unit) => !NOINDEX_UNIT_IDS.has(unit.id))
+    .map((unit) => ({
+      url: `${BASE_URL}${unitPagePath(unit)}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      // Di bawah halaman cluster (0.9) tapi di atas artikel (0.7): halaman tipe
+      // adalah tujuan komersial, bukan konten editorial.
+      priority: 0.75,
+    }));
+}
 
 // Daftar artikel published dari CMS ikut masuk sitemap agar Google menemukan
 // URL /{slug} tanpa bergantung pada internal link saja.
@@ -104,6 +129,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${BASE_URL}/tipe-rumah`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    ...getUnitTypeSitemapEntries(),
     ...getCategorySitemapEntries(),
   ];
 

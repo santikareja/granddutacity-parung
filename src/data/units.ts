@@ -69,7 +69,13 @@ export type Unit = {
   carports: number | null;
   /** Jumlah lantai menurut denah arsitektur Product Knowledge. */
   floors: number | null;
-  status: UnitStatus;
+  /**
+   * Kavling hook (sudut). Bukan label pemasaran: unit hook punya luas tanah
+   * jauh di atas tipe lain dan dua sisi terbuka, jadi ia karakteristik produk
+   * yang nyata. "Rumah hook" juga istilah yang dipakai pembeli saat mencari.
+   */
+  isHook: boolean;
+    status: UnitStatus;
   /** String harga tampil untuk kartu. Mewakili Harga Jual Tunai Keras terendah. */
   priceLabel: string;
   facadeImage: string;
@@ -100,7 +106,8 @@ export const units: readonly Unit[] = [
     bathrooms: null,
     carports: null,
     floors: 1,
-    status: "check-siteplan",
+        isHook: false,
+        status: "check-siteplan",
     priceLabel: "700 Juta-an",
     facadeImage: `${CLOUDINARY}/v1775577163/Type_Aira_no2g1u.webp`,
     floorPlanImage: null,
@@ -122,7 +129,8 @@ export const units: readonly Unit[] = [
     bathrooms: 1,
     carports: 2,
     floors: 1,
-    status: "check-siteplan",
+        isHook: false,
+        status: "check-siteplan",
     // Dikonfirmasi pemilik: mewakili Tunai Keras terendah Rp 845.550.000.
     priceLabel: "800 Juta-an",
     facadeImage: `${CLOUDINARY}/v1775577152/Type_Malta_tkq7di.webp`,
@@ -147,7 +155,8 @@ export const units: readonly Unit[] = [
     bathrooms: 2,
     carports: 2,
     floors: 2,
-    status: "check-siteplan",
+        isHook: false,
+        status: "check-siteplan",
     priceLabel: "1.1 Milyar-an",
     facadeImage: `${CLOUDINARY}/v1775577152/Type_Tuscan_drllpk.webp`,
     // Idem Malta: aset sudah tayang di /cluster-ladera, kini terdaftar.
@@ -170,7 +179,8 @@ export const units: readonly Unit[] = [
     carports: null,
     floors: 2,
     // Pricelist resmi menyebut "Segera Hadir" — belum dirilis.
-    status: "coming-soon",
+        isHook: false,
+        status: "coming-soon",
     priceLabel: "Segera Hadir",
     facadeImage: `${CLOUDINARY}/v1775577152/Type_Tuscan_drllpk.webp`,
     floorPlanImage: null,
@@ -193,7 +203,8 @@ export const units: readonly Unit[] = [
     bathrooms: 1,
     carports: 1,
     floors: 1,
-    status: "check-siteplan",
+        isHook: false,
+        status: "check-siteplan",
     priceLabel: "800 Juta-an",
     facadeImage: `${CLOUDINARY}/v1775577163/Type_Aira_no2g1u.webp`,
     floorPlanImage: `${CLOUDINARY}/v1775917837/cluster-cascada-tipe-aira_q7et6h.webp`,
@@ -214,7 +225,8 @@ export const units: readonly Unit[] = [
     bathrooms: 1,
     carports: 1,
     floors: 1,
-    status: "sold-out",
+        isHook: false,
+        status: "sold-out",
     priceLabel: "700 Juta",
     // CATATAN: aset fasad Keila belum ada; sengaja memakai render Aira dengan
     // penanda eksplisit ini, bukan komentar "fallback" yang mudah terlewat.
@@ -238,7 +250,8 @@ export const units: readonly Unit[] = [
     bathrooms: 2,
     carports: 1,
     floors: 2,
-    status: "check-siteplan",
+        isHook: false,
+        status: "check-siteplan",
     priceLabel: "800 Juta-an",
     facadeImage: `${CLOUDINARY}/v1775577152/Type_Manoa_j8uvcr.webp`,
     floorPlanImage: `${CLOUDINARY}/v1775917835/cluster-cascada-tipe-manoa_xdmt5m.webp`,
@@ -259,7 +272,8 @@ export const units: readonly Unit[] = [
     bathrooms: null,
     carports: null,
     floors: null,
-    status: "check-siteplan",
+        isHook: true,
+        status: "check-siteplan",
     priceLabel: "1.3 Milyar-an",
     facadeImage: `${CLOUDINARY}/v1775577152/Type_Manoa_j8uvcr.webp`,
     floorPlanImage: null,
@@ -284,7 +298,8 @@ export const units: readonly Unit[] = [
     bathrooms: 2,
     carports: 2,
     floors: 2,
-    status: "check-siteplan",
+        isHook: false,
+        status: "check-siteplan",
     priceLabel: "1.1 Milyar-an",
     facadeImage: `${CLOUDINARY}/v1775577163/Type_Victoria_scolcc.webp`,
     floorPlanImage: `${CLOUDINARY}/v1775917834/cluster-cascada-tipe-victoria_xntjns.webp`,
@@ -305,7 +320,8 @@ export const units: readonly Unit[] = [
     bathrooms: 2,
     carports: 2,
     floors: 2,
-    status: "check-siteplan",
+        isHook: false,
+        status: "check-siteplan",
     priceLabel: "1.4 Milyar-an",
     facadeImage: `${CLOUDINARY}/v1775577152/Type_Alexandra_hhvq3f.webp`,
     floorPlanImage: `${CLOUDINARY}/v1775917838/cluster-cascada-tipe-alexandra_urmnh4.webp`,
@@ -326,6 +342,39 @@ export const CLUSTER_LABEL: Record<ClusterKey, string> = {
 
 export const getUnitById = (id: string): Unit | undefined =>
   units.find((unit) => unit.id === id);
+
+/**
+ * Path halaman tipe unit. SATU tempat, karena `@id` dan `Offer.url` di
+ * `src/lib/schema.ts` sudah memakai pola ini dan sudah tayang di produksi.
+ * Mengubah pola di sini WAJIB diikuti route-nya, kalau tidak structured data
+ * akan menunjuk URL 404 lagi.
+ */
+export const unitPagePath = (unit: Unit): string => `/tipe-rumah/${unit.id}`;
+
+/**
+ * Nama tipe untuk tampilan. `name` disimpan KAPITAL semua ("VERONA") karena
+ * begitulah penulisannya di pricelist resmi, tapi judul halaman yang seluruhnya
+ * kapital terbaca seperti berteriak. "AIRA+" dan "T-62" ditangani apa adanya:
+ * keduanya bukan kata biasa.
+ */
+export const unitDisplayName = (unit: Unit): string => {
+  if (unit.name === "T-62") return "T-62";
+  const [head, ...rest] = unit.name.toLowerCase().split("");
+  const titled = head.toUpperCase() + rest.join("");
+  return titled.replace(/\+$/, "+");
+};
+
+/** Label ukuran ringkas, mis. "58/60". Dipakai di judul dan tabel banding. */
+export const unitSizeLabel = (unit: Unit): string => `${unit.lb}/${unit.lt}`;
+
+/**
+ * Tipe lain di cluster yang sama, untuk tabel banding di halaman tipe.
+ * Inilah sumber keunikan per halaman yang membuat 10 halaman ini BUKAN
+ * doorway page: setiap halaman membandingkan dirinya dengan tetangga yang
+ * berbeda, dengan angka yang berbeda.
+ */
+export const getSiblingUnits = (unit: Unit): Unit[] =>
+  units.filter((other) => other.cluster === unit.cluster && other.id !== unit.id);
 
 export const getUnitsByCluster = (cluster: ClusterKey): Unit[] =>
   units.filter((unit) => unit.cluster === cluster);

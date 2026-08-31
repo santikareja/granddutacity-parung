@@ -373,6 +373,15 @@ export const residenceNode = (unit: Unit) => {
       name: "Kode Tipe",
       value: unit.typeCode,
     },
+    // Hanya diemit bila benar. Kavling hook adalah karakteristik nyata
+    // (luas tanah di atas tipe lain, dua sisi terbuka), bukan label pemasaran.
+    unit.isHook
+      ? {
+          "@type": "PropertyValue",
+          name: "Posisi Kavling",
+          value: "Hook",
+        }
+      : null,
   ].filter(Boolean);
 
   return {

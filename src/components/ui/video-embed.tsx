@@ -24,11 +24,19 @@ export function VideoEmbed({
   url,
   poster,
   title,
+  aspect = "landscape",
   className,
 }: {
   url: string;
   poster: string;
   title: string;
+  /**
+   * `portrait` = 9:16 untuk rekaman vertikal (yang dipakai halaman tipe rumah),
+   * `landscape` = 16:9. Rasionya dipilih eksplisit alih-alih dibiarkan
+   * menyesuaikan isi, supaya tidak ada pergeseran tata letak saat video mulai
+   * dimuat (penyumbang CLS).
+   */
+  aspect?: "portrait" | "landscape";
   className?: string;
 }) {
   const [playing, setPlaying] = useState(false);
@@ -37,7 +45,8 @@ export function VideoEmbed({
   return (
     <div
       className={cn(
-        "relative aspect-video w-full overflow-hidden rounded-2xl border border-[#0b120c]/10 bg-[#0b120c]",
+        "relative w-full overflow-hidden rounded-2xl border border-[#0b120c]/10 bg-[#0b120c]",
+        aspect === "portrait" ? "aspect-[9/16]" : "aspect-video",
         className,
       )}
     >

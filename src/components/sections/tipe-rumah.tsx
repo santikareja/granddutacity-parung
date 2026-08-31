@@ -34,11 +34,11 @@ import {
 // sementara katalog memakai `aira-42`.
 //
 // Dua perilaku lama dipertahankan dengan sengaja:
-//   - anggaran byte gambar: sebelumnya `clImg` 480x480 (230k piksel) untuk
-//     menekan bandwidth carousel. Sekarang 560x420 = 235k piksel — praktis SAMA,
-//     tapi rasionya 4:3 sesuai area gambar kartu yang baru, jadi tidak ada
-//     piksel yang diunduh lalu dibuang oleh crop. Anggaran yang dijaga keputusan
-//     lama tetap utuh; yang berubah hanya bentuknya.
+//   - anggaran byte gambar: kartu kembali ke rasio 3:4 dengan FOTO PENUH, jadi
+//     transformasinya 480x640 (307k piksel). Ini di atas 480x480 (230k) yang
+//     dipakai versi paling awal, dan itu disengaja: kini fotonya ADALAH kartunya,
+//     bukan thumbnail kecil di atas blok teks, sehingga ketajaman lebih terasa.
+//     Tetap lazy dan tetap q55 supaya kenaikannya terkendali.
 //   - kartu sold-out disembunyikan: carousel homepage untuk menarik minat,
 //     bukan arsip. Unit sold-out tetap tampil di halaman cluster masing-masing.
 //
@@ -54,7 +54,7 @@ const propertyTypes = catalogUnits
     typeCategory: unit.typeCategory,
     cluster: CLUSTER_LABEL[unit.cluster],
     price: unit.priceLabel,
-    image: clImg(unit.facadeImage, { w: 560, h: 420, q: 55 }),
+    image: clImg(unit.facadeImage, { w: 480, h: 640, q: 55 }),
     alt: unitFacadeAlt(unit),
     specs: {
       bed: bedroomLabel(unit),

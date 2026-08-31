@@ -69,9 +69,9 @@ const toLegacy = (unit: Unit): LegacyPropertyType => ({
   ...(unit.status === "sold-out" ? { soldOut: true } : {}),
   // Sebelumnya URL Cloudinary ASLI dikirim apa adanya ke kartu, jadi halaman
   // cluster mengunduh render ukuran penuh untuk kotak selebar ~380px. Ukurannya
-  // diseragamkan dengan carousel beranda: 560x420 (4:3, sama dengan rasio area
-  // gambar kartu) sehingga tidak ada piksel yang diunduh lalu dibuang crop.
-  image: clImg(unit.facadeImage, { w: 560, h: 420, q: 55 }),
+  // diseragamkan dengan carousel beranda: 480x640, yaitu rasio 3:4 yang sama
+  // dengan kartunya, sehingga tidak ada piksel yang diunduh lalu dibuang crop.
+  image: clImg(unit.facadeImage, { w: 480, h: 640, q: 55 }),
   alt: unitFacadeAlt(unit),
   sizeLabel: unitSizeLabel(unit),
   href: unitPagePath(unit),

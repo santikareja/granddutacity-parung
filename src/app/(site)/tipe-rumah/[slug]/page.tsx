@@ -28,15 +28,8 @@ import { Header } from "@/components/ui/header-2";
 import { UnitGallery } from "@/components/ui/unit-gallery";
 import { VideoEmbed } from "@/components/ui/video-embed";
 import { facilities, type FacilityIconKey } from "@/data/facilities";
-import {
-  ACCESS_SUMMARY,
-  CLUSTER_SITEPLAN,
-  CLUSTER_THEME,
-  getUnitContent,
-  resolveUnitGallery,
-  resolveUnitOverview,
-  resolveUnitVideo,
-} from "@/data/unit-content";
+import { CLUSTER_THEME } from "@/data/unit-content";
+import { resolveUnitContentForUnit } from "@/lib/v2-admin/unit-content";
 import {
   CLUSTER_LABEL,
   PROJECT_ELECTRICAL,
@@ -46,7 +39,6 @@ import {
   getSiblingUnits,
   getUnitById,
   unitDisplayName,
-  unitFacadeAlt,
   unitPagePath,
   unitSizeLabel,
   unitSpecSentence,
@@ -307,15 +299,16 @@ export default async function TipeRumahDetailPage({ params }: Props) {
   const pageUrl = `${SITE_URL}${unitPagePath(unit)}`;
   const siblings = getSiblingUnits(unit);
 
-  const content = getUnitContent(unit.id);
-  const gallery = resolveUnitGallery(unit, unitFacadeAlt(unit));
-  const video = resolveUnitVideo(unit);
-  const overview = resolveUnitOverview(unit);
-  const siteplan = CLUSTER_SITEPLAN[unit.cluster];
+  // Konten dibaca dari DATABASE dengan fallback ke default kode. Lihat
+  // src/lib/v2-admin/unit-content.ts: fungsi ini tidak pernah melempar, jadi
+  // kegagalan DB menurunkan halaman ke nilai default alih-alih membuatnya 500.
+  const content = await resolveUnitContentForUnit(unit);
+  const { gallery, video, overview, siteplan, accessItems } = content;
+  const floorPlanImage = content.floorPlanImage;
   const soldOut = unit.status === "sold-out";
 
   const priceDisplay =
-    unit.status === "coming-soon" ? unit.priceLabel : `Rp ${unit.priceLabel}`;
+    unit.status === "coming-soon" ? content.priceLabel : `Rp ${content.priceLabel}`;
 
   const availabilityLabel = soldOut
     ? "Sold out"
@@ -334,7 +327,7 @@ export default async function TipeRumahDetailPage({ params }: Props) {
   const navItems: { href: string; label: string }[] = [
     { href: "#deskripsi", label: "Deskripsi" },
     { href: "#spesifikasi", label: "Spesifikasi" },
-    ...(unit.floorPlanImage ? [{ href: "#denah", label: "Denah" }] : []),
+    ...(floorPlanImage ? [{ href: "#denah", label: "Denah" }] : []),
     ...(video ? [{ href: "#video", label: "Video" }] : []),
     { href: "#fasilitas", label: "Fasilitas" },
     { href: "#lokasi", label: "Akses" },
@@ -667,7 +660,7 @@ export default async function TipeRumahDetailPage({ params }: Props) {
         </section>
 
         {/* ── Denah — hanya bila asetnya benar-benar ada ── */}
-        {unit.floorPlanImage ? (
+        {floorPlanImage ? (
           <section
             id="denah"
             aria-labelledby="denah-title"
@@ -681,7 +674,7 @@ export default async function TipeRumahDetailPage({ params }: Props) {
               />
               <div className="relative mt-8 h-80 overflow-hidden rounded-2xl border border-[#0b120c]/10 bg-white sm:h-96 md:h-[620px]">
                 <ClickableSiteplanImage
-                  src={unit.floorPlanImage}
+                  src={floorPlanImage}
                   alt={`Denah tipe ${name} ${size} ${clusterLabel} GDC Parung`}
                   fill
                   sizes="(max-width: 768px) 100vw, 1100px"
@@ -703,15 +696,50 @@ export default async function TipeRumahDetailPage({ params }: Props) {
             <div className="mx-auto max-w-screen-xl px-4 sm:px-6 md:px-14">
               <SectionHeading
                 id="video"
-                title={`Video ${clusterLabel}`}
+                title={video.title}
                 intro="Suasana kawasan dan lingkungan cluster tempat tipe ini berada."
               />
-              <div className="mt-8 max-w-4xl">
-                <VideoEmbed
-                  url={video.url}
-                  poster={video.poster ?? unit.facadeImage}
-                  title={video.title}
-                />
+
+              {/* Video POTRET 9:16 sesuai permintaan pemilik. Karena bentuknya
+                  tinggi, ia tidak dilebarkan penuh: lebarnya dibatasi dan
+                  didampingi ringkasan agar ruang di sebelahnya tidak menganggur
+                  di layar lebar. Di ponsel keduanya menumpuk, video lebih dulu. */}
+              <div className="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+                <div className="mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:col-span-5 lg:mx-0">
+                  <VideoEmbed
+                    url={video.url}
+                    poster={video.poster ?? content.facadeImage}
+                    title={video.title}
+                    aspect="portrait"
+                  />
+                </div>
+
+                <div className="lg:col-span-7">
+                  <p className="leading-relaxed text-[#0b120c]/75">
+                    Rekaman ini memperlihatkan gerbang, boulevard, dan suasana
+                    lingkungan {clusterLabel} tempat Tipe {name} dibangun.
+                    Untuk melihat unit secara langsung, marketing dapat mengatur
+                    jadwal survey ke lokasi.
+                  </p>
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <a
+                      href={waHref}
+                      data-wa-placement="tipe-rumah-video"
+                      data-wa-unit={`${name} ${size}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-[#C8521A] px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#DE5E1E]"
+                    >
+                      Atur jadwal survey <ArrowRight className="size-4" />
+                    </a>
+                    <Link
+                      href="/galeri"
+                      className="inline-flex items-center justify-center rounded-full border border-[#0b120c]/20 px-6 py-3 text-xs font-bold uppercase tracking-[0.16em] text-[#0b120c] transition-colors hover:border-[#A85D16] hover:text-[#A85D16]"
+                    >
+                      Galeri kawasan
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -769,11 +797,14 @@ export default async function TipeRumahDetailPage({ params }: Props) {
             <SectionHeading
               id="lokasi"
               title="Aksesibilitas"
-              intro="Ringkasan akses dari kawasan. Peta, rincian jarak per exit tol, dan rute alternatif dibahas lengkap di halaman lokasi."
+              intro="Perkiraan waktu tempuh dari kawasan. Peta, rincian per exit tol, dan rute alternatif dibahas lengkap di halaman lokasi."
             />
 
+            {/* Daftar ini bisa disunting dari /admin/unit-content per tipe, jadi
+                waktu tempuh dapat diperbarui tanpa deploy saat akses berubah
+                (mis. ruas tol baru dibuka). */}
             <dl className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {ACCESS_SUMMARY.map((item) => (
+              {accessItems.map((item) => (
                 <div
                   key={item.label}
                   className="rounded-2xl border border-[#0b120c]/10 bg-white/60 p-5"

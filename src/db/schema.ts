@@ -350,6 +350,45 @@ export const adminAuditLog = pgTable("admin_audit_log", {
 });
 
 // ---------------------------------------------------------------------------
+// unit_content — konten halaman /tipe-rumah/<slug> yang bisa diedit dari admin.
+//
+// Migrasi: src/db/sql/0002_unit_content.sql. `unit_id` unik
+// (unit_content_unit_id_idx) dan dipakai sebagai target ON CONFLICT saat upsert.
+//
+// SEMUA kolom konten NULL-able, dan itu disengaja: NULL berarti "pakai default
+// dari kode" (src/data/units.ts + src/data/unit-content.ts). Dengan begitu situs
+// tetap utuh saat tabel kosong, dan `next build` tidak bergantung pada database.
+//
+// `unit_id` BUKAN foreign key — daftar unit hidup di kode, bukan di database.
+// ---------------------------------------------------------------------------
+
+export const unitContent = pgTable("unit_content", {
+  id: serial("id").primaryKey(),
+  unitId: varchar("unit_id").notNull(),
+  priceLabel: varchar("price_label"),
+  facadeImage: varchar("facade_image"),
+  floorPlanImage: varchar("floor_plan_image"),
+  // Array string.
+  overview: jsonb("overview"),
+  highlights: jsonb("highlights"),
+  suitedFor: jsonb("suited_for"),
+  // Array objek { url, alt, caption? }.
+  gallery: jsonb("gallery"),
+  // Array objek { label, value }.
+  accessItems: jsonb("access_items"),
+  videoUrl: varchar("video_url"),
+  videoPoster: varchar("video_poster"),
+  videoTitle: varchar("video_title"),
+  isPublished: boolean("is_published").default(true).notNull(),
+  updatedAt: timestamp("updated_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  createdAt: timestamp("created_at", { precision: 3, withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// ---------------------------------------------------------------------------
 // Relations (untuk query relational Drizzle)
 // ---------------------------------------------------------------------------
 
@@ -395,5 +434,7 @@ export type AgentApiToken = typeof agentApiTokens.$inferSelect;
 export type NewAgentApiToken = typeof agentApiTokens.$inferInsert;
 export type AiTask = typeof aiTasks.$inferSelect;
 export type NewAiTask = typeof aiTasks.$inferInsert;
+export type UnitContentRow = typeof unitContent.$inferSelect;
+export type NewUnitContentRow = typeof unitContent.$inferInsert;
 export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
 export type NewAdminAuditLog = typeof adminAuditLog.$inferInsert;

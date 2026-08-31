@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Home,
   LayoutDashboard,
   Newspaper,
   FolderTree,
@@ -49,6 +50,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Konten",
     items: [
       { href: "/admin/articles", label: "Artikel", icon: Newspaper },
+      { href: "/admin/unit-content", label: "Konten Tipe Rumah", icon: Home },
       { href: "/admin/categories", label: "Kategori", icon: FolderTree },
       { href: "/admin/tags", label: "Tag", icon: Tags },
       { href: "/admin/media", label: "Media", icon: Images },

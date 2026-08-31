@@ -77,6 +77,20 @@ const nextConfig: NextConfig = {
         destination: "/admin/:path*",
         permanent: true,
       },
+      // Artikel yang value proposition-nya identik homepage, dan H1/title-nya
+      // membuka dengan "Grand Duta City Parung South of Jakarta" — kombinasi
+      // primary + secondary keyword homepage, sinyal kanibalisasi paling parah
+      // dari 9 halaman yang diaudit (30 Agustus 2026). Sudah didesain sejak
+      // spec seo-cannibalization-and-pseo (task 1.7/1.8), pemilik mengeksekusi
+      // setelah audit H1 mengonfirmasi tidak ada alasan mempertahankannya
+      // sebagai halaman berdiri sendiri. Ditaruh di grup redirect statis paling
+      // atas (sesudah /v2-admin, sebelum /:path+/) agar menang atas aturan
+      // trailing-slash di bawahnya.
+      {
+        source: "/perumahan-eksklusif-di-parung-bogor-dengan-fasilitas-lengkap",
+        destination: "/",
+        permanent: true,
+      },
       {
         source: "/:path+/",
         destination: "/:path+",

@@ -452,27 +452,40 @@ export const getPublishedArticleSummaries = async (
 };
 
 /**
- * Entri sitemap: hanya slug + publishedAt untuk artikel published.
- * depth 0, limit 500, ORDER BY publishedAt DESC.
+ * Entri sitemap artikel published. depth 0, limit 500.
+ *
+ * `updatedAt` ikut diambil (Fase 6): `lastModified` di sitemap seharusnya
+ * menyatakan kapan konten TERAKHIR BERUBAH, bukan kapan ia pertama diterbitkan.
+ * Memakai `publishedAt` membuat artikel yang baru saja disunting tetap terlihat
+ * lama bagi Google, sehingga sinyal freshness-nya hilang justru pada artikel
+ * yang paling aktif dirawat.
  */
 export const getArticleSitemapEntries = async (): Promise<
-  { slug: string; publishedAt: string | null }[]
+  { slug: string; publishedAt: string | null; updatedAt: string | null }[]
 > => {
   try {
     const rows = await db
-      .select({ slug: artikel.slug, publishedAt: artikel.publishedAt })
+      .select({
+        slug: artikel.slug,
+        publishedAt: artikel.publishedAt,
+        updatedAt: artikel.updatedAt,
+      })
       .from(artikel)
       .where(eq(artikel.status, "published"))
       .orderBy(desc(artikel.publishedAt))
       .limit(500);
 
     return rows
-      .filter((row): row is { slug: string; publishedAt: Date | null } =>
-        Boolean(row.slug),
+      .filter(
+        // `updatedAt` non-nullable di skema (kolom NOT NULL), jadi predikatnya
+        // hanya perlu mempersempit `slug`.
+        (row): row is { slug: string; publishedAt: Date | null; updatedAt: Date } =>
+          Boolean(row.slug),
       )
       .map((row) => ({
         slug: row.slug,
         publishedAt: toIso(row.publishedAt),
+        updatedAt: toIso(row.updatedAt),
       }));
   } catch (error) {
     console.warn(

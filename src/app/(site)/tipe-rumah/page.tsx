@@ -99,9 +99,16 @@ const pageSchema = graph([
       position: index + 1,
       name: `Tipe ${unitDisplayName(unit)} ${unitSizeLabel(unit)}`,
       url: `${SITE_URL}${unitPagePath(unit)}`,
-      // Merujuk node hunian yang @id-nya sama dengan yang dipakai halaman
-      // tipe, halaman cluster, dan pricelist — satu entitas, bukan empat.
-      item: ref(`${SITE_URL}${unitPagePath(unit)}#residence`),
+      // REFERENSI BERTIPE ke node hunian yang @id-nya sama dengan yang dipakai
+      // halaman tipe, halaman cluster, dan pricelist — satu entitas, bukan
+      // empat.
+      //
+      // `@type` disertakan karena node aslinya didefinisikan di halaman tipe,
+      // BUKAN di hub ini. Crawler yang membaca hub saja hanya akan melihat
+      // `{"@id": "..."}` tanpa petunjuk jenis entitas — pola yang sama sudah
+      // ditandai sebagai markup error oleh Site Audit pada properti `seller`
+      // di /pricelist.
+      item: { "@type": "SingleFamilyResidence", ...ref(`${SITE_URL}${unitPagePath(unit)}#residence`) },
     })),
   },
 ]);

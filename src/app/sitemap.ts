@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getCategorySitemapEntries } from "@/lib/articles";
 import { getArticleSitemapEntries } from "@/lib/public/queries";
+import { siteImages } from "@/data/images";
 import { unitPagePath, units } from "@/data/units";
 
 const BASE_URL = "https://granddutacitysouthofjakarta.com";
@@ -19,14 +20,12 @@ const NOINDEX_UNIT_IDS = new Set(["frontera-89"]);
 function getUnitTypeSitemapEntries(): MetadataRoute.Sitemap {
   return units
     .filter((unit) => !NOINDEX_UNIT_IDS.has(unit.id))
-    .map((unit) => ({
-      url: `${BASE_URL}${unitPagePath(unit)}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
+    .map((unit) =>
       // Di bawah halaman cluster (0.9) tapi di atas artikel (0.7): halaman tipe
-      // adalah tujuan komersial, bukan konten editorial.
-      priority: 0.75,
-    }));
+      // adalah tujuan komersial, bukan konten editorial. Fasad dan denah ikut
+      // terlampir karena `imagesFor()` membacanya dari registry gambar.
+      entry(unitPagePath(unit), 0.75, "weekly"),
+    );
 }
 
 // Daftar artikel published dari CMS ikut masuk sitemap agar Google menemukan
@@ -41,100 +40,80 @@ async function getArtikelSitemapEntries(): Promise<MetadataRoute.Sitemap> {
 
   return entries.map((entry) => ({
     url: `${BASE_URL}/${entry.slug}`,
-    lastModified: entry.publishedAt ? new Date(entry.publishedAt) : new Date(),
+    // `updatedAt` didahulukan (Fase 6). `publishedAt` membuat artikel yang baru
+    // disunting tetap terlihat lama bagi Google, jadi sinyal freshness-nya
+    // hilang tepat pada artikel yang paling aktif dirawat.
+    lastModified: new Date(entry.updatedAt ?? entry.publishedAt ?? Date.now()),
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
+}
+
+/**
+ * Gambar per halaman untuk properti `images` native Next 16.
+ *
+ * `/images.xml` SENGAJA DIPERTAHANKAN dan tidak dipensiunkan: route handler itu
+ * berfungsi dan sudah terdaftar sebagai sitemap di Search Console. Mencabutnya
+ * sekarang adalah risiko tanpa imbalan setara. Keduanya boleh hidup bersama —
+ * Google tidak mempermasalahkan satu gambar muncul di dua sitemap.
+ */
+function imagesFor(path: string): string[] {
+  return siteImages.filter((image) => image.page === path).map((image) => image.url);
+}
+
+/** Bangun entri sitemap sekaligus melampirkan gambar halaman itu bila ada. */
+function entry(
+  path: string,
+  priority: number,
+  changeFrequency: "weekly" | "monthly",
+): MetadataRoute.Sitemap[number] {
+  const url = path === "/" ? BASE_URL : `${BASE_URL}${path}`;
+  const images = imagesFor(path);
+  return {
+    url,
+    lastModified: new Date(),
+    changeFrequency,
+    priority,
+    ...(images.length > 0 ? { images } : {}),
+  };
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [artikelEntries] = await Promise.all([getArtikelSitemapEntries()]);
 
   const staticEntries: MetadataRoute.Sitemap = [
+    // Homepage juga membawa `videos`: tur kawasan di YouTube. `uploadDate`-nya
+    // dibaca dari structured data YouTube sendiri (lihat page.tsx homepage),
+    // bukan ditebak.
     {
-      url: BASE_URL,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1.0,
+      ...entry("/", 1.0, "weekly"),
+      videos: [
+        {
+          title: "Grand Duta City Parung South of Jakarta Progress Terbaru",
+          thumbnail_loc: "https://i.ytimg.com/vi/AZLiHEyd9Yo/hqdefault.jpg",
+          description:
+            "Tur kawasan Grand Duta City Parung South of Jakarta: gerbang cluster, boulevard utama, The Beach Lagoon, Central Park, dan progres pembangunan terbaru.",
+        },
+      ],
     },
-    {
-      url: `${BASE_URL}/pricelist-grand-duta-city`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/artikel`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/category`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.65,
-    },
-    {
-      url: `${BASE_URL}/author/santika-reza`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cluster-ladera`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/cluster-cascada`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/galeri`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/cara-beli-kpr`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/update-stok-siteplan-grand-duta-city-parung`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/lokasi-akses-grand-duta-city-parung`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/kontak`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/tipe-rumah`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
+    entry("/pricelist-grand-duta-city", 0.85, "weekly"),
+    entry("/artikel", 0.85, "weekly"),
+    entry("/category", 0.65, "monthly"),
+    entry("/author/santika-reza", 0.6, "monthly"),
+    entry("/cluster-ladera", 0.9, "weekly"),
+    entry("/cluster-cascada", 0.9, "weekly"),
+    entry("/galeri", 0.7, "monthly"),
+    entry("/about", 0.6, "monthly"),
+    entry("/cara-beli-kpr", 0.8, "weekly"),
+    entry("/update-stok-siteplan-grand-duta-city-parung", 0.8, "weekly"),
+    entry("/lokasi-akses-grand-duta-city-parung", 0.85, "weekly"),
+    entry("/kontak", 0.8, "weekly"),
+    entry("/tipe-rumah", 0.85, "weekly"),
+    // Dua halaman legal ini INDEXABLE tapi belum pernah masuk sitemap.
+    // Priority rendah karena bukan tujuan pencarian, tapi membiarkannya di luar
+    // sitemap berarti Google hanya menemukannya lewat tautan footer.
+    entry("/disclaimer", 0.3, "monthly"),
+    entry("/privacy-policy", 0.3, "monthly"),
     ...getUnitTypeSitemapEntries(),
     ...getCategorySitemapEntries(),
   ];

@@ -20,19 +20,33 @@ export function Header() {
 	const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
 	const scrolled = useScroll(15);
 
+	// Tiga menu induk sebelumnya `href: '#'`. Anak-anaknya tetap ter-crawl karena
+	// ada di DOM, tapi HIERARKINYA tidak terbaca: Google tidak bisa menyimpulkan
+	// bahwa "Cluster" adalah kategori yang membawahi Ladera dan Cascada, karena
+	// induknya tidak menunjuk halaman apa pun.
+	//
+	// Ini salah satu dari dua hambatan sitelinks yang teridentifikasi di audit
+	// awal; satunya (entitas schema terpecah) sudah dibereskan Fase 5. Kini tiap
+	// induk menunjuk hub yang benar-benar ada, jadi struktur navigasinya utuh.
+	//
+	// `Cluster` -> `/tipe-rumah` dipilih, BUKAN salah satu halaman cluster:
+	// menunjuk `/cluster-ladera` akan membuat menu induk berebut dengan anaknya
+	// sendiri, sementara `/tipe-rumah` adalah hub netral yang memang membawahi
+	// kedua cluster.
 	const links: NavItem[] = [
 		{ label: 'Beranda', href: '/' },
 		{ 
 			label: 'Cluster', 
-			href: '#',
+			href: '/tipe-rumah',
 			submenu: [
+				{ label: 'Semua Tipe Rumah', href: '/tipe-rumah', desc: '10 tipe · Harga, denah & spesifikasi' },
 				{ label: 'Cluster Ladera', href: '/cluster-ladera', desc: 'American Classic Modern · Mulai 800 Jt' },
 				{ label: 'Cluster Cascada', href: '/cluster-cascada', desc: 'Modern Tropical Resort · Mulai 800 Jt' }
 			]
 		},
 		{ 
 			label: 'Harga & Stok', 
-			href: '#',
+			href: '/pricelist-grand-duta-city',
 			submenu: [
 				{ label: 'Pricelist Lengkap', href: '/pricelist-grand-duta-city', desc: 'Harga & simulasi cicilan terbaru' },
 				{ label: 'Update Stok & Siteplan', href: '/update-stok-siteplan-grand-duta-city-parung', desc: 'Ketersediaan unit real-time' }
@@ -40,7 +54,7 @@ export function Header() {
 		},
 		{ 
 			label: 'Informasi', 
-			href: '#',
+			href: '/lokasi-akses-grand-duta-city-parung',
 			submenu: [
 				{ label: 'Tentang Developer', href: '/about', desc: 'Duta Putra Land sejak 1983' },
 				{ label: 'Lokasi & Akses', href: '/lokasi-akses-grand-duta-city-parung', desc: 'Akses 4 exit tol & TOD' },
@@ -109,13 +123,26 @@ export function Header() {
 						{links.map((link, i) => (
 							<div key={i} className="relative group">
 								{link.submenu ? (
-									<button
-										type="button"
+									// Menu induk desktop kini <Link>, bukan <button>. Mengubah
+									// `href` di data saja tidak cukup: selama elemennya <button>,
+									// Google tidak melihat tautan apa pun sehingga hierarki
+									// navigasi tetap tidak terbaca.
+									//
+									// Dropdown tetap terbuka lewat `group-hover` di elemen induk,
+									// jadi perilaku hover tidak berubah. Yang bertambah adalah
+									// klik pada induk sekarang membawa ke hub-nya — perilaku yang
+									// justru diharapkan pengunjung.
+									//
+									// Versi MOBILE sengaja tetap <button>: di layar sentuh, menekan
+									// induk harus membuka akordeon, bukan langsung pindah halaman.
+									// Tautan induk sudah hadir di DOM lewat versi desktop.
+									<Link
+										href={link.href!}
 										className="flex items-center gap-1.5 px-3.5 py-2 text-[11px] tracking-[0.16em] text-[#F8F6F0]/75 hover:text-[#F8F6F0] hover:bg-white/5 rounded-full font-sans font-semibold uppercase transition-all duration-300 cursor-pointer"
 									>
 										<span>{link.label}</span>
 										<ChevronDown className="w-3 h-3 text-[#D49A3D] opacity-80 group-hover:rotate-180 transition-transform duration-300" />
-									</button>
+									</Link>
 								) : (
 									<Link
 										href={link.href!}

@@ -77,17 +77,39 @@ export function ArticleCard({
               {article.tags.slice(0, compact ? 2 : 3).map((tag) => {
                 const tagDefinition =
                   articleTagDefinitions[tag as keyof typeof articleTagDefinitions];
-                const href = tagDefinition
-                  ? getTagPath(tag as keyof typeof articleTagDefinitions)
-                  : `/tag/${encodeURIComponent(String(tag))}`;
+
+                // Tag dari DB yang TIDAK punya definisi arsip dirender sebagai
+                // chip biasa, BUKAN tautan.
+                //
+                // Sebelumnya fallback di sini membuat `/tag/<slug>` untuk tag
+                // apa pun. Karena arsipnya tidak ada, URL itu 308-redirect —
+                // dan audit tautan internal menemukan 4 di antaranya tayang di
+                // /artikel (`perumahan`, `investasi`, `desain`, `brand`;
+                // keempatnya nol kemunculan di articleTagDefinitions).
+                //
+                // Setiap tautan internal ke URL yang me-redirect memaksa Google
+                // satu hop ekstra sebelum sampai tujuan, memboroskan crawl
+                // budget dan menipiskan link equity. Label tag tetap
+                // ditampilkan supaya informasi topiknya tidak hilang bagi
+                // pembaca.
+                if (!tagDefinition) {
+                  return (
+                    <span
+                      key={String(tag)}
+                      className="inline-flex rounded-full border border-white/18 bg-[#0B120C]/45 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#F5F1E8]/90"
+                    >
+                      {String(tag)}
+                    </span>
+                  );
+                }
 
                 return (
                   <Link
                     key={String(tag)}
-                    href={href}
+                    href={getTagPath(tag as keyof typeof articleTagDefinitions)}
                     className="pointer-events-auto inline-flex rounded-full border border-white/18 bg-[#0B120C]/45 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#F5F1E8]/90 transition-colors hover:border-[#F5A524]/45 hover:bg-[#F5A524]/20"
                   >
-                    {tagDefinition?.name ?? String(tag)}
+                    {tagDefinition.name}
                   </Link>
                 );
               })}

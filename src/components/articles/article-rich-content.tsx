@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { createElement } from "react";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 import type { PublicMedia } from "@/types/content";
@@ -138,6 +139,38 @@ function injectReadAlsoNodes(
   };
 }
 
+/**
+ * Turunkan `<h1>` di ISI artikel menjadi `<h2>`.
+ *
+ * MASALAH NYATA yang ditemukan di produksi: `/rumah-di-kawasan-strategis` dan
+ * `/listing-properti-panduan-lengkap` mengirim DUA `<h1>` ke Google — satu dari
+ * template halaman (judul artikel, yang benar) dan satu lagi dari isi artikel
+ * yang ditulis editor di CMS. Pada halaman kedua, keduanya bahkan berbunyi
+ * persis sama.
+ *
+ * Dua `<h1>` membuat Google harus menebak mana topik utama halaman. Untuk situs
+ * yang sedang berjuang memenangkan query brand, membuang kejelasan hierarki
+ * seperti ini tidak ada gunanya.
+ *
+ * Kenapa diperbaiki DI SINI, bukan di `lexical-renderer.tsx`:
+ * renderer itu adalah port 1:1 dari serializer Payload dan punya kontrak
+ * byte-identik yang diuji golden fixture. Menurunkan heading adalah KEPUTUSAN
+ * EDITORIAL milik halaman artikel, bukan perilaku serializer. Jadi port-nya
+ * tetap setia, kebijakannya diterapkan di lapisan pemakai.
+ *
+ * Default `h2` (bukan `h1`) juga disengaja: converter asli memakai `"h1"`
+ * sebagai fallback ketika `node.tag` tidak terbaca — fallback paling berbahaya
+ * yang mungkin, karena node heading rusak akan diam-diam menjadi `<h1>` kedua.
+ */
+const BodyHeadingConverter: JSXConverter = ({ node, nodesToJSX }) => {
+  const children = nodesToJSX({ nodes: (node as { children?: unknown[] }).children as never });
+  const rawTag = (node as { tag?: unknown }).tag;
+  const tag = typeof rawTag === "string" ? rawTag.toLowerCase() : "h2";
+  const safeTag = tag === "h1" ? "h2" : tag;
+  // eslint-disable-next-line react/no-children-prop -- tag dinamis, sama seperti converter asli
+  return createElement(safeTag, { children });
+};
+
 export function ArticleRichContent({ data, readAlsoItems = [] }: ArticleRichContentProps) {
   const enrichedData = injectReadAlsoNodes(data, readAlsoItems);
 
@@ -168,6 +201,7 @@ export function ArticleRichContent({ data, readAlsoItems = [] }: ArticleRichCont
       <LexicalRenderer
         converters={({ defaultConverters }) => ({
           ...defaultConverters,
+          heading: BodyHeadingConverter,
           upload: UploadNodeConverter,
           readAlso: ReadAlsoConverter,
         })}

@@ -1,0 +1,49 @@
+# Berkas disavow — draf untuk ditinjau pemilik sebelum diunggah ke Search Console
+# Dibuat: 2026-08-31, dari data Semrush backlinks_research atas granddutacitysouthofjakarta.com
+#
+# LATAR BELAKANG:
+# 19 backlink dari 16 domain berbeda memakai teks anchor identik yang menjual
+# jasa PBN/backlink spam ("High Quality Dofollow Backlinks DA 50 PA 40 Premium
+# PBN Network Service ... Buy Backlinks Online Cheap"). Domain sumbernya tidak
+# relevan dengan properti (casino, betting, shop generik, archive scraper).
+# Backlink ini TIDAK follow (dofollow, terverifikasi via kolom nofollow=false)
+# dan gelombangnya dimulai awal Juli 2026, memuncak pertengahan-akhir Agustus
+# 2026 — bertepatan dengan periode penurunan ranking yang dilaporkan pemilik.
+#
+# INI BUKAN LINK YANG DIMINTA ATAU DIBAYAR OLEH PEMILIK. Pola dan bahasa anchor
+# adalah tanda khas SEO negatif (negative SEO): pihak ketiga menautkan domain
+# spam ke situs target dengan anchor yang mencurigakan, dengan tujuan membuat
+# Google mengasosiasikan situs dengan jaringan link berkualitas rendah.
+#
+# CATATAN PENTING: disavow adalah alat TERAKHIR, bukan pertama. Google
+# menyatakan mereka umumnya sudah mengabaikan link spam kualitas rendah secara
+# otomatis. Mengajukan disavow yang salah sasaran (menyertakan domain yang
+# sebenarnya tidak berbahaya) bisa MENGHILANGKAN nilai link yang justru positif.
+# Berkas ini HANYA memuat domain dengan pola anchor PBN/spam yang sudah
+# terverifikasi berulang dan tidak relevan — bukan seluruh 138 referring domain.
+#
+# CARA PAKAI:
+#   1. Tinjau daftar di bawah. Setiap baris adalah satu root domain.
+#   2. Bila setuju, unggah file INI (hapus baris berkomentar bila diminta
+#      formulir) di https://search.google.com/search-console/disavow-links
+#      untuk properti granddutacitysouthofjakarta.com.
+#   3. Efeknya butuh beberapa minggu sampai Google memprosesnya kembali.
+#   4. TIDAK menghapus link, hanya meminta Google mengabaikannya saat menilai.
+
+domain:lydiaroyrealestate.com
+domain:plumeriamarketing.com
+domain:onlineshoppingidea.com
+domain:archive-hu.com
+domain:betulcrime.com
+domain:betwinnermirror.com
+domain:breachviews.com
+domain:casinooftheking.com
+domain:clifflisting.com
+domain:m98ufa.com
+domain:masihnyata.com
+domain:mediaboooster.com
+domain:mylisthero.com
+domain:newblogerseo.com
+domain:nivira.shop
+domain:southfwb.com
+domain:backlinksplace.site

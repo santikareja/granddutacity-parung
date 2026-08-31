@@ -19,6 +19,12 @@
 
 import type { Metadata } from "next";
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import {
+  HOMEPAGE_PRIMARY,
+  duplicatePrimaries,
+  ownershipOf,
+  reservedPhraseViolations,
+} from "@/lib/keyword-ownership";
 
 // `next/font/google` butuh plugin build Next dan tidak bisa dieksekusi di
 // Vitest. Hanya nilai `.variable` yang dipakai layout, jadi stub ini cukup.
@@ -335,5 +341,101 @@ describe("R2 & konsistensi entitas", () => {
 
   it("G12: layout tidak lagi mengekspor title.template", () => {
     expect(layoutTemplate).toBeNull();
+  });
+});
+
+// ===========================================================================
+// R3 lanjutan — kepemilikan kata kunci: satu query, satu halaman
+//
+// G4/G5/G5b di atas mendeteksi GEJALA kanibalisasi (frasa brand menggantung di
+// title). Asersi di bawah menutup AKARNYA: setiap halaman harus menyatakan
+// SATU query yang ia klaim, dan klaim itu harus eksklusif. Tanpa ini, halaman
+// baru bisa lolos G4/G5 tapi tetap berhadapan langsung dengan halaman lain.
+// ===========================================================================
+
+describe("R3 — kepemilikan kata kunci eksklusif", () => {
+  it("G13: title homepage DIBUKA dengan kata kunci utama, bukan menaruhnya di tengah", () => {
+    // Pemilik memilih "grand duta city parung" sebagai target utama karena
+    // volume pencariannya jauh lebih tinggi. Posisi di awal title adalah
+    // pembobotan yang paling langsung untuk keputusan itu.
+    const title = resolveTitle("/", home().metadata.title).toLowerCase();
+    expect(title.startsWith(HOMEPAGE_PRIMARY)).toBe(true);
+  });
+
+  it("G13b: homepage tetap memuat kata kunci kedua", () => {
+    // Homepage menargetkan KEDUA frasa. Yang kedua boleh di belakang, tapi
+    // tidak boleh hilang — tidak ada halaman lain yang menggantikannya.
+    const home_ = home();
+    const haystack = [
+      resolveTitle("/", home_.metadata.title),
+      descriptionOf(home_.metadata),
+    ]
+      .join(" ")
+      .toLowerCase();
+    // "south of jakarta" harus hadir; frasa penuhnya ada di <h1> (G1).
+    expect(haystack).toContain("south of jakarta");
+  });
+
+  it("G14: setiap route indexable terdaftar di peta kepemilikan kata kunci", () => {
+    // Halaman baru yang lupa didaftarkan = kanibalisasi yang tidak terpantau.
+    const undeclared = indexableRoutes()
+      .map((route) => route.path)
+      .filter((path) => ownershipOf(path) === undefined);
+
+    expect(
+      undeclared,
+      `Route ini belum punya primary keyword di src/lib/keyword-ownership.ts: ${undeclared.join(", ")}`,
+    ).toEqual([]);
+  });
+
+  it("G15: nol dua halaman berbagi primary keyword yang sama", () => {
+    const dupes = duplicatePrimaries();
+    expect(
+      dupes,
+      `Primary keyword dipakai lebih dari satu halaman: ${dupes
+        .map((d) => `"${d.primary}" -> ${d.paths.join(" & ")}`)
+        .join("; ")}`,
+    ).toEqual([]);
+  });
+
+  it("G16: nol halaman non-homepage mengklaim frasa homepage tanpa modifier", () => {
+    const violations = reservedPhraseViolations();
+    expect(
+      violations,
+      `Kanibalisasi terhadap homepage: ${violations
+        .map((v) => `${v.path} ("${v.primary}") ${v.reason}`)
+        .join("; ")}`,
+    ).toEqual([]);
+  });
+
+  it("G17: title setiap halaman benar-benar memuat primary keyword-nya", () => {
+    // Menjaga peta ini tetap JUJUR. Tanpa asersi ini, peta bisa mengklaim
+    // sebuah halaman menargetkan query X sementara title-nya tidak menyebut X
+    // sama sekali — dokumentasi yang menyesatkan, bukan kontrak.
+    //
+    // Pencocokan dilakukan per-token supaya "update stok gdc parung" tetap
+    // cocok dengan "Update Stok Unit & Siteplan GDC Parung 2026" yang menyelipkan
+    // kata di tengah frasa.
+    const offenders = indexableRoutes()
+      .map((route) => {
+        const owned = ownershipOf(route.path);
+        if (!owned) return null;
+        const title = resolveTitle(route.path, route.metadata.title).toLowerCase();
+        const missing = owned.primary
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((token) => !title.includes(token));
+        return missing.length > 0
+          ? { path: route.path, primary: owned.primary, missing, title }
+          : null;
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+
+    expect(
+      offenders,
+      `Title tidak memuat primary keyword-nya: ${offenders
+        .map((o) => `${o.path} kehilangan [${o.missing.join(", ")}] dari "${o.primary}" — title: "${o.title}"`)
+        .join("; ")}`,
+    ).toEqual([]);
   });
 });

@@ -95,7 +95,15 @@ const jsonLdWebPage = {
 // halaman ini mendefinisikan ulang `RealEstateAgent` tanpa `@id`, sehingga
 // Google melihat kantor pemasaran kedua yang tidak pernah menyatu dengan yang
 // di homepage.
-const SELLER = ref(SCHEMA_ID.salesOffice);
+//
+// REFERENSI BERTIPE, bukan `@id` polos. Node `#salesoffice` didefinisikan
+// lengkap di homepage, BUKAN di halaman ini. Konsumen yang merayapi halaman ini
+// sendirian hanya melihat `{"@id": "..."}` tanpa petunjuk jenis entitasnya —
+// Site Audit Semrush menandainya sebagai markup error pada properti `seller`.
+// Menyertakan `@type` membuat referensi lintas halaman bisa dipahami sendiri
+// tanpa harus menunggu node aslinya di-resolve, dan tetap merujuk entitas yang
+// sama karena `@id`-nya identik.
+const SELLER = { "@type": "RealEstateAgent", ...ref(SCHEMA_ID.salesOffice) };
 
 /**
  * Harga Jual Tunai Keras TERENDAH per tipe menurut pricelist resmi.

@@ -78,6 +78,25 @@ const hasLocationClaim = (node) =>
 
 const typeList = (t) => (Array.isArray(t) ? t : typeof t === "string" ? [t] : []);
 
+/**
+ * REFERENSI BERTIPE: node yang HANYA berisi `@type` + `@id`, tanpa properti lain.
+ *
+ * Bentuk ini adalah referensi, BUKAN definisi. Ia dipakai untuk rujukan lintas
+ * halaman: node aslinya didefinisikan lengkap di halaman lain (mis. `#salesoffice`
+ * di homepage), sementara halaman perujuk menyertakan `@type` agar konsumen yang
+ * merayapi halaman itu sendirian tetap tahu jenis entitasnya.
+ *
+ * Alasannya konkret: Site Audit Semrush menandai `seller: {"@id": "..."}` polos
+ * di `/pricelist` sebagai markup error justru karena tidak ada `@type`. Tapi
+ * kalau `@type` ditambahkan dan script ini tetap menganggapnya definisi, ia akan
+ * melaporkan "@id didefinisikan ulang dengan isi berbeda" — alarm palsu terhadap
+ * perbaikan yang benar. Karena itu pembedaan ini harus eksplisit.
+ */
+const isTypedReference = (node, keys) =>
+  keys.length === 2 &&
+  Object.prototype.hasOwnProperty.call(node, "@type") &&
+  Object.prototype.hasOwnProperty.call(node, "@id");
+
 /** Kumpulkan @id yang didefinisikan (node punya @type) dan yang dirujuk. */
 function collect(node, defined, referenced, anonymous, path) {
   if (Array.isArray(node)) {
@@ -88,6 +107,13 @@ function collect(node, defined, referenced, anonymous, path) {
 
   const keys = Object.keys(node);
   const id = typeof node["@id"] === "string" ? node["@id"] : null;
+
+  // Referensi bertipe dicatat sebagai RUJUKAN dan berhenti di sini — ia tidak
+  // mendefinisikan apa pun, jadi tidak boleh masuk daftar definisi.
+  if (id && isTypedReference(node, keys)) {
+    referenced.push({ id, path });
+    return;
+  }
 
   if (node["@type"]) {
     if (id) {

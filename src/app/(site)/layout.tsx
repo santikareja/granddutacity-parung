@@ -139,7 +139,19 @@ const jsonLdOrganization = {
       contactType: "sales",
       areaServed: "ID",
       availableLanguage: ["Indonesian", "English"],
-      openingHoursSpecification: [
+      // `openingHoursSpecification` BUKAN properti `ContactPoint` — domainnya
+      // `Place`/`LocalBusiness`. Properti yang benar untuk jam layanan sebuah
+      // titik kontak adalah `hoursAvailable`.
+      //
+      // Kesalahan ini terdeteksi Site Audit Semrush sebagai "structured data
+      // that contains markup errors" pada 62 halaman sekaligus — karena node
+      // Organization ini diemit global dari layout, satu kesalahan menular ke
+      // seluruh situs. Ini penyumbang terbesar dari 64 error markup.
+      //
+      // Catatan: `openingHoursSpecification` di `salesOfficeNode()`
+      // (src/lib/schema.ts) TETAP BENAR dan tidak diubah, karena node itu
+      // bertipe `RealEstateAgent` yang merupakan subtipe `LocalBusiness`.
+      hoursAvailable: [
         {
           "@type": "OpeningHoursSpecification",
           dayOfWeek: [

@@ -24,6 +24,10 @@ const imageList = [
   { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Fasad_GDC_ptpex3.webp", { w: 380, h: 475, q: 60 }), alt: "Fasad Rumah Grand Duta City Parung" },
   { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/Lingkungan_GDC_Parung_aw7ljq.webp", { w: 380, h: 475, q: 60 }), alt: "Lingkungan Asri GDC Parung" },
   { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/GDC_Parung_lbfaw3.webp", { w: 380, h: 475, q: 60 }), alt: "Fasilitas Grand Duta City Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1788225154/Fasad_GDC_SOJ.webp", { w: 380, h: 475, q: 60 }), alt: "Fasad Rumah Cluster Grand Duta City South of Jakarta Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1788225153/Fasilitas_Kawasan_GDC_Parung.webp", { w: 380, h: 475, q: 60 }), alt: "Fasilitas Kawasan Grand Duta City Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1788225154/Future_Devevelopment.webp", { w: 380, h: 475, q: 60 }), alt: "Rencana Future Development Kawasan Grand Duta City Parung" },
+  { url: clImg("https://res.cloudinary.com/dzhvfbuks/image/upload/v1788225832/Promo_KPR_Grand_Duta_City.webp", { w: 380, h: 475, q: 60 }), alt: "Promo KPR Grand Duta City Parung Tanpa DP" },
 ];
 
 function StackedImageSlider() {

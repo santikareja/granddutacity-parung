@@ -355,7 +355,7 @@ export function Hero() {
           >
             <div className="flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5 text-[#D49A3D]" />
-              <span>Developer 35+ Tahun</span>
+              <span>Developer 43 Tahun</span>
             </div>
             <span className="w-1 h-1 rounded-full bg-white/30 hidden sm:inline-block" />
             <div className="flex items-center gap-1.5">

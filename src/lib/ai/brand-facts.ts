@@ -55,7 +55,7 @@ const INTERNAL_LINK_LINES = INTERNAL_LINKS.map(
  */
 const STABLE_FACTS = `- Nama proyek: ${BRAND_NAME} (dipasarkan juga sebagai "${BRAND_ALT_NAME}").
 - Lokasi: ${BRAND_LOCATION}.
-- Master developer: Duta Putra Land, berpengalaman sejak 1983 (lebih dari 35 tahun) membangun CBD, superblok, mall, dan kawasan residensial.
+- Master developer: Duta Putra Land, berpengalaman sejak 1983 (lebih dari 40 tahun, per 2026 sekitar 43 tahun) membangun CBD, superblok, mall, dan kawasan residensial.
 - Badan hukum untuk transaksi: PT. Duta Putra Mahkota.
 - Skala kawasan: kota mandiri seluas 200 hektar.
 - Dua cluster hunian:

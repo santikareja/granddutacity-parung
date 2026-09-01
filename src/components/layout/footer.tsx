@@ -56,7 +56,7 @@ export function Footer() {
           </p>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[11px] text-[#D49A3D] font-sans font-medium">
             <ShieldCheck className="w-4 h-4" />
-            <span>Developer Terpercaya Lebih Dari 35 Tahun</span>
+            <span>Developer Terpercaya Lebih Dari 43 Tahun</span>
           </div>
         </div>
 

@@ -120,8 +120,8 @@ const reasons = [
   {
     icon: Building2,
     tag: "Reputasi",
-    title: "Developer 35+ Tahun",
-    desc: "Duta Putra Land — dedikasi lebih dari 35 tahun membangun mahakarya kota mandiri di Indonesia.",
+    title: "Developer 43 Tahun",
+    desc: "Duta Putra Land — dedikasi lebih dari 43 tahun membangun mahakarya kota mandiri di Indonesia.",
     colSpan: "lg:col-span-6",
   },
   {
@@ -152,7 +152,7 @@ export function WhyGdc() {
           <Reveal className="lg:col-span-7 flex flex-col justify-start">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D0A]/5 border border-[#090D0A]/8 text-[10px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.2em] font-sans font-bold uppercase text-[#B45309] mb-4 sm:mb-6 w-max">
               <Sparkles className="w-3 h-3 text-[#D49A3D]" />
-              <span>Investasi Properti Bogor Terbaik</span>
+              <span>Rumah Cluster Parung Bogor Terbaik</span>
             </div>
 
             <h2

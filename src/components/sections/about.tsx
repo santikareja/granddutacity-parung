@@ -80,7 +80,7 @@ export function About() {
                     <div>
                       <p className="text-[#D49A3D] text-[8px] sm:text-[9px] tracking-[0.25em] sm:tracking-[0.3em] uppercase font-sans font-bold">Master Developer</p>
                       <p className="font-serif text-[#F8F6F0] text-xs sm:text-base font-semibold leading-tight">Duta Putra Land</p>
-                      <p className="text-[#F8F6F0]/50 text-[9px] sm:text-[10px] tracking-wider uppercase font-sans mt-0.5">Established Since 1983 · 35+ Years</p>
+                      <p className="text-[#F8F6F0]/50 text-[9px] sm:text-[10px] tracking-wider uppercase font-sans mt-0.5">Established Since 1983 · 43 Years</p>
                     </div>
                   </div>
                 </Reveal>
@@ -113,7 +113,7 @@ export function About() {
                   <span className="font-semibold text-[#090D0A]">200 Ha</span> di Parung, Kabupaten Bogor. Kawasan ini terintegrasi secara harmonis dengan area hijau 80 Ha, Central Park, The Beach Lagoon, dan pusat bisnis CBD modern dalam satu ekosistem terpadu.
                 </p>
                 <p>
-                  Persembahan istimewa dari <span className="font-semibold text-[#090D0A]">Duta Putra Land</span> yang telah berpengalaman lebih dari 35 tahun membangun township ternama di Indonesia. Grand Duta City Parung terletak di koridor strategis Jakarta–Bogor yang dilewati rencana Tol JORR 3, hanya 20 menit ke CBD TB Simatupang Jakarta Selatan via Tol Desari & Pamulang.
+                  Persembahan istimewa dari <span className="font-semibold text-[#090D0A]">Duta Putra Land</span> yang telah berpengalaman lebih dari 43 tahun membangun township ternama di Indonesia. Grand Duta City Parung terletak di koridor strategis Jakarta–Bogor yang dilewati rencana Tol JORR 3, hanya 20 menit ke CBD TB Simatupang Jakarta Selatan via Tol Desari & Pamulang.
                 </p>
               </div>
             </div>
@@ -126,7 +126,7 @@ export function About() {
                   <p className="text-[#090D0A]/60 text-[9px] sm:text-[11px] tracking-wider uppercase mt-1 font-sans">Township</p>
                 </div>
                 <div className="border-l border-r border-[#090D0A]/15 px-2 sm:px-4">
-                  <p className="font-serif text-xl sm:text-3xl md:text-4xl text-[#B45309] font-bold">35+ Thn</p>
+                  <p className="font-serif text-xl sm:text-3xl md:text-4xl text-[#B45309] font-bold">43 Thn</p>
                   <p className="text-[#090D0A]/60 text-[9px] sm:text-[11px] tracking-wider uppercase mt-1 font-sans">Pengalaman</p>
                 </div>
                 <div className="pl-2 sm:pl-4">

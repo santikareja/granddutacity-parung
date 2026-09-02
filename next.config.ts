@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH } from "./src/lib/redirects";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -87,7 +88,7 @@ const nextConfig: NextConfig = {
       // atas (sesudah /v2-admin, sebelum /:path+/) agar menang atas aturan
       // trailing-slash di bawahnya.
       {
-        source: "/perumahan-eksklusif-di-parung-bogor-dengan-fasilitas-lengkap",
+        source: HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH,
         destination: "/",
         permanent: true,
       },

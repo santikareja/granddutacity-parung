@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { isRedirectedSitemapSourcePath } from "@/lib/redirects";
 import { getArticleSitemapEntries } from "@/lib/public/queries";
 
 /**
@@ -31,12 +32,14 @@ export const revalidate = 3600;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries = await getArticleSitemapEntries();
 
-  return entries.map((entry) => ({
-    url: `${BASE_URL}/${entry.slug}`,
-    // `updatedAt` lebih dulu: ia menyatakan kapan kontennya terakhir berubah.
-    // `publishedAt` hanya cadangan untuk baris lama yang `updatedAt`-nya kosong.
-    lastModified: new Date(entry.updatedAt ?? entry.publishedAt ?? Date.now()),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
+  return entries
+    .filter((entry) => !isRedirectedSitemapSourcePath(`/${entry.slug}`))
+    .map((entry) => ({
+      url: `${BASE_URL}/${entry.slug}`,
+      // `updatedAt` lebih dulu: ia menyatakan kapan kontennya terakhir berubah.
+      // `publishedAt` hanya cadangan untuk baris lama yang `updatedAt`-nya kosong.
+      lastModified: new Date(entry.updatedAt ?? entry.publishedAt ?? Date.now()),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }));
 }

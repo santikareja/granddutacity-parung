@@ -27,30 +27,13 @@ const OG_IMAGE =
 /** Diekspor untuk guard G19 (seo-invariants.test.ts). */
 export const PAGE_H1 = "Blog & Panduan Properti Parung Bogor";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}): Promise<Metadata> {
-  const resolvedSearchParams = await searchParams;
-  const pageParam = resolvedSearchParams.page;
-  const pageNumber = typeof pageParam === "string" ? parseInt(pageParam, 10) : 1;
-  const isFirstPage = !pageNumber || isNaN(pageNumber) || pageNumber <= 1;
+export const revalidate = 3600;
 
-  // Spam defense: query param selain `page` (mis. ?q=, ?utm= injection) → noindex.
-  // Seluruh halaman paginasi (page > 1) → noindex,follow (hemat crawl budget, cegah duplikat/spam).
-  const paramKeys = Object.keys(resolvedSearchParams);
-  const hasUnexpectedParams = paramKeys.some((key) => key !== "page");
-  const shouldIndex = isFirstPage && !hasUnexpectedParams;
+export function generateMetadata(): Metadata {
+  const pageTitle = "Blog Properti Parung Bogor: Panduan Beli Rumah 2026";
 
-  // Title sebelumnya 102 karakter — terpanjang di situs, terpotong berat di
-  // SERP, dan memuat frasa target homepage dua kali. Halaman arsip blog tidak
-  // perlu membawa brand: query yang dikejar adalah topik ("panduan beli rumah
-  // parung bogor"), bukan brand.
-  const pageTitle = isFirstPage
-    ? "Blog Properti Parung Bogor: Panduan Beli Rumah 2026"
-    : `Blog Properti Parung Bogor – Halaman ${pageNumber}`;
-
+  // Metadata statis membuat archive /artikel bisa diprerender dan direvalidate
+  // tanpa menunggu request-time searchParams.
   const pageDescription =
     "Artikel dan panduan properti untuk calon pembeli rumah di Parung dan Bogor Selatan: proses KPR, dokumen, pilihan kawasan, dan tips menilai lokasi hunian.";
 
@@ -72,10 +55,10 @@ export async function generateMetadata({
       canonical: canonicalUrl,
     },
     robots: {
-      index: shouldIndex,
+      index: true,
       follow: true,
       googleBot: {
-        index: shouldIndex,
+        index: true,
         follow: true,
         "max-image-preview": "large",
       },
@@ -242,16 +225,8 @@ const resolveArticleCategory = (
   return fallbackCategory;
 };
 
-export default async function ArtikelPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const resolvedSearchParams = await searchParams;
-  const pageParam = resolvedSearchParams.page;
-  const pageNumber = typeof pageParam === "string" ? parseInt(pageParam, 10) : 1;
-  const canonicalUrl = pageNumber > 1 ? `${PAGE_URL}?page=${pageNumber}` : PAGE_URL;
-
+export default async function ArtikelPage() {
+  const canonicalUrl = PAGE_URL;
   const dbArticlesRaw = await getPublishedArticles(100);
 
   const formatDate = (value?: string | null) => {

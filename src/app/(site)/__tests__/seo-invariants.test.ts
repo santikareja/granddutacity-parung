@@ -26,6 +26,12 @@ import {
   ownershipOf,
   reservedPhraseViolations,
 } from "@/lib/keyword-ownership";
+import {
+  HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH,
+  REDIRECTED_SITEMAP_SOURCE_PATHS,
+  isRedirectedSitemapSourcePath,
+  isRedirectedSitemapSourceUrl,
+} from "@/lib/redirects";
 
 // `next/font/google` butuh plugin build Next dan tidak bisa dieksekusi di
 // Vitest. Hanya nilai `.variable` yang dipakai layout, jadi stub ini cukup.
@@ -155,7 +161,12 @@ beforeAll(async () => {
 
   // --- route dengan `generateMetadata(searchParams)` -----------------------
   const searchParamRoutes: Array<
-    [string, Promise<{ generateMetadata: (props: never) => Promise<Metadata> }>]
+    [
+      string,
+      Promise<{
+        generateMetadata: (props: never) => Metadata | Promise<Metadata>;
+      }>,
+    ]
   > = [
     ["/artikel", import("../artikel/page")],
     ["/cara-beli-kpr", import("../cara-beli-kpr/page")],
@@ -363,6 +374,58 @@ describe("R2 & konsistensi entitas", () => {
 
   it("G12: layout tidak lagi mengekspor title.template", () => {
     expect(layoutTemplate).toBeNull();
+  });
+});
+
+// ===========================================================================
+// Temuan Semrush: sitemap, duplicate H1/title
+// ===========================================================================
+
+describe("Semrush technical SEO regressions", () => {
+  it("G12b: source redirect permanen tidak boleh masuk sitemap", async () => {
+    const config = (await import("../../../../next.config")).default;
+    const redirects = await config.redirects?.();
+    const redirectSources = new Set(
+      (redirects ?? [])
+        .filter((redirect) => redirect.permanent)
+        .map((redirect) => redirect.source),
+    );
+
+    for (const path of REDIRECTED_SITEMAP_SOURCE_PATHS) {
+      expect(redirectSources.has(path)).toBe(true);
+      expect(isRedirectedSitemapSourcePath(path)).toBe(true);
+      expect(isRedirectedSitemapSourcePath(`${path}/`)).toBe(true);
+      expect(isRedirectedSitemapSourceUrl(`${SITE_URL}${path}`)).toBe(true);
+    }
+
+    expect(isRedirectedSitemapSourceUrl(SITE_URL)).toBe(false);
+  });
+
+  it("G12c: title tag tidak identik dengan H1 halaman yang dilaporkan Semrush", async () => {
+    const [{ metadata: galeriMetadata, PAGE_H1: galeriH1 }, privacyPage] =
+      await Promise.all([
+        import("../galeri/page"),
+        import("../privacy-policy/page"),
+      ]);
+
+    const cases = [
+      {
+        path: "/galeri",
+        title: resolveTitle("/galeri", galeriMetadata.title),
+        h1: galeriH1,
+      },
+      {
+        path: "/privacy-policy",
+        title: resolveTitle("/privacy-policy", privacyPage.metadata.title),
+        h1: privacyPage.PAGE_H1,
+      },
+    ];
+
+    const offenders = cases.filter(
+      (entry) => entry.title.trim().toLowerCase() === entry.h1.trim().toLowerCase(),
+    );
+
+    expect(offenders).toEqual([]);
   });
 });
 
@@ -590,8 +653,7 @@ describe("G19 — H1 sembilan halaman kanibalisasi tidak dibuka dengan frasa bra
     const redirects = await config.redirects?.();
     const target = redirects?.find(
       (r: { source: string }) =>
-        r.source ===
-        "/perumahan-eksklusif-di-parung-bogor-dengan-fasilitas-lengkap",
+        r.source === HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH,
     );
 
     expect(

@@ -3,6 +3,7 @@ import { getCategorySitemapEntries } from "@/lib/articles";
 import { getArticleSitemapEntries } from "@/lib/public/queries";
 import { siteImages } from "@/data/images";
 import { unitPagePath, units } from "@/data/units";
+import { isRedirectedSitemapSourceUrl } from "@/lib/redirects";
 
 const BASE_URL = "https://granddutacitysouthofjakarta.com";
 
@@ -129,6 +130,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticEntries,
     ...artikelEntries.filter((entry) => {
+      if (isRedirectedSitemapSourceUrl(entry.url)) return false;
       if (seenUrls.has(entry.url)) return false;
       seenUrls.add(entry.url);
       return true;

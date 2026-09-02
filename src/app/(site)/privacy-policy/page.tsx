@@ -9,13 +9,15 @@ import { OG_SITE_NAME } from "@/lib/seo";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const PAGE_URL = `${SITE_URL}/privacy-policy`;
+const PAGE_TITLE = "Kebijakan Privasi Pengguna Situs GDC Parung";
+export const PAGE_H1 = "Kebijakan Privasi";
 
 // Halaman legal tidak punya alasan bisnis untuk membawa frasa kata kunci utama
 // di title — ia hanya bersaing dengan homepage tanpa imbalan. Brand dicabut
 // dari title; description dibiarkan karena konteksnya faktual dan panjangnya
 // sudah di dalam rentang.
 export const metadata: Metadata = {
-  title: { absolute: "Kebijakan Privasi" },
+  title: { absolute: PAGE_TITLE },
   description: "Penjelasan tentang pengumpulan, penggunaan, penyimpanan, dan perlindungan data pribadi pada situs Grand Duta City Parung.",
   alternates: { canonical: PAGE_URL },
   robots: {
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Kebijakan Privasi",
+    title: PAGE_TITLE,
     description: "Penjelasan tentang pengumpulan, penggunaan, penyimpanan, dan perlindungan data pribadi pada situs Grand Duta City Parung.",
     url: PAGE_URL,
     siteName: OG_SITE_NAME,
@@ -72,7 +74,7 @@ export default function PrivacyPolicyPage() {
               ]} />
             </div>
             <h1 className="font-serif text-4xl font-bold tracking-tight text-[#F5A524] md:text-5xl lg:text-6xl">
-              Kebijakan Privasi
+              {PAGE_H1}
             </h1>
             <p className="mt-6 text-base text-[#F5F1E8]/80">
               Terakhir diperbarui: 12 April 2026

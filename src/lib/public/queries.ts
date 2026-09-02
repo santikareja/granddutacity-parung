@@ -76,6 +76,20 @@ const articleColumns = {
   seoFocusKeyword: artikel.seoFocusKeyword,
 } as const;
 
+const articleListColumns = {
+  id: artikel.id,
+  title: artikel.title,
+  slug: artikel.slug,
+  excerpt: artikel.excerpt,
+  status: artikel.status,
+  publishedAt: artikel.publishedAt,
+  createdAt: artikel.createdAt,
+  updatedAt: artikel.updatedAt,
+  seoMetaTitle: artikel.seoMetaTitle,
+  seoMetaDescription: artikel.seoMetaDescription,
+  seoFocusKeyword: artikel.seoFocusKeyword,
+} as const;
+
 const mediaColumns = {
   id: media.id,
   url: media.url,
@@ -100,6 +114,8 @@ type ArticleRow = {
   seoMetaDescription: string | null;
   seoFocusKeyword: string | null;
 };
+
+type ArticleListRow = Omit<ArticleRow, "content">;
 
 type MediaRow = {
   id: number | null;
@@ -139,6 +155,27 @@ const mapArticleBase = (
   slug: row.slug ?? "",
   excerpt: row.excerpt ?? null,
   content: (row.content ?? EMPTY_LEXICAL_STATE) as SerializedEditorState<SerializedLexicalNode>,
+  status: row.status,
+  publishedAt: toIso(row.publishedAt),
+  createdAt: toIso(row.createdAt) ?? new Date(0).toISOString(),
+  updatedAt: toIso(row.updatedAt) ?? new Date(0).toISOString(),
+  seo: {
+    metaTitle: row.seoMetaTitle ?? null,
+    metaDescription: row.seoMetaDescription ?? null,
+    focusKeyword: row.seoFocusKeyword ?? null,
+  },
+  featuredImage,
+});
+
+const mapArticleListBase = (
+  row: ArticleListRow,
+  featuredImage: PublicMedia | null,
+): PublicArticle => ({
+  id: row.id,
+  title: row.title ?? "",
+  slug: row.slug ?? "",
+  excerpt: row.excerpt ?? null,
+  content: EMPTY_LEXICAL_STATE,
   status: row.status,
   publishedAt: toIso(row.publishedAt),
   createdAt: toIso(row.createdAt) ?? new Date(0).toISOString(),
@@ -359,15 +396,18 @@ export const getPublishedArticleBySlug = async (
 
 /**
  * Daftar artikel published (ORDER BY publishedAt DESC), dengan featuredImage,
- * tags[], dan kategori[] terpopulasi. `limit` mengikuti pemakaian pemanggil
- * (100 untuk /artikel, 50 untuk sidebar [slug]).
+ * tags[], dan kategori[] terpopulasi.
+ *
+ * Archive /artikel tidak merender body artikel, jadi kolom `content` sengaja
+ * tidak diambil. Ini memangkas payload DB terbesar tanpa mengubah shape
+ * PublicArticle yang dikonsumsi mapper halaman.
  */
 export const getPublishedArticles = async (
   limit: number,
 ): Promise<PublicArticle[]> => {
   try {
     const rows = await db
-      .select({ article: articleColumns, media: mediaColumns })
+      .select({ article: articleListColumns, media: mediaColumns })
       .from(artikel)
       .leftJoin(media, eq(artikel.featuredImageId, media.id))
       .where(eq(artikel.status, "published"))
@@ -375,7 +415,10 @@ export const getPublishedArticles = async (
       .limit(limit);
 
     const articles = rows.map((row) =>
-      mapArticleBase(row.article as ArticleRow, mapMedia(row.media as MediaRow)),
+      mapArticleListBase(
+        row.article as ArticleListRow,
+        mapMedia(row.media as MediaRow),
+      ),
     );
 
     const { tagsByArticle, kategoriByArticle } = await loadTaxonomyForArticles(

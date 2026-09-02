@@ -8,12 +8,15 @@ import { siteImages } from "@/data/images";
 import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
 import { SITE_URL } from "@/lib/seo";
 
+export const PAGE_TITLE = "Galeri GDC Parung: Foto, Video & Fasilitas";
+export const PAGE_H1 = "Galeri Foto & Video Kawasan GDC Parung";
+
 // Frasa "Grand Duta City South of Jakarta" DICABUT dari title dan description
 // halaman ini (Fase 1). Sebelumnya halaman ini satu-satunya di situs yang
 // memuat KEDUA kata kunci target homepage, dan exact match-nya lebih bersih
 // daripada homepage — jadi ia pesaing internal paling langsung.
 export const metadata: Metadata = {
-  title: "Galeri Foto & Video Kawasan GDC Parung",
+  title: PAGE_TITLE,
   description:
     "Lihat galeri foto kawasan GDC Parung: fasad rumah, The Beach Lagoon, Central Park, boulevard, area komersial, dan progres pembangunan cluster terbaru.",
   alternates: {
@@ -85,7 +88,7 @@ export default function GaleriPage() {
                 supaya halaman ini menyasar query visual, bukan query brand
                 yang jadi milik homepage. */}
             <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-semibold leading-tight text-[#F5F1E8] mb-6">
-              Galeri Foto &amp; Video Kawasan GDC Parung
+              {PAGE_H1}
             </h1>
             <p className="text-[#F5F1E8]/50 text-base md:text-lg font-light max-w-xl mx-auto leading-relaxed">
               Jelajahi setiap sudut kawasan hunian prestisius{" "}

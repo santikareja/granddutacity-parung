@@ -44,7 +44,9 @@ import { SITE_URL } from "@/lib/seo";
 export const SCHEMA_ID = {
   project: `${SITE_URL}/#project`,
   organization: `${SITE_URL}/#organization`,
+  brand: `${SITE_URL}/#brand`,
   salesOffice: `${SITE_URL}/#salesoffice`,
+  salesOfficeImage: `${SITE_URL}/#salesoffice-image`,
   website: `${SITE_URL}/#website`,
   homepage: `${SITE_URL}/#webpage`,
   primaryImage: `${SITE_URL}/#primaryimage`,
@@ -60,6 +62,13 @@ export const SCHEMA_ID = {
 export const ref = (id: string) => ({ "@id": id });
 
 export const PROJECT_NAME = "Grand Duta City Parung South of Jakarta";
+export const SITE_NAME = "Grand Duta City Parung";
+
+export const SITE_ALTERNATE_NAMES = [
+  "Grand Duta City South of Jakarta",
+  "GDC Parung",
+  "GDC SOJ",
+];
 
 /**
  * Varian nama yang Google harus tahu menunjuk entitas yang SAMA.
@@ -95,8 +104,13 @@ export const PROJECT_SAME_AS = [
   "https://www.instagram.com/granddutacityparungsoj/",
   "https://www.facebook.com/granddutacityparungsoj",
   "https://www.youtube.com/@marketinggdcparung",
-  "https://dutaputraland.com/main/public/",
 ];
+
+export const DEVELOPER_URL = "https://dutaputraland.com/main/public/";
+export const DEVELOPER_LOGO =
+  "https://res.cloudinary.com/dzhvfbuks/image/upload/c_pad,b_white,w_512,h_512/v1775669124/Logo_Duta_Putra_Land_rq0kzk.png";
+export const SALES_OFFICE_IMAGE =
+  "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775630456/Marketing_Galeri_n0hwsx.webp";
 
 const OPENING_HOURS = [
   {
@@ -130,12 +144,47 @@ const OPENING_HOURS = [
 export const websiteNode = () => ({
   "@type": "WebSite",
   "@id": SCHEMA_ID.website,
-  name: PROJECT_NAME,
-  alternateName: PROJECT_ALTERNATE_NAMES,
+  name: SITE_NAME,
+  alternateName: SITE_ALTERNATE_NAMES,
   url: SITE_URL,
   inLanguage: "id-ID",
   publisher: ref(SCHEMA_ID.organization),
   about: ref(SCHEMA_ID.project),
+});
+
+/** Brand proyek, terpisah dari badan hukum developer dan kantor pemasaran. */
+export const projectBrandNode = () => ({
+  "@type": "Brand",
+  "@id": SCHEMA_ID.brand,
+  name: SITE_NAME,
+  alternateName: PROJECT_ALTERNATE_NAMES,
+  url: SITE_URL,
+  logo: `${SITE_URL}/logo.svg`,
+  sameAs: PROJECT_SAME_AS,
+});
+
+/** Developer/publisher situs. Data lokasi proyek tidak ditempelkan ke node ini. */
+export const developerOrganizationNode = () => ({
+  "@type": "Organization",
+  "@id": SCHEMA_ID.organization,
+  name: "Duta Putra Land",
+  legalName: "PT. Duta Putra Mahkota",
+  url: DEVELOPER_URL,
+  logo: {
+    "@type": "ImageObject",
+    url: DEVELOPER_LOGO,
+    contentUrl: DEVELOPER_LOGO,
+    width: 512,
+    height: 512,
+  },
+  foundingDate: "1983",
+  foundingLocation: {
+    "@type": "Country",
+    name: "Indonesia",
+  },
+  slogan: "Best Living For Generations",
+  brand: ref(SCHEMA_ID.brand),
+  knowsAbout: ["Pengembangan properti", "Perumahan", "Kota mandiri"],
 });
 
 /**
@@ -149,6 +198,7 @@ export const projectPlaceNode = () => ({
   name: PROJECT_NAME,
   alternateName: PROJECT_ALTERNATE_NAMES,
   url: SITE_URL,
+  mainEntityOfPage: ref(SCHEMA_ID.homepage),
   description:
     "Kawasan hunian kota mandiri 200 hektar di Parung, Bogor, persembahan Duta Putra Land. Terdiri dari Cluster Ladera dan Cluster Cascada, 20 menit ke CBD Jakarta Selatan.",
   address: PROJECT_ADDRESS,
@@ -215,18 +265,21 @@ export const salesOfficeNode = () => ({
   "@type": "RealEstateAgent",
   "@id": SCHEMA_ID.salesOffice,
   name: "Marketing Gallery Grand Duta City Parung",
-  url: SITE_URL,
-  image: ref(SCHEMA_ID.primaryImage),
+  url: `${SITE_URL}/kontak`,
+  description:
+    "Kantor pemasaran resmi Grand Duta City Parung untuk informasi produk, harga, simulasi KPR, dan kunjungan lokasi.",
+  image: ref(SCHEMA_ID.salesOfficeImage),
   telephone: PROJECT_PHONE,
   email: PROJECT_EMAIL,
   address: PROJECT_ADDRESS,
   geo: PROJECT_GEO,
   hasMap: PROJECT_MAP,
-  sameAs: PROJECT_SAME_AS,
+  brand: ref(SCHEMA_ID.brand),
+  location: ref(SCHEMA_ID.project),
   areaServed: [
-    { "@type": "City", name: "Parung, Bogor" },
+    { "@type": "AdministrativeArea", name: "Parung, Kabupaten Bogor" },
     { "@type": "City", name: "Depok" },
-    { "@type": "City", name: "Jakarta Selatan" },
+    { "@type": "AdministrativeArea", name: "Jakarta Selatan" },
   ],
   openingHoursSpecification: OPENING_HOURS,
   // Batas bawah mengikuti Verona 39/60 (600 juta-an, tipe termurah sejak
@@ -235,14 +288,14 @@ export const salesOfficeNode = () => ({
   priceRange: "Rp 600.000.000 - Rp 1.900.000.000",
   currenciesAccepted: "IDR",
   parentOrganization: ref(SCHEMA_ID.organization),
-  // Menjual proyek ini — inilah tautan yang mengikat kantor pemasaran ke entitas
-  // proyek, sehingga keduanya tidak dibaca sebagai bisnis lepas.
-  makesOffer: {
-    "@type": "Offer",
-    itemOffered: ref(SCHEMA_ID.project),
-    priceCurrency: "IDR",
-    availability: "https://schema.org/InStock",
-  },
+});
+
+export const salesOfficeImageNode = () => ({
+  "@type": "ImageObject",
+  "@id": SCHEMA_ID.salesOfficeImage,
+  url: SALES_OFFICE_IMAGE,
+  contentUrl: SALES_OFFICE_IMAGE,
+  caption: "Marketing Gallery Grand Duta City Parung",
 });
 
 export const primaryImageNode = (url: string, caption: string) => ({
@@ -315,6 +368,10 @@ export const graph = (nodes: unknown[]) => ({
   "@context": "https://schema.org",
   "@graph": nodes.filter(Boolean),
 });
+
+/** Serialize JSON-LD safely when embedded in an HTML script element. */
+export const serializeJsonLd = (value: unknown) =>
+  JSON.stringify(value).replace(/</g, "\\u003c");
 
 // ---------------------------------------------------------------------------
 // Node unit rumah

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { clImg } from "@/lib/cloudinary";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
+import { betterLivingImages } from "@/data/homepage-images";
 import {
   Carousel,
   CarouselContent,
@@ -12,25 +13,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-
-const sliderImages = [
-  {
-    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Malta_qnowfx.webp",
-    alt: "Tampilan Depan Fasad Rumah Modern Tipe Malta di Grand Duta City Parung",
-  },
-  {
-    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800277/Tipe_Aira_ah9nsa.webp",
-    alt: "Desain Fasad Rumah Minimalis Estetik Tipe Aira di Grand Duta City Parung",
-  },
-  {
-    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Victoria_-_Tuscan_gj1kcd.webp",
-    alt: "Fasad Hunian Eksklusif Tipe Victoria Bergaya Tuscan di Grand Duta City Parung",
-  },
-  {
-    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Alexandra_mtw8xh.webp",
-    alt: "Tampilan Fasad Rumah Mewah 2 Lantai Tipe Alexandra di Grand Duta City Parung",
-  },
-];
 
 export function BetterLiving() {
   return (
@@ -97,7 +79,7 @@ export function BetterLiving() {
                 className="w-full rounded-[calc(2rem-0.375rem)] sm:rounded-[calc(2.5rem-0.5rem)] overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
               >
                 <CarouselContent>
-                  {sliderImages.map((image, index) => (
+                  {betterLivingImages.map((image, index) => (
                     <CarouselItem key={index}>
                       <div className="relative aspect-[4/3] sm:aspect-square w-full overflow-hidden bg-[#090D0A]">
                         <Image

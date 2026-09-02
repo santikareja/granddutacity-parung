@@ -10,6 +10,7 @@
 import { describe, expect, it } from "vitest";
 import { homepageFaqs } from "@/data/faq-homepage";
 import { facilities } from "@/data/facilities";
+import { betterLivingImages } from "@/data/homepage-images";
 import { getUnitById, getUnitsByCluster, units } from "@/data/units";
 import {
   PROJECT_ALTERNATE_NAMES,
@@ -18,13 +19,17 @@ import {
   breadcrumbNode,
   clusterNodes,
   clusterOfferCatalogNode,
+  developerOrganizationNode,
   faqNode,
   graph,
   primaryImageNode,
   projectPlaceNode,
+  projectBrandNode,
   ref,
   residenceNode,
+  salesOfficeImageNode,
   salesOfficeNode,
+  serializeJsonLd,
   unitAvailability,
   unitOfferNode,
   websiteNode,
@@ -70,10 +75,13 @@ function collectTypes(node: unknown, out = new Set<string>()) {
 
 const homepageGraph = () =>
   graph([
+    developerOrganizationNode(),
+    projectBrandNode(),
     websiteNode(),
     projectPlaceNode(),
     ...clusterNodes(),
     salesOfficeNode(),
+    salesOfficeImageNode(),
     primaryImageNode(`${SITE_URL}/x.jpg`, "contoh"),
     {
       "@type": "WebPage",
@@ -154,14 +162,94 @@ describe("entitas utama", () => {
   });
 });
 
+describe("identitas developer, brand, dan website", () => {
+  it("memisahkan developer dari brand dan alamat proyek", () => {
+    const developer = developerOrganizationNode() as Record<string, unknown>;
+    expect(developer).toMatchObject({
+      "@type": "Organization",
+      "@id": SCHEMA_ID.organization,
+      name: "Duta Putra Land",
+      url: "https://dutaputraland.com/main/public/",
+      brand: ref(SCHEMA_ID.brand),
+    });
+    expect(developer).not.toHaveProperty("address");
+    expect(developer).not.toHaveProperty("geo");
+    expect(developer).not.toHaveProperty("contactPoint");
+  });
+
+  it("memakai logo developer persegi dan logo tersebut bukan logo proyek", () => {
+    const developer = developerOrganizationNode() as {
+      logo: { url: string; width: number; height: number };
+    };
+    expect(developer.logo.url).toContain("Logo_Duta_Putra_Land");
+    expect(developer.logo.width).toBe(512);
+    expect(developer.logo.height).toBe(512);
+  });
+
+  it("menempatkan akun sosial proyek pada Brand", () => {
+    const brand = projectBrandNode();
+    expect(brand).toMatchObject({
+      "@type": "Brand",
+      "@id": SCHEMA_ID.brand,
+    });
+    expect(brand.sameAs).toContain(
+      "https://www.instagram.com/granddutacityparungsoj/",
+    );
+    expect(brand.sameAs).not.toContain(
+      "https://dutaputraland.com/main/public/",
+    );
+  });
+
+  it("memakai nama situs yang ringkas dan konsisten dengan og:site_name", () => {
+    const website = websiteNode();
+    expect(website.name).toBe("Grand Duta City Parung");
+    expect(website.alternateName).toContain(
+      "Grand Duta City South of Jakarta",
+    );
+  });
+});
+
+describe("kantor pemasaran", () => {
+  it("terhubung ke brand, proyek, developer, dan gambar kantor yang tepat", () => {
+    const office = salesOfficeNode();
+    expect(office).toMatchObject({
+      "@type": "RealEstateAgent",
+      url: `${SITE_URL}/kontak`,
+      image: ref(SCHEMA_ID.salesOfficeImage),
+      brand: ref(SCHEMA_ID.brand),
+      location: ref(SCHEMA_ID.project),
+      parentOrganization: ref(SCHEMA_ID.organization),
+    });
+    expect(office).not.toHaveProperty("makesOffer");
+    expect(office).not.toHaveProperty("sameAs");
+  });
+
+  it("tidak mengklaim proyek sebagai barang InStock", () => {
+    expect(JSON.stringify(salesOfficeNode())).not.toContain(
+      "https://schema.org/InStock",
+    );
+  });
+});
+
+describe("serialisasi JSON-LD", () => {
+  it("meng-escape karakter pembuka tag agar script tidak dapat ditutup data", () => {
+    const serialized = serializeJsonLd({ value: "</script><script>alert(1)" });
+    expect(serialized).not.toContain("<");
+    expect(serialized).toContain("\\u003c/script>");
+  });
+});
+
+describe("gambar homepage", () => {
+  it("menandai Malta sebagai bagian Cluster Ladera", () => {
+    expect(betterLivingImages[0].alt).toContain("Cluster Ladera");
+    expect(betterLivingImages[0].alt).not.toContain("Cluster Cascada");
+  });
+});
+
 describe("graf homepage", () => {
   it("setiap referensi @id menunjuk node yang didefinisikan di graf yang sama", () => {
     const { defined, referenced } = analyse(homepageGraph());
-    // `#organization` sengaja didefinisikan di layout (global di semua halaman),
-    // jadi ia referensi lintas-dokumen yang sah.
-    const dangling = referenced.filter(
-      (id) => !defined.has(id) && id !== SCHEMA_ID.organization,
-    );
+    const dangling = referenced.filter((id) => !defined.has(id));
     expect(dangling).toEqual([]);
   });
 
@@ -365,5 +453,12 @@ describe("VideoObject homepage", () => {
     // ISO 8601 lengkap dengan offset, bukan sekadar "2026-07-20".
     expect(uploadDate).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
     expect(Number.isNaN(Date.parse(uploadDate!))).toBe(false);
+
+    // Halaman tontonan YouTube bukan file video langsung, jadi tidak sah
+    // dipublikasikan sebagai contentUrl. Crawler tetap mendapat embedUrl.
+    expect(source).not.toContain(
+      "contentUrl: `https://www.youtube.com/watch?v=",
+    );
+    expect(source).toContain("publisher: ref(SCHEMA_ID.salesOffice)");
   });
 });

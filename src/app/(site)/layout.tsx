@@ -7,6 +7,12 @@ import { PromoPopup } from "@/components/ui/promo-popup";
 import { WhatsAppButton } from "@/components/ui/whatsapp-button";
 import { WhatsAppTracker } from "@/components/providers/whatsapp-tracker";
 import { OG_SITE_NAME } from "@/lib/seo";
+import {
+  developerOrganizationNode,
+  graph,
+  projectBrandNode,
+  serializeJsonLd,
+} from "@/lib/schema";
 import "../globals.css";
 
 // Keduanya variable font di Google Fonts. Tanpa array `weight`, next/font
@@ -86,105 +92,10 @@ export const viewport = {
   themeColor: "#0b120c",
 };
 
-const SITE_URL = "https://granddutacitysouthofjakarta.com";
-
-// Global Organization schema (Duta Putra Land) — mendukung eligibility Google Knowledge Panel.
-// Dirender server-side di layout agar hadir di setiap halaman publik.
-const jsonLdOrganization = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": `${SITE_URL}/#organization`,
-  name: "Duta Putra Land",
-  // Nama legal dipindahkan ke sini dari /pricelist, yang sebelumnya
-  // mendefinisikan Organization anonim "PT. Duta Putra Mahkota" dengan `url`
-  // yang sama. Satu entitas, satu node.
-  legalName: "PT. Duta Putra Mahkota",
-  alternateName: "Grand Duta City Parung South of Jakarta",
-  url: SITE_URL,
-  logo: {
-    "@type": "ImageObject",
-    url: `${SITE_URL}/logo.svg`,
-    width: 512,
-    height: 160,
-    caption: "Logo Grand Duta City Parung by Duta Putra Land",
-  },
-  image: `${SITE_URL}/logo.svg`,
-  description:
-    "Duta Putra Land — developer real estate Indonesia sejak 1983, pengembang kota mandiri Grand Duta City Parung South of Jakarta seluas 200 Ha di Parung, Bogor.",
-  foundingDate: "1983",
-  foundingLocation: { "@type": "Place", name: "Jakarta, Indonesia" },
-  slogan: "Best Living For Generations",
-  brand: {
-    "@type": "Brand",
-    name: "Grand Duta City Parung South of Jakarta",
-  },
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Jl. Raya Parung No.47, Jabon Mekar",
-    addressLocality: "Parung",
-    addressRegion: "Jawa Barat",
-    postalCode: "16330",
-    addressCountry: "ID",
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: -6.462459,
-    longitude: 106.729392,
-  },
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      telephone: "+628131742034",
-      email: "contact@granddutacitysouthofjakarta.com",
-      contactType: "sales",
-      areaServed: "ID",
-      availableLanguage: ["Indonesian", "English"],
-      // `openingHoursSpecification` BUKAN properti `ContactPoint` — domainnya
-      // `Place`/`LocalBusiness`. Properti yang benar untuk jam layanan sebuah
-      // titik kontak adalah `hoursAvailable`.
-      //
-      // Kesalahan ini terdeteksi Site Audit Semrush sebagai "structured data
-      // that contains markup errors" pada 62 halaman sekaligus — karena node
-      // Organization ini diemit global dari layout, satu kesalahan menular ke
-      // seluruh situs. Ini penyumbang terbesar dari 64 error markup.
-      //
-      // Catatan: `openingHoursSpecification` di `salesOfficeNode()`
-      // (src/lib/schema.ts) TETAP BENAR dan tidak diubah, karena node itu
-      // bertipe `RealEstateAgent` yang merupakan subtipe `LocalBusiness`.
-      hoursAvailable: [
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday",
-          ],
-          opens: "09:00",
-          closes: "18:00",
-        },
-      ],
-    },
-  ],
-  sameAs: [
-    "https://www.instagram.com/granddutacityparungsoj/",
-    "https://www.facebook.com/granddutacityparungsoj",
-    "https://www.youtube.com/@marketinggdcparung",
-    "https://dutaputraland.com/main/public/",
-  ],
-  areaServed: { "@type": "City", name: "Parung, Bogor" },
-  knowsAbout: [
-    "Real Estate",
-    "Township",
-    "Perumahan",
-    "Parung",
-    "Bogor",
-    "South of Jakarta",
-  ],
-};
+const jsonLdGlobal = graph([
+  developerOrganizationNode(),
+  projectBrandNode(),
+]);
 
 export default function RootLayout({
   children,
@@ -207,7 +118,7 @@ export default function RootLayout({
       <body className="relative font-sans min-h-screen bg-brand-light text-[#0B120C] flex flex-col">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLdGlobal) }}
         />
         <SmoothScrollProvider>
           <div className="relative grow">{children}</div>

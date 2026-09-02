@@ -3,6 +3,7 @@ import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
 import dynamic from "next/dynamic";
+import { betterLivingImages } from "@/data/homepage-images";
 
 import {
   SCHEMA_ID,
@@ -12,7 +13,9 @@ import {
   primaryImageNode,
   projectPlaceNode,
   ref,
+  salesOfficeImageNode,
   salesOfficeNode,
+  serializeJsonLd,
   websiteNode,
 } from "@/lib/schema";
 
@@ -133,28 +136,12 @@ export const metadata: Metadata = {
 
 // Gambar unit untuk `ImageObject` di graf. Caption deskriptif dipertahankan
 // karena itulah yang membuat gambar punya peluang muncul sebagai hasil gambar.
-const unitImageNodes = [
-  {
-    "@type": "ImageObject",
-    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Malta_qnowfx.webp",
-    caption: "Desain Fasad Rumah Tipe Malta di Cluster Cascada Grand Duta City Parung",
-  },
-  {
-    "@type": "ImageObject",
-    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800277/Tipe_Aira_ah9nsa.webp",
-    caption: "Tampilan Eksterior Rumah Modern Minimalis Tipe Aira Grand Duta City Bogor",
-  },
-  {
-    "@type": "ImageObject",
-    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Victoria_-_Tuscan_gj1kcd.webp",
-    caption: "Rumah 2 Lantai Mewah Tipe Victoria Tuscan Grand Duta City South of Jakarta",
-  },
-  {
-    "@type": "ImageObject",
-    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Alexandra_mtw8xh.webp",
-    caption: "Hunian Eksklusif 2 Lantai Tipe Alexandra di Grand Duta City Parung",
-  },
-];
+const unitImageNodes = betterLivingImages.map((image) => ({
+  "@type": "ImageObject",
+  url: image.url,
+  contentUrl: image.url,
+  caption: image.alt,
+}));
 
 /**
  * Video tur kawasan di YouTube (channel Marketing Grand Duta City Parung).
@@ -195,11 +182,10 @@ const tourVideoNode = {
   uploadDate: TOUR_VIDEO_UPLOAD_DATE,
   duration: TOUR_VIDEO_DURATION,
   embedUrl: `https://www.youtube-nocookie.com/embed/${TOUR_VIDEO_ID}`,
-  contentUrl: `https://www.youtube.com/watch?v=${TOUR_VIDEO_ID}`,
   inLanguage: "id-ID",
   isPartOf: ref(SCHEMA_ID.website),
   about: ref(SCHEMA_ID.project),
-  publisher: ref(SCHEMA_ID.organization),
+  publisher: ref(SCHEMA_ID.salesOffice),
 };
 
 /**
@@ -219,6 +205,8 @@ const homepageNode = {
     "Grand Duta City Parung South of Jakarta (GDC SOJ) — kota mandiri 200 Ha by Duta Putra Land. Hunian mulai Rp 600 jutaan, Promo Tanpa DP, KPR 7 bank, 20 menit ke CBD Jaksel via tol.",
   inLanguage: "id-ID",
   isPartOf: ref(SCHEMA_ID.website),
+  hasPart: ref(SCHEMA_ID.faq),
+  publisher: ref(SCHEMA_ID.organization),
   about: ref(SCHEMA_ID.project),
   mainEntity: ref(SCHEMA_ID.project),
   primaryImageOfPage: ref(SCHEMA_ID.primaryImage),
@@ -253,6 +241,7 @@ const jsonLdGraph = graph([
   projectPlaceNode(),
   ...clusterNodes(),
   salesOfficeNode(),
+  salesOfficeImageNode(),
   primaryImageNode(FALLBACK_IMAGE, FALLBACK_IMAGE_ALT),
   homepageNode,
   faqNode(),
@@ -265,7 +254,7 @@ export default function Home() {
       {/* Satu blok JSON-LD berisi seluruh graf (lihat src/lib/schema.ts). */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLdGraph) }}
       />
       <Header />
       <main className="relative w-full overflow-hidden">

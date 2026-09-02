@@ -125,7 +125,7 @@ const breadcrumbSchema = breadcrumbNode(
 const getItemListSchema = (articles: ArticleArchiveEntry[]) => ({
   "@type": "ItemList",
   "@id": `${PAGE_URL}#itemlist`,
-  name: "Daftar artikel seputar Grand Duta City Parung dan properti",
+  name: "Daftar artikel panduan properti Parung dan Bogor Selatan",
   itemListOrder: "https://schema.org/ItemListUnordered",
   numberOfItems: articles.length,
   itemListElement: articles.map((article, index) => ({
@@ -147,9 +147,9 @@ const getCollectionPageSchema = (canonicalUrl: string) => ({
   "@type": "CollectionPage",
   "@id": `${canonicalUrl}#webpage`,
   url: canonicalUrl,
-  name: "Artikel Properti Grand Duta City Parung",
+  name: "Artikel & Panduan Properti Parung Bogor",
   description:
-    "Kumpulan artikel edukasi properti tentang cara beli rumah, KPR, lokasi, dan tips investasi di Grand Duta City Parung.",
+    "Kumpulan artikel edukasi properti: panduan beli rumah, proses KPR, ulasan lokasi, dan tips investasi properti di Parung dan Bogor Selatan.",
   inLanguage: "id-ID",
   // Referensi murni. `${SITE_URL}#website` (tanpa garis miring) sebelumnya
   // membuat node WebSite kedua yang terpisah dari milik homepage.
@@ -165,7 +165,7 @@ const getCollectionPageSchema = (canonicalUrl: string) => ({
     "@id": `${PAGE_URL}#primaryimage`,
     url: OG_IMAGE,
     contentUrl: OG_IMAGE,
-    description: "Hero visual halaman artikel properti Grand Duta City Parung",
+    description: "Hero visual halaman artikel panduan properti Parung Bogor",
   },
 });
 

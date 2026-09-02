@@ -86,8 +86,11 @@ export function BetterLiving() {
                           src={clImg(image.url, { w: 1000, q: "auto" })}
                           alt={image.alt}
                           fill
+                          // Cloudinary sudah membatasi sumber ke 1000 px dan
+                          // memilih format/kualitas; srcset Next hanya menambah
+                          // HTML untuk carousel yang maksimal 560 CSS px.
+                          unoptimized
                           className="object-cover transition-transform duration-700 hover:scale-105"
-                          sizes="(max-width: 639px) calc(100vw - 2rem), (max-width: 1023px) calc(100vw - 4rem), 560px"
                           loading="lazy"
                         />
                       </div>

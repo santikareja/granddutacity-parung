@@ -4,8 +4,7 @@ import { getArticleSitemapEntries } from "@/lib/public/queries";
 import { siteImages } from "@/data/images";
 import { unitPagePath, units } from "@/data/units";
 import { isRedirectedSitemapSourceUrl } from "@/lib/redirects";
-
-const BASE_URL = "https://granddutacitysouthofjakarta.com";
+import { SITE_URL } from "@/lib/seo";
 
 /**
  * Halaman tipe unit (Fase 7).
@@ -44,7 +43,7 @@ async function getArtikelSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   const entries = await getArticleSitemapEntries();
 
   return entries.map((entry) => ({
-    url: `${BASE_URL}/${entry.slug}`,
+    url: `${SITE_URL}/${entry.slug}`,
     // `updatedAt` didahulukan (Fase 6). `publishedAt` membuat artikel yang baru
     // disunting tetap terlihat lama bagi Google, jadi sinyal freshness-nya
     // hilang tepat pada artikel yang paling aktif dirawat.
@@ -72,7 +71,7 @@ function entry(
   priority: number,
   changeFrequency: "weekly" | "monthly",
 ): MetadataRoute.Sitemap[number] {
-  const url = path === "/" ? BASE_URL : `${BASE_URL}${path}`;
+  const url = path === "/" ? SITE_URL : `${SITE_URL}${path}`;
   const images = imagesFor(path);
   return {
     url,

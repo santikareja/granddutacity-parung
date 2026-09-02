@@ -1,10 +1,11 @@
 import { siteImages } from "@/data/images";
+import { SITE_URL } from "@/lib/seo";
 
 export const dynamic = "force-static";
 export const revalidate = 86400;
 
-const BASE_URL = "https://granddutacitysouthofjakarta.com";
 const IMAGE_FILE_PATTERN = /\.(avif|gif|jpe?g|png|webp)$/i;
+const pageUrl = (page: string) => (page === "/" ? SITE_URL : `${SITE_URL}${page}`);
 
 export async function GET() {
   const uniqueImageEntries = siteImages.filter(
@@ -34,7 +35,7 @@ export async function GET() {
 ${Object.entries(pageMap)
   .map(
     ([page, images]) => `  <url>
-    <loc>${BASE_URL}${page}</loc>
+    <loc>${pageUrl(page)}</loc>
 ${images
   .map(
     (image) => `    <image:image>

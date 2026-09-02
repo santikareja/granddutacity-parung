@@ -7,10 +7,12 @@ import { facilities, type FacilityIconKey } from "@/data/facilities";
 import { cn } from "@/lib/utils";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { Reveal } from "@/components/ui/reveal";
+import { clImg } from "@/lib/cloudinary";
 
 function FacilityImage({ src, alt, title, className }: { src: string; alt: string; title: string; className?: string }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const cardSrc = clImg(src, { w: 800, q: "auto" });
 
   return (
     <>
@@ -25,10 +27,10 @@ function FacilityImage({ src, alt, title, className }: { src: string; alt: strin
       >
         <div className="relative w-full h-full rounded-[calc(1.5rem-0.375rem)] overflow-hidden bg-black/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
           <Image 
-            src={src}
+            src={cardSrc}
             alt={alt}
             fill
-            sizes="(max-width: 480px) 340px, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            unoptimized
             className={cn(
               "object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
               isHovered && "scale-108"

@@ -1,10 +1,9 @@
-"use client";
-
 import Image from "next/image";
 import {
   BANK_PARTNER_COUNT,
   bankPartners,
 } from "@/data/bank-partners";
+import { clImg } from "@/lib/cloudinary";
 
 /**
  * Daftar bank kini berasal dari SUMBER TUNGGAL `src/data/bank-partners.ts`
@@ -57,10 +56,13 @@ export function BankSlider({
             >
               {bank.logo ? (
                 <Image
-                  src={bank.logo}
+                  // Logo hanya dirender pada 112 CSS px. Cloudinary sudah
+                  // mengirim varian 224 px (2x DPR), jadi srcset penuh dari
+                  // Next hanya menggandakan URL panjang ke HTML tanpa manfaat.
+                  src={clImg(bank.logo, { w: 224, q: "auto" })}
                   alt={`Logo ${bank.name}`}
                   fill
-                  sizes="112px"
+                  unoptimized
                   className="object-contain object-left"
                   loading="lazy"
                 />

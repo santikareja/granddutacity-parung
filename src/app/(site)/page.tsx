@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
+import { BankPartners } from "@/components/sections/bank-partners";
 import dynamic from "next/dynamic";
 import { betterLivingImages } from "@/data/homepage-images";
 
@@ -21,7 +22,6 @@ import {
 
 const VideoSection = dynamic(() => import("@/components/sections/video-section").then((mod) => ({ default: mod.VideoSection })));
 const WhyGdc = dynamic(() => import("@/components/sections/why-gdc").then((mod) => ({ default: mod.WhyGdc })));
-const BankPartners = dynamic(() => import("@/components/sections/bank-partners").then((mod) => ({ default: mod.BankPartners })));
 const BetterLiving = dynamic(() => import("@/components/sections/better-living").then((mod) => ({ default: mod.BetterLiving })));
 const LokasiScroll = dynamic(() => import("@/components/sections/lokasi-scroll").then((mod) => ({ default: mod.LokasiScroll })));
 const About = dynamic(() => import("@/components/sections/about").then((mod) => ({ default: mod.About })));

@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-
-const BASE_URL = "https://granddutacitysouthofjakarta.com";
+import { SITE_URL } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -24,10 +23,14 @@ export default function robots(): MetadataRoute.Robots {
           "Google-Extended",
         ],
         allow: "/",
-        disallow: ["/admin/"],
+        disallow: ["/api/", "/admin/"],
       },
     ],
-    sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/images.xml`],
-    host: BASE_URL,
+    sitemap: [
+      `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/artikel/sitemap.xml`,
+      `${SITE_URL}/images.xml`,
+    ],
+    host: SITE_URL,
   };
 }

@@ -37,6 +37,22 @@ function StackedImageSlider() {
     setIndex((prev) => (prev + 1) % imageList.length);
   };
 
+  // Hanya tiga kartu yang terlihat. Satu kartu sebelumnya dipertahankan
+  // sebagai outgoing frame agar animasi tetap sama. Versi lama memasang
+  // seluruh 10 gambar lalu menyembunyikan tujuh kartu permanen.
+  const mountedImages = [0, 1, 2, imageList.length - 1].map(
+    (position) => {
+      const sourceIndex = (index + position) % imageList.length;
+      return { image: imageList[sourceIndex], position, sourceIndex };
+    },
+  );
+  const mountedSourceIndexes = new Set(
+    mountedImages.map(({ sourceIndex }) => sourceIndex),
+  );
+  const inactiveImages = imageList
+    .map((image, sourceIndex) => ({ image, sourceIndex }))
+    .filter(({ sourceIndex }) => !mountedSourceIndexes.has(sourceIndex));
+
   return (
     <div
       className="relative w-full aspect-[4/5] cursor-pointer group pt-8 select-none"
@@ -51,9 +67,21 @@ function StackedImageSlider() {
       }}
       aria-label="Klik untuk melihat foto dokumentasi selanjutnya"
     >
-      {imageList.map((img, i) => {
-        const position = (i - index + imageList.length) % imageList.length;
-
+      {inactiveImages.map(({ image: img }) => (
+        // eslint-disable-next-line @next/next/no-img-element -- inactive slide memakai URL Cloudinary 380x475 yang sudah dioptimalkan; native img menjaga SSR ringan tanpa srcset Next.js.
+        <img
+          key={`inactive-${img.url}`}
+          src={img.url}
+          alt={img.alt}
+          width={380}
+          height={475}
+          loading="lazy"
+          decoding="async"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0"
+        />
+      ))}
+      {mountedImages.map(({ image: img, position, sourceIndex: i }) => {
         const isFront = position === 0;
         const isSecond = position === 1;
         const isThird = position === 2;
@@ -82,9 +110,9 @@ function StackedImageSlider() {
                 src={img.url}
                 alt={img.alt}
                 fill
-                // sizes mengikuti lebar render sebenarnya: wrapper max-w 320px
-                // (mobile) / 420px, dikurangi inset kartu 16px di kiri-kanan.
-                sizes="(max-width: 639px) 288px, 388px"
+                // Sumber sudah dipotong Cloudinary ke 380x475, mendekati
+                // ukuran render maksimum kartu (388 CSS px).
+                unoptimized
                 loading="lazy"
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
               />

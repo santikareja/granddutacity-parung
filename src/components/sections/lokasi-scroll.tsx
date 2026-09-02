@@ -6,6 +6,11 @@ import Link from "next/link";
 import { X, Navigation2, MapPin, ArrowUpRight, Clock, Car, Compass } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Reveal } from "@/components/ui/reveal";
+import { clImg } from "@/lib/cloudinary";
+
+const MAP_IMAGE_URL =
+  "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776804065/map_lokasi_gdc_parung_bogor_anhrcm.webp";
+const MAP_CARD_IMAGE_URL = clImg(MAP_IMAGE_URL, { w: 1200, q: "auto" });
 
 const accessPoints = [
   { time: "5 Mnt", destination: "RS Dompet Dhuafa & SMA Dwiwarna", icon: Clock },
@@ -185,10 +190,10 @@ export function LokasiScroll() {
                 aria-label="Buka peta lokasi dalam tampilan penuh"
               >
                 <Image
-                  src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1776804065/map_lokasi_gdc_parung_bogor_anhrcm.webp"
+                  src={MAP_CARD_IMAGE_URL}
                   alt="Map Lokasi Grand Duta City Parung"
                   fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  unoptimized
                   className="object-contain transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
                   draggable={false}
                 />
@@ -310,7 +315,7 @@ export function LokasiScroll() {
                     }}
                   >
                     <Image
-                      src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1776804065/map_lokasi_gdc_parung_bogor_anhrcm.webp"
+                      src={MAP_IMAGE_URL}
                       alt="Map Lokasi Grand Duta City Parung"
                       fill
                       sizes="(max-width: 640px) 95vw, (max-width: 1280px) 90vw, 1200px"

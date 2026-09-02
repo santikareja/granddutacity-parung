@@ -65,6 +65,20 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Canonical host: seluruh sinyal SEO memakai non-www.
+      // Redirect ini hanya menyentuh host duplicate; path dan query tetap
+      // diteruskan oleh Next sehingga tidak mengubah URL konten canonical.
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "www.granddutacitysouthofjakarta.com",
+          },
+        ],
+        destination: "https://granddutacitysouthofjakarta.com/:path*",
+        statusCode: 301,
+      },
       // Panel admin lama /v2-admin -> /admin (Task 12B-2). Ditaruh PALING ATAS
       // agar menang atas aturan trailing-slash di bawahnya. Tanpa ini, bookmark
       // dan tab yang masih terbuka di /v2-admin/* akan 404 (R2: nol URL mati).

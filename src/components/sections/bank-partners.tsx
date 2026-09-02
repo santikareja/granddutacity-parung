@@ -1,5 +1,3 @@
-"use client";
-
 import { BankSlider } from "@/components/ui/bank-slider";
 
 export function BankPartners() {

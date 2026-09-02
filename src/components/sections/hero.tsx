@@ -314,7 +314,7 @@ export function Hero() {
             className="text-[#F8F6F0]/90 text-[13px] sm:text-base md:text-lg font-normal max-w-2xl mb-5 sm:mb-8 leading-[1.7] [text-shadow:0_1px_12px_rgba(0,0,0,0.8)] px-2"
             style={{ animation: "heroFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both" }}
           >
-            Investasi &amp; hunian prestisius di Grand Duta City Parung — kota mandiri 200 Ha persembahan{" "}
+            Investasi &amp; hunian prestisius di Grand Duta City Parung, yang juga dikenal sebagai Grand Duta City South of Jakarta (GDC SOJ) — kota mandiri 200 Ha di Parung, Kabupaten Bogor, persembahan{" "}
             <span className="text-[#F8F6F0] font-semibold">Duta Putra Land</span>. Cicilan mulai{" "}
             <span className="text-[#F5A524] font-semibold">Rp 4 jutaan/bln</span>, Promo Tanpa DP, 20 menit ke CBD Jakarta Selatan.
           </p>

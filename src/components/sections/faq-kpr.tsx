@@ -5,7 +5,12 @@ import { ChevronDown, Calculator, ArrowUpRight, HelpCircle } from "lucide-react"
 import Image from "next/image";
 import { trackWhatsAppClick } from "@/lib/analytics";
 import { homepageFaqs as faqs } from "@/data/faq-homepage";
+import { clImg } from "@/lib/cloudinary";
 
+const KPR_PROMO_IMAGE = clImg(
+  "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775663927/Promo_Grand_Duta_City_SOuth_of_Jakarta_Harga_sbgtyx.webp",
+  { w: 800, h: 450, q: "auto" },
+);
 
 export function FaqKpr() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -132,10 +137,10 @@ export function FaqKpr() {
                 {/* Promo Thumbnail */}
                 <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl sm:rounded-2xl mb-5 sm:mb-6 border border-[#090D0A]/8 shadow-sm">
                   <Image
-                    src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775663927/Promo_Grand_Duta_City_SOuth_of_Jakarta_Harga_sbgtyx.webp"
+                    src={KPR_PROMO_IMAGE}
                     alt="Promo Harga Grand Duta City"
                     fill
-                    sizes="(max-width: 480px) 290px, (max-width: 768px) 50vw, 40vw"
+                    unoptimized
                     className="object-cover"
                   />
                   <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[#C8521A] text-white text-[8px] sm:text-[9px] font-sans font-bold tracking-widest uppercase shadow-md">

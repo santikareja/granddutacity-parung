@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
-import {
-  ArrowUpRight,
-  Bath,
-  BedDouble,
-  CarFront,
-  Maximize,
-  ScrollText,
-  Zap,
-} from "lucide-react";
+import { ArrowUpRight, ScrollText, Zap } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -299,15 +291,11 @@ export function ProductRevealCard({
         </div>
       </div>
 
-      {/* Ikon spesifikasi hanya dipakai sebagai penanda semantik di markup
-          tersembunyi supaya pembaca layar tetap mendapat konteks angka bila
-          overlay tidak pernah dibuka. */}
+      {/* Ringkasan aksesibel tetap dipertahankan, tetapi ikon SVG dekoratif
+          yang sebelumnya ikut tersembunyi tidak menambah konteks pembaca layar
+          dan menggandakan 32 SVG pada delapan kartu homepage. */}
       <span className="sr-only">
-        <Maximize aria-hidden="true" /> Luas bangunan {specs.lb} meter persegi, luas
-        tanah {specs.lt} meter persegi.
-        <BedDouble aria-hidden="true" /> {specs.bed} kamar tidur.
-        <Bath aria-hidden="true" /> {specs.bath} kamar mandi.
-        <CarFront aria-hidden="true" /> Carport {specs.carport} mobil.
+        Luas bangunan {specs.lb} meter persegi, luas tanah {specs.lt} meter persegi. {specs.bed} kamar tidur. {specs.bath} kamar mandi. Carport {specs.carport} mobil.
       </span>
     </article>
   );

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { isRedirectedSitemapSourcePath } from "@/lib/redirects";
 import { getArticleSitemapEntries } from "@/lib/public/queries";
+import { SITE_URL } from "@/lib/seo";
 
 /**
  * SITEMAP ARTIKEL TERPISAH — Fase 6 spec `seo-cannibalization-and-pseo`.
@@ -25,8 +26,6 @@ import { getArticleSitemapEntries } from "@/lib/public/queries";
  * adalah URL yang tidak konsisten dengan canonical-nya.
  */
 
-const BASE_URL = "https://granddutacitysouthofjakarta.com";
-
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -35,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return entries
     .filter((entry) => !isRedirectedSitemapSourcePath(`/${entry.slug}`))
     .map((entry) => ({
-      url: `${BASE_URL}/${entry.slug}`,
+      url: `${SITE_URL}/${entry.slug}`,
       // `updatedAt` lebih dulu: ia menyatakan kapan kontennya terakhir berubah.
       // `publishedAt` hanya cadangan untuk baris lama yang `updatedAt`-nya kosong.
       lastModified: new Date(entry.updatedAt ?? entry.publishedAt ?? Date.now()),

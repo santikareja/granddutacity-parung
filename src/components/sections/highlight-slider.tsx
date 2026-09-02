@@ -154,9 +154,11 @@ export function HighlightSlider() {
                       src={slide.image}
                       alt={slide.title}
                       fill
+                      // `slide.image` sudah 600x450 dari Cloudinary. Hindari
+                      // proxy + srcset Next yang mengulang URL pada 10 slide.
+                      unoptimized
                       loading="lazy"
                       className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/slide:scale-108"
-                      sizes="(max-width: 480px) 370px, (max-width: 768px) 50vw, 33vw"
                     />
                     
                     {/* Gradient Overlay */}

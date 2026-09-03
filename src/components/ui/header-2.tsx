@@ -54,10 +54,10 @@ export function Header() {
 		},
 		{ 
 			label: 'Informasi', 
-			href: '/lokasi-akses-grand-duta-city-parung',
+			href: '/lokasi-akses-gdc-parung',
 			submenu: [
 				{ label: 'Tentang Developer', href: '/about', desc: 'Duta Putra Land sejak 1983' },
-				{ label: 'Lokasi & Akses', href: '/lokasi-akses-grand-duta-city-parung', desc: 'Akses 4 exit tol & TOD' },
+				{ label: 'Lokasi & Akses', href: '/lokasi-akses-gdc-parung', desc: 'Akses 4 exit tol & TOD' },
 				{ label: 'Cara Beli & KPR', href: '/cara-beli-kpr', desc: 'Promo Tanpa DP & 7 Bank Mitra' },
 				{ label: 'Galeri Foto & Video', href: '/galeri', desc: 'Dokumentasi kawasan & fasilitas' },
 				{ label: 'Blog Properti', href: '/artikel', desc: 'Tips investasi properti Bogor' }

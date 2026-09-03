@@ -739,9 +739,9 @@ export const siteImages: SiteImage[] = [
     updateStokSeeds
   ),
 
-  // ── LOKASI & AKSES (/lokasi-akses-grand-duta-city-parung) ───────────────
+  // ── LOKASI & AKSES (/lokasi-akses-gdc-parung) ───────────────────────────
   ...createPageImages(
-    "/lokasi-akses-grand-duta-city-parung",
+    "/lokasi-akses-gdc-parung",
     "halaman lokasi dan akses",
     lokasiSeeds
   ),

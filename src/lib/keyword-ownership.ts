@@ -131,7 +131,7 @@ export const keywordOwnership: readonly KeywordOwnership[] = [
     supporting: ["kpr gdc parung", "syarat kpr", "booking fee"],
   },
   {
-    path: "/lokasi-akses-grand-duta-city-parung",
+    path: "/lokasi-akses-gdc-parung",
     primary: "lokasi gdc parung",
     supporting: ["akses tol parung", "exit tol sawangan", "jarak parung ke jakarta"],
   },

@@ -382,7 +382,7 @@ export default function ClusterLaderaPage() {
                   Lihat Update Stok Ladera <ArrowRight className="w-4 h-4" />
                 </Link>
                 <div className="mt-4">
-                  <Link href="/lokasi-akses-grand-duta-city-parung" className="inline-flex items-center gap-2 text-[#F5F1E8]/70 hover:text-[#F5F1E8] text-sm transition-colors">
+                  <Link href="/lokasi-akses-gdc-parung" className="inline-flex items-center gap-2 text-[#F5F1E8]/70 hover:text-[#F5F1E8] text-sm transition-colors">
                     <MapPin className="w-4 h-4" /> Pelajari lokasi &amp; akses GDC Parung
                   </Link>
                 </div>

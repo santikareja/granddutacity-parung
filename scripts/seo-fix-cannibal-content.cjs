@@ -6,7 +6,7 @@
  *
  * Audit produksi 3 September 2026 (crawl 66 URL sitemap) menemukan homepage
  * turun ke halaman 2 untuk "grand duta city parung", sementara
- * `/cara-memilih-rumah-parung` dan `/lokasi-akses-grand-duta-city-parung`
+ * `/cara-memilih-rumah-parung` dan `/lokasi-akses-gdc-parung`
  * berperingkat di atasnya. Guard G4–G19 semuanya HIJAU: title, description, dan
  * `<h1>` seluruh halaman non-homepage sudah bersih. Kanibalisasi yang tersisa
  * ada di dua tempat yang tidak satu pun guard itu periksa, dan keduanya hidup di

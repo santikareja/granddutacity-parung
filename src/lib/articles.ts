@@ -194,7 +194,7 @@ export const articleCategoryDefinitions: Record<
       "Baca detail lokasi, jalur akses, dan titik penting sekitar Grand Duta City untuk menilai apakah rute hariannya sesuai kebutuhan Anda.",
     ctaPrimary: {
       label: "Lihat Akses & Lokasi GDC",
-      href: "/lokasi-akses-grand-duta-city-parung",
+      href: "/lokasi-akses-gdc-parung",
     },
     ctaSecondary: {
       label: "Konsultasikan Kebutuhan",
@@ -438,7 +438,7 @@ export const articleAuthorDefinitions: Record<
  *   /  (homepage)                                244 dari 66 halaman
  *   /cara-beli-kpr                               168 dari 40 halaman
  *   /update-stok-siteplan-grand-duta-city-parung  165 dari 40 halaman
- *   /lokasi-akses-grand-duta-city-parung          161 dari 42 halaman
+ *   /lokasi-akses-gdc-parung                      161 dari 42 halaman
  *
  * Homepage unggul tipis, padahal ia satu-satunya pemilik frasa itu: gabungan
  * tiga halaman di atas justru dua kali lipat lebih banyak. Untuk query
@@ -553,9 +553,9 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     ],
   },
   {
-    id: "lokasi-akses-grand-duta-city-parung",
-    slug: "lokasi-akses-grand-duta-city-parung",
-    href: "/lokasi-akses-grand-duta-city-parung",
+    id: "lokasi-akses-gdc-parung",
+    slug: "lokasi-akses-gdc-parung",
+    href: "/lokasi-akses-gdc-parung",
     title: "Lokasi GDC Parung dan Akses ke Bogor, Depok, Jakarta",
     excerpt:
       "Peta lokasi, jalur akses utama, serta fasilitas penting di sekitar kawasan untuk membantu Anda menilai kenyamanan mobilitas harian.",
@@ -575,7 +575,11 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     popularityRank: 3,
     recommendationRank: 3,
     searchTerms: [
-      "lokasi grand duta city parung",
+      // "lokasi grand duta city parung" diganti "lokasi gdc parung" agar entri
+      // ini selaras dengan slug, title, dan H1 halaman tujuan. Nilai-nilai ini
+      // tidak dirender ke HTML (hanya dipakai filter search box arsip), tapi
+      // ikut ter-serialize ke RSC payload, jadi tetap disamakan.
+      "lokasi gdc parung",
       "akses bogor depok jakarta",
       "peta lokasi",
       "fasilitas sekitar",

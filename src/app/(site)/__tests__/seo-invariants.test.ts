@@ -171,8 +171,8 @@ beforeAll(async () => {
     ["/artikel", import("../artikel/page")],
     ["/cara-beli-kpr", import("../cara-beli-kpr/page")],
     [
-      "/lokasi-akses-grand-duta-city-parung",
-      import("../lokasi-akses-grand-duta-city-parung/page"),
+      "/lokasi-akses-gdc-parung",
+      import("../lokasi-akses-gdc-parung/page"),
     ],
     [
       "/update-stok-siteplan-grand-duta-city-parung",
@@ -573,7 +573,7 @@ describe("konsistensi klaim harga terendah", () => {
 // topik brand sama sekali (mis. /galeri, /about).
 //
 // Sembilan halaman itu:
-//   1. /lokasi-akses-grand-duta-city-parung  5. /pricelist-grand-duta-city
+//   1. /lokasi-akses-gdc-parung               5. /pricelist-grand-duta-city
 //   2. /disclaimer                            6. /cluster-ladera
 //   3. /kontak                                7. /cluster-cascada
 //   4. /artikel                               8. /cara-beli-kpr
@@ -602,7 +602,7 @@ describe("G19 — H1 sembilan halaman kanibalisasi tidak dibuka dengan frasa bra
       { PAGE_H1: clusterCascadaH1 },
       { PAGE_H1: caraBeliKprH1 },
     ] = await Promise.all([
-      import("../lokasi-akses-grand-duta-city-parung/page"),
+      import("../lokasi-akses-gdc-parung/page"),
       import("../disclaimer/page"),
       import("../kontak/page"),
       import("../artikel/page"),
@@ -613,7 +613,7 @@ describe("G19 — H1 sembilan halaman kanibalisasi tidak dibuka dengan frasa bra
     ]);
 
     const h1sByPath: Record<string, string> = {
-      "/lokasi-akses-grand-duta-city-parung": lokasiAksesH1,
+      "/lokasi-akses-gdc-parung": lokasiAksesH1,
       "/disclaimer": disclaimerH1,
       "/kontak": kontakH1,
       "/artikel": artikelH1,
@@ -671,7 +671,7 @@ describe("G19 — H1 sembilan halaman kanibalisasi tidak dibuka dengan frasa bra
 // G4–G19 memeriksa `title`, `description`, dan `<h1>`. Ketiganya bersih pada
 // audit 3 September 2026, TAPI homepage tetap turun ke halaman 2 untuk
 // "grand duta city parung" sementara /cara-memilih-rumah-parung dan
-// /lokasi-akses-grand-duta-city-parung menyalipnya. Audit crawl 66 URL sitemap
+// /lokasi-akses-gdc-parung menyalipnya. Audit crawl 66 URL sitemap
 // menemukan dua saluran kanibalisasi yang tidak satu pun guard di atas menyentuh:
 //
 //   1. ANCHOR TEXT INTERNAL. Judul di `articleArchiveEntries` dirender sebagai

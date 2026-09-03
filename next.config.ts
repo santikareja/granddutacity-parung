@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
-import { HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH } from "./src/lib/redirects";
+import {
+  HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH,
+  LOCATION_PAGE_LEGACY_PATH,
+  LOCATION_PAGE_PATH,
+} from "./src/lib/redirects";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -104,6 +108,16 @@ const nextConfig: NextConfig = {
       {
         source: HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH,
         destination: "/",
+        permanent: true,
+      },
+      // Slug halaman lokasi diubah agar URL-nya tidak lagi memuat frasa target
+      // homepage (lihat catatan di src/lib/redirects.ts). URL lama sudah
+      // terindeks dan menerima tautan internal, jadi ia 301 ke slug baru —
+      // bukan dibiarkan 404. Ditaruh SEBELUM aturan `/:path+/` agar menang atas
+      // normalisasi trailing-slash, mengikuti pola redirect statis di atasnya.
+      {
+        source: LOCATION_PAGE_LEGACY_PATH,
+        destination: LOCATION_PAGE_PATH,
         permanent: true,
       },
       {

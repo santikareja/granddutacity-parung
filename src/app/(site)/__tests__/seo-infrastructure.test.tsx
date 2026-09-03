@@ -128,7 +128,7 @@ describe("SEO infrastructure hardening", () => {
       "/cluster-ladera",
       "/cluster-cascada",
       "/pricelist-grand-duta-city",
-      "/lokasi-akses-grand-duta-city-parung",
+      "/lokasi-akses-gdc-parung",
       "/update-stok-siteplan-grand-duta-city-parung",
       "/cara-beli-kpr",
       "/galeri",

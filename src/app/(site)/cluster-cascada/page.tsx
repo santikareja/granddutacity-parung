@@ -240,7 +240,7 @@ export default function ClusterCascadaPage() {
                 ))}
               </div>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                <Link href="/lokasi-akses-grand-duta-city-parung" className="inline-flex items-center gap-2 rounded-full border border-[#F5A524]/20 px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#F5A524] hover:border-[#F5A524] hover:bg-[#F5A524] hover:text-[#F5F1E8]">
+                <Link href="/lokasi-akses-gdc-parung" className="inline-flex items-center gap-2 rounded-full border border-[#F5A524]/20 px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#F5A524] hover:border-[#F5A524] hover:bg-[#F5A524] hover:text-[#F5F1E8]">
                   Pelajari Lokasi & Akses
                 </Link>
                 <Link href="/cluster-ladera" className="inline-flex items-center gap-2 rounded-full border border-[#0b120c]/10 px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#0b120c] hover:border-[#0b120c] hover:bg-[#0b120c] hover:text-[#F5F1E8]">
@@ -445,7 +445,7 @@ export default function ClusterCascadaPage() {
                   <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20ingin%20cek%20ketersediaan%20unit%20di%20Cluster%20Cascada." data-wa-placement="cascada-cek-stok" target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#F5A524] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#F5F1E8] hover:bg-[#0b120c]">
                     <Phone className="h-4 w-4" /> Cek ketersediaan Cascada
                   </a>
-                  <Link href="/lokasi-akses-grand-duta-city-parung" className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#0b120c]/10 px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#0b120c] hover:border-[#F5A524] hover:text-[#F5A524]">
+                  <Link href="/lokasi-akses-gdc-parung" className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#0b120c]/10 px-6 py-3.5 text-xs font-bold uppercase tracking-[0.22em] text-[#0b120c] hover:border-[#F5A524] hover:text-[#F5A524]">
                     <MapPin className="h-4 w-4" /> Lihat detail lokasi
                   </Link>
                 </div>
@@ -507,7 +507,7 @@ export default function ClusterCascadaPage() {
                   ["/", "Grand Duta City Parung"],
                   ["/pricelist-grand-duta-city", "Cek harga Cluster Cascada"],
                   ["/update-stok-siteplan-grand-duta-city-parung#cluster-cascada", "Lihat stok Cluster Cascada"],
-                  ["/lokasi-akses-grand-duta-city-parung", "Lihat detail lokasi & akses GDC Parung"],
+                  ["/lokasi-akses-gdc-parung", "Lihat detail lokasi & akses GDC Parung"],
                   ["/cluster-ladera", "Bandingkan dengan Cluster Ladera"],
                   ["/cara-beli-kpr", "Cara beli & KPR"],
                   ["/kontak", "Kontak marketing"],

@@ -131,7 +131,7 @@ export function Footer() {
           </p>
           <ul className="space-y-2.5">
             {[
-              { label: "Lokasi & Akses Tol", href: "/lokasi-akses-grand-duta-city-parung" },
+              { label: "Lokasi & Akses Tol", href: "/lokasi-akses-gdc-parung" },
               { label: "Tentang Developer", href: "/about" },
               { label: "Blog Properti", href: "/artikel" },
               { label: "Topik Artikel", href: "/category" },

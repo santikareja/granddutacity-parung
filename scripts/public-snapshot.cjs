@@ -34,7 +34,7 @@ const DEFAULT_URLS = [
   "/cara-beli-kpr",
   "/cluster-cascada",
   "/cluster-ladera",
-  "/lokasi-akses-grand-duta-city-parung",
+  "/lokasi-akses-gdc-parung",
   "/update-stok-siteplan-grand-duta-city-parung",
   "/10-ciri-agen-properti-terbaik", // satu-satunya artikel DB murni (via [slug])
   "/category/panduan-properti",

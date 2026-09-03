@@ -68,7 +68,7 @@ const STATIC_PATHS = new Set([
   "/galeri",
   "/kontak",
   "/cara-beli-kpr",
-  "/lokasi-akses-grand-duta-city-parung",
+  "/lokasi-akses-gdc-parung",
   "/update-stok-siteplan-grand-duta-city-parung",
   "/disclaimer",
   "/privacy-policy",

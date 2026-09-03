@@ -8,7 +8,7 @@ Urutan task ini bukan sembarang: setiap fase adalah prasyarat fase berikutnya, d
 - **Homepage read-mostly.** Task 1–7 TIDAK BOLEH menyentuh `title`, `description`, `alternates.canonical`, `robots`, atau `<h1>` homepage. Perubahan homepage hanya di Task 8.
 - **Sebelum menandai task selesai**, jalankan `npm run lint && npm run test && npm run build` dan pastikan hijau.
 - **Bila ragu atau menemukan ambiguitas**, tanyakan ke pemilik. Jangan memilih sendiri nilai fakta yang bertentangan.
-- **Jangan pernah** menambahkan `noindex` ke homepage, `/cluster-ladera`, `/cluster-cascada`, `/pricelist-grand-duta-city`, `/kontak`, `/lokasi-akses-grand-duta-city-parung`, `/cara-beli-kpr`, `/galeri`, `/update-stok-siteplan-grand-duta-city-parung`, `/about`, `/artikel`, atau `/category/*`.
+- **Jangan pernah** menambahkan `noindex` ke homepage, `/cluster-ladera`, `/cluster-cascada`, `/pricelist-grand-duta-city`, `/kontak`, `/lokasi-akses-gdc-parung`, `/cara-beli-kpr`, `/galeri`, `/update-stok-siteplan-grand-duta-city-parung`, `/about`, `/artikel`, atau `/category/*`.
 - **Jangan ubah** 13 aturan `redirects()` yang sudah ada di `next.config.ts`; hanya tambah.
 
 ---
@@ -66,7 +66,7 @@ Urutan task ini bukan sembarang: setiap fase adalah prasyarat fase berikutnya, d
 
   - [x] 1.2 Tulis ulang title 16 halaman non-homepage
     - Terapkan kolom "Title baru" dari tabel di `design.md` Fase 1 secara persis
-    - File: `cluster-ladera/page.tsx`, `cluster-cascada/page.tsx`, `pricelist-grand-duta-city/page.tsx`, `kontak/page.tsx`, `lokasi-akses-grand-duta-city-parung/page.tsx`, `cara-beli-kpr/page.tsx`, `artikel/page.tsx`, `galeri/page.tsx`, `update-stok-siteplan-grand-duta-city-parung/page.tsx`, `about/page.tsx`, `privacy-policy/page.tsx`, `category/page.tsx`, `author/santika-reza/page.tsx`, dan `metaTitle` 3 kategori di `src/lib/articles.ts`
+    - File: `cluster-ladera/page.tsx`, `cluster-cascada/page.tsx`, `pricelist-grand-duta-city/page.tsx`, `kontak/page.tsx`, `lokasi-akses-gdc-parung/page.tsx` (dulu `lokasi-akses-grand-duta-city-parung/`, direname 3 September 2026), `cara-beli-kpr/page.tsx`, `artikel/page.tsx`, `galeri/page.tsx`, `update-stok-siteplan-grand-duta-city-parung/page.tsx`, `about/page.tsx`, `privacy-policy/page.tsx`, `category/page.tsx`, `author/santika-reza/page.tsx`, dan `metaTitle` 3 kategori di `src/lib/articles.ts`
     - Prioritas tunggal tertinggi: **`/galeri`** — satu-satunya halaman yang memuat KEDUA kata kunci target
     - Jangan ubah `/tag/*` (sudah `noindex`, title tidak memuat frasa target) dan `/disclaimer` (title sudah bersih)
     - _Design: Fase 1 → Tabel title & H1_
@@ -558,7 +558,7 @@ Urutan task ini bukan sembarang: setiap fase adalah prasyarat fase berikutnya, d
 
   - [ ] 10.4 Parent nav crawlable
     - `header-2.tsx:29,38,47` — `Cluster`, `Harga & Stok`, `Informasi` dirender `<button>` dengan `href: '#'`. Anak-anaknya ada di DOM jadi tetap ter-crawl, tapi hierarkinya tidak terbaca
-    - Ubah jadi `<Link>` ke hub nyata: `Cluster` → `/tipe-rumah`, `Harga & Stok` → `/pricelist-grand-duta-city`, `Informasi` → `/lokasi-akses-grand-duta-city-parung`
+    - Ubah jadi `<Link>` ke hub nyata: `Cluster` → `/tipe-rumah`, `Harga & Stok` → `/pricelist-grand-duta-city`, `Informasi` → `/lokasi-akses-gdc-parung`
     - Ini salah satu dari dua hambatan sitelink; satunya (entitas terpecah) diselesaikan Fase 5
     - _Requirements: R6_
 

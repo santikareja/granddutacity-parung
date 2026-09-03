@@ -3,7 +3,7 @@ import { getCategorySitemapEntries } from "@/lib/articles";
 import { getArticleSitemapEntries } from "@/lib/public/queries";
 import { siteImages } from "@/data/images";
 import { unitPagePath, units } from "@/data/units";
-import { isRedirectedSitemapSourceUrl } from "@/lib/redirects";
+import { LOCATION_PAGE_PATH, isRedirectedSitemapSourceUrl } from "@/lib/redirects";
 import { SITE_URL } from "@/lib/seo";
 
 /**
@@ -110,7 +110,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/about", 0.6, "monthly"),
     entry("/cara-beli-kpr", 0.8, "weekly"),
     entry("/update-stok-siteplan-grand-duta-city-parung", 0.8, "weekly"),
-    entry("/lokasi-akses-grand-duta-city-parung", 0.85, "weekly"),
+    // Slug lama (`/lokasi-akses-grand-duta-city-parung`) sekarang 301 ke sini
+    // dan sudah terdaftar di REDIRECTED_SITEMAP_SOURCE_PATHS, jadi ia tidak
+    // pernah ikut masuk sitemap lagi.
+    entry(LOCATION_PAGE_PATH, 0.85, "weekly"),
     entry("/kontak", 0.8, "weekly"),
     entry("/tipe-rumah", 0.85, "weekly"),
     // Dua halaman legal ini INDEXABLE tapi belum pernah masuk sitemap.

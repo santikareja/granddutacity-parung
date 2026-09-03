@@ -7,13 +7,24 @@ import { MapPin, Navigation, Car, Train, Clock, Building2, Hospital, ArrowRight,
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { SCHEMA_ID, breadcrumbNode, graph, ref } from "@/lib/schema";
-import { OG_SITE_NAME } from "@/lib/seo";
+import { LOCATION_PAGE_PATH } from "@/lib/redirects";
+import { OG_SITE_NAME, SITE_URL } from "@/lib/seo";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-const PAGE_URL = "https://granddutacitysouthofjakarta.com/lokasi-akses-grand-duta-city-parung";
+/**
+ * Slug diubah 3 September 2026 dari `lokasi-akses-grand-duta-city-parung`
+ * menjadi `lokasi-akses-gdc-parung`: URL adalah sinyal on-page, dan slug lama
+ * memuat frasa target homepage secara utuh. URL lama 301 ke sini
+ * (lihat `next.config.ts` dan `src/lib/redirects.ts`).
+ *
+ * `LOCATION_PAGE_PATH` diimpor alih-alih ditulis ulang supaya path ini punya
+ * SATU sumber: redirect, sitemap, breadcrumb, dan canonical tidak bisa lagi
+ * bergeser satu sama lain.
+ */
+const PAGE_URL = `${SITE_URL}${LOCATION_PAGE_PATH}`;
 const MAP_IMAGE =
   "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp";
 
@@ -35,8 +46,8 @@ const PAGE_DESCRIPTION =
  * Halaman ini adalah kasus pemecahan entitas yang paling parah di situs:
  *
  *  - `RealEstateAgent` di sini diberi `@id` = URL HALAMAN ini
- *    (".../lokasi-akses-grand-duta-city-parung"), bukan fragment entitas. Jadi
- *    Google diberi tahu bahwa HALAMAN itu sendiri adalah sebuah agen properti,
+ *    (".../lokasi-akses-gdc-parung"), bukan fragment entitas. Jadi Google
+ *    diberi tahu bahwa HALAMAN itu sendiri adalah sebuah agen properti,
  *    terpisah dari `#salesoffice` di homepage. Dua bisnis, satu kantor.
  *  - `Place` anonim di sini mengulang alamat proyek tanpa `@id`, jadi ia
  *    entitas lokasi KETIGA yang bersaing dengan `#project`.
@@ -56,7 +67,7 @@ const PAGE_DESCRIPTION =
  */
 const pageSchema = graph([
   breadcrumbNode(
-    [{ name: "Lokasi & Akses", path: "/lokasi-akses-grand-duta-city-parung" }],
+    [{ name: "Lokasi & Akses", path: LOCATION_PAGE_PATH }],
     PAGE_URL,
   ),
   {
@@ -123,7 +134,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       siteName: OG_SITE_NAME,
       locale: "id_ID",
       type: "website",
-      images: [{ url: MAP_IMAGE, width: 1200, height: 630, alt: "Lokasi Grand Duta City Parung dan akses ke Bogor Depok Jakarta" }],
+      images: [{ url: MAP_IMAGE, width: 1200, height: 630, alt: "Peta lokasi GDC Parung dan akses ke Bogor, Depok, Jakarta" }],
     },
     twitter: {
       card: "summary_large_image",
@@ -136,9 +147,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export default function LokasiAksesPage() {
   const sliderImages = [
-    { src: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776541441/Masterplan_svnc3y.webp", alt: "Akses Utama Lokasi Grand Duta City Parung" },
-    { src: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775879212/Akses_Tol_Grand_Duta_City_South_of_Jakarta_1_ozzhny.webp", alt: "Akses Tol Dekat Grand Duta City Parung" },
-    { src: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775879212/Akses_Tol_Grand_Duta_City_South_of_Jakarta_2_kmrerc.webp", alt: "Akses Tol Bojong Gede Grand Duta City Parung" }
+    // `alt` juga sinyal on-page dan dipakai Google sebagai anchor text untuk
+    // tautan bergambar, jadi ia mengikuti aturan yang sama dengan title/H1
+    // halaman ini: pakai "GDC Parung", jangan frasa target homepage.
+    { src: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776541441/Masterplan_svnc3y.webp", alt: "Akses utama lokasi GDC Parung" },
+    { src: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775879212/Akses_Tol_Grand_Duta_City_South_of_Jakarta_1_ozzhny.webp", alt: "Akses tol terdekat dari GDC Parung" },
+    { src: "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775879212/Akses_Tol_Grand_Duta_City_South_of_Jakarta_2_kmrerc.webp", alt: "Akses tol Bojong Gede dari GDC Parung" }
   ];
 
   const lokasiSekitar = [
@@ -207,7 +221,7 @@ export default function LokasiAksesPage() {
           <div className="absolute inset-0 opacity-20">
             <Image 
               src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763648/PK-SGDC-apr-22_page-0018_bjhro5.webp" 
-              alt="Lokasi Grand Duta City Parung dan akses ke Bogor Depok Jakarta"
+              alt="Lokasi GDC Parung dan akses ke Bogor, Depok, Jakarta"
               fill
               className="object-contain md:object-cover"
               priority
@@ -228,6 +242,11 @@ export default function LokasiAksesPage() {
             </h1>
             
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8 max-w-3xl">
+              {/* Anchor ke homepage SENGAJA memakai frasa brand utuh. Ini satu
+                  pengecualian yang justru mendukung konsolidasi: tautan ini
+                  MENGIRIM sinyal "frasa itu milik homepage", bukan mengklaimnya
+                  untuk halaman ini. Yang dilarang adalah frasa brand di
+                  title/description/H1/slug/alt halaman ini sendiri. */}
               <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
               berada di kawasan Parung, Bogor, dengan akses yang menjangkau Bogor, Depok, dan Jakarta serta didukung fasilitas publik di sekitarnya.
             </p>
@@ -308,7 +327,7 @@ export default function LokasiAksesPage() {
              <div className="relative w-full aspect-[4/3] md:aspect-[16/9] lg:aspect-[21/9] rounded-2xl overflow-hidden border border-[#F5F1E8]/10 shadow-2xl bg-brand-light/5">
                 <Image 
                    src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1776804065/map_lokasi_gdc_parung_bogor_anhrcm.webp"
-                   alt="Map Lokasi Grand Duta City Parung"
+                   alt="Peta lokasi GDC Parung"
                    fill
                    className="object-contain"
                    quality={90}
@@ -438,10 +457,10 @@ export default function LokasiAksesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="aspect-square relative rounded-xl overflow-hidden border border-[#F5F1E8]/10">
-                    <Image src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763648/PK-SGDC-apr-22_page-0018_bjhro5.webp" alt="Fasilitas Rekreasi Grand Duta City" fill className="object-contain md:object-cover" />
+                    <Image src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763648/PK-SGDC-apr-22_page-0018_bjhro5.webp" alt="Fasilitas rekreasi kawasan GDC Parung" fill className="object-contain md:object-cover" />
                  </div>
                   <div className="aspect-square relative rounded-xl overflow-hidden border border-[#F5F1E8]/10 mt-8">
-                    <Image src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1776541441/Masterplan_svnc3y.webp" alt="Boulevard Grand Duta City Parung" fill className="object-contain md:object-cover" />
+                    <Image src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1776541441/Masterplan_svnc3y.webp" alt="Boulevard utama GDC Parung" fill className="object-contain md:object-cover" />
                  </div>
               </div>
            </div>
@@ -455,7 +474,7 @@ export default function LokasiAksesPage() {
             <div className="relative z-10 max-w-3xl mx-auto">
                 <h3 className="text-3xl md:text-5xl font-serif text-[#F5F1E8] mb-6">Berkunjung ke Lokasi Kami</h3>
                 <p className="text-[#F5F1E8]/80 text-lg mb-10">
-                    Datang dan buktikan sendiri kemudahan akses menuju Grand Duta City Parung. Hubungi kami untuk jadwal booking atau bantuan arahan jalan.
+                    Datang dan buktikan sendiri kemudahan akses menuju GDC Parung. Hubungi kami untuk jadwal booking atau bantuan arahan jalan.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="https://maps.app.goo.gl/68zzL5Yg64ZtfdGUA" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[#F5A524] text-[#0b120c] px-8 py-4 rounded-full font-bold hover:bg-brand-light transition-colors w-full sm:w-auto justify-center">

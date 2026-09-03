@@ -37,7 +37,7 @@ export const INTERNAL_LINKS: { path: string; description: string }[] = [
     description: "Update stok unit dan siteplan",
   },
   {
-    path: "/lokasi-akses-grand-duta-city-parung",
+    path: "/lokasi-akses-gdc-parung",
     description: "Lokasi dan akses",
   },
   { path: "/cara-beli-kpr", description: "Cara beli dan proses KPR" },

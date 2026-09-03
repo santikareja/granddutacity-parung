@@ -38,7 +38,7 @@
  * blok panjang yang sama ke 10 halaman akan:
  *   - membuat kesepuluh halaman saling mirip (pola doorway page), dan
  *   - berebut dengan halaman yang MEMANG memiliki query itu, terutama
- *     `/lokasi-akses-grand-duta-city-parung` yang sudah memegang klaster
+ *     `/lokasi-akses-gdc-parung` yang sudah memegang klaster
  *     pencarian lokasi/akses, serta `/galeri` dan
  *     `/update-stok-siteplan-grand-duta-city-parung`.
  *
@@ -343,7 +343,7 @@ export const CLUSTER_THEME: Record<ClusterKey, string> = {
  * RINGKASAN aksesibilitas — sengaja pendek.
  *
  * Uraian lengkap (peta, jarak per exit tol, rute alternatif) ADALAH milik
- * `/lokasi-akses-grand-duta-city-parung`. Empat butir di bawah cuma memberi
+ * `/lokasi-akses-gdc-parung`. Empat butir di bawah cuma memberi
  * konteks secukupnya lalu mengarahkan ke sana, supaya 10 halaman tipe tidak
  * berebut query lokasi dengan halaman itu.
  */

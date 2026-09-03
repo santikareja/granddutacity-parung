@@ -261,7 +261,7 @@ export function LokasiScroll() {
                   </span>
                 </a>
                 <Link
-                  href="/lokasi-akses-grand-duta-city-parung"
+                  href="/lokasi-akses-gdc-parung"
                   className="inline-flex items-center justify-center px-6 py-3.5 rounded-full border border-[#090D0A]/20 hover:border-[#B45309] text-[#090D0A]/80 hover:text-[#B45309] text-xs sm:text-sm tracking-[0.16em] uppercase font-sans font-semibold active:scale-[0.98] transition-all duration-300 text-center"
                 >
                   Lihat Lokasi Detail

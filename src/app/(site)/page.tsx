@@ -218,7 +218,7 @@ const homepageNode = {
     `${SITE_URL}/cluster-ladera`,
     `${SITE_URL}/cluster-cascada`,
     `${SITE_URL}/pricelist-grand-duta-city`,
-    `${SITE_URL}/lokasi-akses-grand-duta-city-parung`,
+    `${SITE_URL}/lokasi-akses-gdc-parung`,
     `${SITE_URL}/update-stok-siteplan-grand-duta-city-parung`,
     `${SITE_URL}/cara-beli-kpr`,
     `${SITE_URL}/galeri`,

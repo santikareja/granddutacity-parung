@@ -77,7 +77,7 @@ export const SITE_ALTERNATE_NAMES = [
 export const PROJECT_ALTERNATE_NAMES = [
   "Grand Duta City Parung",
   "Grand Duta City South of Jakarta",
-  "GDC SOJ Parung",
+  "GDC SOJ",
   "GDC Parung",
 ];
 

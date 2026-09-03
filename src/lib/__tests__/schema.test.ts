@@ -147,6 +147,8 @@ describe("entitas utama", () => {
     const lower = PROJECT_ALTERNATE_NAMES.map((name) => name.toLowerCase());
     expect(lower).toContain("grand duta city parung");
     expect(lower).toContain("grand duta city south of jakarta");
+    expect(lower).toContain("gdc soj");
+    expect(lower).not.toContain("gdc soj parung");
   });
 
   it("nama entitas menggabungkan kedua frasa", () => {

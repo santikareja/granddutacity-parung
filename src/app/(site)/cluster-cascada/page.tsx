@@ -507,7 +507,7 @@ export default function ClusterCascadaPage() {
                   ["/", "Grand Duta City Parung"],
                   ["/pricelist-grand-duta-city", "Cek harga Cluster Cascada"],
                   ["/update-stok-siteplan-grand-duta-city-parung#cluster-cascada", "Lihat stok Cluster Cascada"],
-                  ["/lokasi-akses-grand-duta-city-parung", "Lihat detail lokasi Grand Duta City Parung"],
+                  ["/lokasi-akses-grand-duta-city-parung", "Lihat detail lokasi & akses GDC Parung"],
                   ["/cluster-ladera", "Bandingkan dengan Cluster Ladera"],
                   ["/cara-beli-kpr", "Cara beli & KPR"],
                   ["/kontak", "Kontak marketing"],

@@ -16,10 +16,28 @@ export function Footer() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] sm:text-[10px] tracking-[0.16em] sm:tracking-[0.2em] uppercase font-sans font-bold text-[#D49A3D] mb-2.5 sm:mb-3 w-max">
               <span>Konsultasi &amp; Jadwal Survey</span>
             </div>
-            <h2 className="font-serif text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-[#F8F6F0]">
+            {/* `<p>`, BUKAN `<h2>`.
+                Footer ini dirender di SELURUH 66 URL indexable, jadi selama
+                kalimat ini berupa `<h2>` maka SETIAP halaman situs punya
+                heading level-2 yang memuat frasa target homepage secara utuh.
+                Audit 3 September 2026 mengonfirmasinya: 65 halaman non-homepage
+                terdeteksi punya H2 "…di Grand Duta City Parung", satu-satunya
+                sumbernya adalah blok ini.
+
+                Heading adalah sinyal struktur dokumen — ia memberi tahu Google
+                topik sebuah SEKSI halaman. Untuk banner promosi yang identik di
+                semua halaman, klaim itu tidak benar dan justru membuat 65
+                halaman ikut mengklaim frasa yang harus dimiliki homepage.
+
+                Teks, ukuran, dan posisinya TIDAK berubah; hanya elemennya yang
+                kembali sesuai perannya (headline promosi, bukan judul seksi).
+                Landmark `<footer>` sudah memberi konteks navigasi yang
+                dibutuhkan pembaca layar. Guard G21 menggagalkan test bila ia
+                dikembalikan menjadi heading. */}
+            <p className="font-serif text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-[#F8F6F0]">
               Wujudkan Rumah Impian Keluarga <br />
               <span className="italic font-normal text-[#D49A3D]">di Grand Duta City Parung</span>
-            </h2>
+            </p>
           </div>
 
           <a

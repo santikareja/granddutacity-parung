@@ -664,3 +664,107 @@ describe("G19 — H1 sembilan halaman kanibalisasi tidak dibuka dengan frasa bra
     expect(target?.permanent).toBe(true);
   });
 });
+
+// ===========================================================================
+// G20 & G21 — kanibalisasi lewat ANCHOR TEXT dan HEADING sitewide
+//
+// G4–G19 memeriksa `title`, `description`, dan `<h1>`. Ketiganya bersih pada
+// audit 3 September 2026, TAPI homepage tetap turun ke halaman 2 untuk
+// "grand duta city parung" sementara /cara-memilih-rumah-parung dan
+// /lokasi-akses-grand-duta-city-parung menyalipnya. Audit crawl 66 URL sitemap
+// menemukan dua saluran kanibalisasi yang tidak satu pun guard di atas menyentuh:
+//
+//   1. ANCHOR TEXT INTERNAL. Judul di `articleArchiveEntries` dirender sebagai
+//      teks tautan di sidebar, kartu "Artikel Terkait", navigasi prev/next, dan
+//      blok "Baca juga" tiap tiga paragraf. Tiga judul yang memuat frasa brand
+//      utuh menghasilkan 168 / 165 / 161 anchor bermuatan frasa target menuju
+//      /cara-beli-kpr, /update-stok-*, dan /lokasi-akses-* — nyaris menyamai 244
+//      anchor menuju homepage, padahal homepage seharusnya dominan mutlak.
+//
+//   2. HEADING FOOTER SITEWIDE. `<h2>` "Wujudkan Rumah Impian Keluarga di Grand
+//      Duta City Parung" dirender di SETIAP halaman, sehingga 65 halaman
+//      non-homepage punya heading level-2 yang mengklaim frasa target.
+//
+// Kedua asersi di bawah menguji SUMBER DATA dan MARKUP KOMPONEN, bukan HTML
+// live, supaya pelanggaran tertangkap di `npm run test` sebelum deploy.
+// ===========================================================================
+
+describe("G20 — anchor text internal tidak mengklaim frasa homepage", () => {
+  it("judul dan alt di articleArchiveEntries tidak memuat frasa target homepage", async () => {
+    const { articleArchiveEntries } = await import("@/lib/articles");
+
+    const offenders: Array<{ slug: string; field: string; value: string }> = [];
+    for (const entry of articleArchiveEntries) {
+      for (const [field, value] of [
+        ["title", entry.title],
+        ["coverAlt", entry.coverAlt],
+        ["description", entry.description],
+        ["excerpt", entry.excerpt],
+      ] as const) {
+        const normalized = value.toLowerCase();
+        if (
+          normalized.includes(HOMEPAGE_PRIMARY) ||
+          normalized.includes(HOMEPAGE_SECONDARY)
+        ) {
+          offenders.push({ slug: entry.slug, field, value });
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      `Field ini dirender sebagai anchor text / alt tautan internal di seluruh halaman artikel, jadi memuat frasa milik homepage berarti mengirim sinyal kepemilikan ke halaman lain: ${offenders
+        .map((o) => `${o.slug}.${o.field} = "${o.value}"`)
+        .join("; ")}`,
+    ).toEqual([]);
+  });
+});
+
+describe("G21 — footer sitewide tidak mengemit heading bermuatan frasa homepage", () => {
+  it("blok CTA footer bukan elemen heading", async () => {
+    const { default: fs } = await import("node:fs");
+    const source = fs.readFileSync("src/components/layout/footer.tsx", "utf8");
+
+    // Footer dirender di 66 URL. Heading di sini = 65 halaman non-homepage ikut
+    // mengklaim frasa target lewat struktur dokumen.
+    const headings = [...source.matchAll(/<(h[1-6])\b[\s\S]*?<\/\1>/gi)].map(
+      (match) => match[0],
+    );
+
+    const offenders = headings.filter((heading) => {
+      const text = heading.replace(/<[^>]*>/g, " ").toLowerCase();
+      return (
+        text.includes(HOMEPAGE_PRIMARY) || text.includes(HOMEPAGE_SECONDARY)
+      );
+    });
+
+    expect(
+      offenders,
+      `Heading footer memuat frasa milik homepage dan tayang di setiap halaman: ${offenders.join(
+        " | ",
+      )}`,
+    ).toEqual([]);
+  });
+
+  it("judul video cluster tidak memuat frasa homepage (dirender sebagai H2 di halaman tipe)", async () => {
+    const { CLUSTER_VIDEO } = await import("@/data/unit-content");
+
+    const offenders = Object.entries(CLUSTER_VIDEO)
+      .filter(([, video]) => video !== null)
+      .map(([cluster, video]) => ({ cluster, title: video!.title }))
+      .filter(({ title }) => {
+        const normalized = title.toLowerCase();
+        return (
+          normalized.includes(HOMEPAGE_PRIMARY) ||
+          normalized.includes(HOMEPAGE_SECONDARY)
+        );
+      });
+
+    expect(
+      offenders,
+      `Judul ini dirender sebagai <h2> di halaman tipe unit: ${offenders
+        .map((o) => `${o.cluster} ("${o.title}")`)
+        .join("; ")}`,
+    ).toEqual([]);
+  });
+});

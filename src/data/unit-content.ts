@@ -324,7 +324,11 @@ export const CLUSTER_VIDEO: Record<ClusterKey, UnitVideo | null> = {
     url: "https://res.cloudinary.com/dzhvfbuks/video/upload/v1775875427/Video_Cluster_Ladera_Grand_Duta_City_South_of_Jakarta_w9kaq3.mp4",
     poster:
       "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp",
-    title: "Video Cluster Ladera Grand Duta City Parung",
+    // "GDC Parung", bukan frasa brand utuh: nilai ini dirender sebagai `<h2>`
+    // di empat halaman tipe Ladera (lihat tipe-rumah/[slug]/page.tsx), dan
+    // heading bermuatan frasa target homepage di halaman lain adalah bentuk
+    // kanibalisasi yang sama dengan yang dicabut dari footer sitewide.
+    title: "Video Cluster Ladera GDC Parung",
   },
   cascada: null,
 };

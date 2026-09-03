@@ -420,6 +420,43 @@ export const articleAuthorDefinitions: Record<
   },
 };
 
+/**
+ * ANCHOR TEXT, BUKAN SEKADAR JUDUL KARTU.
+ *
+ * `title` dan `coverAlt` di daftar ini dirender sebagai teks tautan internal di
+ * SETIAP halaman artikel: sidebar "Artikel Populer"/"Artikel Terbaru"/"Seputar
+ * GDC", kartu "Artikel Terkait", navigasi sebelum/berikutnya, dan blok "Baca
+ * juga" yang disuntikkan otomatis tiap tiga paragraf oleh
+ * `injectReadAlsoNodes()`. Satu judul karena itu bisa tayang 5x per halaman
+ * dikali 40 halaman artikel.
+ *
+ * Audit tautan internal (3 September 2026, crawl 66 URL sitemap; `alt` gambar
+ * dihitung sebagai anchor text karena begitulah Google membacanya untuk tautan
+ * bergambar) menemukan akibatnya:
+ *
+ *   tujuan                                       anchor bermuatan frasa brand
+ *   /  (homepage)                                244 dari 66 halaman
+ *   /cara-beli-kpr                               168 dari 40 halaman
+ *   /update-stok-siteplan-grand-duta-city-parung  165 dari 40 halaman
+ *   /lokasi-akses-grand-duta-city-parung          161 dari 42 halaman
+ *
+ * Homepage unggul tipis, padahal ia satu-satunya pemilik frasa itu: gabungan
+ * tiga halaman di atas justru dua kali lipat lebih banyak. Untuk query
+ * navigasional/brand, anchor text internal adalah salah satu sinyal terkuat soal
+ * halaman mana pemilik sebuah nama. Selama tiga judul di bawah memuat
+ * "Grand Duta City Parung" utuh, struktur internal situs membagi klaim itu ke
+ * halaman lain — dan itu persis yang terjadi: dua halaman menyalip homepage di
+ * query "grand duta city parung".
+ *
+ * Karena itu ketiganya memakai "GDC Parung" — varian yang sudah dipakai
+ * `title` produksi halaman-halaman itu sendiri ("Lokasi GDC Parung: 4 Exit Tol
+ * ke Jakarta & Depok", "Cara Beli Rumah GDC Parung: Alur KPR & Dokumen",
+ * "Update Stok Unit & Siteplan GDC Parung 2026"), jadi ini justru MENYELARASKAN
+ * anchor dengan judul halaman tujuan, bukan mengaburkannya.
+ *
+ * Guard G20 di `src/app/(site)/__tests__/seo-invariants.test.ts` menggagalkan
+ * test bila frasa milik homepage kembali masuk ke `title` atau `coverAlt`.
+ */
 export const articleArchiveEntries: ArticleArchiveEntry[] = [
   {
     id: "10-ciri-agen-properti-terbaik",
@@ -456,11 +493,11 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     id: "update-stok-siteplan-grand-duta-city-parung",
     slug: "update-stok-siteplan-grand-duta-city-parung",
     href: "/update-stok-siteplan-grand-duta-city-parung",
-    title: "Update Stok & Siteplan Grand Duta City Parung",
+    title: "Update Stok & Siteplan GDC Parung",
     excerpt:
       "Lihat posisi unit, status ketersediaan terbaru, dan ringkasan stok Cluster Ladera serta Cascada dalam satu halaman resmi.",
     description:
-      "Halaman update resmi untuk memantau siteplan kawasan, status unit available, reservasi, sold, dan progress rumah di Grand Duta City Parung.",
+      "Halaman update resmi untuk memantau siteplan kawasan, status unit available, reservasi, sold, dan progress rumah di GDC Parung.",
     category: articleCategoryDefinitions["seputar-gdc"].name,
     categorySlug: "seputar-gdc",
     authorSlug: "santika-reza",
@@ -468,7 +505,7 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     coverImage:
       "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818474/cluster-cascada-grand-duta-city-south-of-jakarta_vhdxvm.webp",
     coverAlt:
-      "Siteplan Grand Duta City Parung dengan update stok cluster terbaru",
+      "Siteplan GDC Parung dengan update stok cluster terbaru",
     updatedAt: "2026-03-09",
     updatedLabel: "9 Maret 2026",
     readingTime: "5 menit baca",
@@ -488,11 +525,11 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     id: "cara-beli-kpr",
     slug: "cara-beli-kpr",
     href: "/cara-beli-kpr",
-    title: "Cara Beli Rumah dan Proses KPR di Grand Duta City Parung",
+    title: "Cara Beli Rumah dan Proses KPR di GDC Parung",
     excerpt:
       "Panduan langkah demi langkah mulai dari pilih unit, booking fee, DP, pengajuan KPR, verifikasi bank, hingga akad kredit.",
     description:
-      "Panduan pembelian rumah untuk membantu Anda memahami proses KPR, dokumen yang dibutuhkan, dan tahapan transaksi di Grand Duta City Parung.",
+      "Panduan pembelian rumah untuk membantu Anda memahami proses KPR, dokumen yang dibutuhkan, dan tahapan transaksi di GDC Parung.",
     category: articleCategoryDefinitions["panduan-properti"].name,
     categorySlug: "panduan-properti",
     authorSlug: "santika-reza",
@@ -500,7 +537,7 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     coverImage:
       "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775877869/cara-beli-kpr-grand-duta-city-parung_cf7tep.webp",
     coverAlt:
-      "Panduan cara beli rumah dan proses KPR Grand Duta City Parung",
+      "Panduan cara beli rumah dan proses KPR GDC Parung",
     updatedAt: "2026-04-12",
     updatedLabel: "12 April 2026",
     readingTime: "7 menit baca",
@@ -519,11 +556,11 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     id: "lokasi-akses-grand-duta-city-parung",
     slug: "lokasi-akses-grand-duta-city-parung",
     href: "/lokasi-akses-grand-duta-city-parung",
-    title: "Lokasi Grand Duta City Parung dan Akses ke Bogor, Depok, Jakarta",
+    title: "Lokasi GDC Parung dan Akses ke Bogor, Depok, Jakarta",
     excerpt:
       "Peta lokasi, jalur akses utama, serta fasilitas penting di sekitar kawasan untuk membantu Anda menilai kenyamanan mobilitas harian.",
     description:
-      "Panduan lokasi dan akses Grand Duta City Parung yang membahas konektivitas kawasan, titik penting sekitar, dan kedekatan dengan fasilitas publik.",
+      "Panduan lokasi dan akses GDC Parung yang membahas konektivitas kawasan, titik penting sekitar, dan kedekatan dengan fasilitas publik.",
     category: articleCategoryDefinitions.kawasan.name,
     categorySlug: "kawasan",
     authorSlug: "santika-reza",
@@ -531,7 +568,7 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     coverImage:
       "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763613/Grand-Duta-City-Parung-Map-scaled_mth9ir.webp",
     coverAlt:
-      "Peta lokasi Grand Duta City Parung dengan akses ke Bogor, Depok, dan Jakarta",
+      "Peta lokasi GDC Parung dengan akses ke Bogor, Depok, dan Jakarta",
     updatedAt: "2026-04-12",
     updatedLabel: "12 April 2026",
     readingTime: "6 menit baca",

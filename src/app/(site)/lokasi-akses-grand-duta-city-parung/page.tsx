@@ -25,6 +25,10 @@ const PAGE_H1_LEAD = "Lokasi & Akses GDC Parung ke";
 const PAGE_H1_TAIL = "Jakarta, Depok, Bogor";
 export const PAGE_H1 = `${PAGE_H1_LEAD} ${PAGE_H1_TAIL}`;
 
+const PAGE_TITLE = "Lokasi GDC Parung: 4 Exit Tol ke Jakarta & Depok";
+const PAGE_DESCRIPTION =
+  "Lokasi GDC Parung di Jl. Raya Parung No.47, Bogor: 15 menit ke 4 exit tol Pamulang, Krukut, Sawangan, Bojong Gede, dan 20 menit ke CBD TB Simatupang.";
+
 /**
  * SATU `@graph` menggantikan empat blok lepas (Fase 5).
  *
@@ -42,6 +46,13 @@ export const PAGE_H1 = `${PAGE_H1_LEAD} ${PAGE_H1_TAIL}`;
  * Sekarang halaman ini tidak mendefinisikan entitas lokasi apa pun; ia hanya
  * MERUJUK `#project` dan `#salesoffice`. Google melihat satu tempat, dengan
  * satu titik peta, yang dibahas oleh beberapa halaman.
+ *
+ * `name`/`description` node `WebPage` memakai `PAGE_TITLE`/`PAGE_DESCRIPTION`
+ * yang SAMA dengan `<title>` dan meta description (3 September 2026).
+ * Sebelumnya keduanya ditulis terpisah dan masih membawa versi lama
+ * "Lokasi Grand Duta City Parung | Akses ke Bogor, Depok & Jakarta" — jadi
+ * halaman ini mengumumkan judul yang berbeda dari judul aslinya DAN judul itu
+ * memuat frasa target homepage. Satu sumber menutup kedua masalah sekaligus.
  */
 const pageSchema = graph([
   breadcrumbNode(
@@ -53,17 +64,15 @@ const pageSchema = graph([
     "@id": `${PAGE_URL}#primaryimage`,
     url: MAP_IMAGE,
     contentUrl: MAP_IMAGE,
-    caption:
-      "Peta lokasi Grand Duta City Parung dan akses ke Bogor, Depok, Jakarta",
+    caption: "Peta lokasi GDC Parung dan akses ke Bogor, Depok, Jakarta",
     width: 1200,
     height: 630,
   },
   {
     "@type": "WebPage",
     "@id": `${PAGE_URL}#webpage`,
-    name: "Lokasi Grand Duta City Parung | Akses ke Bogor, Depok & Jakarta",
-    description:
-      "Lihat lokasi Grand Duta City Parung beserta akses menuju Bogor, Depok, dan Jakarta, termasuk kedekatan ke fasilitas publik dan titik penting sekitar.",
+    name: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
     url: PAGE_URL,
     inLanguage: "id",
     isPartOf: ref(SCHEMA_ID.website),
@@ -75,10 +84,6 @@ const pageSchema = graph([
     publisher: ref(SCHEMA_ID.organization),
   },
 ]);
-
-const PAGE_TITLE = "Lokasi GDC Parung: 4 Exit Tol ke Jakarta & Depok";
-const PAGE_DESCRIPTION =
-  "Lokasi GDC Parung di Jl. Raya Parung No.47, Bogor: 15 menit ke 4 exit tol Pamulang, Krukut, Sawangan, Bojong Gede, dan 20 menit ke CBD TB Simatupang.";
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
@@ -243,8 +248,16 @@ export default function LokasiAksesPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                <div className="order-2 lg:order-1">
                   <h2 className="text-3xl font-serif text-[#F5F1E8] mb-6">Penghubung Strategis 3 Wilayah</h2>
+                  {/* Subjek kalimat sengaja "Kawasan GDC Parung", bukan frasa
+                      brand utuh. Halaman ini hanya boleh menjelaskan LOKASI
+                      entitas; klaim atas nama entitasnya sendiri milik homepage
+                      (lihat src/lib/keyword-ownership.ts). Sebelum perubahan ini
+                      halaman ini menyebut KEDUA frasa target homepage —
+                      "Grand Duta City Parung" di paragraf hero DAN "Grand Duta
+                      City South of Jakarta" di sini — pola yang sama dengan
+                      halaman-halaman yang sudah di-redirect karena alasan itu. */}
                   <p className="text-[#F5F1E8]/70 text-lg leading-relaxed mb-6">
-                    Grand Duta City South of Jakarta berlokasi di wilayah strategis koridor Parung, Bogor, yang menghubungkan wilayah Tangerang Selatan, Depok, dan Jakarta Selatan. Kawasan hunian seluas 200 hektar ini dikembangkan sebagai kota mandiri dengan konsep Modern Sanctuary Living.
+                    Kawasan GDC Parung berlokasi di wilayah strategis koridor Parung, Bogor, yang menghubungkan wilayah Tangerang Selatan, Depok, dan Jakarta Selatan. Kawasan hunian seluas 200 hektar ini dikembangkan sebagai kota mandiri dengan konsep Modern Sanctuary Living.
                   </p>
                   
                   <div className="bg-brand-light/5 border border-[#F5F1E8]/10 p-6 rounded-2xl mb-8">

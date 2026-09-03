@@ -261,7 +261,7 @@ Urutan task ini bukan sembarang: setiap fase adalah prasyarat fase berikutnya, d
 
   - [x] 5.2 Bangun `@graph` homepage tersambung
     - Gabungkan 6 blok terpisah jadi satu `<script>` berisi `@graph`, semua node ber-`@id`, sesuai diagram di `design.md` Fase 5
-    - Entitas utama: `Place` `@id /#project` bernama `Grand Duta City Parung South of Jakarta` dengan `alternateName: ["Grand Duta City South of Jakarta", "GDC SOJ Parung", "GDC Parung"]`
+    - Entitas utama: `Place` `@id /#project` bernama `Grand Duta City Parung South of Jakarta` dengan `alternateName: ["Grand Duta City South of Jakarta", "GDC SOJ", "GDC Parung"]`
     - `alternateName` ini adalah mekanisme paling langsung untuk memberi tahu Google bahwa kedua varian brand adalah entitas yang sama dan homepage adalah halamannya
     - `WebSite` **wajib diberi `@id`** — sekarang tidak ada, padahal `/category/*` merujuk `isPartOf: {"@id": ".../#website"}` sehingga referensinya menggantung
     - `CollectionPage` → `WebPage` (tipe sekarang untuk arsip, bukan homepage)

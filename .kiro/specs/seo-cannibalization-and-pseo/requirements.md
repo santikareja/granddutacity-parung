@@ -154,7 +154,7 @@ Daftar kandidat 18 slug diarsipkan di `design.md` → "Lampiran: kandidat pemang
 ### R6 — Schema yang benar dan graf tersambung
 
 - WHEN schema direstrukturisasi THEN homepage mengemit satu `@graph` dengan semua node ber-`@id` dan NOL referensi `@id` menggantung.
-- WHEN entitas utama ditetapkan THEN ia bertipe `Place` bernama `Grand Duta City Parung South of Jakarta` dengan `alternateName` memuat `Grand Duta City South of Jakarta`, `GDC SOJ Parung`, dan `GDC Parung`.
+- WHEN entitas utama ditetapkan THEN ia bertipe `Place` bernama `Grand Duta City Parung South of Jakarta` dengan `alternateName` memuat `Grand Duta City South of Jakarta`, `GDC SOJ`, dan `GDC Parung`.
 - WHEN `Organization` "Duta Putra Land" dipertahankan THEN ia terhubung ke entitas proyek lewat `@id`, bukan berdiri sendiri.
 - WHEN schema mati dihapus THEN `Product`/`Offer`, `SearchAction`, `SiteNavigationElement`, breadcrumb 1-item, dan 3 dari 4 `FAQPage` dibuang; satu `FAQPage` di homepage dipertahankan karena masih dibaca LLM dan AI search.
 - WHEN `BreadcrumbList` ditambahkan ke `/[slug]` THEN item breadcrumb JSON-LD identik dengan breadcrumb visual yang dirender.

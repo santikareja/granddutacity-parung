@@ -300,7 +300,7 @@ Catatan metodologis untuk spec terpisah nanti (jangan hilang): `noindex` dulu, U
 ```
 Place            @id /#project        ← ENTITAS UTAMA
   name           "Grand Duta City Parung South of Jakarta"
-  alternateName  ["Grand Duta City South of Jakarta", "GDC SOJ Parung", "GDC Parung"]
+  alternateName  ["Grand Duta City South of Jakarta", "GDC SOJ", "GDC Parung"]
   address, geo, hasMap, photo
   amenityFeature[]   ← dari facilities (8 item)
   containsPlace  [{@id /#cluster-ladera}, {@id /#cluster-cascada}]

@@ -121,10 +121,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  // absolute: mencegah template layout "%s | Grand Duta City Parung" menumpuk
-  // suffix kedua di belakang title yang sudah mengandung branding.
-  const title = article.seo?.metaTitle || `${article.title} | Grand Duta City Parung`;
-  const description = article.seo?.metaDescription || article.excerpt || "Artikel Grand Duta City";
+  // absolute: mencegah template layout menumpuk suffix kedua di belakang
+  // title yang sudah mengandung branding.
+  //
+  // Suffix memakai "GDC Parung", BUKAN "Grand Duta City Parung": frasa penuh
+  // itu milik homepage (RESERVED_HOMEPAGE_KEYWORDS). Sebelumnya setiap artikel
+  // tanpa metaTitle kustom memuat exact-match keyword primary homepage di
+  // title-nya — sumber kanibal paling signifikan yang tersisa.
+  const title = article.seo?.metaTitle || `${article.title} | Blog GDC Parung`;
+  const description = article.seo?.metaDescription || article.excerpt || "Artikel Blog GDC Parung";
   const url = normalizeArticleUrl(article.slug);
   const featuredImage = isMedia(article.featuredImage) ? article.featuredImage : null;
   const ogImage = resolveMediaUrl(featuredImage) || undefined;
@@ -312,7 +317,7 @@ export default async function ArtikelDetailRootSlugPage({ params }: PageProps) {
       "@id": `${canonicalUrl}#article`,
       headline: article.title,
       description:
-        article.seo?.metaDescription || article.excerpt || "Artikel Grand Duta City Parung",
+        article.seo?.metaDescription || article.excerpt || "Artikel Blog GDC Parung",
       image: [schemaImage],
       datePublished,
       dateModified,

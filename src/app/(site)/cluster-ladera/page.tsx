@@ -77,9 +77,9 @@ const pageSchema = graph([
     "@type": "WebPage",
     "@id": `${PAGE_URL}#webpage`,
     url: PAGE_URL,
-    name: "Cluster Ladera Grand Duta City Parung",
+    name: "Cluster Ladera GDC Parung",
     description:
-      "Informasi Cluster Ladera Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
+      "Informasi Cluster Ladera GDC Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
     isPartOf: ref(SCHEMA_ID.website),
     about: ref(SCHEMA_ID.clusterLadera),
     breadcrumb: ref(`${PAGE_URL}#breadcrumb`),

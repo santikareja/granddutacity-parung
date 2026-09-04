@@ -156,9 +156,9 @@ export default function ClusterCascadaPage() {
                 "@type": "WebPage",
                 "@id": `${PAGE_URL}#webpage`,
                 url: PAGE_URL,
-                name: "Cluster Cascada Grand Duta City Parung | Cascada South of Jakarta",
+                name: "Cluster Cascada GDC Parung",
                 description:
-                  "Informasi Cluster Cascada Grand Duta City Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
+                  "Informasi Cluster Cascada GDC Parung lengkap: tipe unit, denah, spesifikasi, harga, lokasi cluster, fasilitas, dan update stok terbaru.",
                 isPartOf: ref(SCHEMA_ID.website),
                 about: ref(SCHEMA_ID.clusterCascada),
                 breadcrumb: ref(`${PAGE_URL}#breadcrumb`),

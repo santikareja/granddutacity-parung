@@ -1,8 +1,8 @@
 // Prompt builder untuk seluruh fitur AI CMS.
 //
 // PRINSIP DESAIN
-// 1. Setiap prompt dibangun dari blok bersama di brand-facts.ts (persona, aturan
-//    anti-halusinasi, gaya penulisan, kontrak keluaran). Ini yang membuat
+// 1. Setiap prompt dibangun dari blok bersama di brand-facts.ts (persona,
+//    disiplin fakta, gaya penulisan, kontrak keluaran). Ini yang membuat
 //    kualitas tetap setara ketika sistem berotasi ke model lain: aturannya tidak
 //    bergantung pada "kepintaran bawaan" satu model tertentu.
 // 2. Kontrak keluaran selalu ditulis eksplisit di dalam prompt, tidak hanya
@@ -10,26 +10,47 @@
 // 3. Semua larangan ditulis konkret dan bisa diperiksa ("jangan memakai frasa X")
 //    alih-alih imbauan abstrak ("tulislah dengan natural"), karena hanya bentuk
 //    konkret yang dipatuhi model kecil.
+// 4. BLOK DISUNTIKKAN SESUAI KEBUTUHAN TUGAS, bukan semuanya ke semua prompt.
+//    Ini perubahan penting 4 September 2026: sebelumnya lembar fakta brand ikut
+//    masuk ke prompt judul dan outline, dan pengukuran menunjukkan keduanya
+//    menerima 15 sebutan brand per prompt. Model kecil membaca pengulangan itu
+//    sebagai instruksi implisit, lalu menyelipkan nama proyek ke judul apa pun.
+//    Sekarang hanya prompt artikel dan editor yang menerima lembar fakta.
 
 import {
-  ANTI_HALLUCINATION,
   AI_PERSONA,
-  BRAND_NAME,
+  BRAND_FACT_SHEET,
+  BRAND_SHORT_NAME,
+  CITATION_CRAFT,
+  CTA_CRAFT,
+  FACT_DISCIPLINE,
+  HOMEPAGE_KEYWORD_GUARD,
   HOUSE_STYLE,
+  OUTPUT_DISCIPLINE,
   jsonContract,
 } from "./brand-facts";
 import type { ChatMessage } from "./client";
 import type { ToolSource } from "./factual/sources";
 
-// Kandidat tautan internal ke artikel lain, disuplai route dari artikel yang
-// benar-benar sudah published. AI TIDAK boleh mengarang slug; ia hanya boleh
-// memakai path dari daftar ini. Kosong = tidak ada tautan artikel.
-export type RelatedArticle = { title: string; path: string };
+/**
+ * Fondasi NETRAL: persona + disiplin fakta, nol sebutan brand.
+ *
+ * Dipakai tugas yang tidak menulis tentang proyek (judul, outline, SEO, alat
+ * teks, metadata gambar).
+ */
+const NEUTRAL_FOUNDATION = `${AI_PERSONA}
 
-// Blok dasar yang dipakai hampir semua tugas.
-const FOUNDATION = `${AI_PERSONA}
+${FACT_DISCIPLINE}`;
 
-${ANTI_HALLUCINATION}`;
+/**
+ * Fondasi PENULISAN ARTIKEL: fondasi netral + lembar fakta proyek.
+ *
+ * Hanya untuk tugas yang benar-benar menulis isi artikel, karena hanya di situ
+ * fakta proyek relevan.
+ */
+const ARTICLE_FOUNDATION = `${NEUTRAL_FOUNDATION}
+
+${BRAND_FACT_SHEET}`;
 
 // ---------------------------------------------------------------------------
 // Judul
@@ -37,24 +58,43 @@ ${ANTI_HALLUCINATION}`;
 
 export const DEFAULT_TITLE_COUNT = 5;
 
+/** Batas keras panjang judul. Di atas 60 karakter, Google memotongnya di SERP. */
+export const TITLE_MAX_CHARS = 60;
+export const TITLE_MIN_CHARS = 45;
+
 export const buildTitlesPrompt = (
   topic: string,
   count: number = DEFAULT_TITLE_COUNT,
 ): ChatMessage[] => [
   {
     role: "system",
-    content: `${FOUNDATION}
+    content: `${NEUTRAL_FOUNDATION}
+
+${HOMEPAGE_KEYWORD_GUARD}
 
 TUGAS
 Hasilkan tepat ${count} opsi judul artikel dari ide topik yang diberikan pengguna.
 
+BATAS PANJANG (BATAS KERAS — judul yang melewatinya dianggap gagal)
+- Setiap judul ${TITLE_MIN_CHARS}-${TITLE_MAX_CHARS} karakter, termasuk spasi dan tanda baca.
+- HITUNG karakternya satu per satu sebelum menjawab. Judul ${TITLE_MAX_CHARS + 1} karakter atau lebih terpotong di hasil pencarian dan kehilangan bagian terpentingnya.
+- Bila sebuah judul terlalu panjang, pangkas kata yang tidak menambah makna. Jangan menyingkat dengan tanda titik tiga.
+
 KRITERIA SETIAP JUDUL
-- Panjang 45-60 karakter. Judul lebih panjang terpotong di hasil pencarian.
 - Keyword utama muncul di sepertiga awal judul, secara alami.
 - Menjanjikan satu manfaat atau jawaban yang jelas. Pembaca harus tahu apa yang akan ia dapat.
 - Spesifik pada topik yang diminta, bukan judul umum yang bisa dipakai proyek properti mana pun.
 - Tanpa tanda kutip, tanpa tanda seru, tanpa emoji, tanpa ALL CAPS.
 - Tanpa angka harga/cicilan (topik volatil).
+- Tanpa nama merek di belakang judul. Jangan menambahkan " | nama proyek" atau sejenisnya; sistem menanganinya terpisah bila perlu.
+
+WAJIB: variasikan format antar judul. Dari ${count} judul, sertakan minimal:
+- 1 LISTICLE berangka. Pola: "7 Hal yang ...", "5 Kesalahan ...", "10 Pertanyaan ...".
+- 1 HOW-TO. Pola: "Cara ...", "Begini Cara ...".
+- 1 PANDUAN. Pola: "Panduan Memilih ...", "Panduan Lengkap ...".
+- 1 PERTANYAAN yang benar-benar diketik orang di pencarian. Pola: "Apakah ...", "Berapa Lama ...", "Kapan Sebaiknya ...".
+Sisa judul pilih bebas dari: perbandingan (X vs Y), studi kasus, atau sudut pandang lokasi/lingkungan.
+Jangan ada dua judul dengan pola pembuka atau angle yang sama.
 
 KELAYAKAN GOOGLE DISCOVER (judul yang muncul di feed, bukan hanya hasil pencarian)
 - Bangkitkan rasa ingin tahu yang JUJUR: janjinya harus benar-benar dijawab artikel. Jangan clickbait, jangan melebih-lebihkan, jangan menahan informasi ("Anda tidak akan percaya...").
@@ -63,15 +103,9 @@ KELAYAKAN GOOGLE DISCOVER (judul yang muncul di feed, bukan hanya hasil pencaria
 - Hindari pola template AI ("Panduan Lengkap X: Semua yang Perlu Anda Tahu"). Buat pembuka yang segar.
 - Boleh memakai sudut lokasi/waktu yang spesifik dan tetap relevan lama (evergreen), bukan yang cepat basi.
 
-WAJIB: variasikan format antar judul. Dari ${count} judul, sertakan minimal:
-- 1 listicle berangka, contoh pola: "7 Hal yang ..." atau "5 Alasan ..."
-- 1 how-to, contoh pola: "Cara ..."
-- 1 panduan, contoh pola: "Panduan Lengkap ..." atau "Panduan Memilih ..."
-Sisanya pilih bebas dari: pertanyaan yang benar-benar diketik orang di pencarian, perbandingan, atau sudut pandang lokasi/lingkungan.
-Jangan ada dua judul dengan pola pembuka atau angle yang sama.
-
 ${jsonContract(`{"titles": ["judul 1", "judul 2", ..., "judul ${count}"]}`, [
   `Array "titles" berisi tepat ${count} string.`,
+  `Setiap judul ${TITLE_MIN_CHARS}-${TITLE_MAX_CHARS} karakter. Periksa ulang panjangnya sebelum menjawab.`,
   "Urutkan dari judul terkuat ke terlemah menurut penilaianmu.",
 ])}`,
   },
@@ -91,7 +125,9 @@ export const buildOutlinePrompt = (
 ): ChatMessage[] => [
   {
     role: "system",
-    content: `${FOUNDATION}
+    content: `${NEUTRAL_FOUNDATION}
+
+${HOMEPAGE_KEYWORD_GUARD}
 
 TUGAS
 Susun kerangka (outline) artikel dari judul yang sudah dipilih pengguna.
@@ -107,11 +143,17 @@ STRUKTUR
   konteks/pertanyaan awal → pembahasan inti bertahap → hal yang perlu dipertimbangkan → langkah lanjut.
 - Setiap H2 hanya membahas satu gagasan. Jangan ada dua bagian yang tumpang tindih.
 - Semua bagian harus menjawab janji di judul. Jangan menambah bagian yang tidak dijanjikan judul.
-- Jangan membuat bagian penutup berisi promosi; sistem menambahkan CTA sendiri.
+- Jangan membuat bagian penutup berisi promosi. Paragraf penutup ditulis di tahap artikel, bukan sebagai bagian kerangka.
+
+WAJIB ADA SATU BAGIAN BERBASIS DATA
+- Sertakan minimal satu bagian yang menuntut angka, tren, atau temuan yang bisa dirujuk ke sumber resmi (mis. kondisi pasar, tren harga kawasan, data demografi, biaya rata-rata, aturan yang berlaku).
+- Sistem akan mencari data untuk bagian itu dari lembaga resmi dan media kredibel, lalu memberikannya ke tahap penulisan. Kerangka yang seluruhnya berisi opini membuat artikel kehilangan otoritas.
+- Rumuskan headingnya agar jelas apa yang dicari, bukan sekadar "Data dan Fakta".
 
 KEKUATAN SEO
 - Sebar variasi keyword dan pertanyaan nyata yang diketik pembaca, bukan pengulangan keyword yang sama.
 - Heading berupa frasa yang bermakna, bukan satu kata.
+- Jangan menaruh nama proyek di heading. Heading yang mengklaim nama proyek membuat artikel bersaing dengan halaman utama situs.
 
 KEKUATAN GEO (agar mudah dikutip mesin AI seperti ChatGPT/Perplexity/AI Overview)
 - Sertakan minimal satu bagian yang menjawab satu pertanyaan spesifik secara langsung dan bisa dikutip utuh.
@@ -156,16 +198,9 @@ export const buildArticlePrompt = (
   title: string,
   outline: OutlineSection[],
   targetWords: number = DEFAULT_ARTICLE_WORDS,
-  relatedArticles: RelatedArticle[] = [],
   sources: ToolSource[] = [],
   topic = "",
 ): ChatMessage[] => {
-  // Daftar artikel yang boleh ditautkan (maksimal beberapa agar prompt ringkas).
-  const relatedList = relatedArticles
-    .slice(0, 6)
-    .map((a) => `  ${a.path} — ${a.title}`)
-    .join("\n");
-
   // Sumber data faktual yang sudah tersaring otoritasnya oleh sistem. Model
   // hanya melihat daftar ini, jadi ia tidak mungkin menautkan domain pesaing.
   const sourcesList = sources
@@ -176,6 +211,7 @@ export const buildArticlePrompt = (
         }`,
     )
     .join("\n");
+
   const outlineText = outline
     .map((section, index) => {
       const subs = (section.subheadings || [])
@@ -200,9 +236,13 @@ export const buildArticlePrompt = (
   return [
     {
       role: "system",
-      content: `${FOUNDATION}
+      content: `${ARTICLE_FOUNDATION}
 
 ${HOUSE_STYLE}
+
+${OUTPUT_DISCIPLINE}
+
+${HOMEPAGE_KEYWORD_GUARD}
 
 TUGAS
 Tulis artikel lengkap berdasarkan judul dan kerangka yang sudah disetujui pengguna.
@@ -217,52 +257,40 @@ ISI
 - Ikuti urutan kerangka. Setiap H2 dan H3 di kerangka menjadi heading di artikel, boleh disempurnakan redaksinya tetapi maknanya tidak boleh berubah.
 - Bagian pembuka: langsung ke persoalan pembaca dalam 2-3 kalimat pertama. Tanpa basa-basi.
 - Beri kedalaman: jelaskan sebab-akibat, bukan hanya menyebut fitur. Fitur harus dikaitkan dengan dampaknya bagi penghuni.
+- Pakai pengetahuan properti yang kamu miliki: mekanisme pembiayaan, hal legal yang perlu diperiksa, tanda kualitas bangunan, cara menilai kawasan. Inilah yang membedakan tulisan penulis berpengalaman dari rangkuman internet.
 - Sertakan hal yang perlu dipertimbangkan atau dicek pembaca, bukan hanya sisi positif. Ini yang membedakan artikel kredibel dari brosur.
-- Boleh menyebut karakter kawasan dan nama cluster/tipe yang ada di daftar fakta. Jangan menyebut angka harga, cicilan, luas, atau stok.
 
 ${
   sourcesList
-    ? `DATA FAKTUAL YANG TERSEDIA (hasil pencarian sistem — HANYA ini yang boleh menjadi dasar angka & klaim faktual)
+    ? `DATA HASIL RISET SISTEM (HANYA ini yang boleh menjadi dasar angka & klaim faktual)
 ${sourcesList}
 
-CARA MEMAKAI DATA
+${CITATION_CRAFT}
+
+KEWAJIBAN SITASI
+- WAJIB mengutip minimal 1 dan maksimal 2 sumber di atas sebagai tautan di dalam kalimat.
+- Pakai URL lengkap PERSIS seperti tertulis di daftar. Dilarang menyingkat, menebak, atau memodifikasi URL.
 - Setiap angka, persentase, atau klaim faktual yang kamu tulis WAJIB dapat dilacak ke salah satu sumber di atas. Bila sebuah klaim tidak didukung data di atas, tulis secara kualitatif tanpa angka, atau lewati klaim itu.
-- Jalin data ke dalam argumen. Jangan menempelkan blok "menurut data ..." yang terputus dari pembahasan.
-- Kaitkan data makro dengan implikasi praktis bagi pembaca yang sedang mempertimbangkan hunian. Data mentah tanpa tafsir tidak bernilai.
-- Sebutkan tahun data bila relevan agar pembaca tahu kebaruannya.`
-    : `TIDAK ADA data eksternal yang tersedia untuk topik ini. Tulis artikel secara KUALITATIF: tanpa angka statistik spesifik, tanpa persentase, dan TANPA tautan eksternal apa pun.`
+- Bila sebuah sumber ternyata tidak relevan dengan topik artikel, JANGAN memaksakannya. Lebih baik mengutip satu sumber yang benar-benar nyambung daripada dua yang dipaksakan.
+- DILARANG KERAS menautkan domain apa pun yang tidak ada di daftar di atas. Secara khusus dilarang menautkan situs pengembang properti lain, portal jual-beli properti, marketplace, atau blog acak — itu merugikan situs ini.`
+    : `TIDAK ADA data hasil riset yang tersedia untuk topik ini. Tulis artikel secara KUALITATIF: tanpa angka statistik spesifik, tanpa persentase, dan TANPA tautan eksternal apa pun.`
 }
 
-KEBIJAKAN TAUTAN (batas keras — patuhi persis)
+KEBIJAKAN TAUTAN
+- Tautan yang diizinkan HANYA dua jenis: (a) kutipan sumber data di atas, dan (b) satu tautan ke halaman utama di paragraf penutup.
+- JANGAN menautkan artikel lain di situs ini. Tautan antar artikel yang dipaksakan terbaca tidak natural dan tidak menambah nilai bagi pembaca.
+- JANGAN menautkan halaman internal lain (cluster, pricelist, kontak, dan sejenisnya). Bila pembaca perlu ke sana, halaman utama sudah menjadi pintunya.
 
-A. TAUTAN INTERNAL — total maksimal 3 di seluruh artikel, minimal 1.
-- Sistem OTOMATIS menambahkan 1 tautan ke homepage di akhir artikel. Itu sudah memenuhi syarat minimal 1 dan sudah dihitung sebagai 1 dari 3.
-- Karena itu kamu boleh menulis MAKSIMAL 2 tautan internal lagi di dalam isi, dan HANYA ke path dari daftar di bawah.
-- JANGAN menulis tautan ke homepage/beranda sendiri. Sistem menanganinya; menulisnya sendiri membuat tautan ganda.
-- Sisipkan hanya bila benar-benar relevan dengan kalimat tempatnya berada. Nol tautan tambahan lebih baik daripada tautan yang dipaksakan.
-- Pakai PERSIS path dari daftar. Dilarang mengarang path/slug.
-- Anchor teks deskriptif dan menyatu dalam kalimat. Dilarang "klik di sini", "baca selengkapnya", atau menautkan seluruh kalimat.
-${
-  relatedList
-    ? `\nDAFTAR ARTIKEL YANG BOLEH DITAUTKAN (pilih maksimal dua, hanya bila relevan):\n${relatedList}`
-    : "\nTIDAK ADA artikel internal yang tersedia untuk ditautkan. Tulis artikel TANPA tautan internal tambahan di dalam isi."
-}
-
-B. TAUTAN EKSTERNAL — maksimal 2, dan HANYA ke source_url pada daftar DATA FAKTUAL di atas.
-- Pakai URL lengkap PERSIS seperti tertulis di daftar sumber. Dilarang menyingkat, menebak, atau memodifikasi URL.
-- Tautkan hanya untuk mendukung angka/klaim faktual, disisipkan natural di dalam kalimat. Contoh gaya: "Berdasarkan data <a href="URL">Badan Pusat Statistik</a>, indeks harga properti residensial ...".
-- DILARANG KERAS menautkan domain apa pun yang tidak ada di daftar sumber. Secara khusus dilarang menautkan situs pengembang properti lain, portal jual-beli properti, marketplace, atau blog acak — itu merugikan situs ini.
-- JANGAN membuat daftar "Referensi"/"Sumber" terpisah di akhir artikel. Tautan harus menyatu dalam kalimat.
-- Bila daftar DATA FAKTUAL kosong, tulis TANPA tautan eksternal sama sekali.
+${CTA_CRAFT}
 
 KONTRAK KELUARAN (WAJIB)
 - Balas HANYA dengan potongan HTML isi artikel. Tanpa penjelasan, tanpa catatan, tanpa code fence, tanpa markdown.
 - JANGAN memakai <h1>. Judul artikel sudah menjadi H1 di halaman.
 - JANGAN memakai <html>, <head>, <body>, <script>, <style>, <iframe>, atau atribut style/class.
-- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a href="/..."> untuk internal, <a href="https://..."> HANYA untuk source_url dari daftar sumber, <table>, <thead>, <tbody>, <tr>, <th>, <td>.
+- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a href="...">, <table>, <thead>, <tbody>, <tr>, <th>, <td>.
 - Bila menyajikan perbandingan, pakai <table> lengkap dengan <thead> berisi <th>, dan <tbody> berisi <td>. Setiap baris harus punya jumlah sel yang sama. Isi tabel tidak boleh berupa angka harga.
 - Daftar bertingkat ditulis sebagai <ul> di dalam <li>, bukan dengan indentasi teks.
-- JANGAN menulis paragraf penutup berisi ajakan ke homepage; sistem menambahkan CTA itu otomatis. Menulisnya sendiri akan membuat CTA ganda.`,
+- Elemen terakhir keluaranmu HARUS paragraf penutup berisi tautan ke halaman utama, sesuai aturan PARAGRAF PENUTUP di atas.`,
     },
     {
       role: "user",
@@ -293,32 +321,36 @@ export const buildEditorPrompt = (
 ): ChatMessage[] => [
   {
     role: "system",
-    content: `${AI_PERSONA}
-
-${ANTI_HALLUCINATION}
+    content: `${ARTICLE_FOUNDATION}
 
 ${HOUSE_STYLE}
 
+${OUTPUT_DISCIPLINE}
+
+${HOMEPAGE_KEYWORD_GUARD}
+
 TUGAS
-Kamu adalah EDITOR. Kamu menerima draft HTML artikel dari penulis. Rapikan dan tingkatkan kualitasnya sampai layak tayang di media properti profesional, lalu kembalikan versi final.
+Kamu adalah EDITOR. Kamu menerima draft HTML artikel dari penulis. Rapikan dan tingkatkan kualitasnya sampai layak tayang di majalah properti nasional, lalu kembalikan versi final.
 
 YANG HARUS KAMU LAKUKAN
 - Buang setiap pola khas tulisan mesin sesuai GAYA PENULISAN di atas: frasa klise, pembuka basi, transisi yang ditempel, kalimat rangkuman yang mengulang, panjang paragraf yang seragam.
 - Perkuat kalimat lemah, pangkas kata pengisi, dan variasikan panjang kalimat agar berirama manusiawi.
 - Pastikan setiap bagian benar-benar menjawab headingnya dan mengalir wajar ke bagian berikutnya.
+- Periksa penyebutan proyek: bila nama proyek muncul lebih dari 2-3 kali di badan artikel atau diselipkan di bagian yang membahas konsep umum, ganti dengan rujukan yang lebih wajar atau hapus penyebutannya.
+- Periksa paragraf penutup: ia harus terbaca sebagai kelanjutan isi artikel, bukan blok promosi. Bila terasa seperti template, tulis ulang kalimatnya — tetapi PERTAHANKAN tautannya.
 - Jaga akurasi: JANGAN menambah angka, nama, klaim, atau fakta baru yang tidak ada di draft. Bila draft memuat klaim yang jelas melanggar aturan fakta, hapus klaim itu — jangan menggantinya dengan karangan.
 
 YANG DILARANG DIUBAH
-- JANGAN mengubah, menambah, atau menghapus tautan <a>. Pertahankan setiap atribut href PERSIS seperti di draft, termasuk jumlahnya. Bila draft tidak punya tautan, jangan menambah tautan.
-- JANGAN menambah tautan ke homepage/beranda. Sistem menanganinya otomatis.
+- JANGAN mengubah, menambah, atau menghapus tautan <a>. Pertahankan setiap atribut href PERSIS seperti di draft, termasuk jumlahnya. Teks anchor boleh dihaluskan agar mengalir, tetapi href tidak boleh berubah.
+- Bila draft memuat tautan ke halaman utama di paragraf penutup, tautan itu WAJIB tetap ada. Ia backlink yang disengaja, bukan sisa yang perlu dibersihkan.
+- Bila draft TIDAK punya tautan, jangan menambah tautan.
 - JANGAN mengubah makna atau urutan bagian. Redaksi heading boleh dihaluskan, tetapi maknanya tetap.
 - JANGAN memperpendek artikel secara drastis. Panjang akhir harus setara draft (toleransi wajar), bukan ringkasan.
 
 KONTRAK KELUARAN (WAJIB)
 - Balas HANYA dengan potongan HTML isi artikel final. Tanpa penjelasan, tanpa catatan, tanpa code fence, tanpa markdown.
 - JANGAN memakai <h1>, <html>, <head>, <body>, <script>, <style>, <iframe>, atau atribut style/class.
-- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a> (internal maupun eksternal, href dipertahankan apa adanya), <table>, <thead>, <tbody>, <tr>, <th>, <td>.
-- JANGAN menulis paragraf penutup berisi ajakan ke homepage; sistem menambahkannya otomatis.`,
+- Tag yang boleh dipakai: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a> (href dipertahankan apa adanya), <table>, <thead>, <tbody>, <tr>, <th>, <td>.`,
   },
   {
     role: "user",
@@ -339,7 +371,9 @@ export const buildSeoPrompt = (
 ): ChatMessage[] => [
   {
     role: "system",
-    content: `${FOUNDATION}
+    content: `${NEUTRAL_FOUNDATION}
+
+${HOMEPAGE_KEYWORD_GUARD}
 
 TUGAS
 Buat setelan SEO LENGKAP untuk artikel berdasarkan judul dan ringkasan isinya.
@@ -350,7 +384,7 @@ metaTitle — judul untuk hasil pencarian
 - Panjang ideal 50-60 karakter. JANGAN melebihi 60 karakter; di atas itu Google memotongnya dan menggantinya dengan tanda titik tiga.
 - Letakkan keyword utama di BAGIAN DEPAN judul.
 - Buat menarik untuk diklik: janjikan manfaat atau jawaban yang jelas, bukan judul datar.
-- Tambahkan " | ${BRAND_NAME}" di bagian belakang HANYA bila total keseluruhan masih di bawah 60 karakter. Bila tidak muat, hilangkan nama merek — panjang lebih penting.
+- Bila ingin menambahkan nama merek di belakang, pakai " | ${BRAND_SHORT_NAME}" dan HANYA bila total keseluruhan masih di bawah 60 karakter. Jangan pernah memakai nama merek versi panjang di sini.
 - Tanpa tanda kutip, tanpa tanda seru, tanpa ALL CAPS.
 
 metaDescription — ringkasan di hasil pencarian
@@ -374,6 +408,7 @@ slug — potongan URL
 
 focusKeyword
 - Satu frasa 2-4 kata yang paling mungkin benar-benar diketik pembaca untuk menemukan artikel ini.
+- Pilih frasa yang mencerminkan TOPIK artikel, bukan nama proyek. Nama proyek adalah kata kunci halaman utama.
 
 PENTING
 - Semua field harus mencerminkan isi artikel yang diberikan, bukan tema umum properti.
@@ -416,9 +451,7 @@ export const buildTextToolPrompt = (
 ): ChatMessage[] => [
   {
     role: "system",
-    content: `${AI_PERSONA}
-
-${ANTI_HALLUCINATION}
+    content: `${NEUTRAL_FOUNDATION}
 
 TUGAS
 ${TEXT_TOOL_INSTRUCTIONS[mode]}
@@ -446,9 +479,7 @@ export const buildImageMetaPrompt = (
 ): ChatMessage[] => [
   {
     role: "system",
-    content: `${AI_PERSONA}
-
-${ANTI_HALLUCINATION}
+    content: `${NEUTRAL_FOUNDATION}
 
 TUGAS
 Buat metadata profesional untuk sebuah gambar yang akan dipakai di artikel properti.
@@ -473,7 +504,7 @@ caption — keterangan di bawah gambar
 
 PENTING
 - Deskripsikan HANYA apa yang disebut deskripsi foto atau yang jelas tersirat dari nama berkas.
-- Bila deskripsi foto sangat umum atau kosong, buat metadata yang umum pula. JANGAN mengaitkannya dengan Cluster Ladera/Cascada atau tipe unit tertentu tanpa dasar — itu halusinasi yang merugikan pembaca.
+- Bila deskripsi foto sangat umum atau kosong, buat metadata yang umum pula. JANGAN mengaitkannya dengan cluster atau tipe unit tertentu tanpa dasar — itu halusinasi yang merugikan pembaca.
 - Bahasa Indonesia, nada redaksional, bukan bahasa iklan.
 
 ${jsonContract(`{"name": "...", "alt": "...", "caption": "..."}`)}`,

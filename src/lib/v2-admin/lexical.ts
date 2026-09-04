@@ -28,6 +28,11 @@ export const CTA_URL = "https://granddutacitysouthofjakarta.com";
 // berbeda hanya teksnya, supaya backlink internal tidak memakai anchor identik
 // di setiap artikel (anchor yang terlalu seragam terbaca tidak natural). Index
 // 0 dipertahankan sebagai default demi kompatibilitas dengan artikel lama.
+//
+// Daftar ini dipakai HANYA oleh CTA cadangan yang dibuat sistem. Sejak
+// 4 September 2026 AI menulis CTA-nya sendiri dengan anchor bebas yang menyatu
+// ke kalimat, jadi `ensureCta` tidak lagi boleh mensyaratkan anchor dari daftar
+// ini untuk mengenali CTA — lihat catatan di `containsCtaLink`.
 export const CTA_ANCHORS = [
   "Grand Duta City Parung",
   "Website Resmi",
@@ -111,17 +116,50 @@ export const collectText = (node: LexNode | null | undefined): string => {
   return own + kids;
 };
 
+/**
+ * Apakah URL ini menunjuk homepage situs?
+ *
+ * Menerima DUA bentuk, dan itu disengaja: AI menulis CTA-nya dalam HTML, lalu
+ * `htmlToLexicalState` menyimpan href apa adanya. Bila AI menulis
+ * `<a href="/">`, url tersimpan sebagai `"/"`; bila ia menulis URL penuh, url
+ * tersimpan sebagai absolut. Keduanya homepage yang sama, jadi keduanya harus
+ * dikenali — kalau tidak, `ensureCta` menambahkan CTA kedua.
+ */
+const isHomepageUrl = (raw: string): boolean => {
+  const value = raw.trim();
+  if (!value) return false;
+  if (value === "/") return true;
+  const withoutTrailing = value.replace(/\/+$/, "");
+  return withoutTrailing === CTA_URL || withoutTrailing === CTA_URL.replace(/^https:/, "http:");
+};
+
+/**
+ * Apakah blok ini sudah memuat tautan ke homepage?
+ *
+ * Deteksi berbasis URL SAJA (diubah 4 September 2026). Versi sebelumnya
+ * mensyaratkan URL homepage DAN teks anchor yang cocok dengan salah satu
+ * `CTA_ANCHORS`. Syarat kedua itu benar selama hanya sistem yang menulis CTA,
+ * tetapi menjadi bug begitu AI menulis CTA-nya sendiri: anchor tulisan AI
+ * menyatu ke kalimat ("kawasan ini", "situs resminya", "profil kawasan"), tidak
+ * ada di daftar, sehingga `ensureCta` menganggap CTA belum ada dan MENAMBAH
+ * paragraf CTA kedua. Artikel jadi punya dua penutup.
+ *
+ * URL sudah cukup sebagai penanda: satu-satunya alasan sebuah paragraf penutup
+ * menautkan homepage adalah karena ia CTA. Anchor-nya tidak menambah kepastian,
+ * hanya membatasi kebebasan redaksional.
+ */
 const containsCtaLink = (node: LexNode | null | undefined): boolean => {
   if (!node) return false;
 
-  if (node.type === "link") {
-    const url = (node as { fields?: { url?: unknown } }).fields?.url;
-    if (typeof url === "string") {
-      const normalized = url.replace(/\/+$/, "");
-      const text = collectText(node);
-      if (normalized === CTA_URL && CTA_ANCHORS.some((a) => text.includes(a))) {
-        return true;
-      }
+  if (node.type === "link" || node.type === "autolink") {
+    // URL tautan bisa tersimpan di `fields.url` (bentuk Payload, dipakai korpus
+    // artikel dan renderer publik) atau di `url` level atas (bentuk Lexical
+    // setelah disunting di editor). Keduanya harus dikenali.
+    const fieldUrl = (node as { fields?: { url?: unknown } }).fields?.url;
+    const topUrl = (node as { url?: unknown }).url;
+
+    for (const candidate of [fieldUrl, topUrl]) {
+      if (typeof candidate === "string" && isHomepageUrl(candidate)) return true;
     }
   }
 
@@ -131,8 +169,27 @@ const containsCtaLink = (node: LexNode | null | undefined): boolean => {
 const isEmptyBlock = (node: LexNode | null | undefined): boolean =>
   collectText(node).trim().length === 0;
 
-// Pastikan CTA ada di akhir artikel, IDEMPOTEN: aman dipanggil berulang pada
-// setiap penyimpanan tanpa menumpuk paragraf CTA.
+/**
+ * Jaring pengaman backlink homepage.
+ *
+ * PERAN BERUBAH 4 September 2026. Sebelumnya fungsi ini adalah SATU-SATUNYA
+ * penulis CTA: prompt secara eksplisit melarang AI menulis ajakan penutup, dan
+ * paragraf template yang identik di semua artikel ditempelkan di sini. Hasilnya
+ * CTA yang tidak tahu apa pun tentang isi artikel di atasnya.
+ *
+ * Sekarang AI menulis CTA-nya sendiri sebagai kelanjutan argumen artikel, dan
+ * fungsi ini menjadi CADANGAN: ia hanya menambahkan paragraf bila artikel benar
+ * -benar berakhir tanpa tautan ke homepage. Backlink internal ke homepage adalah
+ * sinyal SEO yang tidak boleh hilang hanya karena satu generasi AI lupa, jadi
+ * pengaman ini tetap ada.
+ *
+ * Tetap IDEMPOTEN: aman dipanggil berulang pada setiap penyimpanan.
+ *
+ * Pemeriksaan dilakukan pada BLOK TERAKHIR yang berisi teks, bukan seluruh
+ * dokumen. Ini disengaja: tautan homepage di tengah artikel tidak menggantikan
+ * peran penutup, dan artikel lama yang menautkan homepage di paragraf awal tetap
+ * berhak mendapat CTA di akhir.
+ */
 export const ensureCta = (state: unknown): unknown => {
   if (!state || typeof state !== "object" || !("root" in state)) return state;
 

@@ -6,17 +6,29 @@
 //   2. buildFactualArticlePrompt — model menulis artikel HANYA dari hasil tool.
 
 import {
-  ANTI_HALLUCINATION,
   AI_PERSONA,
+  BRAND_FACT_SHEET,
+  CITATION_CRAFT,
+  CTA_CRAFT,
+  FACT_DISCIPLINE,
+  HOMEPAGE_KEYWORD_GUARD,
   HOUSE_STYLE,
+  OUTPUT_DISCIPLINE,
   jsonContract,
 } from "@/lib/ai/brand-facts";
 import type { ChatMessage } from "@/lib/ai/client";
 import type { ToolSource } from "./sources";
 
-const FOUNDATION = `${AI_PERSONA}
+// Perencanaan tool tidak menulis tentang proyek, jadi ia hanya butuh fondasi
+// netral (persona + disiplin fakta) tanpa lembar fakta brand.
+const NEUTRAL_FOUNDATION = `${AI_PERSONA}
 
-${ANTI_HALLUCINATION}`;
+${FACT_DISCIPLINE}`;
+
+// Penulisan artikel butuh lembar fakta proyek.
+const ARTICLE_FOUNDATION = `${NEUTRAL_FOUNDATION}
+
+${BRAND_FACT_SHEET}`;
 
 // ---------------------------------------------------------------------------
 // Tahap 1 — perencanaan tool
@@ -32,7 +44,7 @@ export const buildToolPlanPrompt = (
 ): ChatMessage[] => [
   {
     role: "system",
-    content: `${FOUNDATION}
+    content: `${NEUTRAL_FOUNDATION}
 
 TUGAS
 Sebelum menulis artikel, tentukan sumber DATA FAKTUAL yang paling relevan untuk topik ini. Kamu TIDAK menulis artikel sekarang — kamu hanya memilih tool dan query. Sistem akan mengeksekusinya dan memberikan hasilnya padamu di langkah berikutnya.
@@ -94,9 +106,13 @@ export const buildFactualArticlePrompt = (
   return [
     {
       role: "system",
-      content: `${FOUNDATION}
+      content: `${ARTICLE_FOUNDATION}
 
 ${HOUSE_STYLE}
+
+${OUTPUT_DISCIPLINE}
+
+${HOMEPAGE_KEYWORD_GUARD}
 
 TUGAS
 Tulis artikel properti yang berkualitas tinggi dan berbasis data untuk audiens Indonesia yang mencari informasi properti, KPR, atau investasi rumah.
@@ -106,28 +122,32 @@ ATURAN DATA (PRIORITAS TERTINGGI)
 - Bila sebuah klaim tidak didukung sumber, tulis kualitatif (tanpa angka) atau lewati klaim itu sepenuhnya.
 - Setiap angka/persentase yang kamu tulis HARUS bisa ditelusuri ke salah satu SUMBER DATA.
 
-TAUTAN EKSTERNAL (kutipan sumber)
 ${
   sources.length > 0
-    ? `- Sisipkan 1 sampai 2 tautan eksternal ke source_url dari SUMBER DATA, secara NATURAL di dalam kalimat. Contoh gaya: 'Menurut data <a href="URL">Badan Pusat Statistik</a>, ...'.
-- JANGAN membuat daftar "Referensi"/"Sumber" terpisah di akhir artikel. Tautan harus menyatu di dalam paragraf.
+    ? `${CITATION_CRAFT}
+
+KEWAJIBAN SITASI
+- Sisipkan 1 sampai 2 tautan eksternal ke source_url dari SUMBER DATA, secara NATURAL di dalam kalimat.
 - Pakai PERSIS source_url dari daftar. Jangan mengarang URL.
-- Maksimal 2 tautan eksternal.`
-    : `- JANGAN menyertakan tautan eksternal apa pun (tidak ada sumber yang tersedia).`
+- Bila sebuah sumber tidak relevan dengan topik, jangan memaksakannya.`
+    : `TAUTAN EKSTERNAL
+- JANGAN menyertakan tautan eksternal apa pun (tidak ada sumber yang tersedia).`
 }
 
 STRUKTUR & GAYA
 - Panjang ${targetWords} kata (rentang ${lower}-${upper}).
 - Minimal 2 subheading (<h2>/<h3>) yang membagi konten jadi bagian logis.
 - Beri nilai tambah nyata: insight, konteks lokal, implikasi praktis — bukan sekadar merangkum data mentah.
-- Tutup dengan paragraf kesimpulan atau rekomendasi praktis, bukan pengulangan poin.
-- Boleh mengaitkan topik dengan ${topic} dan kawasan yang relevan, tanpa menyebut angka harga/stok/cicilan (topik volatil).
+- Boleh mengaitkan topik dengan kawasan yang relevan, tanpa menyebut angka harga/stok/cicilan (topik volatil).
+
+${CTA_CRAFT}
 
 KONTRAK KELUARAN (WAJIB)
 - Balas HANYA dengan potongan HTML isi artikel. Tanpa penjelasan, tanpa code fence, tanpa markdown.
 - JANGAN memakai <h1>, <html>, <head>, <body>, <script>, <style>, <iframe>, atau atribut style/class.
 - Tag yang boleh: <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a href="...">, <table>, <thead>, <tbody>, <tr>, <th>, <td>.
-- Tautan eksternal memakai URL lengkap (https://...). JANGAN menulis tautan ke homepage sendiri; sistem menambahkannya otomatis.
+- Tautan eksternal memakai URL lengkap (https://...).
+- Elemen terakhir keluaranmu HARUS paragraf penutup berisi tautan ke halaman utama, sesuai aturan PARAGRAF PENUTUP di atas.
 
 ${sourcesBlock}`,
     },

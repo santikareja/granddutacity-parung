@@ -16,10 +16,14 @@ import {
   MIN_ARTICLE_WORDS,
   type OutlineSection,
 } from "@/lib/ai/prompts";
-import { getInternalLinkCandidates } from "@/lib/v2-admin/article-link-candidates";
 import { htmlToLexicalState } from "@/lib/v2-admin/html-to-lexical";
 import { ensureCta } from "@/lib/v2-admin/lexical";
 import { sanitizeAiHtml } from "@/lib/ai/sanitize-html";
+import {
+  assessAiOutput,
+  hardDefectMessage,
+  type OutputAssessment,
+} from "@/lib/ai/output-quality";
 import { logAiTask } from "@/lib/v2-admin/ai-tasks";
 import { gatherGroundingSources } from "@/lib/ai/factual/ground";
 import { planGrounding } from "@/lib/ai/factual/plan";
@@ -125,15 +129,6 @@ export async function POST(request: Request) {
 
   if (candidates.length === 0) return apiError(AI_NOT_CONFIGURED_MESSAGE, 503);
 
-  // Kandidat tautan internal ke artikel published nyata. Defensif: kegagalan DB
-  // tidak menggagalkan generasi — AI cukup menulis tanpa tautan internal.
-  let relatedArticles: { title: string; path: string }[] = [];
-  try {
-    relatedArticles = await getInternalLinkCandidates(8);
-  } catch {
-    relatedArticles = [];
-  }
-
   // --- TAHAP GROUNDING: ambil data faktual terkini ---
   //
   // Rencana dibuat DETERMINISTIK dari judul + outline (lihat plan.ts), bukan
@@ -141,6 +136,11 @@ export async function POST(request: Request) {
   // sudah mendekati maxDuration, dan membuat pemilihan tool bisa diuji.
   // Satu tool dicoba lebih dulu; bila tidak menghasilkan sumber layak, sistem
   // beralih ke tool lainnya. Seluruh hasil disaring allowlist otoritas.
+  //
+  // CATATAN 4 September 2026: kandidat tautan antar artikel tidak lagi disuplai
+  // ke prompt. Tautan internal yang dipaksakan terbaca tidak natural, jadi
+  // satu-satunya tautan internal yang tersisa adalah CTA ke halaman utama, dan
+  // otoritas artikel dibangun dari kutipan sumber data di bawah ini.
   let sources: ToolSource[] = [];
   let groundingMeta: {
     enabled: boolean;
@@ -187,7 +187,6 @@ export async function POST(request: Request) {
         title,
         outline,
         targetWords,
-        relatedArticles,
         sources,
         topic,
       ),
@@ -195,13 +194,34 @@ export async function POST(request: Request) {
       temperature: 0.8,
       maxTokens,
       taskLabel: "article",
-      // Validasi DISENGAJA minimal: hanya keluaran kosong yang ditolak.
-      // Kependekan/keterpotongan dilaporkan sebagai peringatan, bukan dibuang.
+      // Validasi menolak keluaran yang CACAT SECARA OBJEKTIF, bukan yang
+      // mutunya subjektif kurang. Melempar di sini membuat runAiTask berotasi ke
+      // model berikutnya — jauh lebih berguna daripada menyimpan keluaran rusak
+      // lalu menandainya untuk diperbaiki manusia.
+      //
+      // Yang ditolak: aksara non-Latin (mis. Tionghoa) yang kadang diselipkan
+      // model multibahasa, code fence bocor, markdown tercampur HTML, tag tidak
+      // berpasangan (tanda keluaran terpotong), tag terlarang, placeholder yang
+      // belum diisi, kalimat model yang berbicara tentang tugasnya, serta
+      // artikel tanpa satu pun heading atau paragraf.
+      //
+      // Catatan mutu (frasa klise, paragraf seragam, penjiplakan ringkasan
+      // sumber) TIDAK menggagalkan di sini: ia dilaporkan setelah pass editor,
+      // karena editor memang bertugas membersihkannya.
       parse: (raw) => {
         const rawHtml = stripCodeFence(raw);
         if (!rawHtml) {
           throw new AiRequestError("AI menghasilkan artikel kosong.", 502);
         }
+
+        const assessment = assessAiOutput(rawHtml, sources);
+        if (assessment.hasHardDefect) {
+          throw new AiRequestError(
+            `Keluaran AI cacat: ${hardDefectMessage(assessment)}`,
+            502,
+          );
+        }
+
         return rawHtml;
       },
     });
@@ -223,11 +243,24 @@ export async function POST(request: Request) {
         temperature: 0.4,
         maxTokens,
         taskLabel: "article-editor",
+        // Editor diperiksa dengan standar yang SAMA dengan penulis. Tanpa ini,
+        // editor yang merusak keluaran (menyelipkan aksara asing, memotong di
+        // tengah, mencampur markdown) justru menurunkan mutu draft yang tadinya
+        // sudah lolos — dan kegagalannya baru terlihat setelah artikel tayang.
         parse: (raw) => {
           const polished = stripCodeFence(raw);
           if (!polished) {
             throw new AiRequestError("Editor menghasilkan keluaran kosong.", 502);
           }
+
+          const assessment = assessAiOutput(polished, sources);
+          if (assessment.hasHardDefect) {
+            throw new AiRequestError(
+              `Keluaran editor cacat: ${hardDefectMessage(assessment)}`,
+              502,
+            );
+          }
+
           return polished;
         },
       });
@@ -235,6 +268,8 @@ export async function POST(request: Request) {
       edited = true;
       editorModel = editorResult.model;
     } catch (editorError) {
+      // Draft penulis sudah lolos pemeriksaan cacat berat, jadi memakainya tetap
+      // aman meski editor gagal.
       console.warn(
         "[api/v2/ai/article] pass editor dilewati, memakai draft penulis:",
         editorError instanceof Error ? editorError.message : editorError,
@@ -258,6 +293,13 @@ export async function POST(request: Request) {
       : tooShort
         ? `Artikel hanya ~${wordCount} kata dari target ${targetWords}. Anda bisa generate ulang atau melengkapinya manual.`
         : undefined;
+
+    // Catatan mutu pada keluaran FINAL. Cacat berat sudah tidak mungkin ada di
+    // sini (kedua pass menolaknya), jadi yang tersisa adalah hal subjektif:
+    // frasa klise yang lolos, paragraf terlalu seragam, kalimat yang disalin
+    // utuh dari ringkasan sumber. Semuanya dilaporkan ke penulis, bukan
+    // memblokir — keputusan akhir tetap pada manusia.
+    const outputQuality: OutputAssessment = assessAiOutput(finalHtml, sources);
 
     // Validasi kualitas: mendeteksi angka tanpa sumber, tautan eksternal yang
     // tidak cocok dengan sumber, panjang, dan jumlah heading. Hanya menandai
@@ -283,7 +325,9 @@ export async function POST(request: Request) {
         editorModel,
         grounding: groundingMeta,
         sources: sources.map((s) => s.source_url),
-        needsReview: validation.needsReview,
+        needsReview: validation.needsReview || outputQuality.soft.length > 0,
+        outputQuality: outputQuality.summary,
+        outputDefects: outputQuality.all.map((d) => d.code),
       },
       userId: guard.user.id,
     });
@@ -299,6 +343,13 @@ export async function POST(request: Request) {
       sources,
       grounding: groundingMeta,
       validation,
+      // Catatan mutu redaksional, terpisah dari `validation` yang menilai
+      // akurasi data. Keduanya dilaporkan agar penulis tahu apa yang perlu
+      // dilihat sebelum publish.
+      outputQuality: {
+        summary: outputQuality.summary,
+        notes: outputQuality.soft,
+      },
       ...(warning ? { warning } : {}),
     });
   } catch (error) {

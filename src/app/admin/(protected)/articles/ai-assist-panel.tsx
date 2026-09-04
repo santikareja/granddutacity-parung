@@ -98,6 +98,13 @@ export default function AiAssistPanel({
   >([]);
   const [reviewReasons, setReviewReasons] = useState<string[]>([]);
   const [needsReview, setNeedsReview] = useState(false);
+  // Catatan mutu redaksional dari pemeriksa keluaran (frasa klise, paragraf
+  // seragam, kalimat yang disalin dari ringkasan sumber). Terpisah dari
+  // `reviewReasons` yang menilai AKURASI DATA — keduanya perlu ditampilkan
+  // karena penyebab dan cara memperbaikinya berbeda.
+  const [qualityNotes, setQualityNotes] = useState<
+    { code: string; message: string; samples: string[] }[]
+  >([]);
   const [groundingNote, setGroundingNote] = useState<string | null>(null);
   // Model yang benar-benar dipakai pada permintaan terakhir. Bisa berbeda dari
   // model default bila sistem berotasi karena model pertama timeout/gagal.
@@ -246,6 +253,10 @@ export default function AiAssistPanel({
           rejected?: number;
         };
         validation?: { needsReview?: boolean; reasons?: string[] };
+        outputQuality?: {
+          summary?: string;
+          notes?: { code: string; message: string; samples: string[] }[];
+        };
       }>("/api/v2/ai/article", {
         // Judul + outline + topik + kategori dikirim bersama: inilah yang
         // membuat artikel akhir menempel pada judul yang dipilih penulis.
@@ -263,6 +274,9 @@ export default function AiAssistPanel({
           : [],
       );
       setNeedsReview(Boolean(data.validation?.needsReview));
+      setQualityNotes(
+        Array.isArray(data.outputQuality?.notes) ? data.outputQuality.notes : [],
+      );
       setGroundingNote(
         data.grounding?.reason
           ? `${data.grounding.reason}${
@@ -700,19 +714,46 @@ export default function AiAssistPanel({
 
                     {needsReview && reviewReasons.length > 0 ? (
                       <AdminAlert variant="warning">
-                        <span className="font-semibold">Perlu review:</span>
+                        <span className="font-semibold">Perlu review data:</span>
                         <ul className="mt-1 list-disc space-y-0.5 pl-4">
                           {reviewReasons.map((reason, i) => (
                             <li key={i}>{reason}</li>
                           ))}
                         </ul>
                       </AdminAlert>
-                    ) : (
-                      <AdminAlert variant="success">
-                        Lolos validasi kualitas: panjang, struktur heading,
-                        kutipan sumber, dan angka sesuai data.
+                    ) : null}
+
+                    {/* Catatan MUTU REDAKSIONAL, terpisah dari validasi data di
+                        atas. Cacat berat tidak mungkin sampai ke sini — kedua
+                        pass AI menolaknya dan berotasi ke model lain — jadi yang
+                        tampil hanya hal yang butuh penilaian manusia. */}
+                    {qualityNotes.length > 0 ? (
+                      <AdminAlert variant="info">
+                        <span className="font-semibold">
+                          Catatan mutu tulisan:
+                        </span>
+                        <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                          {qualityNotes.map((note) => (
+                            <li key={note.code}>
+                              {note.message}
+                              {note.samples.length > 0 ? (
+                                <span className="text-admin-fg-dim">
+                                  {" "}
+                                  ({note.samples.slice(0, 3).join("; ")})
+                                </span>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
                       </AdminAlert>
-                    )}
+                    ) : null}
+
+                    {!needsReview && qualityNotes.length === 0 ? (
+                      <AdminAlert variant="success">
+                        Lolos pemeriksaan: panjang, struktur heading, kutipan
+                        sumber, angka sesuai data, dan mutu tulisan bersih.
+                      </AdminAlert>
+                    ) : null}
 
                     {groundingNote ? (
                       <p className="text-[11px] text-admin-fg-dim">

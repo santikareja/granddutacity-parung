@@ -1,23 +1,32 @@
-// Kandidat tautan internal untuk artikel yang sedang digenerate.
+// Kandidat tautan internal antar artikel.
 //
-// Model AI TIDAK boleh mengarang slug artikel (akan jadi tautan mati dan
-// melanggar aturan anti-halusinasi). Karena itu route menyuplai daftar artikel
-// yang BENAR-BENAR sudah published dari sini, lalu prompt hanya mengizinkan AI
-// menautkan salah satu path pada daftar ini — maksimal satu, hanya bila relevan.
+// STATUS: TIDAK LAGI DIPAKAI JALUR GENERASI ARTIKEL (4 September 2026).
 //
-// Server-side only. Defensif: kegagalan DB tidak boleh menggagalkan generasi
-// artikel, jadi semua error ditangkap dan mengembalikan daftar kosong (artikel
-// akan ditulis tanpa tautan internal, tetap valid).
+// Sebelumnya route artikel menyuplai daftar ini ke prompt, dan prompt
+// mengizinkan AI menautkan maksimal dua artikel lain. Praktiknya tautan itu
+// hampir selalu terbaca dipaksakan: model menyisipkannya demi memenuhi kuota,
+// bukan karena kalimatnya memang butuh rujukan. Pemilik memutuskan mencabutnya
+// dan menggantinya dengan kutipan sumber data berotoritas — tautan yang justru
+// menambah kredibilitas artikel.
+//
+// Fungsi ini DIPERTAHANKAN, tidak dihapus, karena daftar artikel published
+// berguna untuk keperluan lain (mis. blok "Baca juga" yang dirender komponen,
+// bukan disuntik AI) dan menghapusnya berarti kehilangan query yang sudah
+// teruji. Bila enam bulan berlalu tanpa ada pemakai, ia layak dihapus.
+//
+// Server-side only. Defensif: kegagalan DB mengembalikan daftar kosong.
 
 import { and, desc, eq, isNotNull } from "drizzle-orm";
 
 import { db } from "@/db";
 import { artikel } from "@/db/schema";
-import type { RelatedArticle } from "@/lib/ai/prompts";
+
+/** Artikel published sebagai kandidat rujukan internal. */
+export type RelatedArticle = { title: string; path: string };
 
 /**
- * Ambil beberapa artikel published (judul + path) sebagai kandidat tautan
- * internal. URL artikel berbentuk `/{slug}` (lihat sitemap.ts).
+ * Ambil beberapa artikel published (judul + path). URL artikel berbentuk
+ * `/{slug}` (lihat sitemap.ts).
  */
 export const getInternalLinkCandidates = async (
   limit = 8,

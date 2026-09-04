@@ -355,3 +355,143 @@ describe("G22 — gambar preferred hadir di halaman, bukan hanya di metadata", (
     );
   });
 });
+
+// ===========================================================================
+// G23 — konsistensi BreadcrumbList
+//
+// Breadcrumb adalah rich result yang MASIH AKTIF di SERP, dan item posisi 1
+// setiap breadcrumb selalu "Beranda" -> homepage. Jadi setiap halaman yang
+// mengemit breadcrumb ikut menyatakan homepage sebagai akar hierarki situs.
+//
+// Audit produksi 4 September 2026 (crawl 66 URL) menemukan dua cacat:
+//
+//   1. TIGA halaman menulis `BreadcrumbList` inline dengan `item: ${SITE_URL}/`
+//      — memakai garis miring — sementara `breadcrumbNode()` dan 61 breadcrumb
+//      lain memakai `SITE_URL` tanpa garis miring, bentuk yang sama dengan
+//      canonical homepage. Sinyal "Beranda adalah akar" terbelah dua bentuk URL.
+//
+//   2. `/about` merender breadcrumb yang TERLIHAT tetapi tidak mengemit
+//      `BreadcrumbList` sama sekali — satu-satunya dari 65 halaman non-homepage.
+//
+// Guard di bawah menjaga keduanya tidak kembali, dan sengaja menguji SUMBER
+// (bukan HTML live) supaya pelanggaran tertangkap sebelum deploy.
+// ===========================================================================
+
+describe("G23 — BreadcrumbList konsisten lewat builder bersama", () => {
+  /** Halaman yang secara sah TIDAK punya `BreadcrumbList`. */
+  const EXEMPT = new Set([
+    // Homepage adalah top level path SEKALIGUS halaman itu sendiri. Panduan
+    // Google mengecualikan keduanya, jadi jejaknya nol item — di bawah minimum
+    // dua ListItem, sehingga tidak pernah dirender sebagai rich result.
+    "/",
+    // Route berikut mendelegasikan breadcrumb-nya ke komponen bersama
+    // (article-taxonomy-archive.tsx / [slug]/page.tsx), bukan menyusun sendiri.
+    "/artikel/[slug]",
+    "/category/[slug]",
+    "/category/[slug]/page/[pageNumber]",
+    "/tag/[slug]",
+    "/tag/[slug]/page/[pageNumber]",
+  ]);
+
+  const routeOf = (file: string) => {
+    const route = file
+      .replace(/\\/g, "/")
+      .replace(/^src\/app\/\(site\)/, "")
+      .replace(/\/page\.tsx$/, "");
+    return route === "" ? "/" : route;
+  };
+
+  const pageFiles = async () => {
+    const { default: fs } = await import("node:fs");
+    const { default: path } = await import("node:path");
+    const root = "src/app/(site)";
+    const out: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (entry.name === "__tests__") continue;
+          walk(full);
+        } else if (entry.name === "page.tsx") {
+          out.push(full);
+        }
+      }
+    };
+    walk(root);
+    return out;
+  };
+
+  it("tidak ada halaman yang menulis BreadcrumbList inline alih-alih memakai breadcrumbNode()", async () => {
+    const { default: fs } = await import("node:fs");
+    const files = await pageFiles();
+
+    const offenders = files.filter((file) => {
+      const source = fs.readFileSync(file, "utf8");
+      // Inline = mendeklarasikan tipe sendiri TANPA memanggil builder.
+      return (
+        /"@type":\s*"BreadcrumbList"/.test(source) &&
+        !/breadcrumbNode\(/.test(source)
+      );
+    });
+
+    expect(
+      offenders.map(routeOf),
+      "Breadcrumb inline melewati breadcrumbNode() dan bisa memakai bentuk URL Beranda yang berbeda dari canonical homepage.",
+    ).toEqual([]);
+  });
+
+  it("setiap halaman non-exempt mengemit BreadcrumbList", async () => {
+    const { default: fs } = await import("node:fs");
+    const files = await pageFiles();
+
+    const missing = files
+      .map((file) => ({ file, route: routeOf(file) }))
+      .filter(({ route }) => !EXEMPT.has(route))
+      .filter(({ file }) => {
+        const source = fs.readFileSync(file, "utf8");
+        return (
+          !/breadcrumbNode\(/.test(source) &&
+          !/"@type":\s*"BreadcrumbList"/.test(source)
+        );
+      })
+      .map(({ route }) => route);
+
+    expect(
+      missing,
+      "Halaman ini merender breadcrumb visual tapi tidak mengemit BreadcrumbList — kehilangan rich result sekaligus satu sinyal akar untuk homepage.",
+    ).toEqual([]);
+  });
+
+  it("breadcrumbNode() memakai bentuk URL Beranda yang identik dengan canonical homepage", async () => {
+    const { breadcrumbNode } = await import("@/lib/schema");
+    const { SITE_URL } = await import("@/lib/seo");
+
+    const node = breadcrumbNode(
+      [{ name: "Contoh", path: "/contoh" }],
+      `${SITE_URL}/contoh`,
+    );
+    const beranda = node.itemListElement[0];
+
+    expect(beranda.item).toBe(SITE_URL);
+    // Garis miring di ujung membuat item ini menjadi URL kedua yang bersaing
+    // dengan canonical homepage.
+    expect(beranda.item.endsWith("/")).toBe(false);
+    expect(node.itemListElement.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("/about mengemit breadcrumb yang cocok dengan label breadcrumb visualnya", async () => {
+    const { default: fs } = await import("node:fs");
+
+    // Google meminta breadcrumb terstruktur mencerminkan jalur yang dilihat
+    // pengguna. Dua sumber terpisah bisa menyimpang, jadi labelnya diikat.
+    const visual = fs.readFileSync(
+      "src/components/sections/about-developer.tsx",
+      "utf8",
+    );
+    const page = fs.readFileSync("src/app/(site)/about/page.tsx", "utf8");
+
+    expect(visual).toContain('label: "Tentang Developer"');
+    expect(page).toContain('name: "Tentang Developer"');
+    expect(page).toContain("breadcrumbNode(");
+  });
+});

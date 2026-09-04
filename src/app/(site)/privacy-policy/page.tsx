@@ -5,11 +5,14 @@ import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { breadcrumbNode, graph, ref, serializeJsonLd } from "@/lib/schema";
 import { OG_SITE_NAME } from "@/lib/seo";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const PAGE_URL = `${SITE_URL}/privacy-policy`;
 const PAGE_TITLE = "Kebijakan Privasi Pengguna Situs GDC Parung";
+const PAGE_DESCRIPTION =
+  "Penjelasan tentang pengumpulan, penggunaan, penyimpanan, dan perlindungan data pribadi pada situs Grand Duta City Parung.";
 export const PAGE_H1 = "Kebijakan Privasi";
 
 // Halaman legal tidak punya alasan bisnis untuk membawa frasa kata kunci utama
@@ -18,7 +21,7 @@ export const PAGE_H1 = "Kebijakan Privasi";
 // sudah di dalam rentang.
 export const metadata: Metadata = {
   title: { absolute: PAGE_TITLE },
-  description: "Penjelasan tentang pengumpulan, penggunaan, penyimpanan, dan perlindungan data pribadi pada situs Grand Duta City Parung.",
+  description: PAGE_DESCRIPTION,
   alternates: { canonical: PAGE_URL },
   robots: {
     index: true,
@@ -26,7 +29,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: PAGE_TITLE,
-    description: "Penjelasan tentang pengumpulan, penggunaan, penyimpanan, dan perlindungan data pribadi pada situs Grand Duta City Parung.",
+    description: PAGE_DESCRIPTION,
     url: PAGE_URL,
     siteName: OG_SITE_NAME,
     locale: "id_ID",
@@ -34,35 +37,38 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Breadcrumb dan `WebPage` disusun lewat builder bersama (4 September 2026).
+ *
+ * Versi sebelumnya menuliskan `BreadcrumbList` inline dengan
+ * `item: ${SITE_URL}/` — memakai garis miring — sementara `breadcrumbNode()`
+ * dan 61 breadcrumb lain memakai `SITE_URL` tanpa garis miring, bentuk yang
+ * sama dengan canonical homepage.
+ *
+ * `name` node `WebPage` kini memakai `PAGE_TITLE` yang SAMA dengan `<title>`.
+ * Sebelumnya ia berbunyi "Kebijakan Privasi Grand Duta City Parung" — judul
+ * berbeda dari judul asli halaman, DAN memuat frasa target homepage, padahal
+ * frasa itu sudah sengaja dicabut dari `<title>` pada Fase 1.
+ */
+const pageSchema = graph([
+  breadcrumbNode([{ name: "Kebijakan Privasi", path: "/privacy-policy" }], PAGE_URL),
+  {
+    "@type": "WebPage",
+    "@id": `${PAGE_URL}#webpage`,
+    url: PAGE_URL,
+    name: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+    inLanguage: "id",
+  },
+]);
+
 export default function PrivacyPolicyPage() {
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@graph": [
-              {
-                "@type": "BreadcrumbList",
-                "@id": `${PAGE_URL}#breadcrumb`,
-                itemListElement: [
-                  { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
-                  { "@type": "ListItem", position: 2, name: "Kebijakan Privasi", item: PAGE_URL },
-                ],
-              },
-              {
-                "@type": "WebPage",
-                "@id": `${PAGE_URL}#webpage`,
-                url: PAGE_URL,
-                name: "Kebijakan Privasi Grand Duta City Parung",
-                description: "Penjelasan tentang pengumpulan, penggunaan, penyimpanan, dan perlindungan data pribadi pada situs Grand Duta City Parung.",
-                breadcrumb: { "@id": `${PAGE_URL}#breadcrumb` },
-                inLanguage: "id",
-              },
-            ],
-          }),
-        }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(pageSchema) }}
       />
       <Header />
       <main className="relative w-full overflow-hidden bg-brand-light">

@@ -28,7 +28,14 @@ import { InlineVideoCard } from "@/components/ui/inline-video-card";
 import { Header } from "@/components/ui/header-2";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { propertyTypes } from "@/lib/data";
-import { SCHEMA_ID, clusterOfferCatalogNode, ref } from "@/lib/schema";
+import {
+  SCHEMA_ID,
+  breadcrumbNode,
+  clusterOfferCatalogNode,
+  graph,
+  ref,
+  serializeJsonLd,
+} from "@/lib/schema";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const PAGE_URL = `${SITE_URL}/cluster-cascada`;
@@ -124,17 +131,20 @@ export default function ClusterCascadaPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@graph": [
-              {
-                "@type": "BreadcrumbList",
-                "@id": `${PAGE_URL}#breadcrumb`,
-                itemListElement: [
-                  { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
-                  { "@type": "ListItem", position: 2, name: "Cluster Cascada", item: PAGE_URL },
-                ],
-              },
+          __html: serializeJsonLd(
+            graph([
+              // `breadcrumbNode()` menggantikan susunan inline (4 September 2026).
+              //
+              // Versi inline memakai `item: ${SITE_URL}/` — dengan garis miring —
+              // sementara builder dan 61 breadcrumb lain memakai `SITE_URL` tanpa
+              // garis miring, sama dengan canonical homepage. Akibatnya sinyal
+              // "Beranda adalah akar situs" terbelah ke dua bentuk URL. Memakai
+              // builder membuat bentuknya punya satu sumber sekaligus ikut
+              // terlindungi guard test-nya.
+              breadcrumbNode(
+                [{ name: "Cluster Cascada", path: "/cluster-cascada" }],
+                PAGE_URL,
+              ),
               {
                 "@type": "ImageObject",
                 "@id": `${PAGE_URL}#primaryimage`,
@@ -160,8 +170,8 @@ export default function ClusterCascadaPage() {
               // menegaskan hardcode itu tidak akurat, jadi builder bersama
               // memetakan status `check-siteplan` ke `LimitedAvailability`.
               clusterOfferCatalogNode("cascada", PAGE_URL),
-            ],
-          }),
+            ]),
+          ),
         }}
       />
       <Header />

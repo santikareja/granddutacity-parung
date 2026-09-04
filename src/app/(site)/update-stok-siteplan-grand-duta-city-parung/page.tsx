@@ -6,7 +6,10 @@ import { ArrowRight, Phone, Download, Clock, Info } from "lucide-react";
 import { BankSlider } from "@/components/ui/bank-slider";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ClickableSiteplanImage } from "@/components/ui/clickable-siteplan-image";
-import { SCHEMA_ID, ref } from "@/lib/schema";
+import { SCHEMA_ID, breadcrumbNode, graph, ref, serializeJsonLd } from "@/lib/schema";
+
+const PAGE_URL =
+  "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -24,7 +27,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     description:
       "Cek ketersediaan unit terbaru GDC Parung per blok: siteplan kawasan, status tersedia, reservasi, dan sold untuk Cluster Ladera dan Cluster Cascada.",
     alternates: {
-      canonical: "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung"
+      canonical: PAGE_URL
     },
     robots: {
       index: !hasParams,
@@ -75,56 +78,55 @@ const stockAgeDays = Math.floor(
 const isStockStale = stockAgeDays > STOCK_STALE_AFTER_DAYS;
 
 export default function UpdateStokSiteplanPage() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebPage",
-        "@id": "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung#webpage",
-        "url": "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung",
-        "name": "Update Stok & Siteplan Grand Duta City Parung",
-        "description": "Halaman ini menampilkan siteplan kawasan dan update stok unit Grand Duta City Parung untuk Cluster Ladera dan Cascada.",
-        "datePublished": LAST_UPDATED_ISO,
-        "dateModified": LAST_UPDATED_ISO,
-        "inLanguage": "id",
-        "isPartOf": ref(SCHEMA_ID.website),
-        "about": ref(SCHEMA_ID.project),
-        "breadcrumb": ref("https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung#breadcrumb"),
-        // Referensi murni. Node Person lengkap ada di /author/santika-reza;
-        // sebelumnya halaman ini mendefinisikan ulang `@id` yang sama dengan
-        // properti minimal.
-        "author": ref(SCHEMA_ID.author),
-        "publisher": ref(SCHEMA_ID.organization),
-        "primaryImageOfPage": ref("https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung#primaryimage")
-      },
-      {
-        "@type": "ImageObject",
-        "@id": "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung#primaryimage",
-        "inLanguage": "id-ID",
-        "url": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818474/cluster-cascada-grand-duta-city-south-of-jakarta_vhdxvm.webp",
-        "contentUrl": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818474/cluster-cascada-grand-duta-city-south-of-jakarta_vhdxvm.webp",
-        "caption": "Siteplan Grand Duta City Parung dengan update stok Cluster Ladera dan Cascada."
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung#breadcrumb",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Beranda",
-            "item": "https://granddutacitysouthofjakarta.com"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "Update Stok",
-            "item": "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung"
-          }
-        ]
-      }
-    ]
-  };
+  /**
+   * `breadcrumbNode()` + `graph()` menggantikan susunan inline (4 September 2026).
+   *
+   * Bentuk item "Beranda" di sini SUDAH benar (tanpa garis miring), jadi ini
+   * bukan perbaikan bug — ini menghilangkan satu-satunya jalur di mana bug itu
+   * masih bisa muncul. Guard G23 mensyaratkan setiap halaman memakai builder,
+   * karena breadcrumb inline-lah yang membuat tiga halaman lain menyimpang.
+   *
+   * `serializeJsonLd()` juga menggantikan `JSON.stringify` mentah: ia meng-escape
+   * `<` sehingga string dalam data tidak bisa menutup elemen `<script>`.
+   */
+  const jsonLd = graph([
+    {
+      "@type": "WebPage",
+      "@id": `${PAGE_URL}#webpage`,
+      "url": PAGE_URL,
+      "name": "Update Stok & Siteplan Grand Duta City Parung",
+      "description": "Halaman ini menampilkan siteplan kawasan dan update stok unit Grand Duta City Parung untuk Cluster Ladera dan Cascada.",
+      "datePublished": LAST_UPDATED_ISO,
+      "dateModified": LAST_UPDATED_ISO,
+      "inLanguage": "id",
+      "isPartOf": ref(SCHEMA_ID.website),
+      "about": ref(SCHEMA_ID.project),
+      "breadcrumb": ref(`${PAGE_URL}#breadcrumb`),
+      // Referensi murni. Node Person lengkap ada di /author/santika-reza;
+      // sebelumnya halaman ini mendefinisikan ulang `@id` yang sama dengan
+      // properti minimal.
+      "author": ref(SCHEMA_ID.author),
+      "publisher": ref(SCHEMA_ID.organization),
+      "primaryImageOfPage": ref(`${PAGE_URL}#primaryimage`)
+    },
+    {
+      "@type": "ImageObject",
+      "@id": `${PAGE_URL}#primaryimage`,
+      "inLanguage": "id-ID",
+      "url": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818474/cluster-cascada-grand-duta-city-south-of-jakarta_vhdxvm.webp",
+      "contentUrl": "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818474/cluster-cascada-grand-duta-city-south-of-jakarta_vhdxvm.webp",
+      "caption": "Siteplan Grand Duta City Parung dengan update stok Cluster Ladera dan Cascada."
+    },
+    breadcrumbNode(
+      [
+        {
+          name: "Update Stok",
+          path: "/update-stok-siteplan-grand-duta-city-parung",
+        },
+      ],
+      PAGE_URL,
+    ),
+  ]);
 
   return (
     <>
@@ -132,7 +134,7 @@ export default function UpdateStokSiteplanPage() {
       <main className="relative w-full overflow-hidden bg-[#0b120c] font-sans pb-20">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
 
         {/* Hero Section */}

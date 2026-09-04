@@ -5,10 +5,14 @@ import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { breadcrumbNode, graph, ref, serializeJsonLd } from "@/lib/schema";
 import { OG_SITE_NAME } from "@/lib/seo";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 const PAGE_URL = `${SITE_URL}/disclaimer`;
+const PAGE_TITLE = "Disclaimer | Informasi Penting Situs";
+const PAGE_DESCRIPTION =
+  "Penjelasan batasan informasi, harga, stok, visual, spesifikasi, dan penggunaan konten pada situs Grand Duta City Parung.";
 
 /**
  * Diekspor untuk guard G19 (seo-invariants.test.ts): memastikan H1 halaman
@@ -19,16 +23,16 @@ const PAGE_URL = `${SITE_URL}/disclaimer`;
 export const PAGE_H1 = "Disclaimer";
 
 export const metadata: Metadata = {
-  title: { absolute: "Disclaimer | Informasi Penting Situs" },
-  description: "Penjelasan batasan informasi, harga, stok, visual, spesifikasi, dan penggunaan konten pada situs Grand Duta City Parung.",
+  title: { absolute: PAGE_TITLE },
+  description: PAGE_DESCRIPTION,
   alternates: { canonical: PAGE_URL },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Disclaimer | Informasi Penting Situs",
-    description: "Penjelasan batasan informasi, harga, stok, visual, spesifikasi, dan penggunaan konten pada situs Grand Duta City Parung.",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
     url: PAGE_URL,
     siteName: OG_SITE_NAME,
     locale: "id_ID",
@@ -36,35 +40,37 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Breadcrumb dan `WebPage` disusun lewat builder bersama (4 September 2026).
+ *
+ * Versi sebelumnya menuliskan `BreadcrumbList` inline dengan
+ * `item: ${SITE_URL}/` — memakai garis miring — sementara `breadcrumbNode()`
+ * dan 61 breadcrumb lain memakai `SITE_URL` tanpa garis miring, bentuk yang
+ * sama dengan canonical homepage. Perbedaan itu membelah sinyal "Beranda adalah
+ * akar situs" ke dua bentuk URL.
+ *
+ * `serializeJsonLd()` juga menggantikan `JSON.stringify` mentah: ia meng-escape
+ * `<` sehingga string dalam data tidak bisa menutup elemen `<script>`.
+ */
+const pageSchema = graph([
+  breadcrumbNode([{ name: "Disclaimer", path: "/disclaimer" }], PAGE_URL),
+  {
+    "@type": "WebPage",
+    "@id": `${PAGE_URL}#webpage`,
+    url: PAGE_URL,
+    name: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    breadcrumb: ref(`${PAGE_URL}#breadcrumb`),
+    inLanguage: "id",
+  },
+]);
+
 export default function DisclaimerPage() {
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@graph": [
-              {
-                "@type": "BreadcrumbList",
-                "@id": `${PAGE_URL}#breadcrumb`,
-                itemListElement: [
-                  { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
-                  { "@type": "ListItem", position: 2, name: "Disclaimer", item: PAGE_URL },
-                ],
-              },
-              {
-                "@type": "WebPage",
-                "@id": `${PAGE_URL}#webpage`,
-                url: PAGE_URL,
-                name: "Disclaimer | Informasi Penting Situs",
-                description: "Penjelasan batasan informasi, harga, stok, visual, spesifikasi, dan penggunaan konten pada situs Grand Duta City Parung.",
-                breadcrumb: { "@id": `${PAGE_URL}#breadcrumb` },
-                inLanguage: "id",
-              },
-            ],
-          }),
-        }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(pageSchema) }}
       />
       <Header />
       <main className="relative w-full overflow-hidden bg-brand-light">

@@ -33,7 +33,7 @@ import { facilities } from "@/data/facilities";
 import { homepageFaqs } from "@/data/faq-homepage";
 import {
   BETTER_LIVING_IMAGE_SIZE,
-  betterLivingImages,
+  structuredDataImages,
 } from "@/data/homepage-images";
 import {
   CLUSTER_LABEL,
@@ -223,8 +223,9 @@ export const projectPlaceNode = () => ({
   // Empat foto fasad 1:1 tanpa teks, URL-nya SAMA dengan yang dirender carousel
   // Better Living di homepage. Menyertakan gambar yang benar-benar ada di halaman
   // itu yang membuatnya kandidat kuat; gambar yang hanya hidup di markup belum
-  // tentu diindeks Google.
-  image: betterLivingImages.map((image) => ({
+  // tentu diindeks Google. Urutannya menempatkan gambar preferred lebih dulu
+  // (lihat `structuredDataImages`).
+  image: structuredDataImages.map((image) => ({
     "@type": "ImageObject",
     url: image.url,
     contentUrl: image.url,

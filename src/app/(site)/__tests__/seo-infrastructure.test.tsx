@@ -208,6 +208,18 @@ describe("G22 — gambar preferred hadir di halaman, bukan hanya di metadata", (
     expect(html).toContain(`alt="${HOMEPAGE_PREFERRED_IMAGE.alt}"`);
   });
 
+  it("gambar preferred adalah Tipe Victoria, dan tidak bergeser saat urutan daftar diubah", async () => {
+    const { HOMEPAGE_PREFERRED_IMAGE } = await import("@/data/homepage-images");
+
+    // `HOMEPAGE_PREFERRED_IMAGE` dirujuk lewat indeks (`betterLivingImages[2]`),
+    // dan urutan daftar itu juga menentukan urutan carousel serta `Place.image`.
+    // Tanpa asersi ini, mengurutkan ulang daftar akan diam-diam memindahkan
+    // gambar preferred ke aset lain. Pilihan Victoria adalah keputusan pemilik
+    // (4 September 2026), jadi perubahannya harus disengaja — bukan efek samping.
+    expect(HOMEPAGE_PREFERRED_IMAGE.url).toContain("Tipe_Victoria_-_Tuscan_gj1kcd");
+    expect(HOMEPAGE_PREFERRED_IMAGE.alt).toContain("Tipe Victoria");
+  });
+
   it("gambar preferred bukan aset promo bertulisan atau logo", async () => {
     const { betterLivingImages } = await import("@/data/homepage-images");
 
@@ -236,7 +248,12 @@ describe("G22 — gambar preferred hadir di halaman, bukan hanya di metadata", (
   it("ketiga saluran sinyal gambar terisi dan konsisten", async () => {
     const [
       { SCHEMA_ID, primaryImageNode, projectPlaceNode },
-      { BETTER_LIVING_IMAGE_SIZE, HOMEPAGE_PREFERRED_IMAGE, betterLivingImages },
+      {
+        BETTER_LIVING_IMAGE_SIZE,
+        HOMEPAGE_PREFERRED_IMAGE,
+        betterLivingImages,
+        structuredDataImages,
+      },
     ] = await Promise.all([
       import("@/lib/schema"),
       import("@/data/homepage-images"),
@@ -264,13 +281,20 @@ describe("G22 — gambar preferred hadir di halaman, bukan hanya di metadata", (
       "Place /#project adalah mainEntity homepage; properti `image` di sini adalah saluran kedua yang disebut dokumentasi Google.",
     ).toBe(true);
     expect(place.image).toHaveLength(betterLivingImages.length);
+    // Urutan array senada dengan primaryImageOfPage: preferred lebih dulu.
+    expect(place.image?.[0]?.url).toBe(HOMEPAGE_PREFERRED_IMAGE.url);
     expect(place.image?.map((image) => image.url)).toEqual(
-      betterLivingImages.map((image) => image.url),
+      structuredDataImages.map((image) => image.url),
     );
     for (const image of place.image ?? []) {
       expect(image.width).toBe(1024);
       expect(image.height).toBe(1024);
     }
+
+    // Tidak boleh ada gambar yang hilang atau terduplikasi saat diurut ulang.
+    expect(new Set(structuredDataImages.map((image) => image.url)).size).toBe(
+      betterLivingImages.length,
+    );
   });
 
   it("setiap gambar preferred terdaftar di sitemap gambar untuk homepage", async () => {

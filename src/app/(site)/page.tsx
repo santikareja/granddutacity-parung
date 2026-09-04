@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import {
   BETTER_LIVING_IMAGE_SIZE,
   HOMEPAGE_PREFERRED_IMAGE,
-  betterLivingImages,
+  structuredDataImages,
 } from "@/data/homepage-images";
 
 import {
@@ -181,7 +181,10 @@ export const metadata: Metadata = {
 // salah satu kriteria pemilihan gambar pratinjau ("Use a high resolution, if
 // possible"). Nilainya diverifikasi dengan membaca header berkas, bukan ditebak
 // (lihat BETTER_LIVING_IMAGE_SIZE di src/data/homepage-images.ts).
-const unitImageNodes = betterLivingImages.map((image) => ({
+//
+// Urutannya memakai `structuredDataImages` — gambar preferred lebih dulu —
+// supaya array ini tidak bertentangan dengan `primaryImageOfPage`.
+const unitImageNodes = structuredDataImages.map((image) => ({
   "@type": "ImageObject",
   url: image.url,
   contentUrl: image.url,

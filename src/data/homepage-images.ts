@@ -69,8 +69,39 @@ export const BETTER_LIVING_IMAGE_SIZE = { width: 1024, height: 1024 } as const;
  * `<img>` di halaman mana pun — sehingga sinyal terkuat yang tersisa untuk
  * Google adalah thumbnail YouTube, dan itulah yang tampil di hasil penelusuran.
  *
- * Tipe Malta dipilih di antara keempatnya karena fasadnya paling representatif
- * untuk kawasan (rumah + carport + halaman hijau dalam satu bidang) dan
- * resolusi efektifnya paling tinggi (137 KB, detail paling kaya).
+ * TIPE VICTORIA dipilih (4 September 2026, atas keputusan pemilik) menggantikan
+ * Tipe Malta. Alasannya bertahan saat diuji terhadap kriteria thumbnail:
+ *   - hunian dua lantai penuh, jadi massa bangunannya masih terbaca saat
+ *     dikecilkan ke slot ~120 px di SERP mobile — fasad satu lantai kehilangan
+ *     bentuk lebih cepat;
+ *   - interior menyala saat senja plus langit biru bergradasi memberi kontras
+ *     terang-gelap yang menarik mata di antara hasil penelusuran lain;
+ *   - carport, tanaman, dan paving tergarap, sehingga terbaca sebagai hunian
+ *     jadi, bukan render kosong.
+ *
+ * DIRUJUK LEWAT INDEKS, dan indeksnya dikunci guard test: urutan
+ * `betterLivingImages` juga menentukan urutan carousel dan `Place.image`, jadi
+ * kalau suatu saat diacak, test G22 gagal alih-alih diam-diam memindahkan
+ * gambar preferred ke aset lain.
  */
-export const HOMEPAGE_PREFERRED_IMAGE = betterLivingImages[0];
+export const HOMEPAGE_PREFERRED_IMAGE = betterLivingImages[2];
+
+/**
+ * Urutan gambar untuk STRUCTURED DATA (`WebPage.image`, `Place.image`), dengan
+ * gambar preferred di posisi pertama.
+ *
+ * Terpisah dari `betterLivingImages` karena keduanya punya kebutuhan berbeda:
+ * carousel mempertahankan urutan aslinya (itu keputusan tampilan, dan
+ * mengubahnya berarti mengubah apa yang dilihat pengunjung), sementara array
+ * JSON-LD tidak punya konsekuensi visual sama sekali. Menempatkan gambar
+ * preferred lebih dulu di sana membuat urutan array senada dengan
+ * `primaryImageOfPage` alih-alih bertentangan dengannya.
+ *
+ * Tidak ada jaminan Google memakai urutan ini — pemilihan gambar pratinjau
+ * dinyatakan sepenuhnya otomatis. Ini murni menghilangkan sinyal yang saling
+ * bertolak belakang, bukan mekanisme pemaksa.
+ */
+export const structuredDataImages = [
+  HOMEPAGE_PREFERRED_IMAGE,
+  ...betterLivingImages.filter((image) => image !== HOMEPAGE_PREFERRED_IMAGE),
+];

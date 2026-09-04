@@ -72,19 +72,29 @@ const bankPartnerSeeds: readonly ImageSeed[] = [
 ];
 
 const homeSeeds: readonly ImageSeed[] = [
-  [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763541/Grand_Duta_City_Parung_South_of_Jakarta_-_Promo_KPR_Rumah_Tanpa_DP_Bogor_qhnsec.webp",
-    "Promo KPR rumah tanpa DP",
-    true,
-  ],
+  // CATATAN AKURASI (3 September 2026).
+  //
+  // Registry ini adalah sumber `/images.xml`, dan audit produksi menemukan
+  // dua jenis ketidaksesuaian pada blok homepage:
+  //
+  //   1. DUA gambar didaftarkan tapi TIDAK dirender di homepage:
+  //      `..._Promo_KPR_Rumah_Tanpa_DP_Bogor_qhnsec.webp` dan poster hero
+  //      desktop `..._lsds7k.jpg`. Keduanya sudah dicabut dari daftar ini —
+  //      poster desktop hanya dipakai `<link rel=preload>` bermedia
+  //      `(min-width: 768px)` di hero, tidak pernah jadi `<img src>`, jadi
+  //      Google tidak bisa mengindeksnya sebagai gambar halaman.
+  //
+  //   2. SEPULUH gambar dirender tapi TIDAK didaftarkan, termasuk empat foto
+  //      fasad 1:1 yang justru menjadi kandidat pratinjau hasil penelusuran.
+  //      Semuanya kini ditambahkan di bawah.
+  //
+  // Aturan "Every image displayed on the site MUST be registered here" di
+  // header berkas ini berlaku dua arah: yang tidak tampil juga tidak boleh
+  // didaftarkan, karena sitemap gambar yang menunjuk gambar tak-ada membuat
+  // seluruh berkasnya kurang dipercaya.
   [
     "https://res.cloudinary.com/dzhvfbuks/video/upload/v1775447530/GDC_Parung_Video_nsvvg6.jpg",
     "Poster video hero mobile",
-    true,
-  ],
-  [
-    "https://res.cloudinary.com/dzhvfbuks/video/upload/v1775449335/Grand_Duta_City_Parung_South_of_Jakarta_lsds7k.jpg",
-    "Poster video hero desktop",
     true,
   ],
   [
@@ -110,6 +120,52 @@ const homeSeeds: readonly ImageSeed[] = [
   [
     "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775479369/GDC_Parung_lbfaw3.webp",
     "Fasilitas Grand Duta City",
+  ],
+  // Empat gambar berikut dirender slider "Kenapa Memilih" (why-gdc.tsx:27-30)
+  // tapi belum pernah terdaftar di sitemap gambar.
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1788225154/Fasad_GDC_SOJ.webp",
+    "Fasad rumah cluster Grand Duta City South of Jakarta",
+  ],
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1788225153/Fasilitas_Kawasan_GDC_Parung.webp",
+    "Fasilitas kawasan Grand Duta City Parung",
+  ],
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1788225154/Future_Devevelopment.webp",
+    "Rencana future development kawasan",
+  ],
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1788225832/Promo_KPR_Grand_Duta_City.webp",
+    "Promo KPR tanpa DP",
+  ],
+  // Peta lokasi yang dirender section Lokasi di beranda (lokasi-scroll.tsx:12).
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776804065/map_lokasi_gdc_parung_bogor_anhrcm.webp",
+    "Peta lokasi GDC Parung dan akses tol",
+  ],
+  // EMPAT FOTO FASAD 1:1 — kandidat utama pratinjau hasil penelusuran.
+  //
+  // Sumbernya `src/data/homepage-images.ts`, yang juga mengisi
+  // `primaryImageOfPage`, `WebPage.image`, dan `Place.image`. Didaftarkan di
+  // sini agar Google punya jalur penemuan ketiga (sitemap gambar) selain
+  // `<img>` di halaman dan structured data. Label sengaja memuat nama tipe
+  // supaya `title` tiap gambar berbeda satu sama lain.
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Malta_qnowfx.webp",
+    "Fasad rumah modern Tipe Malta Cluster Ladera",
+  ],
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800277/Tipe_Aira_ah9nsa.webp",
+    "Fasad rumah minimalis Tipe Aira Cluster Cascada",
+  ],
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Victoria_-_Tuscan_gj1kcd.webp",
+    "Fasad hunian Tipe Victoria bergaya Tuscan",
+  ],
+  [
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1776800276/Tipe_Alexandra_mtw8xh.webp",
+    "Fasad rumah mewah dua lantai Tipe Alexandra",
   ],
   // ── Fasad kartu tipe rumah di beranda ──────────────────────────────────
   // Render fasad per tipe yang dikirim pemilik 30 Agustus 2026. Empat tipe

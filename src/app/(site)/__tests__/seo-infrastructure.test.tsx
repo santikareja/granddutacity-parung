@@ -161,3 +161,173 @@ describe("SEO infrastructure hardening", () => {
     }
   });
 });
+
+// ===========================================================================
+// G22 — sinyal GAMBAR PRATINJAU hasil penelusuran
+//
+// Dokumentasi Image SEO Google (diperbarui 2 Maret 2026) menyebut tiga sumber
+// untuk memilih gambar pratinjau: `primaryImageOfPage`, properti `image` pada
+// entitas utama (`mainEntity`/`mainEntityOfPage`), dan `og:image`. Google juga
+// menyatakan pemilihannya otomatis, dan bahwa "the presentation of the images
+// also influences whether an image is indexed at all".
+//
+// Audit produksi 3 September 2026 menemukan hasil penelusuran homepage
+// menampilkan thumbnail YouTube, bukan gambar situs. Sebabnya terukur: dari 53
+// tag `<img>` di HTML homepage, TIDAK SATU PUN memuat aset yang saat itu
+// ditunjuk sebagai gambar preferred. Keduanya hanya hidup di metadata dan tidak
+// terdaftar di `/images.xml`, sementara thumbnail YouTube dirender sebagai
+// `<img>` nyata sekaligus dideklarasikan di `VideoObject`.
+//
+// Guard di bawah mengunci tiga hal yang mudah rusak kembali:
+//   1. gambar preferred WAJIB benar-benar dirender di halaman,
+//   2. ia tidak boleh berupa materi promo bertulisan atau logo,
+//   3. ketiga saluran sinyal terisi dan saling konsisten.
+// ===========================================================================
+
+describe("G22 — gambar preferred hadir di halaman, bukan hanya di metadata", () => {
+  it("primaryImageOfPage menunjuk gambar yang dirender carousel Better Living", async () => {
+    const [{ BetterLiving }, { HOMEPAGE_PREFERRED_IMAGE, betterLivingImages }] =
+      await Promise.all([
+        import("@/components/sections/better-living"),
+        import("@/data/homepage-images"),
+      ]);
+
+    // Sumbernya harus satu: preferred image wajib berasal dari daftar yang
+    // dirender, bukan aset lepas.
+    expect(betterLivingImages).toContain(HOMEPAGE_PREFERRED_IMAGE);
+
+    const html = renderToStaticMarkup(React.createElement(BetterLiving));
+    // Carousel melewatkan URL ke Cloudinary transform, jadi yang dicocokkan
+    // adalah public ID-nya — bagian yang tidak berubah.
+    const publicId = HOMEPAGE_PREFERRED_IMAGE.url.split("/").pop() ?? "";
+    expect(publicId.length).toBeGreaterThan(0);
+    expect(
+      html.includes(publicId),
+      `Gambar preferred (${publicId}) tidak dirender BetterLiving. Gambar yang hanya ada di JSON-LD/og:image adalah kandidat lemah bagi Google.`,
+    ).toBe(true);
+    expect(html).toContain(`alt="${HOMEPAGE_PREFERRED_IMAGE.alt}"`);
+  });
+
+  it("gambar preferred bukan aset promo bertulisan atau logo", async () => {
+    const { betterLivingImages } = await import("@/data/homepage-images");
+
+    // Google: "Avoid using a generic image (for example, your site logo) or an
+    // image with text". Dua aset di /public adalah materi promo bertulisan
+    // "DP Rp. 0" berlogo; keduanya sah untuk og:image, tapi tidak boleh menjadi
+    // sumber gambar preferred.
+    const FORBIDDEN = [
+      "og-grand-duta-city-parung",
+      "perumahan-grand-duta-city-parung",
+      "logo",
+      "Promo_",
+      "Harga_Promo",
+    ];
+
+    const offenders = betterLivingImages.filter((image) =>
+      FORBIDDEN.some((needle) => image.url.includes(needle)),
+    );
+
+    expect(
+      offenders.map((image) => image.url),
+      "Aset promo bertulisan/logo tidak boleh masuk daftar gambar preferred.",
+    ).toEqual([]);
+  });
+
+  it("ketiga saluran sinyal gambar terisi dan konsisten", async () => {
+    const [
+      { SCHEMA_ID, primaryImageNode, projectPlaceNode },
+      { BETTER_LIVING_IMAGE_SIZE, HOMEPAGE_PREFERRED_IMAGE, betterLivingImages },
+    ] = await Promise.all([
+      import("@/lib/schema"),
+      import("@/data/homepage-images"),
+    ]);
+
+    // Saluran 1: primaryImageOfPage.
+    const primary = primaryImageNode(
+      HOMEPAGE_PREFERRED_IMAGE.url,
+      HOMEPAGE_PREFERRED_IMAGE.alt,
+      BETTER_LIVING_IMAGE_SIZE,
+    ) as Record<string, unknown>;
+    expect(primary["@id"]).toBe(SCHEMA_ID.primaryImage);
+    expect(primary.url).toBe(HOMEPAGE_PREFERRED_IMAGE.url);
+    expect(primary.representativeOfPage).toBe(true);
+    // Resolusi eksplisit: salah satu kriteria pemilihan Google.
+    expect(primary.width).toBe(1024);
+    expect(primary.height).toBe(1024);
+
+    // Saluran 2: `image` pada entitas utama (Place = mainEntity homepage).
+    const place = projectPlaceNode() as {
+      image?: { url: string; width?: number; height?: number }[];
+    };
+    expect(
+      Array.isArray(place.image),
+      "Place /#project adalah mainEntity homepage; properti `image` di sini adalah saluran kedua yang disebut dokumentasi Google.",
+    ).toBe(true);
+    expect(place.image).toHaveLength(betterLivingImages.length);
+    expect(place.image?.map((image) => image.url)).toEqual(
+      betterLivingImages.map((image) => image.url),
+    );
+    for (const image of place.image ?? []) {
+      expect(image.width).toBe(1024);
+      expect(image.height).toBe(1024);
+    }
+  });
+
+  it("setiap gambar preferred terdaftar di sitemap gambar untuk homepage", async () => {
+    const [{ betterLivingImages }, { siteImages }] = await Promise.all([
+      import("@/data/homepage-images"),
+      import("@/data/images"),
+    ]);
+
+    const homepageUrls = new Set(
+      siteImages.filter((image) => image.page === "/").map((image) => image.url),
+    );
+
+    const missing = betterLivingImages
+      .map((image) => image.url)
+      .filter((url) => !homepageUrls.has(url));
+
+    expect(
+      missing,
+      "Sitemap gambar adalah jalur penemuan ketiga selain <img> dan structured data.",
+    ).toEqual([]);
+  });
+
+  it("sitemap gambar homepage tidak mendaftarkan gambar yang tidak dirender", async () => {
+    const { siteImages } = await import("@/data/images");
+
+    // Poster hero desktop hanya dipakai `<link rel=preload>` bermedia
+    // `(min-width: 768px)`, tidak pernah menjadi `<img src>` — Google tidak bisa
+    // mengindeksnya sebagai gambar halaman. Aset promo `..._qhnsec.webp` juga
+    // sudah tidak dirender di homepage.
+    const NOT_RENDERED = [
+      "Grand_Duta_City_Parung_South_of_Jakarta_lsds7k",
+      "Promo_KPR_Rumah_Tanpa_DP_Bogor_qhnsec",
+    ];
+
+    const offenders = siteImages
+      .filter((image) => image.page === "/")
+      .map((image) => image.url)
+      .filter((url) => NOT_RENDERED.some((needle) => url.includes(needle)));
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("VideoObject memakai thumbnail resolusi tertinggi yang tersedia", async () => {
+    // Video result adalah jalur SERP tersendiri, terpisah dari pratinjau gambar
+    // hasil teks. Selama ia dipertahankan, thumbnail-nya harus setajam mungkin:
+    // maxresdefault (1280x720) diverifikasi ada, hqdefault (480x360) jadi
+    // cadangan.
+    const { default: fs } = await import("node:fs");
+    const source = fs.readFileSync("src/app/(site)/page.tsx", "utf8");
+
+    expect(source).toContain("maxresdefault.jpg");
+    const thumbBlock = source.slice(
+      source.indexOf("thumbnailUrl: ["),
+      source.indexOf("uploadDate: TOUR_VIDEO_UPLOAD_DATE"),
+    );
+    expect(thumbBlock.indexOf("maxresdefault")).toBeLessThan(
+      thumbBlock.indexOf("hqdefault"),
+    );
+  });
+});

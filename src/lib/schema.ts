@@ -32,6 +32,10 @@ import { bankPartnerNames } from "@/data/bank-partners";
 import { facilities } from "@/data/facilities";
 import { homepageFaqs } from "@/data/faq-homepage";
 import {
+  BETTER_LIVING_IMAGE_SIZE,
+  betterLivingImages,
+} from "@/data/homepage-images";
+import {
   CLUSTER_LABEL,
   getUnitsByCluster,
   unitSpecSentence,
@@ -50,6 +54,8 @@ export const SCHEMA_ID = {
   website: `${SITE_URL}/#website`,
   homepage: `${SITE_URL}/#webpage`,
   primaryImage: `${SITE_URL}/#primaryimage`,
+  /** Aset og:image (materi promo bertulisan) — terpisah dari #primaryimage. */
+  socialImage: `${SITE_URL}/#socialimage`,
   faq: `${SITE_URL}/#faq`,
   video: `${SITE_URL}/#video`,
   clusterLadera: `${SITE_URL}/#cluster-ladera`,
@@ -191,6 +197,14 @@ export const developerOrganizationNode = () => ({
  * ENTITAS UTAMA. `Place` dipilih, bukan `Product`: yang dijual di sini adalah
  * rumah tapak dalam sebuah kawasan, dan `Product` membawa serta ekspektasi
  * merchant listing yang tidak berlaku untuk properti.
+ *
+ * `image` (bukan hanya `photo`) ditambahkan 3 September 2026. Dokumentasi Image
+ * SEO Google menyebut saluran kedua pemilihan gambar pratinjau secara harfiah:
+ * "specify an image URL or ImageObject property and attach it to the main entity
+ * (using the schema.org mainEntity or mainEntityOfPage properties)". Node ini
+ * ADALAH `mainEntity` homepage, tapi sebelumnya ia hanya punya `photo` — properti
+ * yang tidak disebut dokumentasi itu — sehingga saluran tersebut praktis kosong.
+ * `photo` tetap dipertahankan karena sah secara schema.org dan sudah dirujuk.
  */
 export const projectPlaceNode = () => ({
   "@type": "Place",
@@ -206,6 +220,18 @@ export const projectPlaceNode = () => ({
   hasMap: PROJECT_MAP,
   telephone: PROJECT_PHONE,
   photo: ref(SCHEMA_ID.primaryImage),
+  // Empat foto fasad 1:1 tanpa teks, URL-nya SAMA dengan yang dirender carousel
+  // Better Living di homepage. Menyertakan gambar yang benar-benar ada di halaman
+  // itu yang membuatnya kandidat kuat; gambar yang hanya hidup di markup belum
+  // tentu diindeks Google.
+  image: betterLivingImages.map((image) => ({
+    "@type": "ImageObject",
+    url: image.url,
+    contentUrl: image.url,
+    caption: image.alt,
+    width: BETTER_LIVING_IMAGE_SIZE.width,
+    height: BETTER_LIVING_IMAGE_SIZE.height,
+  })),
   publicAccess: true,
   smokingAllowed: false,
   // Diturunkan dari src/data/facilities.ts — daftar yang sama dengan kartu
@@ -298,13 +324,48 @@ export const salesOfficeImageNode = () => ({
   caption: "Marketing Gallery Grand Duta City Parung",
 });
 
-export const primaryImageNode = (url: string, caption: string) => ({
+/**
+ * `ImageObject` untuk `primaryImageOfPage` — sinyal pratinjau paling langsung.
+ *
+ * `width`/`height` opsional tapi sangat dianjurkan diisi: resolusi adalah salah
+ * satu kriteria pemilihan gambar pratinjau Google, dan tanpa kedua properti ini
+ * resolusi baru diketahui setelah berkasnya diunduh.
+ */
+export const primaryImageNode = (
+  url: string,
+  caption: string,
+  size?: { width: number; height: number },
+) => ({
   "@type": "ImageObject",
   "@id": SCHEMA_ID.primaryImage,
   url,
   contentUrl: url,
   caption,
+  ...(size ? { width: size.width, height: size.height } : {}),
   representativeOfPage: true,
+});
+
+/**
+ * Aset pratinjau sosial (`og:image`) sebagai node tersendiri.
+ *
+ * Dipisahkan dari `#primaryimage` 3 September 2026: gambar itu materi promo
+ * bertulisan "DP Rp. 0" plus logo — tepat untuk kartu WhatsApp/Facebook, tapi
+ * justru dihindari Google untuk thumbnail penelusuran ("Avoid using a generic
+ * image ... or an image with text"). Ia tetap punya identitas di graf supaya
+ * `og:image` tidak menunjuk gambar yang tak dikenal graf, tanpa lagi mengklaim
+ * peran gambar pratinjau utama.
+ */
+export const socialImageNode = (
+  url: string,
+  caption: string,
+  size?: { width: number; height: number },
+) => ({
+  "@type": "ImageObject",
+  "@id": SCHEMA_ID.socialImage,
+  url,
+  contentUrl: url,
+  caption,
+  ...(size ? { width: size.width, height: size.height } : {}),
 });
 
 /**

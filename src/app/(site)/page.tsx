@@ -4,7 +4,11 @@ import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
 import { BankPartners } from "@/components/sections/bank-partners";
 import dynamic from "next/dynamic";
-import { betterLivingImages } from "@/data/homepage-images";
+import {
+  BETTER_LIVING_IMAGE_SIZE,
+  HOMEPAGE_PREFERRED_IMAGE,
+  betterLivingImages,
+} from "@/data/homepage-images";
 
 import {
   SCHEMA_ID,
@@ -17,6 +21,7 @@ import {
   salesOfficeImageNode,
   salesOfficeNode,
   serializeJsonLd,
+  socialImageNode,
   websiteNode,
 } from "@/lib/schema";
 
@@ -32,13 +37,47 @@ const FaqKpr = dynamic(() => import("@/components/sections/faq-kpr").then((mod) 
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 
-// Social preview asset (1200x630) — dipakai eksklusif untuk OpenGraph & Twitter Card.
+/**
+ * Aset pratinjau sosial (1200x630) — dipakai EKSKLUSIF untuk OpenGraph & Twitter.
+ *
+ * Sengaja TIDAK dipakai sebagai `primaryImageOfPage`. Materi ini memuat teks
+ * promo "DP Rp. 0" dan logo yang di-burn ke gambar; itu tepat untuk kartu
+ * WhatsApp/Facebook (teks membantu di konteks feed), tapi Google eksplisit
+ * meminta sebaliknya untuk gambar pratinjau penelusuran: "Avoid using a generic
+ * image (for example, your site logo) or an image with text in the schema.org
+ * markup or og:image meta tag."
+ *
+ * `og:image` dibiarkan mengarah ke sini karena perannya di platform sosial nyata
+ * dan terukur, sementara ia hanya satu dari tiga sinyal thumbnail Google — dua
+ * sinyal lainnya (`primaryImageOfPage` dan `image` pada entitas utama) kini
+ * menunjuk foto tanpa teks.
+ */
 const OG_IMAGE = "/og-grand-duta-city-parung.jpg";
 const OG_IMAGE_ALT = "Tampak Depan Rumah Mewah Minimalis di Grand Duta City Parung South of Jakarta";
 
 // Fallback asset (1200x1200) — dipakai untuk JSON-LD WebSite/WebPage yang mewajibkan URL absolut.
 const FALLBACK_IMAGE = `${SITE_URL}/perumahan-grand-duta-city-parung.jpg`;
 const FALLBACK_IMAGE_ALT = "Suasana kawasan perumahan modern Grand Duta City Parung Bogor South of Jakarta";
+
+/**
+ * `primaryImageOfPage` — sinyal pratinjau penelusuran PALING LANGSUNG yang
+ * disebut dokumentasi Google, dan slot ini sekarang menunjuk foto yang benar-benar
+ * dirender di halaman (carousel Better Living).
+ *
+ * Audit produksi 3 September 2026 menemukan kenapa hasil penelusuran menampilkan
+ * thumbnail YouTube alih-alih gambar situs: dari 53 tag `<img>` di HTML homepage,
+ * TIDAK SATU PUN memuat aset yang saat itu ditunjuk sebagai gambar preferred
+ * (`/perumahan-grand-duta-city-parung.jpg` dan `/og-grand-duta-city-parung.jpg`).
+ * Keduanya hanya hidup di metadata dan tidak terdaftar di `/images.xml`.
+ * Sementara thumbnail YouTube dirender sebagai `<img>` NYATA sekaligus
+ * dideklarasikan di `VideoObject` — kandidat yang jauh lebih kuat.
+ *
+ * `FALLBACK_IMAGE` tetap dipertahankan sebagai `ImageObject` terpisah di graf
+ * (`#socialimage`): ia masih dipakai `og:image` dan tetap perlu punya identitas
+ * di graf, tapi ia bukan lagi gambar pratinjau pilihan.
+ */
+const PRIMARY_IMAGE_URL = HOMEPAGE_PREFERRED_IMAGE.url;
+const PRIMARY_IMAGE_ALT = HOMEPAGE_PREFERRED_IMAGE.alt;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://granddutacitysouthofjakarta.com"),
@@ -136,11 +175,19 @@ export const metadata: Metadata = {
 
 // Gambar unit untuk `ImageObject` di graf. Caption deskriptif dipertahankan
 // karena itulah yang membuat gambar punya peluang muncul sebagai hasil gambar.
+//
+// `width`/`height` ditambahkan 3 September 2026: tanpa keduanya, Google baru
+// tahu resolusi gambar setelah mengunduh berkasnya, padahal resolusi adalah
+// salah satu kriteria pemilihan gambar pratinjau ("Use a high resolution, if
+// possible"). Nilainya diverifikasi dengan membaca header berkas, bukan ditebak
+// (lihat BETTER_LIVING_IMAGE_SIZE di src/data/homepage-images.ts).
 const unitImageNodes = betterLivingImages.map((image) => ({
   "@type": "ImageObject",
   url: image.url,
   contentUrl: image.url,
   caption: image.alt,
+  width: BETTER_LIVING_IMAGE_SIZE.width,
+  height: BETTER_LIVING_IMAGE_SIZE.height,
 }));
 
 /**
@@ -178,7 +225,16 @@ const tourVideoNode = {
   name: TOUR_VIDEO_TITLE,
   description:
     "Tur kawasan Grand Duta City Parung South of Jakarta: gerbang cluster, boulevard utama, The Beach Lagoon, Central Park, dan progres pembangunan terbaru.",
-  thumbnailUrl: [`https://i.ytimg.com/vi/${TOUR_VIDEO_ID}/hqdefault.jpg`],
+  // `maxresdefault` (1280x720) menggantikan `hqdefault` (480x360), 3 September
+  // 2026. Video result tetap dipertahankan sebagai jalur SERP tersendiri —
+  // ia berbeda dari pratinjau gambar hasil teks — jadi bila yang tampil adalah
+  // video result, thumbnail-nya harus setajam mungkin. Facade di halaman tetap
+  // memakai `hqdefault` karena slot rendernya hanya ~366px; ini semata soal
+  // resolusi yang dilaporkan ke Google.
+  thumbnailUrl: [
+    `https://i.ytimg.com/vi/${TOUR_VIDEO_ID}/maxresdefault.jpg`,
+    `https://i.ytimg.com/vi/${TOUR_VIDEO_ID}/hqdefault.jpg`,
+  ],
   uploadDate: TOUR_VIDEO_UPLOAD_DATE,
   duration: TOUR_VIDEO_DURATION,
   embedUrl: `https://www.youtube-nocookie.com/embed/${TOUR_VIDEO_ID}`,
@@ -242,7 +298,10 @@ const jsonLdGraph = graph([
   ...clusterNodes(),
   salesOfficeNode(),
   salesOfficeImageNode(),
-  primaryImageNode(FALLBACK_IMAGE, FALLBACK_IMAGE_ALT),
+  // `#primaryimage` sekarang foto fasad 1:1 tanpa teks yang dirender carousel;
+  // aset promo `og:image` pindah ke node `#socialimage` di bawahnya.
+  primaryImageNode(PRIMARY_IMAGE_URL, PRIMARY_IMAGE_ALT, BETTER_LIVING_IMAGE_SIZE),
+  socialImageNode(FALLBACK_IMAGE, FALLBACK_IMAGE_ALT, { width: 1200, height: 630 }),
   homepageNode,
   faqNode(),
   tourVideoNode,

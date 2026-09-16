@@ -15,7 +15,7 @@ import {
   graph,
   ref,
 } from "@/lib/schema";
-import { SITE_URL } from "@/lib/seo";
+import { SITE_URL, OG_SITE_NAME } from "@/lib/seo";
 import {
   PROJECT_ELECTRICAL,
   PROJECT_LEGALITY,
@@ -31,6 +31,10 @@ import {
 
 const PAGE_URL = `${SITE_URL}/cluster-ladera`;
 
+const HERO_IMAGE =
+  "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp";
+const HERO_ALT = "Gerbang Cluster Ladera GDC Parung";
+
 /** Diekspor untuk guard G19 (seo-invariants.test.ts). */
 export const PAGE_H1 = "Cluster Ladera — Verona, Malta, Tuscan & Frontera";
 
@@ -41,6 +45,17 @@ export const metadata: Metadata = {
   title: "Cluster Ladera GDC Parung: Tipe, Harga & Stok Unit",
   description:
     "Cluster Ladera American Classic di GDC Parung: tipe Verona, Malta, Tuscan & Frontera (39-89 m²) mulai Rp 600 jutaan. Lihat denah, spesifikasi & harga KPR.",
+  // Keywords WAJIB cluster-spesifik; frasa utuh "grand duta city parung"
+  // adalah milik homepage (keyword-ownership.ts) dan dilarang di sini.
+  keywords: [
+    "cluster ladera parung",
+    "cluster ladera gdc",
+    "harga cluster ladera",
+    "denah cluster ladera",
+    "tipe verona 39",
+    "tipe malta 47",
+    "tipe tuscan 66",
+  ],
   robots: {
     index: true,
     follow: true,
@@ -49,11 +64,24 @@ export const metadata: Metadata = {
   alternates: {
     canonical: PAGE_URL,
   },
+  openGraph: {
+    title: "Cluster Ladera GDC Parung: Tipe, Harga & Stok Unit",
+    description:
+      "Cluster Ladera American Classic di GDC Parung: tipe Verona, Malta, Tuscan & Frontera (39-89 m²) mulai Rp 600 jutaan. Lihat denah, spesifikasi & harga KPR.",
+    url: PAGE_URL,
+    siteName: OG_SITE_NAME,
+    locale: "id_ID",
+    type: "website",
+    images: [{ url: HERO_IMAGE, width: 1200, height: 630, alt: HERO_ALT }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cluster Ladera GDC Parung: Tipe, Harga & Stok Unit",
+    description:
+      "Cluster Ladera American Classic di GDC Parung: tipe Verona, Malta, Tuscan & Frontera (39-89 m²) mulai Rp 600 jutaan.",
+    images: [HERO_IMAGE],
+  },
 };
-
-const HERO_IMAGE =
-  "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775671249/Cluster_Ladera_Gate_t1vylp.webp";
-const HERO_ALT = "Gerbang Cluster Ladera GDC Parung";
 
 /**
  * SATU `@graph` menggantikan tiga blok JSON-LD terpisah tanpa `@id`.
@@ -99,8 +127,13 @@ const faqData = [
     answer: "Harga tunai keras mulai dari Rp 600 jutaan untuk Tipe Verona 39/60, Rp 800 jutaan untuk Malta 47/72, Rp 1,1 Miliar untuk Tuscan 66/72, hingga Rp 1,6 Miliar untuk Frontera 89/90. Harga KPR lebih tinggi dari harga tunai dan dapat berubah sewaktu-waktu, hubungi marketing kami untuk pricelist terbaru."
   },
   {
-    question: "Bagaimana cara menuju Grand Duta City Parung?",
-    answer: "Grand Duta City Parung berlokasi strategis di Selatan Jakarta, mudah diakses melalui Tol Pamulang (Desari) maupun Tol Kayu Manis (BORR)."
+    // FAQ SENGAJA cluster-spesifik. Versi lama ("Bagaimana cara menuju Grand
+    // Duta City Parung?") adalah pertanyaan BRAND generik yang jawabannya juga
+    // generik (tol Pamulang/Kayu Manis) — pola itu membuat halaman cluster ikut
+    // relevan untuk query brand "grand duta city parung" dan menyalip homepage.
+    // Pertanyaan akses generik milik /lokasi-akses-gdc-parung & homepage.
+    question: "Di mana posisi Cluster Ladera di dalam kawasan GDC Parung?",
+    answer: "Cluster Ladera berada di area premium dalam masterplan GDC Parung, dekat pusat komersial dan jalan utama kawasan. Untuk rute tol dan waktu tempuh ke Jakarta/Depok, lihat halaman lokasi & akses GDC Parung."
   }
 ];
 
@@ -112,7 +145,9 @@ const faqData = [
 const laderaUnits = getUnitsByCluster("ladera").filter((unit) => unit.showInCatalog);
 
 const waHref = (unit: Unit) => {
-  const msg = `Halo, saya tertarik dengan Tipe ${unitDisplayName(unit)} ${unitSizeLabel(unit)} di Cluster Ladera Grand Duta City Parung. Boleh minta info harga, denah, dan ketersediaan unitnya?`;
+  // Teks WA memakai "GDC Parung", bukan frasa utuh milik homepage.
+  // (Tidak terindeks, tapi dijaga konsisten dengan aturan keyword-ownership.)
+  const msg = `Halo, saya tertarik dengan Tipe ${unitDisplayName(unit)} ${unitSizeLabel(unit)} di Cluster Ladera GDC Parung. Boleh minta info harga, denah, dan ketersediaan unitnya?`;
   return `https://wa.me/628131742034?text=${encodeURIComponent(msg)}`;
 };
 
@@ -237,7 +272,9 @@ function TypeShowcase({ unit, index }: { unit: Unit; index: number }) {
           <div className="relative h-80 w-full overflow-hidden rounded-2xl border border-[#0b120c]/10 bg-white sm:h-96 md:h-[520px] xl:w-2/3">
             <Image
               src={unit.floorPlanImage}
-              alt={`Denah lantai Tipe ${name} ${size} Cluster Ladera Grand Duta City Parung`}
+              // Alt memakai "GDC Parung": versi lama memuat frasa utuh milik
+              // homepage di 4 gambar denah sekaligus (= 4 sinyal relevansi brand).
+              alt={`Denah lantai Tipe ${name} ${size} Cluster Ladera GDC Parung`}
               fill
               sizes="(max-width: 1280px) 100vw, 760px"
               className="object-contain p-4"
@@ -425,7 +462,7 @@ export default function ClusterLaderaPage() {
           initialPrice={800000000}
           minPrice={600000000}
           maxPrice={1600000000}
-          whatsappText="Halo, saya ingin konsultasi simulasi KPR dan jadwal survey untuk Cluster Ladera Grand Duta City Parung."
+          whatsappText="Halo, saya ingin konsultasi simulasi KPR dan jadwal survey untuk Cluster Ladera GDC Parung."
         />
 
       </main>

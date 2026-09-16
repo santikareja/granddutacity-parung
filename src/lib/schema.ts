@@ -570,7 +570,11 @@ export const clusterOfferCatalogNode = (
 ) => ({
   "@type": "OfferCatalog",
   "@id": `${pageUrl}#offercatalog`,
-  name: `Tipe Rumah ${CLUSTER_LABEL[cluster]} Grand Duta City Parung`,
+  // Nama memakai "GDC Parung", BUKAN frasa utuh "Grand Duta City Parung".
+  // Frasa utuh adalah primary keyword homepage (lihat keyword-ownership.ts);
+  // memakainya di nama katalog membuat JSON-LD halaman cluster ikut relevan
+  // untuk query brand dan memicu perebutan peringkat dengan homepage.
+  name: `Tipe Rumah ${CLUSTER_LABEL[cluster]} GDC Parung`,
   url: pageUrl,
   itemListElement: getUnitsByCluster(cluster).map(unitOfferNode),
 });

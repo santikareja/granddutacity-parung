@@ -44,7 +44,11 @@ const FEATURED_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v17759
 const FACADE_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775917573/Cluster-Cascada-grand-duta-city-parung_bsre5n.jpg";
 const VIDEO_URL = "https://res.cloudinary.com/dxgoshyei/video/upload/v1780901924/Di_tengah_aktivitas_yang_semakin_cepat_punya_ruang_untuk_menikmati_waktu_dengan_lebih_tenang_ja_gwlttb.mp4";
 const SITEPLAN_IMAGE = "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818893/Cascada_Update_Stock_9_Maret_2026-1_vcrnzw.webp";
-const ALT_TEXT = "Cluster Cascada Grand Duta City Parung South of Jakarta";
+// ALT memakai "GDC Parung", BUKAN frasa utuh milik homepage. Versi lama
+// ("Cluster Cascada Grand Duta City Parung South of Jakarta") memuat KEDUA
+// frasa reserved homepage sekaligus dalam SATU alt — dipakai di hero, fasad,
+// OG image, dan caption ImageObject — sinyal kanibalisasi terkuat di halaman.
+const ALT_TEXT = "Gerbang Cluster Cascada GDC Parung";
 
 /** Diekspor untuk guard G19 (seo-invariants.test.ts). */
 export const PAGE_H1 = "Cluster Cascada — Aira, Manoa, Victoria & Alexandra";
@@ -61,12 +65,15 @@ const featuredUnits = [
 
 const cascadaFaqs = [
   {
-    question: "Apa saja tipe rumah Cluster Cascada Grand Duta City Parung?",
+    // Q memakai "GDC Parung": versi lama memuat frasa utuh milik homepage
+    // ("Cluster Cascada Grand Duta City Parung") di pertanyaan yang dirender
+    // sebagai teks + FAQ schema.
+    question: "Apa saja tipe rumah di Cluster Cascada GDC Parung?",
     answer:
       "Tipe yang ditampilkan pada halaman ini meliputi Aira+ 42/60, Manoa 58/60, Victoria 69/72, Alexandra 88/105, serta Keila 47/72 yang saat ini ditandai sold out.",
   },
   {
-    question: "Berapa harga Cluster Cascada Grand Duta City?",
+    question: "Berapa harga Cluster Cascada GDC Parung?",
     answer:
       "Harga mulai dari 800 Juta-an untuk tipe entry, lalu naik sesuai ukuran bangunan dan luas tanah. Untuk promo dan simulasi KPR terbaru, konfirmasi langsung ke marketing.",
   },
@@ -231,7 +238,7 @@ export default function ClusterCascadaPage() {
             </div>
             <div className="lg:col-span-7">
               <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.38em] text-[#F5A524]">Ringkasan Cluster Cascada</p>
-              <h2 className="font-serif text-4xl font-semibold text-[#0b120c] md:text-5xl">Cascada Grand Duta City</h2>
+              <h2 className="font-serif text-4xl font-semibold text-[#0b120c] md:text-5xl">Cascada GDC Parung</h2>
               <p className="mt-6 text-base leading-relaxed text-[#0b120c]/75">
                 Temukan harmoni kehidupan modern di Cluster Cascada{" "}
                 <Link href="/" className="font-medium text-[#A85D16] underline decoration-[#F5A524]/40 underline-offset-2 hover:text-[#F5A524]">Grand Duta City Parung</Link>. Didesain dengan gaya minimalis tropis yang elegan, klaster ini adalah jawaban bagi Anda yang mendambakan hunian prestisius dengan fasilitas super lengkap. Nikmati kenyamanan tinggal di kawasan mandiri seluas 200 hektare dengan akses tol terdekat di Selatan Jakarta.
@@ -287,7 +294,7 @@ export default function ClusterCascadaPage() {
               <InlineVideoCard
                 src={VIDEO_URL}
                 poster={FACADE_IMAGE}
-                ariaLabel="Video keunggulan utama Cluster Cascada Grand Duta City Parung"
+                ariaLabel="Video keunggulan utama Cluster Cascada GDC Parung"
                 className="max-w-[530px] lg:mr-0"
                 videoClassName="max-h-[580px] max-w-[455px]"
               />
@@ -308,7 +315,7 @@ export default function ClusterCascadaPage() {
                 <div key={item.unit.id} className="grid items-center gap-10 border-b border-[#0b120c]/8 pb-16 last:border-none last:pb-0 lg:grid-cols-12">
                   <div className={`lg:col-span-6 ${index % 2 === 1 ? "lg:order-2" : ""}`}>
                     <div className="relative aspect-[4/3] overflow-hidden rounded-[28px] border border-[#0b120c]/10 bg-brand-light shadow-md">
-                      <Image src={item.plan} alt={`Denah ${item.unit.name} Cluster Cascada Grand Duta City Parung`} fill sizes="(max-width: 768px) 100vw, (max-width: 1280px) 48vw, 620px" className="object-contain p-4" />
+                      <Image src={item.plan} alt={`Denah ${item.unit.name} Cluster Cascada GDC Parung`} fill sizes="(max-width: 768px) 100vw, (max-width: 1280px) 48vw, 620px" className="object-contain p-4" />
                     </div>
                   </div>
                   <div className={`lg:col-span-6 ${index % 2 === 1 ? "lg:order-1" : ""}`}>
@@ -336,7 +343,7 @@ export default function ClusterCascadaPage() {
                     </div>
                     <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
                       <a
-                        href={`https://wa.me/628131742034?text=${encodeURIComponent(`Halo, saya tertarik dengan ${item.unit.name} di Cluster Cascada Grand Duta City Parung. Mohon info harga, denah, dan jadwal survey.`)}`}
+                        href={`https://wa.me/628131742034?text=${encodeURIComponent(`Halo, saya tertarik dengan ${item.unit.name} di Cluster Cascada GDC Parung. Mohon info harga, denah, dan jadwal survey.`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         data-wa-placement="cascada-unit-card"
@@ -361,7 +368,7 @@ export default function ClusterCascadaPage() {
         <section className="bg-brand-light py-24">
           <div className="mx-auto max-w-screen-xl px-6 md:px-14">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.38em] text-[#F5A524]">Harga Cluster Cascada Grand Duta City</p>
+              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.38em] text-[#F5A524]">Harga Cluster Cascada GDC Parung</p>
               <h2 className="font-serif text-4xl font-semibold text-[#0b120c] md:text-5xl">Kisaran harga dan jalur konsultasi yang paling cepat</h2>
             </div>
             {/* Kartu harga kini DITURUNKAN dari `cascadaUnits` (yang berakar di
@@ -498,7 +505,7 @@ export default function ClusterCascadaPage() {
           initialPrice={800000000}
           minPrice={800000000}
           maxPrice={1600000000}
-          whatsappText="Halo, saya ingin konsultasi simulasi KPR dan jadwal survey untuk Cluster Cascada Grand Duta City Parung."
+          whatsappText="Halo, saya ingin konsultasi simulasi KPR dan jadwal survey untuk Cluster Cascada GDC Parung."
         />
 
         <section className="bg-[#0b120c] py-20 text-[#F5F1E8]">

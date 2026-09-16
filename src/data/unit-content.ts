@@ -40,7 +40,7 @@
  *   - berebut dengan halaman yang MEMANG memiliki query itu, terutama
  *     `/lokasi-akses-gdc-parung` yang sudah memegang klaster
  *     pencarian lokasi/akses, serta `/galeri` dan
- *     `/update-stok-siteplan-grand-duta-city-parung`.
+ *     `/update-stok-siteplan-gdc-parung`.
  *
  * Karena itu halaman tipe hanya menampilkan RINGKASAN pendek plus tautan ke
  * halaman pemiliknya. Yang membuat tiap halaman tipe unik tetap datanya

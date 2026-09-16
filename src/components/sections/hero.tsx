@@ -305,22 +305,13 @@ export function Hero() {
             </h1>
           </div>
 
-          {/* Supporting Copy — CSS animation instead of framer-motion to
-               eliminate LCP render delay (this <p> is the LCP element).
-               Delay ditekan seminimal mungkin: fill-mode "both" menahan teks di
-               opacity 0 selama delay, jadi setiap milidetik delay langsung
-               menunda LCP/Speed Index. */}
           <p
             className="text-[#F8F6F0]/90 text-[13px] sm:text-base md:text-lg font-normal max-w-2xl mb-5 sm:mb-8 leading-[1.7] [text-shadow:0_1px_12px_rgba(0,0,0,0.8)] px-2"
             style={{ animation: "heroFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both" }}
           >
-            Investasi &amp; hunian prestisius di Grand Duta City Parung, yang juga dikenal sebagai Grand Duta City South of Jakarta (GDC SOJ) — kota mandiri 200 Ha di Parung, Kabupaten Bogor, persembahan{" "}
-            <span className="text-[#F8F6F0] font-semibold">Duta Putra Land</span>. Cicilan mulai{" "}
-            <span className="text-[#F5A524] font-semibold">Rp 4 jutaan/bln</span>, Promo Tanpa DP, 20 menit ke CBD Jakarta Selatan.
+            <span className="text-[#F8F6F0] font-semibold">Grand Duta City Parung (Grand Duta City South of Jakarta)</span>: rumah ready stock di Parung, Bogor, dengan <span className="text-[#F8F6F0] font-semibold">KPR Tanpa DP</span>, cicilan mulai <span className="text-[#F5A524] font-semibold">Rp4 jutaan/bulan</span>. <span className="text-[#F8F6F0] font-semibold">Promo bulan ini:</span> gratis furnitur &amp; elektronik, PPN, SHM, dan BPHTB. Cek unit dan klaim promonya!
           </p>
 
-          {/* Double-Bezel Button-in-Button CTA Cluster — CSS animation to
-               avoid blocking LCP with framer-motion hydration. */}
           <div
             className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
             style={{ animation: "heroFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both" }}
@@ -368,6 +359,14 @@ export function Hero() {
               <span>Bebas Banjir · One Gate System</span>
             </div>
           </div>
+
+          {/* Freshness Signal (Last Updated) — No icons or emojis */}
+          <p
+            className="mt-4 sm:mt-5 text-[10px] sm:text-[11px] text-[#F8F6F0]/50 font-sans tracking-wider uppercase font-medium"
+            style={{ animation: "heroFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both" }}
+          >
+            Terakhir diperbarui: <span className="text-[#D49A3D] font-semibold">17 September 2026</span>
+          </p>
 
         </div>
       </div>

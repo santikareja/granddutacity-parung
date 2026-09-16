@@ -19,11 +19,14 @@ export default function robots(): MetadataRoute.Robots {
           "anthropic-ai",
           "GPTBot",
           "OAI-SearchBot",
-          "CCBot",
           "Google-Extended",
         ],
         allow: "/",
         disallow: ["/api/", "/admin/"],
+      },
+      {
+        userAgent: "CCBot",
+        disallow: "/",
       },
     ],
     sitemap: [

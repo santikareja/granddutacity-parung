@@ -9,7 +9,7 @@ import { ClickableSiteplanImage } from "@/components/ui/clickable-siteplan-image
 import { SCHEMA_ID, breadcrumbNode, graph, ref, serializeJsonLd } from "@/lib/schema";
 
 const PAGE_URL =
-  "https://granddutacitysouthofjakarta.com/update-stok-siteplan-grand-duta-city-parung";
+  "https://granddutacitysouthofjakarta.com/update-stok-siteplan-gdc-parung";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -121,7 +121,7 @@ export default function UpdateStokSiteplanPage() {
       [
         {
           name: "Update Stok",
-          path: "/update-stok-siteplan-grand-duta-city-parung",
+          path: "/update-stok-siteplan-gdc-parung",
         },
       ],
       PAGE_URL,
@@ -413,7 +413,7 @@ export default function UpdateStokSiteplanPage() {
                 Ketersediaan stok unit berubah dengan cepat. Hubungi kami sekarang untuk mendapatkan file siteplan resolusi tinggi, pricelist terbaru, maupun simulasi KPR.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="https://wa.me/628131742034" data-wa-placement="stok-hubungi-marketing" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[#25D366] text-[#F5F1E8] px-8 py-4 rounded-full font-bold hover:bg-[#1ebd5b] transition-colors w-full sm:w-auto justify-center">
+                <a href="https://wa.me/628131742034" data-wa-placement="stok-hubungi-marketing" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[#1B8A43] text-[#F5F1E8] px-8 py-4 rounded-full font-bold hover:bg-[#157337] transition-colors w-full sm:w-auto justify-center">
                   <Phone className="w-5 h-5" /> Hubungi via WhatsApp
                 </a>
                 <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20dengan%20Grand%20Duta%20City%20dan%20ingin%20meminta%20Siteplan%20HD%20serta%20Pricelist%20terbaru." data-wa-placement="stok-minta-siteplan-hd" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-transparent text-[#F5F1E8] border-2 border-[#F5F1E8]/30 px-8 py-4 rounded-full font-bold hover:bg-brand-light hover:text-[#0b120c] transition-colors w-full sm:w-auto justify-center">

@@ -121,7 +121,7 @@ export const keywordOwnership: readonly KeywordOwnership[] = [
       "memenangkannya — bukan homepage.",
   },
   {
-    path: "/update-stok-siteplan-grand-duta-city-parung",
+    path: "/update-stok-siteplan-gdc-parung",
     primary: "update stok gdc parung",
     supporting: ["siteplan grand duta city parung", "unit tersedia gdc parung"],
   },

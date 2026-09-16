@@ -210,7 +210,7 @@ export default function ClusterCascadaPage() {
               <Link href="/pricelist-grand-duta-city" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#F5A524] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#0b120c] hover:bg-brand-light">
                 Cek harga Cluster Cascada <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/update-stok-siteplan-grand-duta-city-parung#cluster-cascada" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#F5F1E8]/25 bg-brand-light/5 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#F5F1E8] hover:border-[#F5A524] hover:text-[#F5A524]">
+              <Link href="/update-stok-siteplan-gdc-parung#cluster-cascada" className="inline-flex items-center justify-center gap-2 rounded-full border border-[#F5F1E8]/25 bg-brand-light/5 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.24em] text-[#F5F1E8] hover:border-[#F5A524] hover:text-[#F5A524]">
                 Lihat stok Cluster Cascada <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -422,7 +422,7 @@ export default function ClusterCascadaPage() {
                 <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.38em] text-[#F5A524]">Posisi di Dalam Siteplan</p>
                 <h2 className="font-serif text-4xl font-semibold text-[#0b120c] md:text-5xl">Posisi Cluster Cascada dan update stok terbaru</h2>
               </div>
-              <Link href="/update-stok-siteplan-grand-duta-city-parung#cluster-cascada" className="inline-flex items-center gap-2 rounded-full border border-[#F5A524]/20 px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#F5A524] hover:border-[#F5A524] hover:bg-[#F5A524] hover:text-[#F5F1E8]">
+              <Link href="/update-stok-siteplan-gdc-parung#cluster-cascada" className="inline-flex items-center gap-2 rounded-full border border-[#F5A524]/20 px-6 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#F5A524] hover:border-[#F5A524] hover:bg-[#F5A524] hover:text-[#F5F1E8]">
                 Lihat stok Cluster Cascada
               </Link>
             </div>
@@ -523,7 +523,7 @@ export default function ClusterCascadaPage() {
                 {[
                   ["/", "Grand Duta City Parung"],
                   ["/pricelist-grand-duta-city", "Cek harga Cluster Cascada"],
-                  ["/update-stok-siteplan-grand-duta-city-parung#cluster-cascada", "Lihat stok Cluster Cascada"],
+                  ["/update-stok-siteplan-gdc-parung#cluster-cascada", "Lihat stok Cluster Cascada"],
                   ["/lokasi-akses-gdc-parung", "Lihat detail lokasi & akses GDC Parung"],
                   ["/cluster-ladera", "Bandingkan dengan Cluster Ladera"],
                   ["/cara-beli-kpr", "Cara beli & KPR"],

@@ -49,7 +49,7 @@ export function Header() {
 			href: '/pricelist-grand-duta-city',
 			submenu: [
 				{ label: 'Pricelist Lengkap', href: '/pricelist-grand-duta-city', desc: 'Harga & simulasi cicilan terbaru' },
-				{ label: 'Update Stok & Siteplan', href: '/update-stok-siteplan-grand-duta-city-parung', desc: 'Ketersediaan unit real-time' }
+				{ label: 'Update Stok & Siteplan', href: '/update-stok-siteplan-gdc-parung', desc: 'Ketersediaan unit real-time' }
 			]
 		},
 		{ 

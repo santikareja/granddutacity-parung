@@ -99,7 +99,7 @@ export const INTERNAL_LINKS: { path: string; description: string }[] = [
     description: "Pricelist dan brosur resmi",
   },
   {
-    path: "/update-stok-siteplan-grand-duta-city-parung",
+    path: "/update-stok-siteplan-gdc-parung",
     description: "Update stok unit dan siteplan",
   },
   {

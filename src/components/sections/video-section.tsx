@@ -153,7 +153,7 @@ export function VideoSection() {
             target="_blank"
             rel="noopener noreferrer"
             data-wa-placement="video-section"
-            className="group relative inline-flex items-center justify-center gap-2 sm:gap-3 px-5 py-3 sm:px-7 sm:py-4 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white text-[10px] sm:text-sm tracking-[0.16em] uppercase font-sans font-bold shadow-[0_10px_30px_rgba(37,211,102,0.4)] active:scale-[0.98] transition-all duration-300"
+            className="group relative inline-flex items-center justify-center gap-2 sm:gap-3 px-5 py-3 sm:px-7 sm:py-4 rounded-full bg-[#1B8A43] hover:bg-[#157337] text-white text-[10px] sm:text-sm tracking-[0.16em] uppercase font-sans font-bold shadow-[0_10px_30px_rgba(27,138,67,0.4)] active:scale-[0.98] transition-all duration-300"
           >
             <span>Site Visit Sekarang</span>
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">

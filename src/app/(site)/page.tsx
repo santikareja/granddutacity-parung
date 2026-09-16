@@ -3,7 +3,7 @@ import { Header } from "@/components/ui/header-2";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/sections/hero";
 import { BankPartners } from "@/components/sections/bank-partners";
-import dynamic from "next/dynamic";
+
 import {
   BETTER_LIVING_IMAGE_SIZE,
   HOMEPAGE_PREFERRED_IMAGE,
@@ -25,15 +25,16 @@ import {
   websiteNode,
 } from "@/lib/schema";
 
-const VideoSection = dynamic(() => import("@/components/sections/video-section").then((mod) => ({ default: mod.VideoSection })));
-const WhyGdc = dynamic(() => import("@/components/sections/why-gdc").then((mod) => ({ default: mod.WhyGdc })));
-const BetterLiving = dynamic(() => import("@/components/sections/better-living").then((mod) => ({ default: mod.BetterLiving })));
-const LokasiScroll = dynamic(() => import("@/components/sections/lokasi-scroll").then((mod) => ({ default: mod.LokasiScroll })));
-const About = dynamic(() => import("@/components/sections/about").then((mod) => ({ default: mod.About })));
-const Fasilitas = dynamic(() => import("@/components/sections/fasilitas").then((mod) => ({ default: mod.Fasilitas })));
-const TipeRumah = dynamic(() => import("@/components/sections/tipe-rumah").then((mod) => ({ default: mod.TipeRumah })));
-const HighlightSlider = dynamic(() => import("@/components/sections/highlight-slider").then((mod) => ({ default: mod.HighlightSlider })));
-const FaqKpr = dynamic(() => import("@/components/sections/faq-kpr").then((mod) => ({ default: mod.FaqKpr })));
+import { VideoSection } from "@/components/sections/video-section";
+import { WhyGdc } from "@/components/sections/why-gdc";
+import { BetterLiving } from "@/components/sections/better-living";
+import { LokasiScroll } from "@/components/sections/lokasi-scroll";
+import { About } from "@/components/sections/about";
+import { Fasilitas } from "@/components/sections/fasilitas";
+import { TipeRumah } from "@/components/sections/tipe-rumah";
+import { HighlightSlider } from "@/components/sections/highlight-slider";
+import { FaqKpr } from "@/components/sections/faq-kpr";
+import { Testimonials } from "@/components/sections/testimonials";
 
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 
@@ -334,6 +335,7 @@ export default function Home() {
         <Fasilitas />
         <BetterLiving />
         <HighlightSlider />
+        <Testimonials />
         <FaqKpr />
       </main>
       <Footer />

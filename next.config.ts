@@ -3,6 +3,8 @@ import {
   HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH,
   LOCATION_PAGE_LEGACY_PATH,
   LOCATION_PAGE_PATH,
+  SITEPLAN_PAGE_LEGACY_PATH,
+  SITEPLAN_PAGE_PATH,
 } from "./src/lib/redirects";
 
 const nextConfig: NextConfig = {
@@ -118,6 +120,14 @@ const nextConfig: NextConfig = {
       {
         source: LOCATION_PAGE_LEGACY_PATH,
         destination: LOCATION_PAGE_PATH,
+        permanent: true,
+      },
+      // Slug halaman siteplan diubah — alasan identik dengan slug lokasi di atas.
+      // URL lama sudah terindeks dan menerima tautan internal, jadi ia 301 ke
+      // slug baru agar ekuitas tautan tidak hilang.
+      {
+        source: SITEPLAN_PAGE_LEGACY_PATH,
+        destination: SITEPLAN_PAGE_PATH,
         permanent: true,
       },
       {

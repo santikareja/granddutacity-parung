@@ -437,7 +437,7 @@ export const articleAuthorDefinitions: Record<
  *   tujuan                                       anchor bermuatan frasa brand
  *   /  (homepage)                                244 dari 66 halaman
  *   /cara-beli-kpr                               168 dari 40 halaman
- *   /update-stok-siteplan-grand-duta-city-parung  165 dari 40 halaman
+ *   /update-stok-siteplan-gdc-parung  165 dari 40 halaman
  *   /lokasi-akses-gdc-parung                      161 dari 42 halaman
  *
  * Homepage unggul tipis, padahal ia satu-satunya pemilik frasa itu: gabungan
@@ -490,9 +490,9 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
     ],
   },
   {
-    id: "update-stok-siteplan-grand-duta-city-parung",
-    slug: "update-stok-siteplan-grand-duta-city-parung",
-    href: "/update-stok-siteplan-grand-duta-city-parung",
+    id: "update-stok-siteplan-gdc-parung",
+    slug: "update-stok-siteplan-gdc-parung",
+    href: "/update-stok-siteplan-gdc-parung",
     title: "Update Stok & Siteplan GDC Parung",
     excerpt:
       "Lihat posisi unit, status ketersediaan terbaru, dan ringkasan stok Cluster Ladera serta Cascada dalam satu halaman resmi.",

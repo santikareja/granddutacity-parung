@@ -68,7 +68,7 @@ export const READ_ALSO_ITEMS: ReadAlsoItem[] = [
   },
   {
     title: "Update Stok & Siteplan Terbaru",
-    href: "/update-stok-siteplan-grand-duta-city-parung",
+    href: "/update-stok-siteplan-gdc-parung",
     thumbnail: "https://res.cloudinary.com/demo/image/upload/v1/artikel/stok.jpg",
     thumbnailAlt: "Siteplan & stok unit",
   },

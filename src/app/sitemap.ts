@@ -75,7 +75,7 @@ function entry(
   const images = imagesFor(path);
   return {
     url,
-    lastModified: new Date(),
+    lastModified: new Date("2026-09-17T00:00:00Z"),
     changeFrequency,
     priority,
     ...(images.length > 0 ? { images } : {}),
@@ -109,7 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/galeri", 0.7, "monthly"),
     entry("/about", 0.6, "monthly"),
     entry("/cara-beli-kpr", 0.8, "weekly"),
-    entry("/update-stok-siteplan-grand-duta-city-parung", 0.8, "weekly"),
+    entry("/update-stok-siteplan-gdc-parung", 0.8, "weekly"),
     // Slug lama (`/lokasi-akses-grand-duta-city-parung`) sekarang 301 ke sini
     // dan sudah terdaftar di REDIRECTED_SITEMAP_SOURCE_PATHS, jadi ia tidak
     // pernah ikut masuk sitemap lagi.

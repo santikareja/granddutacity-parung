@@ -94,7 +94,7 @@ export function WhatsAppButton() {
                   rel="noopener noreferrer"
                   onClick={() => setOpen(false)}
                   data-wa-placement="floating-widget"
-                  className="group flex items-center justify-center gap-2.5 w-full bg-[#25D366] hover:bg-[#20BD5A] text-[#090D0A] font-sans font-bold text-xs tracking-[0.16em] uppercase py-3.5 rounded-full transition-all duration-300 shadow-lg shadow-[#25D366]/30 active:scale-[0.98]"
+                  className="group flex items-center justify-center gap-2.5 w-full bg-[#1B8A43] hover:bg-[#157337] text-white font-sans font-bold text-xs tracking-[0.16em] uppercase py-3.5 rounded-full transition-all duration-300 shadow-lg shadow-[#1B8A43]/30 active:scale-[0.98]"
                 >
                   <span>Mulai Konsultasi</span>
                   <ArrowUpRight className="w-4 h-4" />
@@ -108,7 +108,7 @@ export function WhatsAppButton() {
       <button
         onClick={toggleOpen}
         aria-label="Chat WhatsApp Official"
-        className={`relative w-13 h-13 sm:w-15 sm:h-15 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.45)] flex items-center justify-center border border-white/20 cursor-pointer bg-[#25D366] hover:bg-[#20BD5A] hover:scale-105 active:scale-95 transition-[background-color,transform] duration-200 ${!open ? "animate-float-soft" : ""}`}
+        className={`relative w-13 h-13 sm:w-15 sm:h-15 rounded-full shadow-[0_10px_30px_rgba(27,138,67,0.45)] flex items-center justify-center border border-white/20 cursor-pointer bg-[#1B8A43] hover:bg-[#157337] hover:scale-105 active:scale-95 transition-[background-color,transform] duration-200 ${!open ? "animate-float-soft" : ""}`}
       >
         {!open && hasNotification && (
           <div className="absolute -top-1 -right-1 z-[60] flex h-5 w-5">

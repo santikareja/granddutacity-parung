@@ -302,7 +302,7 @@ export default function ContactPage() {
                 <span className="text-[10px] text-[#F5F1E8]/60 group-hover:text-[#F5F1E8] uppercase tracking-widest font-bold text-center px-1">Lihat Harga Terbaru</span>
               </Link>
 
-              <Link href="/update-stok-siteplan-grand-duta-city-parung" className="flex flex-col items-center gap-4 group">
+              <Link href="/update-stok-siteplan-gdc-parung" className="flex flex-col items-center gap-4 group">
                 <div className="w-12 h-12 rounded-full border border-[#F5F1E8]/10 flex items-center justify-center group-hover:border-[#F5A524] transition-colors">
                   <ArrowRight className="w-4 h-4 text-[#F5A524]" />
                 </div>

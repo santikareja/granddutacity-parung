@@ -175,8 +175,8 @@ beforeAll(async () => {
       import("../lokasi-akses-gdc-parung/page"),
     ],
     [
-      "/update-stok-siteplan-grand-duta-city-parung",
-      import("../update-stok-siteplan-grand-duta-city-parung/page"),
+      "/update-stok-siteplan-gdc-parung",
+      import("../update-stok-siteplan-gdc-parung/page"),
     ],
   ];
 

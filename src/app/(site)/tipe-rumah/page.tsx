@@ -263,7 +263,7 @@ export default function TipeRumahHubPage() {
                 </Link>{" "}
                 untuk angka lengkapnya, atau{" "}
                 <Link
-                  href="/update-stok-siteplan-grand-duta-city-parung"
+                  href="/update-stok-siteplan-gdc-parung"
                   className="font-medium text-[#A85D16] hover:underline"
                 >
                   cek update stok &amp; siteplan

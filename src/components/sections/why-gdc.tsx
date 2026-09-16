@@ -10,8 +10,7 @@ import {
   ShieldCheck, 
   Building2, 
   TrendingUp, 
-  Sparkles,
-  ArrowUpRight
+  Sparkles
 } from "lucide-react";
 
 // Kartu ter-render ~288 CSS px di mobile dan ~388 px di atasnya, jadi sumber
@@ -37,9 +36,6 @@ function StackedImageSlider() {
     setIndex((prev) => (prev + 1) % imageList.length);
   };
 
-  // Hanya tiga kartu yang terlihat. Satu kartu sebelumnya dipertahankan
-  // sebagai outgoing frame agar animasi tetap sama. Versi lama memasang
-  // seluruh 10 gambar lalu menyembunyikan tujuh kartu permanen.
   const mountedImages = [0, 1, 2, imageList.length - 1].map(
     (position) => {
       const sourceIndex = (index + position) % imageList.length;
@@ -87,7 +83,6 @@ function StackedImageSlider() {
         const isThird = position === 2;
         const isHidden = position > 2;
 
-        // Posisi kartu di-stack — CSS transition menggantikan spring framer-motion
         const y = isFront ? 0 : isSecond ? -14 : isThird ? -26 : -38;
         const x = isFront ? 0 : isSecond ? 14 : isThird ? -14 : 0;
         const rotate = isFront ? 0 : isSecond ? 3 : isThird ? -2.5 : 0;
@@ -110,8 +105,6 @@ function StackedImageSlider() {
                 src={img.url}
                 alt={img.alt}
                 fill
-                // Sumber sudah dipotong Cloudinary ke 380x475, mendekati
-                // ukuran render maksimum kartu (388 CSS px).
                 unoptimized
                 loading="lazy"
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
@@ -255,11 +248,6 @@ export function WhyGdc() {
                     <p className="text-[#090D0A]/70 text-base sm:text-sm font-normal leading-[1.75]">
                       {item.desc}
                     </p>
-                  </div>
-
-                  <div className="pt-5 mt-5 sm:pt-4 sm:mt-4 border-t border-[#090D0A]/5 flex items-center justify-between text-sm sm:text-[11px] font-sans font-semibold text-[#090D0A]/60 group-hover:text-[#B45309] transition-colors">
-                    <span>Pelajari Keunggulan</span>
-                    <ArrowUpRight className="w-4 h-4 sm:w-3.5 sm:h-3.5 -translate-x-1 translate-y-1 group-hover:translate-x-0 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                   </div>
                 </div>
               </Reveal>

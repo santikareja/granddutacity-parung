@@ -22,6 +22,20 @@ export const LOCATION_PAGE_LEGACY_PATH =
 export const LOCATION_PAGE_PATH = "/lokasi-akses-gdc-parung" as const;
 
 /**
+ * Slug halaman siteplan diubah 17 September 2026:
+ * `update-stok-siteplan-grand-duta-city-parung` -> `update-stok-siteplan-gdc-parung`.
+ *
+ * Alasan identik dengan rename slug lokasi: slug lama memuat frasa target
+ * homepage ("grand duta city parung") secara utuh, membocorkan sinyal
+ * kanibalisasi di level URL. Title dan H1 sudah memakai varian "GDC Parung"
+ * sehingga slug baru justru menyelaraskan URL dengan judul halaman.
+ */
+export const SITEPLAN_PAGE_LEGACY_PATH =
+  "/update-stok-siteplan-grand-duta-city-parung" as const;
+
+export const SITEPLAN_PAGE_PATH = "/update-stok-siteplan-gdc-parung" as const;
+
+/**
  * Path yang HARUS dikeluarkan dari sitemap karena ia sumber redirect, bukan
  * tujuan. Sitemap yang memuat URL 301 mengirim sinyal bertabrakan: "indeks ini"
  * sekaligus "URL ini sudah pindah".
@@ -29,6 +43,7 @@ export const LOCATION_PAGE_PATH = "/lokasi-akses-gdc-parung" as const;
 export const REDIRECTED_SITEMAP_SOURCE_PATHS = [
   HOMEPAGE_CANNIBALIZATION_REDIRECT_PATH,
   LOCATION_PAGE_LEGACY_PATH,
+  SITEPLAN_PAGE_LEGACY_PATH,
 ] as const;
 
 const redirectedSitemapSourcePathSet = new Set<string>(

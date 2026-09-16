@@ -422,7 +422,7 @@ export default function CaraBeliKPRPage() {
            <div className="max-w-4xl mx-auto text-center flex flex-wrap justify-center gap-4">
               <Link href="/cluster-ladera" className="text-[#F5A524] text-sm hover:underline hover:text-[#F5F1E8] transition-colors uppercase tracking-widest font-semibold border border-[#F5F1E8]/10 px-6 py-3 rounded-full bg-brand-light/5">Info Cluster Ladera</Link>
               <Link href="/cluster-cascada" className="text-[#F5A524] text-sm hover:underline hover:text-[#F5F1E8] transition-colors uppercase tracking-widest font-semibold border border-[#F5F1E8]/10 px-6 py-3 rounded-full bg-brand-light/5">Info Cluster Cascada</Link>
-              <Link href="/update-stok-siteplan-grand-duta-city-parung" className="text-[#F5A524] text-sm hover:underline hover:text-[#F5F1E8] transition-colors uppercase tracking-widest font-semibold border border-[#F5F1E8]/10 px-6 py-3 rounded-full bg-brand-light/5">Cek Stok Unit Terbaru</Link>
+              <Link href="/update-stok-siteplan-gdc-parung" className="text-[#F5A524] text-sm hover:underline hover:text-[#F5F1E8] transition-colors uppercase tracking-widest font-semibold border border-[#F5F1E8]/10 px-6 py-3 rounded-full bg-brand-light/5">Cek Stok Unit Terbaru</Link>
            </div>
         </section>
 
@@ -445,7 +445,7 @@ export default function CaraBeliKPRPage() {
                     Hubungi marketing kami untuk simulasi KPR gratis, dan jadwalkan kunjungan Anda ke Grand Duta City Parung hari ini!
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20pilih%20rumah%20di%20Grand%20Duta%20City%20dan%20ingin%20dibantu%20simulasi%20KPR." target="_blank" rel="noreferrer" data-wa-placement="cara-beli-kpr-bottom-cta" className="flex items-center gap-2 bg-[#25D366] text-[#F5F1E8] px-8 py-4 rounded-full font-bold hover:bg-[#1ebd5b] transition-colors w-full sm:w-auto justify-center">
+                    <a href="https://wa.me/628131742034?text=Halo%2C%20saya%20tertarik%20pilih%20rumah%20di%20Grand%20Duta%20City%20dan%20ingin%20dibantu%20simulasi%20KPR." target="_blank" rel="noreferrer" data-wa-placement="cara-beli-kpr-bottom-cta" className="flex items-center gap-2 bg-[#1B8A43] text-[#F5F1E8] px-8 py-4 rounded-full font-bold hover:bg-[#157337] transition-colors w-full sm:w-auto justify-center">
                        <Phone className="w-5 h-5" /> Hubungi Marketing
                     </a>
                 </div>

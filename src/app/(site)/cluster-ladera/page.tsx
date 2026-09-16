@@ -415,7 +415,7 @@ export default function ClusterLaderaPage() {
                 <p className="text-[#F5F1E8]/80 leading-relaxed font-sans mb-8">
                   Terletak di area premium dalam masterplan Grand Duta City, Cluster Ladera memiliki kemudahan akses menuju pusat komersial dan jalan utama kawasan.
                 </p>
-                <Link href="/update-stok-siteplan-grand-duta-city-parung" className="inline-flex items-center gap-2 border border-[#F5A524] text-[#F5A524] px-6 py-3 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#F5A524] hover:text-[#0b120c] transition-colors">
+                <Link href="/update-stok-siteplan-gdc-parung" className="inline-flex items-center gap-2 border border-[#F5A524] text-[#F5A524] px-6 py-3 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-[#F5A524] hover:text-[#0b120c] transition-colors">
                   Lihat Update Stok Ladera <ArrowRight className="w-4 h-4" />
                 </Link>
                 <div className="mt-4">

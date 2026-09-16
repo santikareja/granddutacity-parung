@@ -788,9 +788,9 @@ export const siteImages: SiteImage[] = [
     caraBeliSeeds
   ),
 
-  // ── UPDATE STOK SITEPLAN (/update-stok-siteplan-grand-duta-city-parung) ─
+  // ── UPDATE STOK SITEPLAN (/update-stok-siteplan-gdc-parung) ─
   ...createPageImages(
-    "/update-stok-siteplan-grand-duta-city-parung",
+    "/update-stok-siteplan-gdc-parung",
     "halaman update stok dan siteplan",
     updateStokSeeds
   ),

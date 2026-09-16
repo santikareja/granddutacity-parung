@@ -77,24 +77,6 @@ export function Footer() {
             <span>Developer Terpercaya Lebih Dari 43 Tahun</span>
           </div>
 
-          {/* EarlyHunt badge — eksternal, dirender via next/image agar
-              dioptimasi & tidak memblokir LCP. Dimensi dikecilkan ke 50%
-              dari ukuran asli (265×58) agar proporsional di kolom footer. */}
-          <a
-            href="https://earlyhunt.com/project/grand-duta-city-parung-real-estate"
-            target="_blank"
-            rel="noopener"
-            className="block w-max"
-          >
-            <Image
-              src="https://earlyhunt.com/badges/earlyhunt-badge-light.svg"
-              alt="Featured on EarlyHunt"
-              width={133}
-              height={29}
-              loading="lazy"
-              unoptimized
-            />
-          </a>
         </div>
 
         {/* Column 2: Navigasi Cluster & Tipe (Col 3) */}
@@ -107,7 +89,7 @@ export function Footer() {
               { label: "Cluster Ladera (Classic Modern)", href: "/cluster-ladera" },
               { label: "Cluster Cascada (Tropical Resort)", href: "/cluster-cascada" },
               { label: "Pricelist & Brosur", href: "/pricelist-grand-duta-city" },
-              { label: "Update Stok & Siteplan", href: "/update-stok-siteplan-grand-duta-city-parung" },
+              { label: "Update Stok & Siteplan", href: "/update-stok-siteplan-gdc-parung" },
               { label: "Cara Beli & Simulasi KPR", href: "/cara-beli-kpr" },
               { label: "Galeri Foto Kawasan", href: "/galeri" },
             ].map((item) => (

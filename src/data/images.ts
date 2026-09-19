@@ -530,11 +530,11 @@ const updateStokSeeds: readonly ImageSeed[] = [
     true,
   ],
   [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818729/Ladera_Update_Stok_9_Maret_2026_hn0lxg.webp",
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1789805873/Cluster_Ladera_Update_Stock_19_September_2026.webp",
     "Siteplan update stok Cluster Ladera",
   ],
   [
-    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818893/Cascada_Update_Stock_9_Maret_2026-1_vcrnzw.webp",
+    "https://res.cloudinary.com/dzhvfbuks/image/upload/v1789805841/Cascada_Update_Stock_19_September_2026.webp",
     "Siteplan update stok Cluster Cascada",
   ],
   ...bankPartnerSeeds,

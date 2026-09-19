@@ -10,11 +10,20 @@ interface BreadcrumbItem {
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
   className?: string;
+  variant?: "dark" | "light";
 }
 
-export function Breadcrumb({ items, className }: BreadcrumbProps) {
+export function Breadcrumb({ items, className, variant = "dark" }: BreadcrumbProps) {
+  const isLight = variant === "light";
   return (
-    <nav aria-label="Breadcrumb" className={cn("flex items-center text-[10px] md:text-xs tracking-widest uppercase text-white/50", className)}>
+    <nav
+      aria-label="Breadcrumb"
+      className={cn(
+        "flex items-center text-[10px] md:text-xs tracking-widest uppercase",
+        isLight ? "text-[#090D0A]/70" : "text-white/50",
+        className
+      )}
+    >
       <ol className="flex items-center space-x-2">
         <li>
           {/* Tautan ini muncul di 48 halaman dan sebelumnya hanya ikon rumah
@@ -30,7 +39,10 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
               mana pemilik nama brand tersebut. */}
           <Link
             href="/"
-            className="hover:text-brand-accent transition-colors flex items-center"
+            className={cn(
+              "transition-colors flex items-center",
+              isLight ? "hover:text-[#D97706] text-[#090D0A]/70" : "hover:text-brand-accent text-white/50"
+            )}
           >
             <Home className="w-3 h-3 md:w-3.5 md:h-3.5" aria-hidden="true" />
             <span className="sr-only">Beranda Grand Duta City Parung</span>
@@ -40,13 +52,30 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
           const isLast = index === items.length - 1;
           return (
             <li key={index} className="flex items-center space-x-2">
-              <ChevronRight className="w-3 h-3 md:w-3.5 md:h-3.5 text-white/30" />
+              <ChevronRight
+                className={cn(
+                  "w-3 h-3 md:w-3.5 md:h-3.5",
+                  isLight ? "text-[#090D0A]/40" : "text-white/30"
+                )}
+              />
               {isLast || !item.href ? (
-                <span className="text-white/90 font-medium" aria-current="page">
+                <span
+                  className={cn(
+                    "font-medium",
+                    isLight ? "text-[#090D0A]" : "text-white/90"
+                  )}
+                  aria-current="page"
+                >
                   {item.label}
                 </span>
               ) : (
-                <Link href={item.href} className="hover:text-brand-accent transition-colors">
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "transition-colors",
+                    isLight ? "hover:text-[#D97706] text-[#090D0A]/70" : "hover:text-brand-accent text-white/50"
+                  )}
+                >
                   {item.label}
                 </Link>
               )}

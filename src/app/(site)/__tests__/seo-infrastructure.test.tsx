@@ -76,6 +76,10 @@ describe("SEO infrastructure hardening", () => {
     ]);
 
     for (const rule of rules) {
+      if (rule.userAgent === "CCBot") {
+        expect(rule.disallow).toBe("/");
+        continue;
+      }
       expect(rule.allow).toBe("/");
       expect(rule.disallow).toEqual(expect.arrayContaining(["/api/", "/admin/"]));
     }

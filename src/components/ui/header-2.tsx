@@ -15,7 +15,11 @@ type NavItem = {
 	submenu?: { label: string; href: string; desc?: string }[];
 };
 
-export function Header() {
+interface HeaderProps {
+	darkText?: boolean;
+}
+
+export function Header({ darkText = false }: HeaderProps) {
 	const [open, setOpen] = React.useState(false);
 	const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
 	const scrolled = useScroll(15);
@@ -77,6 +81,8 @@ export function Header() {
 		};
 	}, [open]);
 
+	const useDarkText = !scrolled && darkText;
+
 	return (
 		<header
 			className={cn(
@@ -95,7 +101,10 @@ export function Header() {
 					// during a mobile scroll.
 					scrolled
 						? 'max-w-6xl rounded-full border border-white/12 bg-[#0B120C] lg:bg-[#090D0A]/90 lg:backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] px-4 sm:px-6 py-2'
-						: 'max-w-none w-full border-b border-white/8 bg-transparent px-6 sm:px-10 md:px-16 py-3.5'
+						: cn(
+								'max-w-none w-full bg-transparent px-6 sm:px-10 md:px-16 py-3.5',
+								darkText ? 'border-b border-[#090D0A]/10' : 'border-b border-white/8'
+						  )
 				)}
 			>
 				<nav className="flex items-center justify-between">
@@ -138,7 +147,12 @@ export function Header() {
 									// Tautan induk sudah hadir di DOM lewat versi desktop.
 									<Link
 										href={link.href!}
-										className="flex items-center gap-1.5 px-3.5 py-2 text-[11px] tracking-[0.16em] text-[#F8F6F0]/75 hover:text-[#F8F6F0] hover:bg-white/5 rounded-full font-sans font-semibold uppercase transition-all duration-300 cursor-pointer"
+										className={cn(
+											"flex items-center gap-1.5 px-3.5 py-2 text-[11px] tracking-[0.16em] rounded-full font-sans font-semibold uppercase transition-all duration-300 cursor-pointer",
+											useDarkText
+												? "text-[#090D0A]/85 hover:text-[#090D0A] hover:bg-black/5"
+												: "text-[#F8F6F0]/75 hover:text-[#F8F8F0] hover:bg-white/5"
+										)}
 									>
 										<span>{link.label}</span>
 										<ChevronDown className="w-3 h-3 text-[#D49A3D] opacity-80 group-hover:rotate-180 transition-transform duration-300" />
@@ -146,7 +160,12 @@ export function Header() {
 								) : (
 									<Link
 										href={link.href!}
-										className="px-3.5 py-2 text-[11px] tracking-[0.16em] text-[#F8F6F0]/75 hover:text-[#F8F6F0] hover:bg-white/5 rounded-full font-sans font-semibold uppercase transition-all duration-300 inline-block"
+										className={cn(
+											"px-3.5 py-2 text-[11px] tracking-[0.16em] rounded-full font-sans font-semibold uppercase transition-all duration-300 inline-block",
+											useDarkText
+												? "text-[#090D0A]/85 hover:text-[#090D0A] hover:bg-black/5"
+												: "text-[#F8F6F0]/75 hover:text-[#F8F8F0] hover:bg-white/5"
+										)}
 									>
 										{link.label}
 									</Link>
@@ -215,7 +234,12 @@ export function Header() {
 							variant="outline"
 							onClick={() => setOpen(!open)}
 							aria-label="Toggle Navigation"
-							className="w-9 h-9 rounded-full border-white/20 text-[#F8F6F0] bg-white/5 hover:bg-white/10 active:scale-95"
+							className={cn(
+								"w-9 h-9 rounded-full active:scale-95",
+								useDarkText
+									? "border-[#090D0A]/20 text-[#090D0A] bg-black/5 hover:bg-black/10"
+									: "border-white/20 text-[#F8F6F0] bg-white/5 hover:bg-white/10"
+							)}
 						>
 							<MenuToggleIcon open={open} className="size-4" duration={300} />
 						</Button>

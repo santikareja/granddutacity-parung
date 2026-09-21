@@ -110,10 +110,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/about", 0.6, "monthly"),
     entry("/cara-beli-kpr", 0.8, "weekly"),
     entry("/update-stok-siteplan-gdc-parung", 0.8, "weekly"),
-    // Slug lama (`/lokasi-akses-grand-duta-city-parung`) sekarang 301 ke sini
-    // dan sudah terdaftar di REDIRECTED_SITEMAP_SOURCE_PATHS, jadi ia tidak
-    // pernah ikut masuk sitemap lagi.
-    entry(LOCATION_PAGE_PATH, 0.85, "weekly"),
+    // Priority diturunkan dari 0.85 ke 0.65 (22 September 2026): halaman ini
+    // mengkanibalisasi homepage untuk query brand "Grand Duta City Parung"
+    // (posisi 6 vs homepage posisi 14). Menurunkan priority adalah sinyal
+    // relatif bahwa halaman ini KURANG penting dibandingkan homepage dan
+    // halaman konversi utama. `monthly` karena konten lokasi jarang berubah.
+    entry(LOCATION_PAGE_PATH, 0.65, "monthly"),
     entry("/kontak", 0.8, "weekly"),
     entry("/tipe-rumah", 0.85, "weekly"),
     // Dua halaman legal ini INDEXABLE tapi belum pernah masuk sitemap.

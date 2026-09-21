@@ -242,13 +242,10 @@ export default function LokasiAksesPage() {
             </h1>
             
             <p className="text-lg md:text-xl text-[#F5F1E8]/70 leading-relaxed mb-8 max-w-3xl">
-              {/* Anchor ke homepage SENGAJA memakai frasa brand utuh. Ini satu
-                  pengecualian yang justru mendukung konsolidasi: tautan ini
-                  MENGIRIM sinyal "frasa itu milik homepage", bukan mengklaimnya
-                  untuk halaman ini. Yang dilarang adalah frasa brand di
-                  title/description/H1/slug/alt halaman ini sendiri. */}
-              <Link href="/" className="text-[#F5A524] hover:underline">Grand Duta City Parung</Link>{" "}
-              berada di kawasan Parung, Bogor, dengan akses yang menjangkau Bogor, Depok, dan Jakarta serta didukung fasilitas publik di sekitarnya.
+              {/* Anchor ke homepage diubah ke "GDC Parung" untuk sepenuhnya
+                  menghapus frasa utama dari halaman ini dan mencegah kanibalisasi,
+                  mempertajam fokus ke informasi alamat dan akses. */}
+              Informasi alamat resmi, peta lokasi, dan panduan akses tol menuju kawasan hunian <Link href="/" className="text-[#F5A524] hover:underline">GDC Parung</Link>.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
@@ -266,17 +263,9 @@ export default function LokasiAksesPage() {
         <section className="py-16 md:py-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
                <div className="order-2 lg:order-1">
-                  <h2 className="text-3xl font-serif text-[#F5F1E8] mb-6">Penghubung Strategis 3 Wilayah</h2>
-                  {/* Subjek kalimat sengaja "Kawasan GDC Parung", bukan frasa
-                      brand utuh. Halaman ini hanya boleh menjelaskan LOKASI
-                      entitas; klaim atas nama entitasnya sendiri milik homepage
-                      (lihat src/lib/keyword-ownership.ts). Sebelum perubahan ini
-                      halaman ini menyebut KEDUA frasa target homepage —
-                      "Grand Duta City Parung" di paragraf hero DAN "Grand Duta
-                      City South of Jakarta" di sini — pola yang sama dengan
-                      halaman-halaman yang sudah di-redirect karena alasan itu. */}
+                  <h2 className="text-3xl font-serif text-[#F5F1E8] mb-6">Informasi Alamat Lengkap</h2>
                   <p className="text-[#F5F1E8]/70 text-lg leading-relaxed mb-6">
-                    Kawasan GDC Parung berlokasi di wilayah strategis koridor Parung, Bogor, yang menghubungkan wilayah Tangerang Selatan, Depok, dan Jakarta Selatan. Kawasan hunian seluas 200 hektar ini dikembangkan sebagai kota mandiri dengan konsep Modern Sanctuary Living.
+                    Berlokasi di wilayah strategis koridor Parung, Bogor, yang secara langsung menghubungkan akses menuju wilayah Tangerang Selatan, Kota Depok, dan Jakarta Selatan melalui jaringan tol JORR dan Desari.
                   </p>
                   
                   <div className="bg-brand-light/5 border border-[#F5F1E8]/10 p-6 rounded-2xl mb-8">
@@ -423,48 +412,7 @@ export default function LokasiAksesPage() {
            </div>
         </section>
 
-        {/* Fasilitas Sekitar Lokasi */}
-        <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto relative z-10 bg-[#060a07] border border-[#F5F1E8]/5 rounded-3xl mb-16">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              <div>
-                 <h2 className="text-3xl md:text-3xl font-serif text-[#F5F1E8] mb-6">Fasilitas Kehidupan di Sekitar Lokasi</h2>
-                 <p className="text-[#F5F1E8]/70 mb-8">Sebagai kota mandiri skala besar, kawasan ini juga menyediakan berbagai fasilitas internal dan dikelilingi infrastruktur publik yang sudah mapan:</p>
-                 
-                 <div className="space-y-6">
-                    <div className="flex gap-4">
-                       <MapPin className="w-6 h-6 text-[#F5A524] shrink-0" />
-                       <div>
-                          <h4 className="text-lg font-medium text-[#F5F1E8] mb-1">The Beach & Area Rekreasi</h4>
-                          <p className="text-[#F5F1E8]/60 text-sm leading-relaxed">Fasilitas internal mencakup taman bermain keluarga, swimming pool bernuansa resort, kolam renang anak, dan coworking space.</p>
-                       </div>
-                    </div>
-                    <div className="flex gap-4">
-                       <Building2 className="w-6 h-6 text-[#F5A524] shrink-0" />
-                       <div>
-                          <h4 className="text-lg font-medium text-[#F5F1E8] mb-1">Area Komersial & FnB</h4>
-                          <p className="text-[#F5F1E8]/60 text-sm leading-relaxed">Tersedia Garden Cafe dan lifestyle area makan terbuka di sepanjang jalan utama (boulevard), serta shophouse premium.</p>
-                       </div>
-                    </div>
-                    <div className="flex gap-4">
-                       <Hospital className="w-6 h-6 text-[#F5A524] shrink-0" />
-                       <div>
-                          <h4 className="text-lg font-medium text-[#F5F1E8] mb-1">Fasilitas Kesehatan & Pendidikan</h4>
-                          <p className="text-[#F5F1E8]/60 text-sm leading-relaxed">Direncanakan akan segera hadir fasilitas rumah sakit bertaraf nasional dan opsi sekolah swasta di dalam area perumahan seluas 200 Hektar ini.</p>
-                       </div>
-                    </div>
-                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="aspect-square relative rounded-xl overflow-hidden border border-[#F5F1E8]/10">
-                    <Image src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1775763648/PK-SGDC-apr-22_page-0018_bjhro5.webp" alt="Fasilitas rekreasi kawasan GDC Parung" fill className="object-contain md:object-cover" />
-                 </div>
-                  <div className="aspect-square relative rounded-xl overflow-hidden border border-[#F5F1E8]/10 mt-8">
-                    <Image src="https://res.cloudinary.com/dzhvfbuks/image/upload/v1776541441/Masterplan_svnc3y.webp" alt="Boulevard utama GDC Parung" fill className="object-contain md:object-cover" />
-                 </div>
-              </div>
-           </div>
-        </section>
 
         {/* Global CTA */}
         <section className="pb-24 px-4 md:px-8 max-w-7xl mx-auto">

@@ -9,6 +9,7 @@ import {
   HOMEPAGE_PREFERRED_IMAGE,
   structuredDataImages,
 } from "@/data/homepage-images";
+import { SITEPLAN_PAGE_PATH } from "@/lib/redirects";
 
 import {
   SCHEMA_ID,
@@ -279,7 +280,7 @@ const homepageNode = {
     `${SITE_URL}/cluster-cascada`,
     `${SITE_URL}/pricelist-grand-duta-city`,
     `${SITE_URL}/lokasi-akses-gdc-parung`,
-    `${SITE_URL}/update-stok-siteplan-grand-duta-city-parung`,
+    `${SITE_URL}${SITEPLAN_PAGE_PATH}`,
     `${SITE_URL}/cara-beli-kpr`,
     `${SITE_URL}/galeri`,
     `${SITE_URL}/kontak`,

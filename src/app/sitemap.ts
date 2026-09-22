@@ -77,7 +77,7 @@ function entry(
   const images = imagesFor(path);
   return {
     url,
-    lastModified: lastModifiedOverride || new Date("2026-09-17T00:00:00Z"),
+    lastModified: lastModifiedOverride || new Date("2026-09-19T00:00:00Z"),
     changeFrequency,
     priority,
     ...(images.length > 0 ? { images } : {}),

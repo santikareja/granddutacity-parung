@@ -826,7 +826,7 @@ export default function PricelistPage() {
                   </p>
                   <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#F5A524]/30 bg-[#F5A524]/10 px-4 py-2 text-xs text-[#0b120c]/70">
                     <Clock className="h-3.5 w-3.5 text-[#b86d0e]" />
-                    <span>Terakhir diperbarui: <strong className="font-semibold text-[#0b120c]">27 Agustus 2026</strong></span>
+                    <span>Terakhir diperbarui: <strong className="font-semibold text-[#0b120c]">19 September 2026</strong></span>
                   </div>
                 </div>
               </div>

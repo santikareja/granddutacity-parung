@@ -365,7 +365,7 @@ export function Hero() {
             className="mt-4 sm:mt-5 text-[10px] sm:text-[11px] text-[#F8F6F0]/50 font-sans tracking-wider uppercase font-medium"
             style={{ animation: "heroFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both" }}
           >
-            Terakhir diperbarui: <span className="text-[#D49A3D] font-semibold">17 September 2026</span>
+            Terakhir diperbarui: <span className="text-[#D49A3D] font-semibold">19 September 2026</span>
           </p>
 
         </div>

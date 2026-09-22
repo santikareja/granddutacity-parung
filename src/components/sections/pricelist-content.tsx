@@ -730,7 +730,7 @@ export default function PricelistPage() {
               terbaru untuk Cluster Ladera dan Cascada, lengkap dengan kisaran harga, tipe unit, dan informasi awal simulasi KPR. Untuk konfirmasi harga dan unit tersedia, hubungi marketing.
             </p>
             <div className="mt-8 text-[#F5F1E8]/50 font-sans text-xs flex justify-center items-center gap-2">
-              <Clock className="w-4 h-4 text-[#F5A524]" /> Tanggal update: 27 Agustus 2026
+              <Clock className="w-4 h-4 text-[#F5A524]" /> Tanggal update: 19 September 2026
             </div>
           </div>
         </div>

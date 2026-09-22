@@ -188,7 +188,7 @@ const jsonLdDataset = {
   // sekarang tercatat sebagai `legalName` di node kanonik di layout.
   creator: ref(SCHEMA_ID.organization),
   publisher: ref(SCHEMA_ID.organization),
-  license: "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+  license: "https://creativecommons.org/licenses/by/4.0/",
   variableMeasured: ["Harga Tunai Keras", "Harga KPR", "Down Payment", "Booking Fee", "Plafond KPR"],
 };
 

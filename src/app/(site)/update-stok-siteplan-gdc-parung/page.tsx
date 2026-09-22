@@ -41,18 +41,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   }
 }
 
-/**
- * Tanggal update stok — SATU sumber (Fase 3 spec seo-cannibalization-and-pseo).
- *
- * Sebelumnya tanggal ini ditulis DUA KALI sebagai string terpisah
- * ("17 Agustus 2026" dan "2026-08-17T00:00:00+07:00"), jadi memperbarui satu
- * tanpa yang lain membuat tanggal yang dilihat pengunjung berbeda dari yang
- * dibaca Google. Sekarang keduanya diturunkan dari satu nilai.
- *
- * CARA MEMPERBARUI: ganti HANYA baris `STOCK_UPDATED_AT` di bawah setiap kali
- * siteplan baru diunggah.
- */
-const STOCK_UPDATED_AT = new Date("2026-09-19T00:00:00+07:00");
+import { STOCK_UPDATED_AT } from "@/data/update-stok";
 
 const LAST_UPDATED_ISO = STOCK_UPDATED_AT.toISOString();
 const LAST_UPDATED_VISUAL = STOCK_UPDATED_AT.toLocaleDateString("id-ID", {

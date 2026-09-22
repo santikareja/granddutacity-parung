@@ -20,7 +20,6 @@ export const metadata: Metadata = {
   title: PAGE_TITLE,
   description:
     "Halaman yang Anda cari tidak tersedia. Kembali ke beranda atau jelajahi artikel dan panduan properti di kawasan Parung, Bogor.",
-  robots: { index: false, follow: true },
 };
 
 export default function NotFound() {

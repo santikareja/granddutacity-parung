@@ -1,5 +1,15 @@
 const SITE_URL = "https://granddutacitysouthofjakarta.com";
 
+import { STOCK_UPDATED_AT } from "@/data/update-stok";
+
+const stockUpdatedAtISO = STOCK_UPDATED_AT.toISOString().split("T")[0];
+const stockUpdatedLabel = STOCK_UPDATED_AT.toLocaleDateString("id-ID", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Asia/Jakarta",
+});
+
 export type ArticleSortKey = "rekomendasi" | "terbaru" | "populer";
 
 export type ArticleCategorySlug =
@@ -506,8 +516,8 @@ export const articleArchiveEntries: ArticleArchiveEntry[] = [
       "https://res.cloudinary.com/dzhvfbuks/image/upload/v1775818474/cluster-cascada-grand-duta-city-south-of-jakarta_vhdxvm.webp",
     coverAlt:
       "Siteplan GDC Parung dengan update stok cluster terbaru",
-    updatedAt: "2026-03-09",
-    updatedLabel: "9 Maret 2026",
+    updatedAt: stockUpdatedAtISO,
+    updatedLabel: stockUpdatedLabel,
     readingTime: "5 menit baca",
     featured: true,
     popularityRank: 1,

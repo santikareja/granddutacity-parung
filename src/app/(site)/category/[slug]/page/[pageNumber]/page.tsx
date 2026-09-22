@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props) {
   const page = Number(pageNumber);
 
   if (!category || !Number.isInteger(page) || page <= 1) {
-    return {};
+    notFound();
   }
 
   return buildCategoryArchiveMetadata({

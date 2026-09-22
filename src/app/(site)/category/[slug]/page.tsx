@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props) {
   const category = getCategoryDefinition(slug);
 
   if (!category) {
-    return {};
+    notFound();
   }
 
   return buildCategoryArchiveMetadata({

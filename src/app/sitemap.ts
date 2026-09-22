@@ -5,6 +5,7 @@ import { siteImages } from "@/data/images";
 import { unitPagePath, units } from "@/data/units";
 import { LOCATION_PAGE_PATH, isRedirectedSitemapSourceUrl } from "@/lib/redirects";
 import { SITE_URL } from "@/lib/seo";
+import { STOCK_UPDATED_AT } from "@/data/update-stok";
 
 /**
  * Halaman tipe unit (Fase 7).
@@ -70,12 +71,13 @@ function entry(
   path: string,
   priority: number,
   changeFrequency: "weekly" | "monthly",
+  lastModifiedOverride?: Date,
 ): MetadataRoute.Sitemap[number] {
   const url = path === "/" ? SITE_URL : `${SITE_URL}${path}`;
   const images = imagesFor(path);
   return {
     url,
-    lastModified: new Date("2026-09-17T00:00:00Z"),
+    lastModified: lastModifiedOverride || new Date("2026-09-17T00:00:00Z"),
     changeFrequency,
     priority,
     ...(images.length > 0 ? { images } : {}),
@@ -109,7 +111,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry("/galeri", 0.7, "monthly"),
     entry("/about", 0.6, "monthly"),
     entry("/cara-beli-kpr", 0.8, "weekly"),
-    entry("/update-stok-siteplan-gdc-parung", 0.8, "weekly"),
+    entry("/update-stok-siteplan-gdc-parung", 0.8, "weekly", STOCK_UPDATED_AT),
     // Priority diturunkan dari 0.85 ke 0.65 (22 September 2026): halaman ini
     // mengkanibalisasi homepage untuk query brand "Grand Duta City Parung"
     // (posisi 6 vs homepage posisi 14). Menurunkan priority adalah sinyal

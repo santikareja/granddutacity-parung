@@ -116,9 +116,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const article = await getPublishedArticleBySlug(slug);
 
   if (!article) {
-    return {
-      title: "Artikel Tidak Ditemukan",
-    };
+    notFound();
   }
 
   // absolute: mencegah template layout menumpuk suffix kedua di belakang

@@ -171,9 +171,9 @@ describe("identitas developer, brand, dan website", () => {
       "@type": "Organization",
       "@id": SCHEMA_ID.organization,
       name: "Duta Putra Land",
-      url: "https://dutaputraland.com/main/public/",
-      brand: ref(SCHEMA_ID.brand),
+      url: SITE_URL,
     });
+    expect(developer).not.toHaveProperty("brand");
     expect(developer).not.toHaveProperty("address");
     expect(developer).not.toHaveProperty("geo");
     expect(developer).not.toHaveProperty("contactPoint");
@@ -194,12 +194,8 @@ describe("identitas developer, brand, dan website", () => {
       "@type": "Brand",
       "@id": SCHEMA_ID.brand,
     });
-    expect(brand.sameAs).toContain(
-      "https://www.instagram.com/granddutacityparungsoj/",
-    );
-    expect(brand.sameAs).not.toContain(
-      "https://dutaputraland.com/main/public/",
-    );
+    // Akun sosial kini tidak lagi ditaruh pada Brand, melainkan di RealEstateAgent
+    expect(brand).not.toHaveProperty("sameAs");
   });
 
   it("memakai nama situs yang ringkas dan konsisten dengan og:site_name", () => {
@@ -216,14 +212,15 @@ describe("kantor pemasaran", () => {
     const office = salesOfficeNode();
     expect(office).toMatchObject({
       "@type": "RealEstateAgent",
-      url: `${SITE_URL}/kontak`,
-      image: ref(SCHEMA_ID.salesOfficeImage),
+      url: SITE_URL,
       brand: ref(SCHEMA_ID.brand),
-      location: ref(SCHEMA_ID.project),
-      parentOrganization: ref(SCHEMA_ID.organization),
     });
-    expect(office).not.toHaveProperty("makesOffer");
-    expect(office).not.toHaveProperty("sameAs");
+    expect(office).not.toHaveProperty("image");
+    expect(office).not.toHaveProperty("location");
+    expect(office).not.toHaveProperty("parentOrganization");
+    expect(office.sameAs).toContain(
+      "https://www.instagram.com/granddutacityparungsoj/",
+    );
   });
 
   it("tidak mengklaim proyek sebagai barang InStock", () => {

@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props) {
   const page = Number(pageNumber);
 
   if (!tag || !Number.isInteger(page) || page <= 1) {
-    return {};
+    notFound();
   }
 
   const articles = sortArticles(

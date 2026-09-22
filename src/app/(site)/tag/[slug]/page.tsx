@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props) {
   const tag = getTagDefinition(slug);
 
   if (!tag) {
-    return {};
+    notFound();
   }
 
   const articles = sortArticles(

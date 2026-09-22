@@ -243,6 +243,7 @@ const tourVideoNode = {
   uploadDate: TOUR_VIDEO_UPLOAD_DATE,
   duration: TOUR_VIDEO_DURATION,
   embedUrl: `https://www.youtube-nocookie.com/embed/${TOUR_VIDEO_ID}`,
+  contentUrl: "https://www.youtube.com/watch?v=AZLiHEyd9Yo",
   inLanguage: "id-ID",
   isPartOf: ref(SCHEMA_ID.website),
   about: ref(SCHEMA_ID.project),

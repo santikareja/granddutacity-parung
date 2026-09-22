@@ -146,7 +146,7 @@ const isIndexable = (unit: Unit) => !NOINDEX_UNITS.has(unit.id);
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const unit = getUnitById(slug);
-  if (!unit) return { title: "Tipe Tidak Ditemukan" };
+  if (!unit) notFound();
 
   const name = unitDisplayName(unit);
   const size = unitSizeLabel(unit);

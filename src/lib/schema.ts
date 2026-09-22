@@ -47,9 +47,9 @@ import { SITE_URL } from "@/lib/seo";
 /** Konvensi `@id` — satu tempat supaya referensi lintas halaman tidak menggantung. */
 export const SCHEMA_ID = {
   project: `${SITE_URL}/#project`,
-  organization: `${SITE_URL}/#organization`,
+  organization: `${SITE_URL}/#developer`,
   brand: `${SITE_URL}/#brand`,
-  salesOffice: `${SITE_URL}/#salesoffice`,
+  salesOffice: `${SITE_URL}/#marketingagent`,
   salesOfficeImage: `${SITE_URL}/#salesoffice-image`,
   website: `${SITE_URL}/#website`,
   homepage: `${SITE_URL}/#webpage`,
@@ -150,23 +150,24 @@ const OPENING_HOURS = [
 export const websiteNode = () => ({
   "@type": "WebSite",
   "@id": SCHEMA_ID.website,
-  name: SITE_NAME,
-  alternateName: SITE_ALTERNATE_NAMES,
   url: SITE_URL,
+  name: "Grand Duta City Parung",
+  alternateName: ["Grand Duta City South of Jakarta"],
+  publisher: ref(SCHEMA_ID.salesOffice),
   inLanguage: "id-ID",
-  publisher: ref(SCHEMA_ID.organization),
-  about: ref(SCHEMA_ID.project),
 });
 
 /** Brand proyek, terpisah dari badan hukum developer dan kantor pemasaran. */
 export const projectBrandNode = () => ({
   "@type": "Brand",
   "@id": SCHEMA_ID.brand,
-  name: SITE_NAME,
-  alternateName: PROJECT_ALTERNATE_NAMES,
+  name: "Grand Duta City Parung",
+  alternateName: ["Grand Duta City South of Jakarta", "GDC Parung", "GDC SOJ"],
   url: SITE_URL,
-  logo: `${SITE_URL}/logo.svg`,
-  sameAs: PROJECT_SAME_AS,
+  logo: {
+    "@type": "ImageObject",
+    url: `${SITE_URL}/logo.svg`,
+  },
 });
 
 /** Developer/publisher situs. Data lokasi proyek tidak ditempelkan ke node ini. */
@@ -175,21 +176,20 @@ export const developerOrganizationNode = () => ({
   "@id": SCHEMA_ID.organization,
   name: "Duta Putra Land",
   legalName: "PT. Duta Putra Mahkota",
-  url: DEVELOPER_URL,
+  url: SITE_URL,
+  description:
+    "PT. Duta Putra Mahkota (Duta Putra Land) adalah pengembang properti Indonesia yang berdiri sejak 1983, mengembangkan perumahan dan kota mandiri, termasuk Grand Duta City Parung.",
   logo: {
     "@type": "ImageObject",
-    url: DEVELOPER_LOGO,
-    contentUrl: DEVELOPER_LOGO,
+    url: "https://res.cloudinary.com/dzhvfbuks/image/upload/c_pad,b_white,w_512,h_512/v1775669124/Logo_Duta_Putra_Land_rq0kzk.png",
+    contentUrl:
+      "https://res.cloudinary.com/dzhvfbuks/image/upload/c_pad,b_white,w_512,h_512/v1775669124/Logo_Duta_Putra_Land_rq0kzk.png",
     width: 512,
     height: 512,
   },
   foundingDate: "1983",
-  foundingLocation: {
-    "@type": "Country",
-    name: "Indonesia",
-  },
+  foundingLocation: { "@type": "Country", "name": "Indonesia" },
   slogan: "Best Living For Generations",
-  brand: ref(SCHEMA_ID.brand),
   knowsAbout: ["Pengembangan properti", "Perumahan", "Kota mandiri"],
 });
 
@@ -291,30 +291,43 @@ export const clusterNodes = () => [
 export const salesOfficeNode = () => ({
   "@type": "RealEstateAgent",
   "@id": SCHEMA_ID.salesOffice,
-  name: "Marketing Gallery Grand Duta City Parung",
-  url: `${SITE_URL}/kontak`,
+  name: "Sakani - Marketing Grand Duta City Parung",
+  url: SITE_URL,
   description:
-    "Kantor pemasaran resmi Grand Duta City Parung untuk informasi produk, harga, simulasi KPR, dan kunjungan lokasi.",
-  image: ref(SCHEMA_ID.salesOfficeImage),
-  telephone: PROJECT_PHONE,
-  email: PROJECT_EMAIL,
-  address: PROJECT_ADDRESS,
-  geo: PROJECT_GEO,
-  hasMap: PROJECT_MAP,
+    "Agensi pemasaran resmi proyek Grand Duta City Parung (Grand Duta City South of Jakarta), menangani informasi harga, stok unit, dan pemesanan.",
   brand: ref(SCHEMA_ID.brand),
-  location: ref(SCHEMA_ID.project),
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Jl. Raya Parung No. 47, Jabon Mekar",
+    addressLocality: "Parung",
+    addressRegion: "Jawa Barat",
+    postalCode: "16330",
+    addressCountry: "ID",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: "-6.461964",
+    longitude: "106.727668",
+  },
+  hasMap: "https://www.google.com/maps?q=-6.461964,106.727668",
+  telephone: "+62-813-1742-034",
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: "+62-813-1742-034",
+    contactType: "sales",
+    areaServed: "ID",
+    availableLanguage: ["Indonesian", "English"],
+  },
   areaServed: [
-    { "@type": "AdministrativeArea", name: "Parung, Kabupaten Bogor" },
-    { "@type": "City", name: "Depok" },
-    { "@type": "AdministrativeArea", name: "Jakarta Selatan" },
+    { "@type": "City", "name": "Parung" },
+    { "@type": "AdministrativeArea", "name": "Bogor" },
+    { "@type": "AdministrativeArea", "name": "South of Jakarta" },
   ],
-  openingHoursSpecification: OPENING_HOURS,
-  // Batas bawah mengikuti Verona 39/60 (600 juta-an, tipe termurah sejak
-  // 30 Agustus 2026), batas atas mengikuti Ruko SOJ. Angka ini WAJIB dijaga
-  // konsisten dengan `priceLabel` terendah di src/data/units.ts.
-  priceRange: "Rp 600.000.000 - Rp 1.900.000.000",
-  currenciesAccepted: "IDR",
-  parentOrganization: ref(SCHEMA_ID.organization),
+  sameAs: [
+    "https://www.instagram.com/granddutacityparungsoj/",
+    "https://www.facebook.com/granddutacityparungsoj",
+    "https://www.youtube.com/@marketinggdcparung",
+  ],
 });
 
 export const salesOfficeImageNode = () => ({

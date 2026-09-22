@@ -489,6 +489,17 @@ export const unitAvailability = (unit: Unit): string => {
  * tidak punya properti baku untuk keduanya pada `Accommodation`.
  */
 export const residenceNode = (unit: Unit) => {
+  const numberOfBedrooms =
+    unit.bedrooms !== null
+      ? unit.bedrooms + (unit.extraRoom ? 1 : 0)
+      : undefined;
+  const numberOfBathroomsTotal =
+    unit.bathrooms !== null
+      ? unit.bathrooms + (unit.extraBathroom ? 1 : 0)
+      : undefined;
+  const numberOfRooms =
+    unit.bedrooms !== null ? unit.bedrooms + 3 : undefined;
+
   const additionalProperty = [
     {
       "@type": "PropertyValue",
@@ -530,9 +541,9 @@ export const residenceNode = (unit: Unit) => {
       value: unit.lb,
       unitCode: "MTK",
     },
-    numberOfRooms: unit.bedrooms ?? undefined,
-    numberOfBedrooms: unit.bedrooms ?? undefined,
-    numberOfBathroomsTotal: unit.bathrooms ?? undefined,
+    numberOfRooms,
+    numberOfBedrooms,
+    numberOfBathroomsTotal,
     accommodationFloorPlan: unit.floorPlanImage
       ? {
           "@type": "FloorPlan",
@@ -543,8 +554,8 @@ export const residenceNode = (unit: Unit) => {
             value: unit.lb,
             unitCode: "MTK",
           },
-          numberOfBedrooms: unit.bedrooms ?? undefined,
-          numberOfBathroomsTotal: unit.bathrooms ?? undefined,
+          numberOfBedrooms,
+          numberOfBathroomsTotal,
         }
       : undefined,
     additionalProperty,
@@ -558,12 +569,6 @@ export const residenceNode = (unit: Unit) => {
 
 /**
  * `Offer` pembungkus satu tipe unit.
- *
- * TIDAK memuat `price` numerik: harga di pricelist resmi adalah rentang per
- * kavling (tunai keras vs KPR berbeda jauh), sehingga satu angka tunggal pasti
- * salah untuk sebagian kavling. `priceSpecification` dengan `minPrice` juga
- * dihindari selama angka minimum per tipe belum dikonfirmasi seluruhnya.
- * Yang diemit adalah label harga yang sama dengan yang dilihat pengunjung.
  */
 export const unitOfferNode = (unit: Unit) => ({
   "@type": "Offer",
@@ -571,6 +576,7 @@ export const unitOfferNode = (unit: Unit) => ({
   description: unitSpecSentence(unit),
   availability: unitAvailability(unit),
   priceCurrency: "IDR",
+  ...(unit.price !== undefined && unit.price !== null ? { price: unit.price } : {}),
   url: `${SITE_URL}/tipe-rumah/${unit.id}`,
   seller: ref(SCHEMA_ID.salesOffice),
   itemOffered: residenceNode(unit),

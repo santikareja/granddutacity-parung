@@ -102,6 +102,8 @@ export type Unit = {
     status: UnitStatus;
   /** String harga tampil untuk kartu. Mewakili Harga Jual Tunai Keras terendah. */
   priceLabel: string;
+  /** Harga numerik untuk schema Offer jika ada (mis. Rp 695.052.700). */
+  price?: number | null;
   facadeImage: string;
   floorPlanImage: string | null;
   description: string;
@@ -151,6 +153,7 @@ export const units: readonly Unit[] = [
     // Dikoreksi pemilik dari "700 Juta-an". Verona kini HARGA TERENDAH proyek,
     // jadi angka ini yang dirujuk klaim "mulai Rp 600 jutaan" di seluruh situs.
     priceLabel: "600 Juta-an",
+    price: 695052700,
     // Render fasad Verona sendiri. Sebelumnya memakai render Aira sebagai
     // placeholder — placeholder itu kini HILANG, bukan cuma tertimpa.
     facadeImage: `${CLOUDINARY}/v1788194325/Tipe_Verona_39_60.webp`,

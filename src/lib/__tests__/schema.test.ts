@@ -361,18 +361,15 @@ describe("node unit rumah", () => {
   });
 
   it("mengemit spesifikasi Verona 39 dan Frontera 89 yang baru dikonfirmasi", () => {
-    // Kebalikan dari test di atas: begitu datanya ada, ia HARUS ikut terbit.
-    // Tanpa test ini, `null` yang tertinggal tidak akan pernah tertangkap —
-    // schema hanya akan diam-diam kehilangan spesifikasinya.
     const verona = residenceNode(getUnitById("verona-39")!);
     expect(verona.numberOfBedrooms).toBe(2);
     expect(verona.numberOfBathroomsTotal).toBe(1);
+    expect(verona.numberOfRooms).toBe(5);
 
     const frontera = residenceNode(getUnitById("frontera-89")!);
-    expect(frontera.numberOfBedrooms).toBe(4);
-    // 3, BUKAN 4: "+1" kamar mandi servis disimpan di `extraBathroom` dan
-    // sengaja tidak dijumlahkan ke klaim numerik yang dibaca mesin.
-    expect(frontera.numberOfBathroomsTotal).toBe(3);
+    expect(frontera.numberOfBedrooms).toBe(5);
+    expect(frontera.numberOfBathroomsTotal).toBe(4);
+    expect(frontera.numberOfRooms).toBe(7);
   });
 
   it("memakai data Manoa T-58 yang sudah dikoreksi pemilik (2 KT, 2 KM)", () => {
@@ -383,15 +380,15 @@ describe("node unit rumah", () => {
     expect(node.numberOfBathroomsTotal).toBe(2);
   });
 
-  it("tidak mengemit harga numerik pada Offer unit", () => {
-    // Harga di pricelist resmi adalah rentang per kavling (tunai keras vs KPR
-    // berbeda jauh). Satu angka tunggal pasti salah untuk sebagian kavling,
-    // dan itulah yang sempat terjadi di /cluster-ladera (Malta diberi
-    // "900000000" padahal tunai keras terendahnya Rp 845.550.000).
+  it("hanya mengemit harga numerik pada Offer unit yang memiliki harga terdefinisi (Verona)", () => {
     for (const unit of units) {
       const offer = JSON.parse(JSON.stringify(unitOfferNode(unit)));
-      expect(offer, unit.id).not.toHaveProperty("price");
-      expect(offer, unit.id).not.toHaveProperty("priceSpecification");
+      if (unit.id === "verona-39") {
+        expect(offer.price).toBe(695052700);
+      } else {
+        expect(offer, unit.id).not.toHaveProperty("price");
+        expect(offer, unit.id).not.toHaveProperty("priceSpecification");
+      }
     }
   });
 

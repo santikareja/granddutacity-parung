@@ -174,9 +174,9 @@ describe("identitas developer, brand, dan website", () => {
       url: SITE_URL,
     });
     expect(developer).not.toHaveProperty("brand");
-    expect(developer).not.toHaveProperty("address");
     expect(developer).not.toHaveProperty("geo");
-    expect(developer).not.toHaveProperty("contactPoint");
+    expect(developer).toHaveProperty("address");
+    expect(developer).toHaveProperty("contactPoint");
   });
 
   it("memakai logo developer persegi dan logo tersebut bukan logo proyek", () => {

@@ -191,6 +191,28 @@ export const developerOrganizationNode = () => ({
   foundingLocation: { "@type": "Country", "name": "Indonesia" },
   slogan: "Best Living For Generations",
   knowsAbout: ["Pengembangan properti", "Perumahan", "Kota mandiri"],
+  email: "cs@granddutacitysouthofjakarta.com",
+  telephone: "+62-813-1742-034",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Jl. Raya Parung No. 47, Jabon Mekar",
+    addressLocality: "Parung",
+    addressRegion: "Jawa Barat",
+    postalCode: "16330",
+    addressCountry: "ID",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: "+62-813-1742-034",
+    contactType: "sales",
+    areaServed: "ID",
+    availableLanguage: "Indonesian",
+  },
+  sameAs: [
+    "https://www.instagram.com/granddutacityparungsoj/",
+    "https://www.facebook.com/granddutacityparungsoj",
+    "https://www.youtube.com/@marketinggdcparung",
+  ],
 });
 
 /**
